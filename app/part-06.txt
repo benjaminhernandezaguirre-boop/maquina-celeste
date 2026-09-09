@@ -1,0 +1,414 @@
+;
+  const giro = ang ? ang.asc : 0;
+  const aPant = lon => (180 - mod360(lon - giro)) * RAD;
+  const rExt = R, rInt = R*0.845, rCasa = R*0.30, rAsp = R*0.285;
+
+  // anillo de signos
+  for(let i=0;i<12;i++){
+    const a0 = aPant(i*30), a1 = aPant(i*30+30), col = PAPEL.el[SIGNOS[i].el];
+    g.beginPath(); g.arc(cx,cy,rExt,a1,a0); g.arc(cx,cy,rInt,a0,a1,true); g.closePath();
+    g.fillStyle = col+"26"; g.fill();
+    g.strokeStyle = PAPEL.borde; g.lineWidth = 1; g.stroke();
+    const am = aPant(i*30+15), rm = (rExt+rInt)/2;
+    g.fillStyle = col; g.textAlign="center"; g.textBaseline="middle";
+    g.font = `${Math.round(R*0.062)}px Spectral, serif`;
+    g.fillText(SIGNOS[i].g, cx+Math.cos(am)*rm, cy+Math.sin(am)*rm);
+  }
+  // grados
+  g.strokeStyle = PAPEL.ticks;
+  for(let d=0; d<360; d+=5){
+    const a = aPant(d), l = d%30===0 ? R*0.045 : R*0.018;
+    g.beginPath();
+    g.moveTo(cx+Math.cos(a)*rInt, cy+Math.sin(a)*rInt);
+    g.lineTo(cx+Math.cos(a)*(rInt-l), cy+Math.sin(a)*(rInt-l));
+    g.stroke();
+  }
+
+  // casas
+  if(cusp){
+    for(let i=1;i<=12;i++){
+      const a = aPant(cusp[i]), eje = (i===1||i===10||i===4||i===7);
+      g.strokeStyle = eje ? PAPEL.eje+"CC" : PAPEL.casa;
+      g.lineWidth = eje ? 1.6 : 1;
+      g.beginPath();
+      g.moveTo(cx+Math.cos(a)*rCasa, cy+Math.sin(a)*rCasa);
+      g.lineTo(cx+Math.cos(a)*rInt,  cy+Math.sin(a)*rInt);
+      g.stroke();
+      const mitad = mod360(cusp[i===12?1:i+1] - cusp[i])/2;
+      const am = aPant(cusp[i] + mitad);
+      const nx = cx+Math.cos(am)*(rCasa+R*0.055), ny = cy+Math.sin(am)*(rCasa+R*0.055);
+      g.fillStyle = PAPEL.caja;
+      g.beginPath(); g.arc(nx, ny, Math.max(9,R*0.028), 0, 7); g.fill();
+      g.fillStyle = PAPEL.suave; g.textAlign="center"; g.textBaseline="middle";
+      g.font = `${Math.max(9,Math.round(R*0.03))}px "IBM Plex Mono", monospace`;
+      g.fillText(ROMANOS[i], nx, ny);
+    }
+    for(const [lon, txt] of [[ang.asc,"AC"],[ang.mc,"MC"],[mod360(ang.asc+180),"DC"],[mod360(ang.mc+180),"IC"]]){
+      const a = aPant(lon);
+      g.fillStyle = PAPEL.acento; g.textAlign="center"; g.textBaseline="middle";
+      g.font = `600 ${Math.max(10,Math.round(R*0.032))}px "IBM Plex Mono", monospace`;
+      g.fillText(txt, cx+Math.cos(a)*(rExt+R*0.045), cy+Math.sin(a)*(rExt+R*0.045));
+    }
+  }
+
+  // aspectos
+  for(const {A,B,asp} of (capa ? [] : aspectos)){
+    if(A.tipo === "angulo" || B.tipo === "angulo") continue;
+    const a1 = aPant(A.lon), a2 = aPant(B.lon);
+    g.strokeStyle = PAPEL.asp[asp.cl];
+    g.lineWidth = asp.mayor ? 1.2 : 0.8;
+    g.setLineDash(asp.mayor ? [] : [3,4]);
+    g.beginPath();
+    g.moveTo(cx+Math.cos(a1)*rAsp, cy+Math.sin(a1)*rAsp);
+    g.lineTo(cx+Math.cos(a2)*rAsp, cy+Math.sin(a2)*rAsp);
+    g.stroke();
+  }
+  g.setLineDash([]);
+  g.strokeStyle = PAPEL.borde; g.lineWidth = 1;
+  g.beginPath(); g.arc(cx,cy,rAsp,0,7); g.stroke();
+  g.beginPath(); g.arc(cx,cy,rCasa,0,7); g.stroke();
+  g.beginPath(); g.arc(cx,cy,rExt,0,7); g.stroke();
+
+  // astros
+  const colocados = [];
+  const todos = cuerpos.concat(puntos);
+  for(const c of todos){
+    let radio = capa ? R*0.515 : R*0.70;
+    while(colocados.some(u => Math.abs(((u.lon-c.lon+540)%360)-180) < 9 && Math.abs(u.r-radio) < R*0.065)) radio -= R*(capa ? 0.062 : 0.082);
+    colocados.push({lon:c.lon, r:radio});
+    const a = aPant(c.lon), x = cx+Math.cos(a)*radio, y = cy+Math.sin(a)*radio;
+    const act = vivo && (seleccion === c.id || sobre === c.id);
+    const tinta = mezcla(c.color, "#000000", 0.52);
+    g.strokeStyle = tinta + "44"; g.lineWidth = 1;
+    g.beginPath();
+    g.moveTo(cx+Math.cos(a)*(rInt-R*0.008), cy+Math.sin(a)*(rInt-R*0.008));
+    g.lineTo(x,y); g.stroke();
+    if(act){
+      g.fillStyle = "#F7EDD3";
+      g.beginPath(); g.arc(x, y, R*0.042, 0, 7); g.fill();
+    }
+    g.fillStyle = act ? PAPEL.acento : tinta;
+    g.textAlign="center"; g.textBaseline="middle";
+    pintaGlifo(g, c.glifo, x, y, Math.max(13, Math.round(R*0.055)));
+    g.shadowBlur = 0;
+    if(R > 190){
+      const z = posZod(c.lon);
+      g.fillStyle = act ? PAPEL.acento : PAPEL.suave;
+      g.font = `${Math.max(9,Math.round(R*0.024))}px "IBM Plex Mono", monospace`;
+      g.fillText(z.corto + (c.retro && c.tipo==="astro" ? " ℞" : ""), x, y + R*0.05);
+    }
+    if(vivo) blancos.push({id:c.id, x, y, r:Math.max(15,R*0.045)});
+  }
+
+  // anillo del atacir
+  if(capa){
+    g.strokeStyle = PAPEL.borde; g.lineWidth = 1;
+    g.beginPath(); g.arc(cx, cy, R*0.635, 0, 7); g.stroke();
+    const puestos = [];
+    for(const m of capa.movidos){
+      let radio = R*0.79;
+      while(puestos.some(u => Math.abs(((u.lon-m.lon+540)%360)-180) < 8 && Math.abs(u.r-radio) < R*0.045)) radio -= R*0.048;
+      puestos.push({lon:m.lon, r:radio});
+      const a = aPant(m.lon), x = cx+Math.cos(a)*radio, y = cy+Math.sin(a)*radio;
+      g.strokeStyle = PAPEL.eje + "44"; g.lineWidth = 1;
+      g.beginPath();
+      g.moveTo(cx+Math.cos(a)*(rInt-R*0.008), cy+Math.sin(a)*(rInt-R*0.008));
+      g.lineTo(x, y); g.stroke();
+      g.fillStyle = PAPEL.acento; g.textAlign = "center"; g.textBaseline = "middle";
+      pintaGlifo(g, m.glifo, x, y, Math.max(12, Math.round(R*0.05)));
+      if(R > 190){
+        const z = posZod(m.lon);
+        g.fillStyle = PAPEL.suave;
+        g.font = `${Math.max(9,Math.round(R*0.022))}px "IBM Plex Mono", monospace`;
+        g.fillText(z.corto, x, y + R*0.045);
+      }
+    }
+    for(const c of capa.cerca){
+      const a1 = aPant(mod360(c.P.lon + capa.arco)), a2 = aPant(c.N.lon);
+      g.strokeStyle = TINTA_ASP[c.asp.cl] + "BB"; g.lineWidth = 1.5;
+      g.beginPath();
+      g.moveTo(cx+Math.cos(a1)*rAsp, cy+Math.sin(a1)*rAsp);
+      g.lineTo(cx+Math.cos(a2)*rAsp, cy+Math.sin(a2)*rAsp);
+      g.stroke();
+    }
+  }
+
+  // encabezado dentro de la rueda
+  g.textAlign="center"; g.textBaseline="middle";
+  g.fillStyle = PAPEL.tinta; g.font = `${Math.max(11,Math.round(R*0.05))}px Cinzel, serif`;
+  g.fillText(carta.datos.nombre || "Carta natal", cx, cy - R*0.055);
+  g.fillStyle = PAPEL.suave; g.font = `${Math.max(8,Math.round(R*0.026))}px "IBM Plex Mono", monospace`;
+  g.fillText(carta.datos.resumenFecha, cx, cy + R*0.02);
+  g.fillText(carta.datos.lugarTexto, cx, cy + R*0.065);
+  if(capa){
+    g.fillStyle = PAPEL.acento;
+    g.font = `${Math.max(8,Math.round(R*0.024))}px "IBM Plex Mono", monospace`;
+    g.fillText(`${capa.clave.n.split(" · ")[0]} · ${fmtCorta.format(new Date(capa.fecha))}`, cx, cy + R*0.115);
+  }
+}
+
+
+/* --- exportar la carta como imagen --- */
+const NOMBRE_SISTEMA = {placidio:"Placidio", signos:"signos enteros", igual:"casas iguales", porfirio:"Porfirio"};
+const TINTA_ASP = {"a-oro":"#9A7420","a-rojo":"#C0472A","a-azul":"#2F5F9E","a-lila":"#6B57A8"};
+
+function filaHoja(g, y, glifo, nombre, texto, casa, x, ancho){
+  g.textAlign = "center"; g.textBaseline = "middle"; g.fillStyle = PAPEL.acento;
+  pintaGlifo(g, glifo, x + 18, y, 27);
+  g.textAlign = "left"; g.fillStyle = PAPEL.tinta;
+  g.font = "26px Spectral, Georgia, serif";
+  g.fillText(nombre, x + 52, y);
+  g.font = '24px "IBM Plex Mono", monospace';
+  g.fillText(texto, x + 245, y);
+  g.textAlign = "right"; g.fillStyle = PAPEL.suave;
+  g.font = '23px "IBM Plex Mono", monospace';
+  g.fillText(casa, x + ancho, y);
+}
+function rotuloHoja(g, y, texto, x, ancho){
+  g.textAlign = "left"; g.textBaseline = "middle"; g.fillStyle = PAPEL.acento;
+  g.font = '21px "IBM Plex Mono", monospace';
+  g.fillText(texto, x, y);
+  g.strokeStyle = PAPEL.borde; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(x, y + 20); g.lineTo(x + ancho, y + 20); g.stroke();
+}
+async function fabricaHoja(modo){
+  if(!carta) return null;
+  try { await document.fonts.ready; } catch(e){}
+  const d = carta.datos;
+
+  if(modo === "rueda"){
+    const L = 1800, c = document.createElement("canvas");
+    c.width = L; c.height = L;
+    const g = c.getContext("2d");
+    g.fillStyle = PAPEL.fondo; g.fillRect(0, 0, L, L);
+    pintaRueda(g, L/2, L/2, L*0.452, false, atacirActivo ? capaAtacir() : null);
+    return c;
+  }
+
+  const margen = 60, lado = 1500, colX = margen + lado + 70, colW = 640;
+  const ancho = colX + colW + margen;
+  const conAngulos = carta.ang ? 2 : 0;
+  const nFilas = carta.cuerpos.length + carta.puntos.length + conAngulos;
+  const altoCol = 60 + nFilas*46 + 60 + 60 + carta.aspectos.length*36;
+  const alto = Math.max(230 + lado + margen, 230 + altoCol + margen);
+  const c = document.createElement("canvas");
+  c.width = ancho; c.height = alto;
+  const g = c.getContext("2d");
+  g.fillStyle = PAPEL.fondo; g.fillRect(0, 0, ancho, alto);
+
+  // encabezado
+  g.textAlign = "left"; g.textBaseline = "alphabetic"; g.fillStyle = PAPEL.tinta;
+  g.font = "58px Cinzel, Georgia, serif";
+  g.fillText(d.nombre || "Carta natal", margen, 96);
+  g.fillStyle = PAPEL.suave; g.font = '25px "IBM Plex Mono", monospace';
+  g.fillText(`${d.resumenFecha} · ${d.lugarTexto}`, margen, 140);
+  const detalle = carta.ang
+    ? `${d.husoTexto} · casas ${NOMBRE_SISTEMA[d.sistemaReal || d.sistema]} · carta ${carta.diurna ? "diurna" : "nocturna"}`
+    : `${d.husoTexto} · sin hora: no hay Ascendente ni casas`;
+  g.fillText(detalle, margen, 176);
+  g.strokeStyle = PAPEL.borde; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(margen, 200); g.lineTo(ancho - margen, 200); g.stroke();
+
+  pintaRueda(g, margen + lado/2, 230 + lado/2, lado*0.465, false, atacirActivo ? capaAtacir() : null);
+
+  // columna de datos
+  let y = 250;
+  rotuloHoja(g, y, "POSICIONES", colX, colW); y += 52;
+  if(carta.ang){
+    for(const [gl, nom, lon] of [[PUNTOS.asc.glifo,"Ascendente",carta.ang.asc],[PUNTOS.mc.glifo,"Medio Cielo",carta.ang.mc]]){
+      const z = posZod(lon);
+      filaHoja(g, y, gl, nom, `${z.texto} ${z.signo.n}`, "—", colX, colW); y += 46;
+    }
+  }
+  for(const c2 of carta.cuerpos.concat(carta.puntos)){
+    const z = posZod(c2.lon), casa = carta.cusp ? ROMANOS[casaDe(c2.lon, carta.cusp)] : "—";
+    filaHoja(g, y, c2.glifo, c2.nombre, `${z.texto} ${z.signo.n}${c2.retro && c2.tipo === "astro" ? " ℞" : ""}`, casa, colX, colW);
+    y += 46;
+  }
+  y += 46;
+  rotuloHoja(g, y, "ASPECTOS", colX, colW); y += 50;
+  for(const {A, B, asp, dif} of carta.aspectos){
+    g.textAlign = "center"; g.textBaseline = "middle"; g.fillStyle = PAPEL.tinta;
+    pintaGlifo(g, A.glifo, colX + 16, y, 25);
+    g.fillStyle = TINTA_ASP[asp.cl]; g.font = "25px Spectral, Georgia, serif";
+    g.fillText(asp.g, colX + 54, y);
+    g.fillStyle = PAPEL.tinta;
+    pintaGlifo(g, B.glifo, colX + 92, y, 25);
+    g.textAlign = "left"; g.fillStyle = PAPEL.suave; g.font = "21px Spectral, Georgia, serif";
+    g.fillText(`${asp.n} · ${A.nombre} y ${B.nombre}`, colX + 124, y);
+    g.textAlign = "right"; g.font = '20px "IBM Plex Mono", monospace';
+    g.fillText(gradoMin(dif), colX + colW, y);
+    y += 36;
+  }
+  g.textAlign = "left"; g.fillStyle = PAPEL.borde; g.font = '18px "IBM Plex Mono", monospace';
+  g.fillText("Máquina Celeste · zodiaco tropical · posiciones geocéntricas", margen, alto - 26);
+  return c;
+}
+function descargaHoja(modo){
+  fabricaHoja(modo).then(c => {
+    if(!c) return;
+    c.toBlob(b => {
+      if(!b) return;
+      const u = URL.createObjectURL(b), a = document.createElement("a");
+      const base = ((carta && carta.datos.nombre) || "carta-natal").replace(/[^\wÁÉÍÓÚÑáéíóúñ -]/g, "").trim() || "carta-natal";
+      a.href = u; a.download = `${base}${modo === "rueda" ? " - rueda" : " - hoja completa"}.png`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(u), 4000);
+    });
+  });
+}
+
+/* --- panel de resultados --- */
+let filaAbierta = null;
+function pintaCarta(){
+  if(!carta) return;
+  const {cuerpos, puntos, ang, cusp, aspectos, datos} = carta;
+
+  // posiciones
+  const filas = [];
+  if(ang){
+    filas.push(filaSimple(PUNTOS.asc.glifo, "Ascendente", ang.asc, null, false, "asc"));
+    filas.push(filaSimple(PUNTOS.mc.glifo, "Medio Cielo", ang.mc, null, false, "mc"));
+  }
+  for(const c of cuerpos) filas.push(filaAstro(c, cusp));
+  for(const p of puntos)  filas.push(filaSimple(p.glifo, p.nombre, p.lon, cusp ? casaDe(p.lon,cusp) : null, false, p.id));
+
+  document.getElementById("hojaPos").innerHTML = `
+    ${carta.aviso ? `<p class="aviso" style="margin:.8rem 0 0">${carta.aviso}</p>` : ""}
+    ${!datos.horaConocida ? `<p class="aviso" style="margin:.8rem 0 0">Carta sin hora: no hay Ascendente ni casas. Los grados de la Luna son aproximados.</p>` : ""}
+    <table class="posiciones"><thead><tr>
+      <th></th><th>Astro</th><th>Posición</th><th style="text-align:right">Casa</th>
+    </tr></thead><tbody>${filas.join("")}</tbody></table>`;
+
+  // aspectos
+  document.getElementById("hojaAsp").innerHTML = aspectos.length ? `
+    <label class="marcar" style="margin:.8rem 0 .4rem"><input type="checkbox" id="soloMayores"> Ocultar aspectos menores</label>
+    <ul class="aspectos con-menores" id="listaAspectos">${aspectos.map(({A,B,asp,dif}) => `
+      <li class="${asp.mayor ? "mayor" : "menor"}">
+        <span class="cg">${gh(A.glifo)}</span>
+        <span class="as ${asp.cl}">${asp.g}</span>
+        <span class="cg">${gh(B.glifo)}</span>
+        <span class="nom">${asp.n} · ${A.nombre} y ${B.nombre}</span>
+        <span class="orbe">${gradoMin(dif)}</span>
+      </li>`).join("")}</ul>
+    <p class="aviso" style="margin-top:1rem">Orbe = distancia al aspecto exacto. Cuanto menor, más fuerte. Las líneas continuas del centro son aspectos mayores; las punteadas, menores.</p>`
+    : `<p class="aviso" style="margin-top:1rem">No hay aspectos dentro de los orbes elegidos.</p>`;
+
+  // casas
+  document.getElementById("hojaCasas").innerHTML = cusp ? `
+    <div class="cuadro">
+      <div><span class="k">Sistema</span><span class="v">${({placidio:"Placidio",signos:"Signos enteros",igual:"Casas iguales",porfirio:"Porfirio"})[datos.sistemaReal||datos.sistema]}</span></div>
+      <div><span class="k">Carta</span><span class="v">${carta.diurna ? "Diurna" : "Nocturna"}</span></div>
+      <div><span class="k">Latitud</span><span class="v">${datos.lat.toFixed(4)}°</span></div>
+      <div><span class="k">Longitud</span><span class="v">${datos.lon.toFixed(4)}°</span></div>
+      <div><span class="k">Huso aplicado</span><span class="v">${datos.husoTexto}</span></div>
+    </div>
+    <table class="posiciones"><thead><tr><th>Casa</th><th>Cúspide</th><th>Regente</th><th></th></tr></thead><tbody>
+      ${Array.from({length:12},(_,k)=>{
+        const i=k+1, z=posZod(cusp[i]);
+        const reg = REGENTE_TRAD[z.signo.n];
+        return `<tr><td class="ccasa" style="text-align:left">${ROMANOS[i]}</td>
+          <td class="cgrado">${z.texto}</td>
+          <td class="csigno">${z.signo.g} ${z.signo.n}</td>
+          <td class="cg" title="Regente tradicional: ${porId[reg].nombre}">${gh(porId[reg].glifo)}</td></tr>
+          <tr class="detalle"><td colspan="4">${CASAS_SIGNIFICADO[i]}</td></tr>`;
+      }).join("")}
+    </tbody></table>`
+    : `<p class="aviso" style="margin-top:1rem">Sin hora de nacimiento no se pueden calcular las casas. Si el consultante la averigua (acta de nacimiento o registro civil), vuelve a levantar la carta.</p>`;
+
+  pintaSignificados();
+  if(atacirActivo) pintaAtacir();
+  enlazaFilas();
+  const cb = document.getElementById("soloMayores");
+  if(cb) cb.addEventListener("change", () => {
+    document.getElementById("listaAspectos").classList.toggle("con-menores", !cb.checked);
+  });
+}
+const REGENTE_TRAD = {
+  Aries:"marte", Tauro:"venus", "Géminis":"mercurio", "Cáncer":"luna", Leo:"sol", Virgo:"mercurio",
+  Libra:"venus", Escorpio:"marte", Sagitario:"jupiter", Capricornio:"saturno", Acuario:"saturno", Piscis:"jupiter"
+};
+function filaSimple(glifo, nombre, lon, casa, retro, id){
+  const z = posZod(lon);
+  return `<tr class="astro-fila" data-id="${id}">
+    <td class="cg">${gh(glifo)}</td>
+    <td>${nombre}</td>
+    <td><span class="cgrado">${z.texto}</span> <span class="csigno">${z.signo.g} ${z.signo.n}</span>${retro?' <span class="crx">℞</span>':""}</td>
+    <td class="ccasa">${casa?ROMANOS[casa]:"—"}</td></tr>`;
+}
+function filaAstro(c, cusp){
+  const z = posZod(c.lon), casa = cusp ? casaDe(c.lon, cusp) : null;
+  const dig = dignidadDe(c.id, z.signo.n);
+  const a = porId[c.id];
+  const detalle = `<b>${a.nombre} en ${z.signo.n}</b>${casa?` · casa ${ROMANOS[casa]}`:""}${dig?` <span class="dignidad ${dig.c}">${dig.t}</span>`:""}<br>
+    ${a.claves.slice(0,3).join(", ")} — ${casa?CASAS_SIGNIFICADO[casa].toLowerCase():"sin casa (falta la hora)"}.<br>
+    Regencia tradicional: ${a.tradicional}. ${c.retro?"Retrógrado en el nacimiento.":""}`;
+  return `<tr class="astro-fila" data-id="${c.id}">
+      <td class="cg">${gh(c.glifo)}</td>
+      <td>${c.nombre}</td>
+      <td><span class="cgrado">${z.texto}</span> <span class="csigno">${z.signo.g} ${z.signo.n}</span>${c.retro?' <span class="crx">℞</span>':""}</td>
+      <td class="ccasa">${casa?ROMANOS[casa]:"—"}</td>
+    </tr>
+    <tr class="detalle" data-detalle="${c.id}" hidden><td colspan="4">${detalle}</td></tr>`;
+}
+function enlazaFilas(){
+  document.querySelectorAll("#hojaPos tr.astro-fila").forEach(tr => {
+    tr.addEventListener("click", () => marcaFila(tr.dataset.id, true));
+  });
+}
+function marcaFila(id, alterna){
+  const hoja = document.getElementById("hojaPos");
+  hoja.querySelectorAll("tr.astro-fila").forEach(t => t.classList.toggle("activa", t.dataset.id === id));
+  hoja.querySelectorAll("tr.detalle").forEach(t => {
+    const mio = t.dataset.detalle === id;
+    t.hidden = !mio || (alterna && filaAbierta === id);
+  });
+  filaAbierta = (alterna && filaAbierta === id) ? null : id;
+  seleccion = id;
+  const fila = hoja.querySelector(`tr.astro-fila[data-id="${id}"]`);
+  if(fila) fila.scrollIntoView({block:"nearest", behavior:"smooth"});
+}
+
+
+/* --- significados generales, para que el alumno se oriente --- */
+const NOTA_PUNTO = {
+  nodoN:"Hacia dónde crecer: lo que todavía no se domina y hay que practicar a propósito.",
+  nodoS:"Lo que ya se trae sabido. Cómodo, y por eso fácil de repetir de más.",
+  lilith:"La parte que no se acomoda ni negocia: incomoda, y no se rinde.",
+  fortuna:"Donde el cuerpo y el ánimo se juntan: un lugar de bienestar concreto."
+};
+function bloqueSentido(c, cusp){
+  const idx = Math.floor(mod360(c.lon)/30), z = SIGNOS[idx];
+  const casa = cusp ? casaDe(c.lon, cusp) : null;
+  const dig = dignidadDe(c.id, z.n);
+  const enSigno = EN_SIGNO[c.id] ? EN_SIGNO[c.id][idx] : NOTA_PUNTO[c.id];
+  const enCasa = (EN_CASA[c.id] && casa) ? EN_CASA[c.id][casa-1] : null;
+  return `<div class="sent">
+    <h3><span class="cg">${gh(c.glifo)}</span> ${c.nombre} en ${z.n}${casa ? ` <em>· casa ${ROMANOS[casa]}</em>` : ""}
+      ${dig ? `<span class="dignidad ${dig.c}">${dig.t}</span>` : ""}</h3>
+    <p><b>En el signo.</b> ${enSigno}</p>
+    ${enCasa ? `<p><b>En la casa.</b> ${enCasa}</p>` : (casa ? `<p><b>En la casa.</b> ${CASAS_SIGNIFICADO[casa]}.</p>` : "")}
+  </div>`;
+}
+function pintaSignificados(){
+  const {cuerpos, puntos, cusp, ang} = carta;
+  const asc = ang ? (() => {
+    const i = Math.floor(mod360(ang.asc)/30);
+    return `<div class="sent">
+      <h3><span class="cg">AC</span> Ascendente en ${SIGNOS[i].n}</h3>
+      <p>${ASC_SIGNO[i]}</p>
+      <p class="pie-sent">Es la manera de aparecer y de arrancar, no el fondo del carácter: eso lo dicen el Sol y la Luna.</p>
+    </div>`;
+  })() : `<p class="aviso" style="margin:.8rem 0 0">Sin hora de nacimiento no hay Ascendente ni casas, así que solo se leen los signos.</p>`;
+
+  document.getElementById("hojaSent").innerHTML = `
+    <p class="aviso" style="margin:.85rem 0 .2rem">Lecturas breves para orientarse. Son puntos de partida: en una carta real, cada pieza se matiza con las demás.</p>
+    ${asc}
+    <div class="rotulo">Planetas</div>
+    ${cuerpos.map(c => bloqueSentido(c, cusp)).join("")}
+    <div class="rotulo">Puntos calculados</div>
+    ${puntos.map(c => bloqueSentido(c, cusp)).join("")}
+    <div class="rotulo">Qué dice cada aspecto</div>
+    <dl class="dignidades">
+      ${Object.entries(SENTIDO_ASPECTO).map(([k,v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("")}
+    </dl>
