@@ -4,6 +4,10 @@ import re
 p = Path('luna.html')
 t = p.read_text(encoding='utf-8')
 
+if 'id="progBirthDate"' in t and 'function useSavedProgressedBirth()' in t:
+    print('Luna progresada V2 ya está integrada')
+    raise SystemExit(0)
+
 panel = '''<section class="panel" id="panel-progresada">
   <div class="grid">
     <article class="card full">
