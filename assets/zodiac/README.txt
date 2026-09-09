@@ -1,0 +1,1 @@
+Ilustraciones zodiacales premium para Luna. El sprite principal se genera desde la colección aprobada por el usuario.
