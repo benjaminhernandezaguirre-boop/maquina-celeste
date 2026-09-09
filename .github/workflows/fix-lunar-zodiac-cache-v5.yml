@@ -1,0 +1,46 @@
+name: Corregir caché de ilustraciones zodiacales Luna V5
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/fix-lunar-zodiac-cache-v5.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Actualizar versiones de caché
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          luna = Path('luna.html')
+          text = luna.read_text(encoding='utf-8')
+          text = text.replace('app/lunar-zodiac-v2.js?v=2', 'app/lunar-zodiac-v2.js?v=5')
+          text = text.replace('app/lunar-zodiac-v2.js?v=3', 'app/lunar-zodiac-v2.js?v=5')
+          text = text.replace('app/lunar-zodiac-v2.js?v=4', 'app/lunar-zodiac-v2.js?v=5')
+          luna.write_text(text, encoding='utf-8')
+
+          vercel = Path('vercel.json')
+          v = vercel.read_text(encoding='utf-8')
+          if '"source": "/app/lunar-zodiac-v2.js"' not in v:
+              v = v.replace('  "headers": [', '  "headers": [\n    {\n      "source": "/app/lunar-zodiac-v2.js",\n      "headers": [\n        {\n          "key": "Cache-Control",\n          "value": "no-cache, no-store, must-revalidate"\n        }\n      ]\n    },')
+              vercel.write_text(v, encoding='utf-8')
+          PY
+      - name: Guardar corrección
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add luna.html vercel.json
+          if git diff --cached --quiet; then
+            echo "Sin cambios pendientes"
+          else
+            git commit -m "Corrige caché de ilustraciones zodiacales Luna V5"
+            git push
+          fi
