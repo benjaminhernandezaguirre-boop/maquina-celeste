@@ -1,0 +1,120 @@
+from pathlib import Path
+
+# 1) Ciudad junto al botón de carta astral.
+p1 = Path('app/part-01.txt')
+t1 = p1.read_text(encoding='utf-8')
+old = '      <button class="carta-momento" id="btnCartaMomento" type="button">Sacar carta astral</button>'
+new = '''      <div class="carta-momento-wrap">
+        <label class="ciudad-momento-label" for="ciudadCartaMomento">Ciudad</label>
+        <input class="ciudad-momento" id="ciudadCartaMomento" list="ciudades" autocomplete="off" placeholder="Escribe ciudad" aria-label="Ciudad para la carta astral del momento">
+        <button class="carta-momento" id="btnCartaMomento" type="button">Sacar carta astral</button>
+      </div>'''
+if 'id="ciudadCartaMomento"' not in t1:
+    if old not in t1:
+        raise SystemExit('No se encontró el botón Carta astral en part-01')
+    t1 = t1.replace(old, new, 1)
+p1.write_text(t1, encoding='utf-8')
+
+# 2) Capturar el instante exacto del simulador y convertirlo a la hora local de la ciudad elegida.
+p2 = Path('app/part-02.txt')
+t2 = p2.read_text(encoding='utf-8')
+old_handler = '''document.getElementById("btnCartaMomento").addEventListener("click", () => {
+  const p = partesLocales(ahoraSim());
+  const f = document.getElementById("nFecha"), h = document.getElementById("nHora");
+  if(f) f.value = p.fecha;
+  if(h) h.value = p.hora;
+  cambiaVista("natal");
+  const veloNatal = document.getElementById("velo");
+  if(veloNatal) veloNatal.classList.add("visible");
+  const cancelar = document.getElementById("nCancelar");
+  if(cancelar) cancelar.hidden = false;
+  setTimeout(() => document.getElementById("nLugar")?.focus(), 60);
+});'''
+new_handler = '''function partesEnZona(ms, tz){
+  const fmt = new Intl.DateTimeFormat("en-CA",{
+    timeZone:tz, year:"numeric", month:"2-digit", day:"2-digit",
+    hour:"2-digit", minute:"2-digit", hourCycle:"h23"
+  });
+  const p = Object.fromEntries(fmt.formatToParts(new Date(ms)).map(x => [x.type,x.value]));
+  return {fecha:`${p.year}-${p.month}-${p.day}`, hora:`${p.hour}:${p.minute}`};
+}
+
+document.getElementById("btnCartaMomento").addEventListener("click", () => {
+  const instante = ahoraSim();
+  const entrada = document.getElementById("ciudadCartaMomento");
+  const escrito = (entrada?.value || document.getElementById("nLugar")?.value || "").trim();
+  const normal = s => s.normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase();
+  const ciudad = CIUDADES.find(c => normal(c.etiqueta) === normal(escrito))
+              || CIUDADES.find(c => normal(c.n) === normal(escrito));
+
+  if(!escrito){
+    if(entrada){ entrada.classList.add("falta-ciudad"); entrada.focus(); }
+    return;
+  }
+
+  if(entrada) entrada.classList.remove("falta-ciudad");
+  const lugar = document.getElementById("nLugar");
+  const f = document.getElementById("nFecha"), h = document.getElementById("nHora");
+
+  if(!ciudad){
+    const p = partesLocales(instante);
+    if(f) f.value = p.fecha;
+    if(h) h.value = p.hora;
+    if(lugar){ lugar.value = escrito; lugar.dispatchEvent(new Event("input",{bubbles:true})); }
+    cambiaVista("natal");
+    const veloNatal = document.getElementById("velo");
+    if(veloNatal) veloNatal.classList.add("visible");
+    const err = document.getElementById("nError");
+    if(err){ err.textContent = "Elige una ciudad de la lista para levantar la carta automáticamente, o completa las coordenadas manuales."; err.hidden = false; }
+    const cancelar = document.getElementById("nCancelar");
+    if(cancelar) cancelar.hidden = false;
+    return;
+  }
+
+  // Conserva el instante exacto del simulador y lo expresa en la zona horaria elegida.
+  const p = partesEnZona(instante, ciudad.tz);
+  if(f) f.value = p.fecha;
+  if(h) h.value = p.hora;
+  if(lugar){ lugar.value = ciudad.etiqueta; lugar.dispatchEvent(new Event("input",{bubbles:true})); }
+  if(entrada) entrada.value = ciudad.etiqueta;
+  const sinHoraEl = document.getElementById("nSinHora");
+  if(sinHoraEl?.checked){ sinHoraEl.checked = false; sinHoraEl.dispatchEvent(new Event("change")); }
+
+  cambiaVista("natal");
+  const veloNatal = document.getElementById("velo");
+  if(veloNatal) veloNatal.classList.add("visible");
+  const cancelar = document.getElementById("nCancelar");
+  if(cancelar) cancelar.hidden = false;
+  setTimeout(() => document.getElementById("natalForm")?.requestSubmit(), 0);
+});'''
+if 'function partesEnZona' not in t2:
+    if old_handler not in t2:
+        raise SystemExit('No se encontró el manejador de Carta astral en part-02')
+    t2 = t2.replace(old_handler, new_handler, 1)
+p2.write_text(t2, encoding='utf-8')
+
+# 3) Estilo compacto para que ciudad y botón se lean como una sola herramienta.
+css = Path('app/orbit-time.css')
+tc = css.read_text(encoding='utf-8')
+block = '''
+
+/* Ciudad + carta del instante */
+#app .carta-momento-wrap{display:none;align-items:center;gap:.3rem;min-width:0}
+#app.orbits .carta-momento-wrap{display:inline-flex}
+#app .ciudad-momento-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+#app .ciudad-momento{
+  width:clamp(112px,10.5vw,160px);min-height:2rem;padding:.32rem .58rem;
+  border:1px solid rgba(220,186,111,.21);border-radius:999px;
+  background:rgba(5,8,17,.76);color:#eee5d6;
+  font:500 .63rem "IBM Plex Mono",monospace;letter-spacing:.02em;
+  outline:none;transition:border-color .2s,box-shadow .2s,background .2s
+}
+#app .ciudad-momento::placeholder{color:#746f7e}
+#app .ciudad-momento:focus{border-color:rgba(220,186,111,.62);box-shadow:0 0 0 3px rgba(218,184,110,.055)}
+#app .ciudad-momento.falta-ciudad{border-color:rgba(207,102,72,.8);box-shadow:0 0 0 3px rgba(196,101,63,.08)}
+@media(max-width:980px){#app .ciudad-momento{width:112px;font-size:.56rem;padding:.3rem .48rem}}
+@media(max-width:760px){#app .carta-momento-wrap{gap:.24rem}#app .ciudad-momento{width:105px;min-height:1.9rem}}
+'''
+if 'Ciudad + carta del instante' not in tc:
+    tc += block
+css.write_text(tc, encoding='utf-8')
