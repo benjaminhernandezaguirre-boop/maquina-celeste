@@ -267,12 +267,75 @@ function pintaGlifo(g, glifo, x, y, tam){
 let factor = 1, anclaReal = Date.now(), anclaSim = Date.now();
 function ahoraSim(){ return anclaSim + (Date.now()-anclaReal)*factor; }
 const velSel = document.getElementById("velocidad");
+function fijaTiempo(ms, nuevoFactor=0){
+  anclaSim = ms; anclaReal = Date.now(); factor = nuevoFactor;
+  const valor = String(nuevoFactor);
+  if([...velSel.options].some(o => o.value === valor)) velSel.value = valor;
+}
+function partesLocales(ms){
+  const d = new Date(ms), dos = n => String(n).padStart(2,"0");
+  return {
+    fecha:`${d.getFullYear()}-${dos(d.getMonth()+1)}-${dos(d.getDate())}`,
+    hora:`${dos(d.getHours())}:${dos(d.getMinutes())}`
+  };
+}
+function msFechaOrbital(){
+  const f = document.getElementById("fechaOrbital").value;
+  const h = document.getElementById("horaOrbital").value || "12:00";
+  if(!f) return NaN;
+  const [Y,M,D] = f.split("-").map(Number), [hh,mm] = h.split(":").map(Number);
+  return new Date(Y,M-1,D,hh||0,mm||0,0,0).getTime();
+}
 velSel.addEventListener("change", () => {
   anclaSim = ahoraSim(); anclaReal = Date.now(); factor = Number(velSel.value);
 });
 document.getElementById("btnHoy").addEventListener("click", () => {
-  anclaSim = Date.now(); anclaReal = Date.now(); velSel.value = "1"; factor = 1;
+  fijaTiempo(Date.now(), 1);
 });
+
+const btnFechaExacta = document.getElementById("btnFechaExacta");
+const fechaPop = document.getElementById("fechaPop");
+function abreFecha(){
+  const p = partesLocales(ahoraSim());
+  document.getElementById("fechaOrbital").value = p.fecha;
+  document.getElementById("horaOrbital").value = p.hora;
+  fechaPop.hidden = false; btnFechaExacta.setAttribute("aria-expanded","true");
+}
+function cierraFecha(){ fechaPop.hidden = true; btnFechaExacta.setAttribute("aria-expanded","false"); }
+btnFechaExacta.addEventListener("click", () => fechaPop.hidden ? abreFecha() : cierraFecha());
+document.getElementById("btnCancelarFecha").addEventListener("click", cierraFecha);
+document.getElementById("btnAplicarFecha").addEventListener("click", () => {
+  const ms = msFechaOrbital();
+  if(Number.isFinite(ms)){ fijaTiempo(ms, 0); cierraFecha(); }
+});
+function mueveAnio(delta){
+  const ms = msFechaOrbital();
+  const d = Number.isFinite(ms) ? new Date(ms) : new Date(ahoraSim());
+  const dia = d.getDate();
+  d.setDate(1); d.setFullYear(d.getFullYear()+delta);
+  const ultimo = new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
+  d.setDate(Math.min(dia,ultimo));
+  const p = partesLocales(d.getTime());
+  document.getElementById("fechaOrbital").value = p.fecha;
+  document.getElementById("horaOrbital").value = p.hora;
+}
+document.getElementById("btnMenosAnio").addEventListener("click", () => mueveAnio(-1));
+document.getElementById("btnMasAnio").addEventListener("click", () => mueveAnio(1));
+document.addEventListener("keydown", e => { if(e.key === "Escape" && !fechaPop.hidden) cierraFecha(); });
+
+document.getElementById("btnCartaMomento").addEventListener("click", () => {
+  const p = partesLocales(ahoraSim());
+  const f = document.getElementById("nFecha"), h = document.getElementById("nHora");
+  if(f) f.value = p.fecha;
+  if(h) h.value = p.hora;
+  cambiaVista("natal");
+  const veloNatal = document.getElementById("velo");
+  if(veloNatal) veloNatal.classList.add("visible");
+  const cancelar = document.getElementById("nCancelar");
+  if(cancelar) cancelar.hidden = false;
+  setTimeout(() => document.getElementById("nLugar")?.focus(), 60);
+});
+
 const fmtFecha = new Intl.DateTimeFormat("es-MX",{dateStyle:"long",timeStyle:"short"});
 
 /* ===================== Lienzo ===================== */

@@ -29,7 +29,7 @@
       status = document.createElement('div');
       status.className = 'orbit-status';
       status.setAttribute('aria-hidden','true');
-      status.innerHTML = '<span>Vista heliocéntrica</span><span>Escala orbital logarítmica</span><span>Posiciones en tiempo real</span>';
+      status.innerHTML = '<span>Vista heliocéntrica</span><span>Escala orbital logarítmica</span><span>Tiempo configurable</span>';
       escena.appendChild(status);
     }
   }

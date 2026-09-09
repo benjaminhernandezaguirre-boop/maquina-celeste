@@ -34,6 +34,7 @@
 <script src="app/zodiac-theme.js" defer></script>
 <link rel="stylesheet" href="app/orbit-theme.css">
 <script src="app/orbit-theme.js" defer></script>
+<link rel="stylesheet" href="app/orbit-time.css">
 <style>
   :root{
     --tinta:#05060F;

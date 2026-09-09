@@ -216,16 +216,46 @@ F5}
       <button id="btnNatal" aria-pressed="false">Carta natal</button>
     </div>
 
-    <div class="grupo">
-      <select class="velocidad" id="velocidad" aria-label="Velocidad del tiempo">
+    <div class="grupo tiempo-grupo" id="tiempoGrupo">
+      <select class="velocidad" id="velocidad" aria-label="Dirección y velocidad del tiempo">
         <option value="1">Tiempo real</option>
-        <option value="3600">1 hora / seg</option>
-        <option value="86400">1 día / seg</option>
-        <option value="604800">1 semana / seg</option>
-        <option value="2592000">1 mes / seg</option>
-        <option value="31536000">1 año / seg</option>
+        <option value="0">Pausa · fecha fija</option>
+        <optgroup label="Avanzar">
+          <option value="3600">+ 1 hora / seg</option>
+          <option value="86400">+ 1 día / seg</option>
+          <option value="604800">+ 1 semana / seg</option>
+          <option value="2592000">+ 1 mes / seg</option>
+          <option value="31536000">+ 1 año / seg</option>
+        </optgroup>
+        <optgroup label="Retroceder">
+          <option value="-1">− Tiempo real</option>
+          <option value="-3600">− 1 hora / seg</option>
+          <option value="-86400">− 1 día / seg</option>
+          <option value="-604800">− 1 semana / seg</option>
+          <option value="-2592000">− 1 mes / seg</option>
+          <option value="-31536000">− 1 año / seg</option>
+        </optgroup>
       </select>
+      <button class="fecha-control" id="btnFechaExacta" type="button" aria-expanded="false" aria-controls="fechaPop">Ir a fecha</button>
       <button class="hoy" id="btnHoy">Ahora</button>
+      <button class="carta-momento" id="btnCartaMomento" type="button">Sacar carta astral</button>
+
+      <div class="fecha-pop" id="fechaPop" hidden>
+        <p class="fecha-pop-titulo">Ir a una fecha exacta</p>
+        <div class="fecha-grid">
+          <label>Fecha<input id="fechaOrbital" type="date"></label>
+          <label>Hora local<input id="horaOrbital" type="time" step="60"></label>
+        </div>
+        <div class="fecha-rapida">
+          <button type="button" id="btnMenosAnio">− 1 año</button>
+          <button type="button" id="btnMasAnio">+ 1 año</button>
+        </div>
+        <div class="fecha-acciones">
+          <button type="button" id="btnCancelarFecha">Cancelar</button>
+          <button type="button" class="aplicar-fecha" id="btnAplicarFecha">Ir a fecha</button>
+        </div>
+        <small class="fecha-nota">La simulación queda pausada en la fecha elegida. Después puedes hacerla avanzar o retroceder desde el selector.</small>
+      </div>
     </div>
 
     <div class="reloj">
