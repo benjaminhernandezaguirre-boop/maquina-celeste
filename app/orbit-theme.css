@@ -1,0 +1,140 @@
+/* Astroplanetario · Órbitas
+   Pulido visual del planetario heliocéntrico. No altera cálculos astronómicos. */
+
+#app.orbits{
+  --orbit-gold:#dab86e;
+  --orbit-ivory:#eee5d6;
+  --orbit-muted:#918ca1;
+  --orbit-line:rgba(220,186,111,.20);
+  --orbit-soft:rgba(142,150,184,.13);
+  background:
+    radial-gradient(circle at 50% 45%,rgba(41,57,98,.17),transparent 34%),
+    radial-gradient(circle at 64% 61%,rgba(177,126,47,.07),transparent 28%),
+    linear-gradient(145deg,#050814,#02040b 68%);
+  color:var(--orbit-ivory);
+}
+
+#app.orbits header{
+  min-height:3.65rem;
+  padding:.58rem clamp(.75rem,1.7vw,1.25rem);
+  background:linear-gradient(180deg,rgba(8,11,24,.97),rgba(3,5,12,.91));
+  border-bottom:1px solid var(--orbit-line);
+  box-shadow:0 10px 28px rgba(0,0,0,.24);
+  backdrop-filter:blur(14px);
+}
+#app.orbits .marca h1{color:var(--orbit-ivory);font-weight:500;letter-spacing:.12em}
+#app.orbits .marca .sub{color:var(--orbit-gold)}
+
+#app.orbits .conmutador{
+  border-color:rgba(220,186,111,.20);
+  background:rgba(5,8,17,.70);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.015);
+}
+#app.orbits .conmutador button{color:#858092}
+#app.orbits .conmutador button[aria-pressed="true"]{
+  color:#130e04;
+  background:linear-gradient(180deg,#dfc17d,#b58b43);
+  box-shadow:inset 0 1px rgba(255,255,255,.22),0 0 28px rgba(218,184,110,.09);
+}
+#app.orbits select.velocidad,#app.orbits .hoy{
+  background:rgba(5,8,17,.72);
+  border-color:rgba(220,186,111,.18);
+}
+#app.orbits .hoy:hover,#app.orbits select.velocidad:focus{border-color:rgba(220,186,111,.52)}
+#app.orbits .reloj{color:var(--orbit-gold)}
+
+#app.orbits #escena{
+  background:
+    radial-gradient(circle at 50% 48%,rgba(34,48,84,.16),transparent 31%),
+    radial-gradient(ellipse at 50% 52%,rgba(216,179,103,.035),transparent 44%),
+    radial-gradient(circle at 50% 50%,#080c18 0,#03050c 66%,#010207 100%);
+}
+#app.orbits #escena::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.34;
+  background-image:
+    radial-gradient(circle,rgba(240,236,226,.72) 0 1px,transparent 1.25px),
+    radial-gradient(circle,rgba(181,194,226,.40) 0 .8px,transparent 1.2px),
+    radial-gradient(circle,rgba(214,179,105,.28) 0 .7px,transparent 1.1px);
+  background-size:181px 181px,293px 293px,421px 421px;
+  background-position:17px 31px,91px 137px,201px 73px;
+}
+#app.orbits #escena::after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:2;
+  background:radial-gradient(ellipse at 50% 51%,transparent 42%,rgba(1,2,7,.12) 69%,rgba(1,2,7,.52) 100%);
+}
+#app.orbits canvas{position:relative;z-index:1}
+
+#app.orbits .pista{
+  z-index:3;color:#7b7588;font-size:.61rem;letter-spacing:.12em;
+  text-shadow:0 2px 12px #000;
+}
+#app.orbits .orbit-status{
+  position:absolute;left:clamp(.8rem,2vw,1.35rem);top:clamp(.75rem,1.7vw,1.2rem);z-index:3;
+  display:flex;gap:.38rem;flex-wrap:wrap;max-width:min(590px,80vw);pointer-events:none;
+}
+#app.orbits .orbit-status span{
+  padding:.25rem .5rem;border:1px solid rgba(218,184,110,.17);border-radius:999px;
+  background:rgba(4,7,15,.48);backdrop-filter:blur(8px);
+  color:#817b8d;font:500 .53rem "IBM Plex Mono",monospace;letter-spacing:.10em;text-transform:uppercase;
+  box-shadow:0 7px 20px rgba(0,0,0,.12);
+}
+#app.orbits .orbit-status span:first-child{color:#c7a963;border-color:rgba(218,184,110,.30)}
+
+#app.orbits #ficha{
+  width:min(410px,92vw);
+  background:linear-gradient(180deg,rgba(9,13,25,.965),rgba(4,7,15,.955));
+  border-left-color:var(--orbit-line);
+  box-shadow:-22px 0 58px rgba(0,0,0,.46),inset 1px 0 rgba(255,255,255,.025);
+  backdrop-filter:blur(18px) saturate(1.05);
+}
+#app.orbits .ficha-cab{border-bottom-color:rgba(145,140,164,.14)}
+#app.orbits .ficha-cab h2{font-weight:500;color:var(--orbit-ivory)}
+#app.orbits .epiteto{color:#8f899b}
+#app.orbits .ahora{
+  border-color:rgba(218,184,110,.31);background:rgba(218,184,110,.045);
+  box-shadow:inset 0 0 24px rgba(218,184,110,.025);
+}
+#app.orbits .ahora .grado{color:var(--orbit-gold)}
+#app.orbits .rotulo{color:#a7894e;border-bottom-color:rgba(145,140,164,.13)}
+#app.orbits ul.claves li{background:rgba(255,255,255,.025);border-color:rgba(145,140,164,.15)}
+#app.orbits .nota{border-left-color:#927239;color:#b9b2bd}
+#app.orbits table.astro th,#app.orbits table.astro td{border-bottom-color:rgba(145,140,164,.13)}
+
+#app.orbits footer{
+  border-top-color:rgba(218,184,110,.16);
+  background:linear-gradient(180deg,rgba(6,9,18,.94),rgba(3,5,12,.98));
+  box-shadow:0 -10px 28px rgba(0,0,0,.16);
+}
+#app.orbits .efem button:hover{border-color:rgba(218,184,110,.18);background:rgba(255,255,255,.025)}
+#app.orbits .efem button.sel{border-color:rgba(218,184,110,.44);background:rgba(218,184,110,.055)}
+
+#app.orbits .astro-back{
+  display:inline-flex;align-items:center;gap:.42rem;flex:none;
+  border:1px solid rgba(218,184,110,.24);border-radius:999px;
+  padding:.33rem .72rem;background:rgba(255,255,255,.025);
+  color:#aaa4b4;font:500 .62rem "IBM Plex Mono",monospace;
+  letter-spacing:.10em;text-transform:uppercase;transition:.2s;
+}
+#app.orbits .astro-back:hover{color:var(--orbit-gold);border-color:rgba(218,184,110,.58);background:rgba(218,184,110,.04)}
+
+@media(max-width:760px){
+  #app.orbits header{gap:.45rem;padding:.48rem .62rem;min-height:3.25rem;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+  #app.orbits header::-webkit-scrollbar{display:none}
+  #app.orbits .marca{min-width:max-content}
+  #app.orbits .marca h1{font-size:.88rem;letter-spacing:.08em}
+  #app.orbits .marca .sub{display:none}
+  #app.orbits .astro-back{font-size:.54rem;padding:.3rem .56rem;letter-spacing:.07em}
+  #app.orbits .conmutador{min-width:max-content}
+  #app.orbits .conmutador button{padding:.3rem .58rem;font-size:.56rem}
+  #app.orbits .grupo:has(.velocidad){min-width:max-content}
+  #app.orbits .reloj{min-width:max-content;font-size:.59rem}
+  #app.orbits .orbit-status{top:.55rem;left:.55rem;right:.55rem;max-width:none}
+  #app.orbits .orbit-status span{font-size:.47rem;padding:.2rem .38rem}
+  #app.orbits #ficha{width:100%;height:min(67dvh,530px);top:auto;bottom:0;border-left:none;border-top:1px solid rgba(218,184,110,.20);border-radius:15px 15px 0 0}
+}
+
+@media(max-width:430px){
+  #app.orbits .orbit-status span:nth-child(3){display:none}
+  #app.orbits footer{padding:.38rem .4rem}
+  #app.orbits .efem button{min-width:4.9rem;padding:.3rem .5rem}
+}
