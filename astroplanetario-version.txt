@@ -1,4 +1,6 @@
 Astroplanetario
-Deploy refresh: Luna progresada V2
+Deploy refresh: Luna progresada V2 + fase lunar real + signo zodiacal dinámico
 Version source: main
 Incluye fecha natal, hora natal exacta, ciudad natal, fecha a estudiar y hora a estudiar.
+Incluye fase lunar actual real, render visual de creciente/menguante y signo zodiacal lunar dinámico.
+Proyecto Vercel activo: maquina-celeste.
