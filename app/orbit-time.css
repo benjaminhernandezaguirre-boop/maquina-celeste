@@ -1,0 +1,68 @@
+/* Astroplanetario · controles temporales de Órbitas */
+#app .tiempo-grupo{position:relative;gap:.36rem;flex-wrap:nowrap}
+#app .fecha-control,#app .carta-momento{
+  display:none;align-items:center;justify-content:center;white-space:nowrap;
+  border:1px solid rgba(220,186,111,.19);border-radius:999px;
+  padding:.34rem .72rem;background:rgba(5,8,17,.72);color:#928da0;
+  font:500 .66rem "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase;
+  transition:border-color .2s,color .2s,background .2s,box-shadow .2s;
+}
+#app.orbits .fecha-control,#app.orbits .carta-momento{display:inline-flex}
+#app.orbits .fecha-control:hover,#app.orbits .fecha-control[aria-expanded="true"]{
+  color:#d9b86e;border-color:rgba(220,186,111,.55);background:rgba(218,184,110,.055)
+}
+#app.orbits .carta-momento{
+  color:#d9b86e;border-color:rgba(220,186,111,.32);
+  background:linear-gradient(180deg,rgba(218,184,110,.09),rgba(218,184,110,.035));
+  box-shadow:inset 0 0 20px rgba(218,184,110,.025)
+}
+#app.orbits .carta-momento:hover{border-color:rgba(220,186,111,.66);box-shadow:0 0 24px rgba(218,184,110,.08)}
+
+#app .fecha-pop[hidden]{display:none!important}
+#app .fecha-pop{
+  position:absolute;right:0;top:calc(100% + .6rem);z-index:30;width:min(360px,92vw);
+  padding:1rem;border:1px solid rgba(220,186,111,.28);border-radius:10px;
+  background:linear-gradient(145deg,rgba(10,14,27,.985),rgba(4,7,15,.985));
+  box-shadow:0 24px 70px rgba(0,0,0,.62),0 0 45px rgba(218,184,110,.035);
+  backdrop-filter:blur(18px)
+}
+#app .fecha-pop::before{
+  content:"";position:absolute;right:3.2rem;top:-5px;width:9px;height:9px;
+  transform:rotate(45deg);background:#090d19;border-left:1px solid rgba(220,186,111,.28);border-top:1px solid rgba(220,186,111,.28)
+}
+#app .fecha-pop-titulo{
+  margin:0 0 .75rem;color:#eee5d6;font:500 .8rem Cinzel,serif;letter-spacing:.08em;text-transform:uppercase
+}
+#app .fecha-grid{display:grid;grid-template-columns:1fr .78fr;gap:.55rem}
+#app .fecha-grid label{display:grid;gap:.25rem;color:#898395;font:500 .55rem "IBM Plex Mono",monospace;letter-spacing:.13em;text-transform:uppercase}
+#app .fecha-grid input{
+  width:100%;min-height:2.35rem;padding:.38rem .48rem;border:1px solid rgba(153,149,173,.21);border-radius:5px;
+  background:rgba(2,5,13,.88);color:#eee5d6;font:.72rem "IBM Plex Mono",monospace;color-scheme:dark
+}
+#app .fecha-grid input:focus{outline:none;border-color:rgba(220,186,111,.66);box-shadow:0 0 0 3px rgba(218,184,110,.06)}
+#app .fecha-rapida,#app .fecha-acciones{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.62rem}
+#app .fecha-rapida button,#app .fecha-acciones button{
+  min-height:2rem;border:1px solid rgba(220,186,111,.18);border-radius:999px;padding:.34rem .68rem;
+  color:#928da0;background:rgba(255,255,255,.02);font:500 .57rem "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase
+}
+#app .fecha-rapida button:hover,#app .fecha-acciones button:hover{color:#d9b86e;border-color:rgba(220,186,111,.48)}
+#app .fecha-acciones{justify-content:flex-end;margin-top:.75rem}
+#app .fecha-acciones .aplicar-fecha{color:#160f04;background:linear-gradient(180deg,#dfc17d,#b58b43);border-color:#dfc17d}
+#app .fecha-acciones .aplicar-fecha:hover{color:#160f04;filter:brightness(1.06)}
+#app .fecha-nota{display:block;margin-top:.65rem;color:#716c7d;font-size:.68rem;line-height:1.35;font-style:italic}
+
+@media(max-width:980px){
+  #app.orbits .carta-momento{font-size:.58rem;padding:.31rem .58rem}
+  #app.orbits .fecha-control{font-size:.58rem;padding:.31rem .56rem}
+}
+@media(max-width:760px){
+  #app .tiempo-grupo{min-width:max-content}
+  #app .fecha-pop{position:fixed;left:.65rem;right:.65rem;top:max(4.7rem,calc(env(safe-area-inset-top) + 4.2rem));width:auto}
+  #app .fecha-pop::before{display:none}
+  #app .fecha-grid{grid-template-columns:1fr 1fr}
+  #app.orbits .carta-momento{padding:.3rem .52rem}
+}
+@media(max-width:430px){
+  #app .fecha-grid{grid-template-columns:1fr}
+  #app .fecha-pop{left:.5rem;right:.5rem;padding:.9rem}
+}
