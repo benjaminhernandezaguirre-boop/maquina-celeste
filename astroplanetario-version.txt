@@ -1,0 +1,4 @@
+Astroplanetario
+Deploy refresh: Luna progresada V2
+Version source: main
+Incluye fecha natal, hora natal exacta, ciudad natal, fecha a estudiar y hora a estudiar.
