@@ -1,8 +1,26 @@
 {
   "headers": [
     {
+      "source": "/app/lunar-zodiac-v2.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
       "source": "/luna.html",
       "headers": [
+    {
+      "source": "/app/lunar-zodiac-v2.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
         {
           "key": "Cache-Control",
           "value": "no-cache, no-store, must-revalidate"
@@ -12,6 +30,15 @@
     {
       "source": "/",
       "headers": [
+    {
+      "source": "/app/lunar-zodiac-v2.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
         {
           "key": "Cache-Control",
           "value": "no-cache, must-revalidate"
