@@ -294,5 +294,6 @@ selDate.addEventListener('change',updateAll);selTime.addEventListener('change',u
 (async()=>{await loadCities();const now=Date.now(),p=isoLocal(now);selDate.value=p.date;selTime.value=p.time;returnRef.value=p.date;progRef.value=p.date;progRefTime.value=p.time;useSavedBirth();useSavedProgressedBirth();updateAll()})();
 })();
 </script>
+<script src="app/lunar-zodiac-v2.js?v=2"></script>
 </body>
 </html>
