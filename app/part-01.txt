@@ -206,7 +206,7 @@ F5}
 <div id="app">
   <header>
     <div class="marca" id="volverInicio" role="button" tabindex="0" title="Volver a la pantalla de inicio">
-      <h1>Máquina Celeste</h1>
+      <h1>Astroplanetario</h1>
       <span class="sub">Planetario astrológico en vivo</span>
     </div>
 
@@ -303,7 +303,7 @@ F5}
           </button>
         </div>
 
-        <p class="portada-pie">Para volver aquí, toca «Máquina Celeste» en la esquina superior.</p>
+        <p class="portada-pie">Para volver aquí, toca «Astroplanetario» en la esquina superior.</p>
       </div>
     </div>
 

@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Máquina Celeste</title>
+<title>Astroplanetario</title>
 <meta name="description" content="Planetario astrológico en vivo: órbitas del sistema solar en tiempo real, rueda zodiacal geocéntrica y cartas natales con casas, aspectos, significados y atacires.">
-<meta name="author" content="Máquina Celeste">
+<meta name="author" content="Astroplanetario">
 <meta name="theme-color" content="#05060F">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 
@@ -14,11 +14,11 @@
      por ejemplo https://tudominio.com/portada.png -->
 <meta property="og:type" content="website">
 <meta property="og:locale" content="es_MX">
-<meta property="og:title" content="Máquina Celeste">
+<meta property="og:title" content="Astroplanetario">
 <meta property="og:description" content="Planetario astrológico en vivo: órbitas del sistema solar en tiempo real, rueda zodiacal geocéntrica y cartas natales con casas, aspectos, significados y atacires.">
 <meta property="og:image" content="portada.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Máquina Celeste">
+<meta name="twitter:title" content="Astroplanetario">
 <meta name="twitter:description" content="Planetario astrológico en vivo: órbitas del sistema solar en tiempo real, rueda zodiacal geocéntrica y cartas natales con casas, aspectos, significados y atacires.">
 <meta name="twitter:image" content="portada.png">
 
@@ -28,6 +28,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="app/natal-theme.css">
+<script src="app/natal-theme.js" defer></script>
 <style>
   :root{
     --tinta:#05060F;

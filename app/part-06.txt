@@ -241,7 +241,7 @@ async function fabricaHoja(modo){
     y += 36;
   }
   g.textAlign = "left"; g.fillStyle = PAPEL.borde; g.font = '18px "IBM Plex Mono", monospace';
-  g.fillText("Máquina Celeste · zodiaco tropical · posiciones geocéntricas", margen, alto - 26);
+  g.fillText("Astroplanetario · zodiaco tropical · posiciones geocéntricas", margen, alto - 26);
   return c;
 }
 function descargaHoja(modo){
