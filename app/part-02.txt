@@ -323,17 +323,62 @@ document.getElementById("btnMenosAnio").addEventListener("click", () => mueveAni
 document.getElementById("btnMasAnio").addEventListener("click", () => mueveAnio(1));
 document.addEventListener("keydown", e => { if(e.key === "Escape" && !fechaPop.hidden) cierraFecha(); });
 
+function partesEnZona(ms, tz){
+  const fmt = new Intl.DateTimeFormat("en-CA",{
+    timeZone:tz, year:"numeric", month:"2-digit", day:"2-digit",
+    hour:"2-digit", minute:"2-digit", hourCycle:"h23"
+  });
+  const p = Object.fromEntries(fmt.formatToParts(new Date(ms)).map(x => [x.type,x.value]));
+  return {fecha:`${p.year}-${p.month}-${p.day}`, hora:`${p.hour}:${p.minute}`};
+}
+
 document.getElementById("btnCartaMomento").addEventListener("click", () => {
-  const p = partesLocales(ahoraSim());
+  const instante = ahoraSim();
+  const entrada = document.getElementById("ciudadCartaMomento");
+  const escrito = (entrada?.value || document.getElementById("nLugar")?.value || "").trim();
+  const normal = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+  const ciudad = CIUDADES.find(c => normal(c.etiqueta) === normal(escrito))
+              || CIUDADES.find(c => normal(c.n) === normal(escrito));
+
+  if(!escrito){
+    if(entrada){ entrada.classList.add("falta-ciudad"); entrada.focus(); }
+    return;
+  }
+
+  if(entrada) entrada.classList.remove("falta-ciudad");
+  const lugar = document.getElementById("nLugar");
   const f = document.getElementById("nFecha"), h = document.getElementById("nHora");
+
+  if(!ciudad){
+    const p = partesLocales(instante);
+    if(f) f.value = p.fecha;
+    if(h) h.value = p.hora;
+    if(lugar){ lugar.value = escrito; lugar.dispatchEvent(new Event("input",{bubbles:true})); }
+    cambiaVista("natal");
+    const veloNatal = document.getElementById("velo");
+    if(veloNatal) veloNatal.classList.add("visible");
+    const err = document.getElementById("nError");
+    if(err){ err.textContent = "Elige una ciudad de la lista para levantar la carta automáticamente, o completa las coordenadas manuales."; err.hidden = false; }
+    const cancelar = document.getElementById("nCancelar");
+    if(cancelar) cancelar.hidden = false;
+    return;
+  }
+
+  // Conserva el instante exacto del simulador y lo expresa en la zona horaria elegida.
+  const p = partesEnZona(instante, ciudad.tz);
   if(f) f.value = p.fecha;
   if(h) h.value = p.hora;
+  if(lugar){ lugar.value = ciudad.etiqueta; lugar.dispatchEvent(new Event("input",{bubbles:true})); }
+  if(entrada) entrada.value = ciudad.etiqueta;
+  const sinHoraEl = document.getElementById("nSinHora");
+  if(sinHoraEl?.checked){ sinHoraEl.checked = false; sinHoraEl.dispatchEvent(new Event("change")); }
+
   cambiaVista("natal");
   const veloNatal = document.getElementById("velo");
   if(veloNatal) veloNatal.classList.add("visible");
   const cancelar = document.getElementById("nCancelar");
   if(cancelar) cancelar.hidden = false;
-  setTimeout(() => document.getElementById("nLugar")?.focus(), 60);
+  setTimeout(() => document.getElementById("natalForm")?.requestSubmit(), 0);
 });
 
 const fmtFecha = new Intl.DateTimeFormat("es-MX",{dateStyle:"long",timeStyle:"short"});

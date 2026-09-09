@@ -238,7 +238,11 @@ F5}
       </select>
       <button class="fecha-control" id="btnFechaExacta" type="button" aria-expanded="false" aria-controls="fechaPop">Ir a fecha</button>
       <button class="hoy" id="btnHoy">Ahora</button>
-      <button class="carta-momento" id="btnCartaMomento" type="button">Sacar carta astral</button>
+      <div class="carta-momento-wrap">
+        <label class="ciudad-momento-label" for="ciudadCartaMomento">Ciudad</label>
+        <input class="ciudad-momento" id="ciudadCartaMomento" list="ciudades" autocomplete="off" placeholder="Escribe ciudad" aria-label="Ciudad para la carta astral del momento">
+        <button class="carta-momento" id="btnCartaMomento" type="button">Sacar carta astral</button>
+      </div>
 
       <div class="fecha-pop" id="fechaPop" hidden>
         <p class="fecha-pop-titulo">Ir a una fecha exacta</p>

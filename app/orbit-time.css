@@ -66,3 +66,21 @@
   #app .fecha-grid{grid-template-columns:1fr}
   #app .fecha-pop{left:.5rem;right:.5rem;padding:.9rem}
 }
+
+
+/* Ciudad + carta del instante */
+#app .carta-momento-wrap{display:none;align-items:center;gap:.3rem;min-width:0}
+#app.orbits .carta-momento-wrap{display:inline-flex}
+#app .ciudad-momento-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+#app .ciudad-momento{
+  width:clamp(112px,10.5vw,160px);min-height:2rem;padding:.32rem .58rem;
+  border:1px solid rgba(220,186,111,.21);border-radius:999px;
+  background:rgba(5,8,17,.76);color:#eee5d6;
+  font:500 .63rem "IBM Plex Mono",monospace;letter-spacing:.02em;
+  outline:none;transition:border-color .2s,box-shadow .2s,background .2s
+}
+#app .ciudad-momento::placeholder{color:#746f7e}
+#app .ciudad-momento:focus{border-color:rgba(220,186,111,.62);box-shadow:0 0 0 3px rgba(218,184,110,.055)}
+#app .ciudad-momento.falta-ciudad{border-color:rgba(207,102,72,.8);box-shadow:0 0 0 3px rgba(196,101,63,.08)}
+@media(max-width:980px){#app .ciudad-momento{width:112px;font-size:.56rem;padding:.3rem .48rem}}
+@media(max-width:760px){#app .carta-momento-wrap{gap:.24rem}#app .ciudad-momento{width:105px;min-height:1.9rem}}
