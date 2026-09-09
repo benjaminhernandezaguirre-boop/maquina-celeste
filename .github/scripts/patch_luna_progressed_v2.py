@@ -1,7 +1,7 @@
 from pathlib import Path
 import re
 
-p = Path('moon.html')
+p = Path('luna.html')
 t = p.read_text(encoding='utf-8')
 
 panel = '''<section class="panel" id="panel-progresada">
