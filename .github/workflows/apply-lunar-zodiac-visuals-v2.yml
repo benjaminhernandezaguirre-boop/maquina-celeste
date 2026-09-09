@@ -1,0 +1,53 @@
+name: Integrar ilustraciones zodiacales lunares V2
+
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-lunar-zodiac-visuals-v2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Crear módulo visual de los 12 signos
+        shell: bash
+        run: |
+          mkdir -p app
+          python - <<'PY'
+          from pathlib import Path
+          import base64, gzip
+          data='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'
+          Path('app/lunar-zodiac-v2.js').write_bytes(gzip.decompress(base64.b64decode(data)))
+          p=Path('luna.html')
+          s=p.read_text(encoding='utf-8')
+          tag='<script src="app/lunar-zodiac-v2.js?v=2"></script>'
+          if tag not in s:
+              if '</body>' not in s:
+                  raise SystemExit('No se encontró </body> en luna.html')
+              s=s.replace('</body>',tag+'\n</body>',1)
+              p.write_text(s,encoding='utf-8')
+          print('Módulo visual zodiacal V2 conectado')
+          PY
+      - name: Verificar integración
+        run: |
+          test -f app/lunar-zodiac-v2.js
+          grep -q "'Aries'" app/lunar-zodiac-v2.js
+          grep -q "'Piscis'" app/lunar-zodiac-v2.js
+          grep -q 'lunar-zodiac-v2.js' luna.html
+      - name: Guardar cambios
+        run: |
+          git config user.name "Astroplanetario Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add app/lunar-zodiac-v2.js luna.html
+          if git diff --cached --quiet; then
+            echo "Sin cambios pendientes"
+          else
+            git commit -m "Añade ilustraciones y sellos dinámicos para los 12 signos lunares"
+            git push origin main
+          fi
