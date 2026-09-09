@@ -7,7 +7,7 @@ const SIGN_INDEX={
 const NORMALIZE=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 const NAME_MAP={'aries':'Aries','tauro':'Tauro','geminis':'Géminis','cancer':'Cáncer','leo':'Leo','virgo':'Virgo','libra':'Libra','escorpio':'Escorpio','sagitario':'Sagitario','capricornio':'Capricornio','acuario':'Acuario','piscis':'Piscis'};
 const glyphs={'Aries':'♈︎','Tauro':'♉︎','Géminis':'♊︎','Cáncer':'♋︎','Leo':'♌︎','Virgo':'♍︎','Libra':'♎︎','Escorpio':'♏︎','Sagitario':'♐︎','Capricornio':'♑︎','Acuario':'♒︎','Piscis':'♓︎'};
-const SPRITE_URL='/assets/zodiac/zodiac-sprite.webp?v=4';
+const SPRITE_URL='/assets/zodiac/zodiac-sprite.webp?v=6';
 function injectStyles(){
   const old=document.getElementById('lunar-zodiac-v2-style');if(old)old.remove();
   const s=document.createElement('style');s.id='lunar-zodiac-v2-style';s.textContent=`
