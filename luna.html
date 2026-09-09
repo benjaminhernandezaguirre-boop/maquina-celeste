@@ -107,13 +107,18 @@
   <div class="grid">
     <article class="card full">
       <h3>Luna progresada secundaria</h3>
-      <p>Usa la equivalencia astrológica de un día de efemérides por un año de vida. Es una técnica distinta de la revolución lunar mensual.</p>
+      <p>Usa la equivalencia astrológica de un día de efemérides por un año de vida. Para que el cálculo sea transparente, Astroplanetario necesita la fecha, la hora exacta y la ciudad natal.</p>
+      <div class="notice" style="margin:.7rem 0">La hora natal no se sustituye automáticamente por 12:00. Si no la conoces, el resultado no se presenta como exacto. La ciudad se usa para convertir la hora local de nacimiento a UTC con su zona horaria histórica.</div>
       <div class="controls">
+        <div class="field"><label for="progBirthDate">Fecha natal</label><input id="progBirthDate" type="date" min="1800-01-01" max="2050-12-31"></div>
+        <div class="field"><label for="progBirthTime">Hora natal exacta</label><input id="progBirthTime" type="time" step="60"></div>
+        <div class="field fullm"><label for="progBirthCity">Ciudad natal</label><input id="progBirthCity" list="cityList" autocomplete="off" placeholder="Ej. Xalapa, Veracruz, MX"></div>
         <div class="field"><label for="progRef">Fecha a estudiar</label><input id="progRef" type="date" min="1800-01-01" max="2050-12-31"></div>
+        <div class="field"><label for="progRefTime">Hora a estudiar</label><input id="progRefTime" type="time" step="60" value="12:00"></div>
         <button class="ghost" id="progUseSaved">Usar última carta</button>
         <button class="primary" id="calcProgressed">Calcular Luna progresada</button>
       </div>
-      <div class="result" id="progResult"><p class="small">Primero carga una carta natal en la pestaña de Revolución lunar o usa una carta guardada.</p></div>
+      <div class="result" id="progResult"><p class="small">Introduce los datos natales exactos o carga la última carta guardada. La fecha y hora a estudiar se interpretan en la zona horaria de la ciudad natal para mantener un criterio consistente.</p></div>
     </article>
   </div>
 </section>
@@ -189,12 +194,55 @@ function nextSignIngress(ms){const lon=lunaLon(ms),inside=lon%30,delta=30-inside
 const VOC_PLANETS=['sol','mercurio','venus','marte','jupiter','saturno','urano','neptuno','pluton'];const VOC_ASP=[0,60,90,120,180];
 function aspectEvents(start,end){const out=[],step=3600000;for(const id of VOC_PLANETS){for(const a of VOC_ASP){const ors=(a===0||a===180)?[a]:[a,-a];for(const orient of ors){const fn=ms=>{const T=siglos(julian(ms));return wrap180(lonGeo('luna',T)-lonGeo(id,T)-orient)};const rs=findRoots(fn,start,end,step);for(const ms of rs)out.push({ms,id,a})}}}return out.sort((a,b)=>a.ms-b.ms).filter((e,i,arr)=>!i||Math.abs(e.ms-arr[i-1].ms)>15*60000||e.id!==arr[i-1].id)}
 function calcVOC(){const ms=selectedMs(),method=vocMethod.value;let end,label;if(method==='modern'){end=nextSignIngress(ms);label='hasta el próximo cambio de signo'}else{const deg=method==='13'?13:30;end=moonBoundaryTime(ms,deg);label=`dentro de los próximos ${deg}° de movimiento lunar`}if(!end){vocResult.innerHTML='<p class="notice">No pude resolver el horizonte lunar en este rango.</p>';return}const future=aspectEvents(ms+1000,end),isVOC=!future.length;let html=`<div class="voc-state ${isVOC?'on':''}"><span class="voc-dot"></span><div><strong>${isVOC?'Luna vacía de curso':'Luna con aspecto aplicante'}</strong><div class="small">Método: ${vocMethod.options[vocMethod.selectedIndex].text}</div></div></div>`;if(isVOC){html+=`<p>Desde este instante no aparece otro aspecto ptolemaico exacto ${label}. El horizonte calculado termina ${fmtLocal(end)}.</p>`}else{const e=future[0],names={sol:'Sol',mercurio:'Mercurio',venus:'Venus',marte:'Marte',jupiter:'Júpiter',saturno:'Saturno',urano:'Urano',neptuno:'Neptuno',pluton:'Plutón'},an={0:'conjunción',60:'sextil',90:'cuadratura',120:'trígono',180:'oposición'};html+=`<p>El siguiente aspecto exacto es ${an[e.a]} con ${names[e.id]} el ${fmtLocal(e.ms)}. Por este método, la Luna todavía no está vacía.</p>`}vocResult.innerHTML=html}
-let activeBirth=null;function calcProgressed(){let b=birthFromInputs();if(!b){const d=savedData();if(d&&d.anio){const c=cityFind(d.lugarTexto);if(c){const ms=localToUTC(d.anio,d.mes,d.dia,d.hora||12,d.min||0,c.tz);b={ms,city:c}}}}if(!b){progResult.innerHTML='<p class="notice">Carga primero los datos natales en Revolución lunar o usa una carta guardada con ciudad reconocida.</p>';return}const ref=progRef.value?new Date(`${progRef.value}T12:00:00`).getTime():selectedMs(),years=(ref-b.ms)/(365.2422*DAY),ephem=b.ms+years*DAY,lon=lunaLon(ephem),z=zpos(lon),natal=zpos(lunaLon(b.ms));progResult.innerHTML=`<p><span class="tag">Edad simbólica ${years.toFixed(2)} años</span></p><h3 style="margin-top:.55rem">${z.glyph} ${z.text} ${z.n}</h3><p>La efeméride progresada corresponde aproximadamente a ${Math.abs(years).toFixed(2)} días después del nacimiento. La Luna natal estaba en ${natal.glyph} ${natal.text} ${natal.n}.</p><p class="small">La Luna progresada completa un ciclo aproximado en 27–28 años; no es la misma técnica que el retorno lunar mensual.</p>`}
+let activeBirth=null;
+function progressedBirthFromInputs(){
+  const ds=progBirthDate.value,ts=progBirthTime.value.trim(),written=progBirthCity.value.trim();
+  if(!ds||!ts||!written)return null;
+  const c=cityFind(written);if(!c)return null;
+  const[Y,M,D]=ds.split('-').map(Number),[h,m]=ts.split(':').map(Number);
+  return{ms:localToUTC(Y,M,D,h,m,c.tz),city:c,date:ds,time:ts};
+}
+function useSavedProgressedBirth(){
+  const d=savedData();
+  if(!d||!d.anio)return false;
+  progBirthDate.value=`${d.anio}-${String(d.mes).padStart(2,'0')}-${String(d.dia).padStart(2,'0')}`;
+  progBirthCity.value=d.lugarTexto||'';
+  if(d.horaConocida===false){
+    progBirthTime.value='';
+    progResult.innerHTML='<p class="notice">La última carta está guardada sin hora natal conocida. Añade la hora exacta antes de calcular la Luna progresada.</p>';
+    return false;
+  }
+  progBirthTime.value=`${String(d.hora??0).padStart(2,'0')}:${String(d.min??0).padStart(2,'0')}`;
+  return true;
+}
+function calcProgressed(){
+  const ds=progBirthDate.value,ts=progBirthTime.value.trim(),written=progBirthCity.value.trim();
+  if(!ds){progResult.innerHTML='<p class="notice">Falta la fecha natal.</p>';return}
+  if(!ts){progResult.innerHTML='<p class="notice">Falta la hora natal exacta. Astroplanetario no asumirá 12:00 para este cálculo.</p>';return}
+  if(!written){progResult.innerHTML='<p class="notice">Falta la ciudad natal para resolver correctamente la zona horaria.</p>';return}
+  const c=cityFind(written);
+  if(!c){progResult.innerHTML='<p class="notice">No reconozco esa ciudad en la base actual. Elige una sugerencia de la lista para poder aplicar su zona horaria.</p>';return}
+  const b=progressedBirthFromInputs();if(!b)return;
+  if(!progRef.value){progResult.innerHTML='<p class="notice">Falta la fecha que quieres estudiar.</p>';return}
+  const rt=progRefTime.value||'12:00',[Y,M,D]=progRef.value.split('-').map(Number),[hh,mm]=rt.split(':').map(Number);
+  const ref=localToUTC(Y,M,D,hh||0,mm||0,b.city.tz);
+  const years=(ref-b.ms)/(365.2422*DAY);
+  if(years<0){progResult.innerHTML='<p class="notice">La fecha a estudiar es anterior al nacimiento. Elige una fecha posterior para una progresión secundaria.</p>';return}
+  const ephem=b.ms+years*DAY,lon=lunaLon(ephem),z=zpos(lon),natal=zpos(lunaLon(b.ms));
+  const progressedDate=fmtLocal(ephem,b.city.tz),birthMoment=fmtLocal(b.ms,b.city.tz),studyMoment=fmtLocal(ref,b.city.tz);
+  progResult.innerHTML=`
+    <p><span class="tag">Edad simbólica ${years.toFixed(4)} años</span></p>
+    <h3 style="margin-top:.55rem">${z.glyph} ${z.text} ${z.n}</h3>
+    <p><b>Datos usados.</b> Nacimiento: ${birthMoment} · ${b.city.etiqueta} · ${b.city.tz}. Fecha estudiada: ${studyMoment}.</p>
+    <p>La efeméride simbólica corresponde a ${years.toFixed(4)} días después del nacimiento: ${progressedDate}. La Luna natal estaba en ${natal.glyph} ${natal.text} ${natal.n}.</p>
+    <p class="small">Método: progresiones secundarias, 1 día de efemérides = 1 año tropical de vida (365,2422 días). La posición lunar procede del motor astronómico aproximado de Astroplanetario; para validación profesional se contrastará con efemérides de mayor precisión.</p>`;
+}
 function updateAll(){updateSummary();renderLunations();if(!document.getElementById('panel-voc').classList.contains('on'))return;calcVOC()}
 const selDate=document.getElementById('selDate'),selTime=document.getElementById('selTime'),phaseNameEl=document.getElementById('phaseName'),phaseLead=document.getElementById('phaseLead'),illum=document.getElementById('illum'),waxing=document.getElementById('waxing'),moonSign=document.getElementById('moonSign'),moonDegree=document.getElementById('moonDegree'),moonAge=document.getElementById('moonAge'),moonDist=document.getElementById('moonDist'),phaseProgress=document.getElementById('phaseProgress'),cycleTextEl=document.getElementById('cycleText'),prevPhaseName=document.getElementById('prevPhaseName'),prevPhaseDate=document.getElementById('prevPhaseDate'),nextPhaseName=document.getElementById('nextPhaseName'),nextPhaseDate=document.getElementById('nextPhaseDate'),nodeState=document.getElementById('nodeState'),nodeText=document.getElementById('nodeText'),lunationCount=document.getElementById('lunationCount'),lunationFilter=document.getElementById('lunationFilter'),lunationList=document.getElementById('lunationList'),birthDate=document.getElementById('birthDate'),birthTime=document.getElementById('birthTime'),birthCity=document.getElementById('birthCity'),returnCity=document.getElementById('returnCity'),returnRef=document.getElementById('returnRef'),returnResult=document.getElementById('returnResult'),cityList=document.getElementById('cityList'),vocMethod=document.getElementById('vocMethod'),vocResult=document.getElementById('vocResult'),progRef=document.getElementById('progRef'),progResult=document.getElementById('progResult');
+const progBirthDate=document.getElementById('progBirthDate'),progBirthTime=document.getElementById('progBirthTime'),progBirthCity=document.getElementById('progBirthCity'),progRefTime=document.getElementById('progRefTime');
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',String(x===b)));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id===`panel-${b.dataset.tab}`));if(b.dataset.tab==='voc')calcVOC()}));
-selDate.addEventListener('change',updateAll);selTime.addEventListener('change',updateAll);document.getElementById('btnNow').addEventListener('click',()=>setSelected(Date.now()));document.getElementById('refreshLunations').addEventListener('click',renderLunations);lunationCount.addEventListener('change',renderLunations);lunationFilter.addEventListener('change',renderLunations);document.getElementById('calcReturn').addEventListener('click',calculateReturn);document.getElementById('useSaved').addEventListener('click',()=>{if(!useSavedBirth())returnResult.innerHTML='<p class="notice">Todavía no hay una carta natal guardada en este navegador.</p>'});document.getElementById('calcVoc').addEventListener('click',calcVOC);document.getElementById('calcProgressed').addEventListener('click',calcProgressed);document.getElementById('progUseSaved').addEventListener('click',()=>{if(useSavedBirth()){progResult.innerHTML='<p class="small">Datos natales cargados. Elige la fecha a estudiar y calcula.</p>'}else progResult.innerHTML='<p class="notice">No encontré una carta guardada.</p>'});
-(async()=>{await loadCities();const now=Date.now(),p=isoLocal(now);selDate.value=p.date;selTime.value=p.time;returnRef.value=p.date;progRef.value=p.date;useSavedBirth();updateAll()})();
+selDate.addEventListener('change',updateAll);selTime.addEventListener('change',updateAll);document.getElementById('btnNow').addEventListener('click',()=>setSelected(Date.now()));document.getElementById('refreshLunations').addEventListener('click',renderLunations);lunationCount.addEventListener('change',renderLunations);lunationFilter.addEventListener('change',renderLunations);document.getElementById('calcReturn').addEventListener('click',calculateReturn);document.getElementById('useSaved').addEventListener('click',()=>{if(!useSavedBirth())returnResult.innerHTML='<p class="notice">Todavía no hay una carta natal guardada en este navegador.</p>'});document.getElementById('calcVoc').addEventListener('click',calcVOC);document.getElementById('calcProgressed').addEventListener('click',calcProgressed);document.getElementById('progUseSaved').addEventListener('click',()=>{if(useSavedProgressedBirth()){progResult.innerHTML='<p class="small">Datos natales exactos cargados desde la última carta. Revisa la fecha y hora a estudiar y calcula.</p>'}else if(!savedData())progResult.innerHTML='<p class="notice">No encontré una carta guardada.</p>'});
+(async()=>{await loadCities();const now=Date.now(),p=isoLocal(now);selDate.value=p.date;selTime.value=p.time;returnRef.value=p.date;progRef.value=p.date;progRefTime.value=p.time;useSavedBirth();useSavedProgressedBirth();updateAll()})();
 })();
 </script>
 </body>
