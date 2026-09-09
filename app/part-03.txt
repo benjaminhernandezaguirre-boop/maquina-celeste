@@ -307,11 +307,13 @@ document.getElementById("btnOrbitas").addEventListener("click", () => cambiaVist
 document.getElementById("btnRueda").addEventListener("click", () => cambiaVista("rueda"));
 document.getElementById("btnNatal").addEventListener("click", () => cambiaVista("natal"));
 function cambiaVista(v){
+  if(v === "zodiaco") v = "rueda";
   vista = v; zoom = 1;
   if(v === "natal"){ natalPan.x=0; natalPan.y=0; }
   for(const [b,val] of [["btnOrbitas","orbitas"],["btnRueda","rueda"],["btnNatal","natal"]])
     document.getElementById(b).setAttribute("aria-pressed", String(v===val));
   document.getElementById("app").classList.toggle("natal", v==="natal");
+  document.getElementById("app").classList.toggle("zodiac", v==="rueda");
   document.querySelector(".pista").textContent = v === "natal"
     ? "Arrastra para recorrer la carta · rueda para acercar · doble clic para recentrar"
     : "Toca un planeta para abrir su ficha · rueda del ratón para acercar";
