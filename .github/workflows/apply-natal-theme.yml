@@ -1,0 +1,50 @@
+name: Integrar tema de Carta Natal
+
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-natal-theme.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Integrar recursos de Astroplanetario
+        shell: python
+        run: |
+          from pathlib import Path
+
+          p = Path('app/part-00.txt')
+          text = p.read_text(encoding='utf-8')
+          marker = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">'
+          addition = marker + '\n<link rel="stylesheet" href="app/natal-theme.css">\n<script src="app/natal-theme.js" defer></script>'
+          if 'app/natal-theme.css' not in text:
+              if marker not in text:
+                  raise SystemExit('No se encontró el punto de inserción de estilos')
+              text = text.replace(marker, addition, 1)
+          text = text.replace('Máquina Celeste', 'Astroplanetario')
+          p.write_text(text, encoding='utf-8')
+
+          for f in sorted(Path('app').glob('part-*.txt')):
+              if f == p:
+                  continue
+              t = f.read_text(encoding='utf-8')
+              if 'Máquina Celeste' in t:
+                  f.write_text(t.replace('Máquina Celeste','Astroplanetario'), encoding='utf-8')
+      - name: Guardar cambios
+        run: |
+          git config user.name "Astroplanetario Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add app/part-*.txt
+          if git diff --cached --quiet; then
+            echo "Sin cambios pendientes"
+          else
+            git commit -m "Integra Carta Natal con la identidad de Astroplanetario"
+            git push origin main
+          fi
