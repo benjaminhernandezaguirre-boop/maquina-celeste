@@ -32,6 +32,8 @@
 <script src="app/natal-theme.js" defer></script>
 <link rel="stylesheet" href="app/zodiac-theme.css">
 <script src="app/zodiac-theme.js" defer></script>
+<link rel="stylesheet" href="app/orbit-theme.css">
+<script src="app/orbit-theme.js" defer></script>
 <style>
   :root{
     --tinta:#05060F;
