@@ -1,0 +1,35 @@
+name: Corregir navegación planetaria
+
+on:
+  push:
+    paths:
+      - 'scripts/fix-planet-navigation.py'
+      - '.github/workflows/fix-planet-navigation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix-navigation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Aplicar corrección
+        run: python scripts/fix-planet-navigation.py
+
+      - name: Guardar cambios
+        run: |
+          if git diff --quiet; then
+            echo "No hay cambios pendientes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Corrige acceso directo a Tierra y planetas"
+          git push
