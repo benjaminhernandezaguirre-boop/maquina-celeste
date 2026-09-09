@@ -1,0 +1,398 @@
+`;
+}
+
+/* ===================== Atacires =====================
+   Progresión de clave fija: toda la carta avanza a velocidad constante.
+   El punto movido es el promisor; el punto natal que alcanza, el significador.
+   Claves nombradas por los años que tarda la vuelta completa de 360°. */
+const CLAVES_ATACIR = [
+  {grupo:"Atacires", claves:[
+    {id:"a5",   n:"Atacir 5",   dias:5.1},
+    {id:"a12",  n:"Atacir 12",  dias:12.175},
+    {id:"a13",  n:"Atacir 13",  dias:13.2},
+    {id:"a15",  n:"Atacir 15",  dias:15.8},
+    {id:"a25",  n:"Atacir 25",  dias:25.36},
+    {id:"a45",  n:"Atacir 45",  dias:45.625},
+    {id:"a60",  n:"Atacir 60",  dias:60.875},
+    {id:"a64",  n:"Atacir 64",  dias:64.9},
+    {id:"a72",  n:"Atacir 72",  dias:73},
+    {id:"a84",  n:"Atacir 84",  dias:85.225},
+    {id:"a96",  n:"Atacir 96",  dias:97.4},
+    {id:"a120", n:"Atacir 120", dias:121.666},
+    {id:"a144", n:"Atacir 144", dias:146},
+    {id:"a156", n:"Atacir 156", dias:158.8},
+    {id:"a360", n:"Atacir 360", dias:365.2}
+  ]},
+  {grupo:"Otras claves fijas", claves:[
+    {id:"prec",  n:"Precesión · 1° por 72 años",     dias:26297.44},
+    {id:"mes",   n:"1° por mes · 12° por año",       dias:30.4369},
+    {id:"d3",    n:"3° por año · 30° en 10 años",    dias:121.747},
+    {id:"d30",   n:"30° por año",                    dias:12.1747},
+    {id:"d360",  n:"360° por año",                   dias:1.01456},
+    {id:"dia1",  n:"1° por día",                     dias:1},
+    {id:"dia2",  n:"1° cada 2 días",                 dias:2},
+    {id:"d30dia",n:"30° por día",                    dias:0.0333333}
+  ]},
+  {grupo:"Arco solar", claves:[
+    {id:"naibod", n:"Naibod · 0°59′08″ por año", dias:370.59},
+    {id:"solreal",n:"Arco solar real · 1 día = 1 año", solar:true}
+  ]}
+];
+const TODAS_CLAVES = CLAVES_ATACIR.flatMap(g => g.claves);
+const ANG_ATACIR = [
+  {n:"Conjunción", g:"☌︎", a:0,   cl:"a-oro"},
+  {n:"Sextil",     g:"✳",       a:60,  cl:"a-azul"},
+  {n:"Cuadratura", g:"□",       a:90,  cl:"a-rojo"},
+  {n:"Trígono",    g:"△",       a:120, cl:"a-azul"},
+  {n:"Oposición",  g:"☍︎", a:180, cl:"a-rojo"}
+];
+const ORBE_ATACIR = 1;                       // grados de orbe para "contacto activo"
+
+let atacirActivo = false;
+const estadoAtacir = {clave:"a360", diasLibres:null, fecha:null};
+
+function claveActual(){
+  if(estadoAtacir.clave === "libre" && estadoAtacir.diasLibres > 0)
+    return {id:"libre", n:"Clave propia", dias:estadoAtacir.diasLibres};
+  return TODAS_CLAVES.find(c => c.id === estadoAtacir.clave) || TODAS_CLAVES.find(c => c.id === "a360");
+}
+/* grados que avanza la clave en un año, y años que tarda la vuelta completa */
+const porAnio = clave => clave.solar ? 0.98565 : 365.2422/clave.dias;
+const vueltaAnios = clave => 360/porAnio(clave);
+function puntosMoviles(){
+  const l = carta.cuerpos.concat(carta.puntos)
+    .map(c => ({id:c.id, nombre:c.nombre, glifo:c.glifo, color:c.color, lon:c.lon}));
+  if(carta.ang){
+    l.push({id:"asc", nombre:"Ascendente", glifo:PUNTOS.asc.glifo, color:PUNTOS.asc.color, lon:carta.ang.asc});
+    l.push({id:"mc",  nombre:"Medio Cielo", glifo:PUNTOS.mc.glifo,  color:PUNTOS.mc.color,  lon:carta.ang.mc});
+  }
+  return l;
+}
+/* arco solar real: el Sol avanza un día por cada año de vida */
+function arcoSolar(ms){
+  const anios = (ms - carta.ms)/(365.2422*86400000);
+  return mod360(lonGeo("sol", siglos(julian(carta.ms + anios*86400000))) - carta.cuerpos[0].lon);
+}
+const arcoDe = (ms, clave) => clave.solar ? arcoSolar(ms) : (ms - carta.ms)/(clave.dias*86400000);
+function msDeArco(arco, clave){
+  if(!clave.solar) return carta.ms + arco*clave.dias*86400000;
+  let t = carta.ms + arco*370.6*86400000;                 // primera aproximación
+  for(let i=0;i<10;i++){                                   // y se afina por Newton
+    const f = arcoSolar(t) - arco;
+    if(Math.abs(f) < 1e-7) break;
+    const d = arcoSolar(t + 86400000) - arcoSolar(t);
+    if(!isFinite(d) || Math.abs(d) < 1e-10) break;
+    t -= (f/d)*86400000;
+  }
+  return t;
+}
+
+/* todos los contactos entre dos arcos, ordenados por fecha */
+function contactosAtacir(clave, arcoDesde, arcoHasta){
+  const pts = puntosMoviles(), out = [];
+  if(arcoHasta - arcoDesde > 1080) arcoHasta = arcoDesde + 1080;   // dos vueltas y media, tope
+  for(const P of pts) for(const N of pts){
+    if(P.id === N.id) continue;
+    for(const asp of ANG_ATACIR){
+      const desvios = (asp.a === 0 || asp.a === 180) ? [asp.a] : [asp.a, -asp.a];
+      for(const dv of desvios){
+        const base = mod360(N.lon + dv - P.lon);
+        const k0 = Math.floor((arcoDesde - base)/360), k1 = Math.ceil((arcoHasta - base)/360);
+        for(let k = k0; k <= k1; k++){
+          const arco = base + 360*k;
+          if(arco < arcoDesde || arco > arcoHasta) continue;
+          out.push({P, N, asp, arco, ms: msDeArco(arco, clave)});
+        }
+      }
+    }
+  }
+  return out.sort((a, b) => a.arco - b.arco);
+}
+
+/* capa que se dibuja por fuera de la natal */
+function capaAtacir(){
+  if(!carta) return null;
+  const clave = claveActual();
+  const fecha = estadoAtacir.fecha == null ? Date.now() : estadoAtacir.fecha;
+  const arco = arcoDe(fecha, clave);
+  const movidos = puntosMoviles().map(p => Object.assign({}, p, {lonNatal:p.lon, lon:mod360(p.lon + arco)}));
+  const cerca = contactosAtacir(clave, arco - ORBE_ATACIR, arco + ORBE_ATACIR);
+  return {clave, fecha, arco, movidos, cerca};
+}
+
+const fmtDia = new Intl.DateTimeFormat("es-MX", {day:"numeric", month:"long", year:"numeric"});
+const fmtCorta = new Intl.DateTimeFormat("es-MX", {day:"2-digit", month:"2-digit", year:"numeric"});
+function edadEn(ms){
+  const anios = (ms - carta.ms)/(365.2422*86400000);
+  if(anios < 0) return "antes de nacer";
+  const a = Math.floor(anios), m = Math.round((anios - a)*12);
+  return m === 12 ? `${a+1} años` : `${a} a${a === 1 ? "ño" : "ños"}${m ? ` y ${m} ${m === 1 ? "mes" : "meses"}` : ""}`;
+}
+const arcoTexto = arco => {
+  const s = arco < 0 ? "−" : "", v = Math.abs(arco);
+  const g = Math.floor(v), m = Math.round((v - g)*60);
+  return `${s}${m === 60 ? g+1 : g}° ${String(m === 60 ? 0 : m).padStart(2,"0")}′`;
+};
+
+function pintaAtacir(){
+  if(!carta) return;
+  const capa = capaAtacir();
+  if(!capa) return;
+  const {clave, fecha, arco, movidos, cerca} = capa;
+  const proximos = contactosAtacir(clave, arco + 0.0001, arco + Math.min(porAnio(clave)*12, 720)).slice(0, 30);
+  const fechaISO = new Date(fecha - new Date(fecha).getTimezoneOffset()*60000).toISOString().slice(0,10);
+
+  const linea = c => `<li>
+      <span class="cg">${gh(c.P.glifo)}</span>
+      <span class="as ${c.asp.cl}">${c.asp.g}</span>
+      <span class="cg">${gh(c.N.glifo)}</span>
+      <span class="nom">${c.P.nombre} llega a ${c.asp.n.toLowerCase()} de ${c.N.nombre} natal</span>
+      <span class="orbe">${fmtDia.format(new Date(c.ms))}</span>
+    </li>`;
+
+  document.getElementById("hojaAtacir").innerHTML = `
+    <div class="mandos">
+      <div class="campo">
+        <label for="atClave">Clave</label>
+        <select id="atClave">
+          ${CLAVES_ATACIR.map(g => `<optgroup label="${g.grupo}">${g.claves.map(c =>
+              `<option value="${c.id}" ${c.id === estadoAtacir.clave ? "selected" : ""}>${c.n}${c.solar ? "" : ` — 1° cada ${String(c.dias).replace(".", ",")} días`}</option>`).join("")}</optgroup>`).join("")}
+          <optgroup label="A tu medida"><option value="libre" ${estadoAtacir.clave === "libre" ? "selected" : ""}>Clave propia…</option></optgroup>
+        </select>
+      </div>
+      <div class="campo" id="atLibreCampo" ${estadoAtacir.clave === "libre" ? "" : "hidden"}>
+        <label for="atDias">1° cada cuántos días</label>
+        <input id="atDias" type="number" step="0.001" min="0.01" value="${estadoAtacir.diasLibres || 365.2}">
+      </div>
+      <div class="campo">
+        <label for="atFecha">Fecha del atacir</label>
+        <input id="atFecha" type="date" value="${fechaISO}">
+      </div>
+      <div class="acciones" style="margin:0">
+        <button class="secundario" id="atHoy">Hoy</button>
+        <button class="secundario" id="atMenos">− 1 año</button>
+        <button class="secundario" id="atMas">+ 1 año</button>
+      </div>
+    </div>
+
+    <div class="cuadro">
+      <div><span class="k">Arco recorrido</span><span class="v">${arcoTexto(arco)}</span></div>
+      <div><span class="k">Edad</span><span class="v">${edadEn(fecha)}</span></div>
+      <div><span class="k">Clave</span><span class="v">${clave.solar ? "arco solar real" : `1° cada ${String(clave.dias).replace(".", ",")} d`}</span></div>
+      <div><span class="k">Vuelta completa</span><span class="v">${vueltaAnios(clave) >= 1 ? Math.round(vueltaAnios(clave)) + " años" : Math.round(vueltaAnios(clave)*365.2422) + " días"}</span></div>
+    </div>
+
+    <div class="rotulo">Contactos dentro del orbe · ±${ORBE_ATACIR}°</div>
+    ${cerca.length
+      ? `<ul class="aspectos">${cerca.map(linea).join("")}</ul>`
+      : `<p class="aviso">Ningún contacto dentro del orbe en esta fecha. Mira la lista de abajo para el siguiente.</p>`}
+
+    <div class="rotulo">Próximos contactos</div>
+    ${proximos.length
+      ? `<ul class="aspectos">${proximos.map(linea).join("")}</ul>
+         <p class="aviso" style="margin-top:.9rem">Se listan los primeros ${proximos.length} a partir de esa fecha. El promisor es el punto movido; el significador, el punto natal que alcanza.</p>`
+      : `<p class="aviso">No hay contactos en el tramo consultado.</p>`}
+
+    <div class="rotulo">Posiciones movidas</div>
+    <table class="posiciones"><thead><tr><th></th><th>Promisor</th><th>Natal</th><th>Atacir</th></tr></thead><tbody>
+      ${movidos.map(p => {
+        const zn = posZod(p.lonNatal), za = posZod(p.lon);
+        return `<tr><td class="cg">${gh(p.glifo)}</td><td>${p.nombre}</td>
+          <td class="cgrado">${zn.corto} ${zn.signo.g}</td>
+          <td class="cgrado" style="color:var(--laton)">${za.corto} ${za.signo.g}</td></tr>`;
+      }).join("")}
+    </tbody></table>
+    <p class="aviso" style="margin-top:.9rem">La rueda muestra la carta natal por dentro y el atacir por fuera. Las líneas del centro son los contactos en curso.</p>`;
+
+  const sel = document.getElementById("atClave");
+  sel.addEventListener("change", () => {
+    estadoAtacir.clave = sel.value;
+    if(sel.value === "libre") estadoAtacir.diasLibres = estadoAtacir.diasLibres || 365.2;
+    pintaAtacir();
+  });
+  const dias = document.getElementById("atDias");
+  if(dias) dias.addEventListener("change", () => {
+    const v = parseFloat(dias.value);
+    if(v > 0){ estadoAtacir.diasLibres = v; pintaAtacir(); }
+  });
+  document.getElementById("atFecha").addEventListener("change", e => {
+    const [a, m, d] = e.target.value.split("-").map(Number);
+    if(a) { estadoAtacir.fecha = new Date(a, m-1, d, 12).getTime(); pintaAtacir(); }
+  });
+  document.getElementById("atHoy").addEventListener("click", () => { estadoAtacir.fecha = Date.now(); pintaAtacir(); });
+  document.getElementById("atMenos").addEventListener("click", () => { estadoAtacir.fecha = (estadoAtacir.fecha || Date.now()) - 365.2422*86400000; pintaAtacir(); });
+  document.getElementById("atMas").addEventListener("click", () => { estadoAtacir.fecha = (estadoAtacir.fecha || Date.now()) + 365.2422*86400000; pintaAtacir(); });
+}
+
+/* --- formulario --- */
+const velo = document.getElementById("velo");
+const formulario = document.getElementById("natalForm");
+const dl = document.getElementById("ciudades");
+dl.innerHTML = CIUDADES.map(c => `<option value="${c.etiqueta}"></option>`).join("");
+const zonaSel = document.getElementById("nZona");
+(() => {
+  let zonas = [];
+  try { zonas = Intl.supportedValuesOf("timeZone"); } catch(e){ zonas = []; }
+  if(!zonas.length) zonas = [...new Set(CIUDADES.map(c => c.tz))].sort();
+  zonaSel.innerHTML = zonas.map(z => `<option value="${z}">${z}</option>`).join("");
+  zonaSel.value = zonas.includes("America/Mexico_City") ? "America/Mexico_City" : zonas[0];
+})();
+
+const sinHora = document.getElementById("nSinHora");
+sinHora.addEventListener("change", () => {
+  document.getElementById("nHora").disabled = sinHora.checked;
+  document.getElementById("nAvisoHora").hidden = !sinHora.checked;
+});
+document.getElementById("nLugar").addEventListener("input", e => {
+  const hay = CIUDADES.some(c => c.etiqueta.toLowerCase() === e.target.value.trim().toLowerCase());
+  document.getElementById("manual").classList.toggle("visible", !hay && e.target.value.trim().length > 2);
+});
+document.getElementById("nEjemplo").addEventListener("click", () => {
+  document.getElementById("nNombre").value = "Ejemplo de clase";
+  document.getElementById("nFecha").value = "1990-03-21";
+  document.getElementById("nHora").value = "06:30";
+  document.getElementById("nLugar").value = "Ciudad de México, México";
+  document.getElementById("manual").classList.remove("visible");
+});
+document.getElementById("nCancelar").addEventListener("click", () => velo.classList.remove("visible"));
+
+const mesesEs = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+formulario.addEventListener("submit", ev => {
+  ev.preventDefault();
+  const err = document.getElementById("nError");
+  err.hidden = true;
+  const f = document.getElementById("nFecha").value;
+  if(!f){ err.textContent = "Falta la fecha de nacimiento."; err.hidden = false; return; }
+  const [anio, mes, dia] = f.split("-").map(Number);
+  const horaConocida = !sinHora.checked;
+  const [hora, min] = (horaConocida ? document.getElementById("nHora").value || "12:00" : "12:00").split(":").map(Number);
+
+  const escrito = document.getElementById("nLugar").value.trim();
+  let ciudad = CIUDADES.find(c => c.etiqueta.toLowerCase() === escrito.toLowerCase())
+            || CIUDADES.find(c => c.n.toLowerCase() === escrito.toLowerCase());
+  let lat, lon, tz, lugarTexto;
+  if(ciudad){ lat = ciudad.lat; lon = ciudad.lon; tz = ciudad.tz; lugarTexto = ciudad.etiqueta; }
+  else {
+    lat = parseFloat(document.getElementById("nLat").value);
+    lon = parseFloat(document.getElementById("nLon").value);
+    tz = zonaSel.value;
+    if(!isFinite(lat) || !isFinite(lon)){
+      document.getElementById("manual").classList.add("visible");
+      err.textContent = "No encontré ese lugar en la lista. Escribe latitud, longitud y zona horaria abajo.";
+      err.hidden = false; return;
+    }
+    lugarTexto = escrito || `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
+  }
+
+  const datos = {
+    nombre: document.getElementById("nNombre").value.trim(),
+    anio, mes, dia, hora, min, horaConocida, lat, lon, tz, lugarTexto,
+    sistema: document.getElementById("nCasas").value,
+    factorOrbe: parseFloat(document.getElementById("nOrbe").value),
+    resumenFecha: `${dia} de ${mesesEs[mes-1]} de ${anio}${horaConocida ? ` · ${String(hora).padStart(2,"0")}:${String(min).padStart(2,"0")}` : " · hora desconocida"}`
+  };
+  const msPrueba = localAUTC(anio, mes, dia, hora, min, tz);
+  datos.husoTexto = `${tz} (${textoDesfase(tz, msPrueba)})`;
+
+  estadoAtacir.fecha = null;
+  levantarCarta(datos);
+  guardaUltima(datos);
+  velo.classList.remove("visible");
+  document.getElementById("cartaPanel").classList.add("abierto");
+  document.getElementById("nCancelar").hidden = false;
+  pintaCarta();
+  pintaBarra();
+  zoom = 1;
+  natalPan.x=0; natalPan.y=0;
+});
+
+function guardaUltima(d){
+  try { localStorage.setItem("maquina-celeste-carta", JSON.stringify(d)); } catch(e){}
+}
+function recuperaUltima(){
+  try {
+    const s = localStorage.getItem("maquina-celeste-carta");
+    if(!s) return null;
+    const d = JSON.parse(s);
+    return (d && d.anio) ? d : null;
+  } catch(e){ return null; }
+}
+
+function pintaBarra(){
+  if(!carta) return;
+  const d = carta.datos;
+  document.getElementById("app").classList.add("con-carta");
+  document.getElementById("btnPngRueda").hidden = false;
+  document.getElementById("btnPngHoja").hidden = false;
+  document.getElementById("barraDatos").innerHTML =
+    `<span class="quien">${d.nombre || "Carta sin nombre"}</span>
+     <span class="dato">${d.resumenFecha}</span>
+     <span>${d.lugarTexto}</span>
+     <span>${d.husoTexto}</span>`;
+}
+
+document.getElementById("plegar").addEventListener("click", () => {
+  const panel = document.getElementById("cartaPanel");
+  panel.classList.toggle("plegado");
+  document.getElementById("plegar").textContent = panel.classList.contains("plegado") ? "▴" : "▾";
+});
+
+/* pestañas del panel */
+const pestañas = [["tabPos","hojaPos"],["tabAsp","hojaAsp"],["tabCasas","hojaCasas"],["tabSent","hojaSent"],["tabAtacir","hojaAtacir"]];
+for(const [b,h] of pestañas){
+  document.getElementById(b).addEventListener("click", () => {
+    for(const [bb,hh] of pestañas){
+      document.getElementById(bb).setAttribute("aria-selected", String(bb===b));
+      document.getElementById(hh).hidden = hh !== h;
+    }
+    atacirActivo = (h === "hojaAtacir");
+    if(atacirActivo) pintaAtacir();
+  });
+}
+
+/* ===================== Arranque ===================== */
+const portada = document.getElementById("portada");
+function muestraInicio(){
+  cambiaVista("orbitas");
+  cerrarFicha();
+  document.getElementById("app").classList.add("inicio");
+  portada.classList.remove("oculta");
+}
+function entraA(v){
+  document.getElementById("app").classList.remove("inicio");
+  portada.classList.add("oculta");
+  cambiaVista(v);
+}
+portada.querySelectorAll(".opcion").forEach(b => b.addEventListener("click", () => entraA(b.dataset.vista)));
+const marca = document.getElementById("volverInicio");
+marca.addEventListener("click", muestraInicio);
+marca.addEventListener("keydown", e => {
+  if(e.key === "Enter" || e.key === " "){ e.preventDefault(); muestraInicio(); }
+});
+
+document.getElementById("btnEditar").addEventListener("click", () => {
+  velo.classList.add("visible");
+  document.getElementById("nCancelar").hidden = !carta;
+});
+document.getElementById("btnPngRueda").addEventListener("click", () => descargaHoja("rueda"));
+document.getElementById("btnPngHoja").addEventListener("click", () => descargaHoja("completa"));
+(() => {                                   // recupera los últimos datos escritos en este navegador
+  const d = recuperaUltima(); if(!d) return;
+  document.getElementById("nNombre").value = d.nombre || "";
+  document.getElementById("nFecha").value =
+    `${d.anio}-${String(d.mes).padStart(2,"0")}-${String(d.dia).padStart(2,"0")}`;
+  document.getElementById("nHora").value = `${String(d.hora).padStart(2,"0")}:${String(d.min).padStart(2,"0")}`;
+  document.getElementById("nLugar").value = d.lugarTexto || "";
+  document.getElementById("nCasas").value = d.sistema || "placidio";
+  if(!d.horaConocida){ sinHora.checked = true; sinHora.dispatchEvent(new Event("change")); }
+})();
+
+medir();
+requestAnimationFrame(fotograma);
+document.getElementById("app").classList.add("inicio");
+abrirFicha("marte");     // deja la ficha lista detrás de la portada, para quien entre por Órbitas
+})();
+</script>
+
+</body>
+</html>
