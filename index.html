@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Máquina Celeste</title>
+<meta name="description" content="Planetario astrológico interactivo: órbitas, rueda zodiacal y carta natal.">
+<meta name="theme-color" content="#05060F">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_MX">
+<meta property="og:title" content="Máquina Celeste">
+<meta property="og:description" content="Planetario astrológico interactivo: órbitas, rueda zodiacal y carta natal.">
+<meta property="og:image" content="portada.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Máquina Celeste">
+<meta name="twitter:description" content="Planetario astrológico interactivo: órbitas, rueda zodiacal y carta natal.">
+<meta name="twitter:image" content="portada.svg">
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}html,body{height:100%;margin:0}body{display:grid;place-items:center;background:#05060F;color:#EDE4D2;font-family:Georgia,serif;overflow:hidden}.carga{text-align:center;padding:2rem}.sello{font:11px ui-monospace,monospace;letter-spacing:.3em;text-transform:uppercase;color:#8E7239}.titulo{font-size:clamp(2rem,7vw,4.5rem);letter-spacing:.12em;margin:.6rem 0;text-transform:uppercase}.aro{width:54px;height:54px;margin:1.4rem auto;border:1px solid #E3BE75;border-top-color:transparent;border-radius:50%;animation:g 1.8s linear infinite;box-shadow:0 0 24px #E3BE7522}.estado{font:12px ui-monospace,monospace;color:#8E8CAB;letter-spacing:.08em}@keyframes g{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.aro{animation:none;border-top-color:#E3BE75}}
+</style>
+</head>
+<body>
+<main class="carga" id="carga"><div class="sello">Planetario astrológico</div><div class="titulo">Máquina Celeste</div><div class="aro"></div><div class="estado">Preparando el cielo…</div></main>
+<script>
+(async()=>{
+  const archivos=Array.from({length:8},(_,i)=>`app/part-${String(i).padStart(2,'0')}.txt`);
+  try{
+    const respuestas=await Promise.all(archivos.map(r=>fetch(r,{cache:'no-cache'})));
+    const mala=respuestas.find(r=>!r.ok);
+    if(mala) throw new Error(`No se pudo cargar ${mala.url} (${mala.status})`);
+    const html=(await Promise.all(respuestas.map(r=>r.text()))).join('');
+    document.open();
+    document.write(html);
+    document.close();
+  }catch(error){
+    console.error(error);
+    document.getElementById('carga').innerHTML='<div class="sello">Máquina Celeste</div><div class="titulo" style="font-size:2rem">No pude abrir el planetario</div><div class="estado">Recarga la página. Si continúa, revisaremos el despliegue.</div>';
+  }
+})();
+</script>
+</body>
+</html>
