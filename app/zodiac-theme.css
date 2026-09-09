@@ -1,0 +1,175 @@
+/* Astroplanetario · Rueda zodiacal V1
+   Capa visual: conserva cálculos y render del canvas; unifica la interfaz con Astroplanetario. */
+
+#app.zodiac{
+  --z-bg:#02040b;
+  --z-panel:rgba(7,10,20,.94);
+  --z-line:rgba(224,189,114,.20);
+  --z-line-soft:rgba(150,146,173,.14);
+  --z-gold:#d9b86e;
+  --z-ivory:#eee5d5;
+  --z-muted:#928da3;
+  background:
+    radial-gradient(circle at 50% 44%,rgba(44,61,103,.18),transparent 34%),
+    radial-gradient(circle at 72% 64%,rgba(181,132,55,.08),transparent 27%),
+    linear-gradient(145deg,#050815,#02040b 70%);
+  color:var(--z-ivory);
+}
+
+#app.zodiac header{
+  min-height:3.65rem;
+  padding:.58rem clamp(.75rem,1.7vw,1.25rem);
+  background:linear-gradient(180deg,rgba(8,11,24,.97),rgba(3,5,12,.91));
+  border-bottom:1px solid var(--z-line);
+  box-shadow:0 10px 28px rgba(0,0,0,.24);
+  backdrop-filter:blur(14px);
+}
+#app.zodiac .marca h1{color:var(--z-ivory);font-weight:500;letter-spacing:.12em}
+#app.zodiac .marca .sub{color:var(--z-gold)}
+
+#app.zodiac .conmutador{
+  border-color:rgba(224,189,114,.20);
+  background:rgba(3,6,14,.78);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.018);
+}
+#app.zodiac .conmutador button{color:#888397}
+#app.zodiac .conmutador button:hover:not([aria-pressed="true"]){color:#d6cdbc;background:rgba(255,255,255,.025)}
+#app.zodiac .conmutador button[aria-pressed="true"]{
+  background:linear-gradient(180deg,#dabd78,#aa823e);
+  color:#130e04;
+  box-shadow:0 0 24px rgba(224,189,114,.12);
+}
+#app.zodiac select.velocidad,
+#app.zodiac .hoy{
+  background:rgba(3,6,14,.76);
+  border-color:rgba(224,189,114,.18);
+  color:#aaa4b5;
+}
+#app.zodiac select.velocidad{color:#ddd4c5}
+#app.zodiac .hoy:hover{color:var(--z-gold);border-color:rgba(224,189,114,.48)}
+#app.zodiac .reloj{color:var(--z-gold)}
+#app.zodiac .reloj span:last-child{color:#817c90}
+
+#app.zodiac #escena{
+  background:
+    radial-gradient(circle at 50% 48%,rgba(47,65,109,.20),transparent 31%),
+    radial-gradient(circle at 50% 50%,#080d1a 0,#03050c 67%,#010207 100%);
+}
+#app.zodiac #escena::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.36;
+  background-image:
+    radial-gradient(circle,rgba(242,238,226,.58) 0 1px,transparent 1.35px),
+    radial-gradient(circle,rgba(208,184,128,.30) 0 .75px,transparent 1.2px),
+    radial-gradient(circle,rgba(144,158,205,.28) 0 .7px,transparent 1.1px);
+  background-size:173px 173px,277px 277px,389px 389px;
+  background-position:19px 37px,83px 121px,151px 44px;
+}
+#app.zodiac #escena::after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(circle at 50% 50%,transparent 35%,rgba(2,4,11,.18) 70%,rgba(1,2,7,.62) 100%);
+}
+#app.zodiac canvas{position:relative;z-index:1}
+#app.zodiac .pista{
+  z-index:3;color:#777287;font-size:.62rem;letter-spacing:.12em;
+  text-shadow:0 2px 10px #000;
+}
+
+#app.zodiac .zodiac-status{
+  position:absolute;right:clamp(.75rem,2vw,1.25rem);bottom:1rem;z-index:3;
+  display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;justify-content:flex-end;
+  pointer-events:none;max-width:min(520px,72vw);
+  font:500 .57rem "IBM Plex Mono",monospace;letter-spacing:.11em;text-transform:uppercase;
+  color:#8c8799;text-shadow:0 2px 12px #000;
+}
+#app.zodiac .zodiac-status span{
+  border:1px solid rgba(224,189,114,.16);border-radius:999px;
+  padding:.24rem .48rem;background:rgba(4,7,15,.58);backdrop-filter:blur(8px);
+}
+#app.zodiac .zodiac-status span:first-child{color:#c6a861;border-color:rgba(224,189,114,.29)}
+
+#app.zodiac #ficha{
+  width:min(420px,94vw);
+  background:linear-gradient(180deg,rgba(9,13,25,.965),rgba(4,7,15,.955));
+  border-left-color:var(--z-line);
+  box-shadow:-22px 0 58px rgba(0,0,0,.46),inset 1px 0 rgba(255,255,255,.025);
+  backdrop-filter:blur(18px) saturate(1.05);
+}
+#app.zodiac .ficha-cab{border-bottom-color:var(--z-line-soft);background:rgba(4,7,15,.46)}
+#app.zodiac .ficha-cab h2{font-weight:500;color:var(--z-ivory)}
+#app.zodiac .epiteto{color:#948fa0}
+#app.zodiac .cerrar{color:#958fa1}
+#app.zodiac .cerrar:hover{color:var(--z-gold)}
+#app.zodiac .ahora{
+  border-color:rgba(224,189,114,.29);background:rgba(224,189,114,.045);border-radius:6px;
+}
+#app.zodiac .ahora .grado{color:var(--z-gold)}
+#app.zodiac .ahora .signo{color:var(--z-ivory)}
+#app.zodiac .ahora small,#app.zodiac .directo{color:#8d8799}
+#app.zodiac .rotulo{color:#a88950;border-bottom-color:var(--z-line-soft)}
+#app.zodiac dl.dignidades dt{color:#8b8596}
+#app.zodiac dl.dignidades dd{color:#ddd4c5}
+#app.zodiac ul.claves li{border-color:var(--z-line-soft);background:rgba(255,255,255,.025);color:#d8d0c2}
+#app.zodiac .nota{color:#aaa4b2;border-left-color:#8d713c}
+#app.zodiac table.astro{color:#ddd4c5}
+#app.zodiac table.astro th,#app.zodiac table.astro td{border-bottom-color:var(--z-line-soft)}
+#app.zodiac table.astro th{color:#837e90}
+
+#app.zodiac footer{
+  background:linear-gradient(180deg,rgba(4,7,15,.96),rgba(2,4,11,.98));
+  border-top-color:var(--z-line);
+  box-shadow:0 -10px 28px rgba(0,0,0,.18);
+  padding:.46rem clamp(.55rem,1.7vw,1rem);
+}
+#app.zodiac .efem{gap:.28rem}
+#app.zodiac .efem button{border-radius:7px;padding:.32rem .65rem;min-width:5.15rem}
+#app.zodiac .efem button:hover{border-color:rgba(224,189,114,.18);background:rgba(255,255,255,.025)}
+#app.zodiac .efem button.sel{
+  border-color:rgba(224,189,114,.36);background:rgba(224,189,114,.055);
+  box-shadow:inset 0 0 18px rgba(224,189,114,.035);
+}
+#app.zodiac .efem .g{color:#d9b86e;text-shadow:0 0 12px rgba(224,189,114,.10)}
+#app.zodiac .efem .p{color:#ddd4c5}
+#app.zodiac .efem .n{color:#706b7f}
+
+#app.zodiac #globo{
+  background:rgba(6,9,18,.96);border-color:rgba(224,189,114,.22);color:#e5ddcf;
+  box-shadow:0 12px 34px rgba(0,0,0,.45);
+}
+#app.zodiac #globo b{color:var(--z-gold)}
+
+#app.zodiac .astro-back{
+  display:inline-flex;align-items:center;gap:.42rem;flex:none;
+  border:1px solid rgba(224,189,114,.24);border-radius:999px;
+  padding:.33rem .72rem;background:rgba(255,255,255,.025);
+  color:#aaa4b4;font:500 .62rem "IBM Plex Mono",monospace;
+  letter-spacing:.10em;text-transform:uppercase;transition:.2s;
+}
+#app.zodiac .astro-back:hover{color:var(--z-gold);border-color:rgba(224,189,114,.58);background:rgba(224,189,114,.04)}
+
+@media(max-width:760px){
+  #app.zodiac header{gap:.45rem;padding:.48rem .62rem;min-height:3.25rem;flex-wrap:wrap}
+  #app.zodiac .marca{order:1;margin-right:auto}
+  #app.zodiac .marca h1{font-size:.88rem;letter-spacing:.08em}
+  #app.zodiac .marca .sub{display:block;font-size:.5rem;letter-spacing:.10em}
+  #app.zodiac .astro-back{order:0;font-size:.53rem;padding:.29rem .54rem;letter-spacing:.07em}
+  #app.zodiac .conmutador{order:3;width:100%;overflow-x:auto;scrollbar-width:none;justify-content:center}
+  #app.zodiac .conmutador::-webkit-scrollbar{display:none}
+  #app.zodiac .conmutador button{flex:1;min-width:max-content;padding:.36rem .48rem;font-size:.58rem;letter-spacing:.08em}
+  #app.zodiac header>.grupo:not(.conmutador){order:4;margin-left:auto}
+  #app.zodiac .reloj{order:2;font-size:.6rem}
+  #app.zodiac .zodiac-status{right:.55rem;left:.55rem;bottom:.65rem;max-width:none;justify-content:center;font-size:.49rem;gap:.3rem}
+  #app.zodiac .zodiac-status span{padding:.2rem .38rem}
+  #app.zodiac .pista{display:none}
+  #app.zodiac #ficha{
+    width:100%;top:auto;bottom:0;height:min(67dvh,560px);border-left:none;border-top:1px solid rgba(224,189,114,.24);
+    border-radius:16px 16px 0 0;transform:translateY(102%);padding-bottom:env(safe-area-inset-bottom);
+  }
+  #app.zodiac #ficha.abierta{transform:none}
+  #app.zodiac footer{padding-bottom:max(.42rem,env(safe-area-inset-bottom))}
+}
+
+@media(max-width:430px){
+  #app.zodiac .marca .sub{display:none}
+  #app.zodiac .zodiac-status span:last-child{display:none}
+  #app.zodiac .efem button{min-width:4.7rem;padding:.3rem .5rem}
+}
