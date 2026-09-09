@@ -72,3 +72,30 @@ del archivo y las líneas `og:title` y `twitter:title`.
 - **Portada:** el mecanismo zodiacal de la pantalla inicial está animado con CSS. Si el
   sistema del visitante tiene activada la opción de reducir movimiento, la animación
   se desactiva automáticamente.
+
+## Anotación de diseño y cálculo — Luna progresada
+
+Antes de considerar terminada la herramienta de **Luna progresada secundaria**, la
+interfaz debe pedir o mostrar de forma explícita los siguientes datos:
+
+- **Fecha natal**.
+- **Hora natal exacta**.
+- **Ciudad natal**, para resolver correctamente la zona horaria histórica y convertir
+  la hora local del nacimiento al instante UTC correspondiente.
+- **Fecha a estudiar** para la progresión.
+
+La herramienta no debe asumir silenciosamente una hora como `12:00` cuando la hora
+natal es desconocida. Si falta la hora, debe indicarlo claramente y advertir que el
+grado de la Luna progresada puede variar.
+
+El método de cálculo es **progresión secundaria: 1 día de efemérides = 1 año de vida**.
+La Luna progresada debe obtenerse de la posición lunar calculada para el día simbólico
+correspondiente; no debe desplazarse artificialmente con la clave de Naibod.
+
+Para una futura **carta progresada completa**, además de los datos natales conviene
+pedir la **ciudad de residencia o ubicación elegida** si se van a calcular Ascendente,
+Medio Cielo y casas.
+
+Antes de dar por validada la precisión fina del módulo, conviene contrastar varios
+casos contra efemérides profesionales (por ejemplo Swiss Ephemeris/Astrodienst) y
+verificar signo, grado y minutos de arco con una tolerancia pequeña.
