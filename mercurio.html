@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mercurio · Astroplanetario</title>
+<meta name="description" content="Calendario de retrogradaciones de Mercurio: estaciones, periodos de sombra y qué toca de tu carta natal.">
+<meta name="theme-color" content="#02040b">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Spectral:ital,wght@0,300;0,400;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#02040b;--panel:#080c19e8;--panel2:#0c1121e8;--gold:#dfbd75;--ivory:#f1eadf;--muted:#9993a4;--line:#dabb6f2b;--violet:#a997d8;--blue:#9eb5dc;--retro:#d2694a;--verde:#8fb27a}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#02040b;color:var(--ivory);font-family:Spectral,Georgia,serif}
+body{background:radial-gradient(circle at 16% 14%,#1a1630 0,transparent 26%),radial-gradient(circle at 84% 74%,#10233c 0,transparent 28%),linear-gradient(145deg,#050815,#010207 68%);overflow-x:hidden}
+button,input,select{font:inherit;color:inherit}
+.stars{position:fixed;inset:0;pointer-events:none;opacity:.5;background-image:radial-gradient(circle,#fff 0 1px,transparent 1.25px),radial-gradient(circle,#fff 0 .8px,transparent 1px);background-size:180px 180px,90px 90px;background-position:0 0,40px 60px}
+.shell{position:relative;max-width:1120px;margin:0 auto;padding:clamp(.8rem,2.5vw,1.6rem) clamp(.8rem,3vw,1.8rem) 3rem}
+header{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.4rem}
+.back{flex:none;text-decoration:none;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:.4rem .9rem;font:500 .62rem 'IBM Plex Mono',monospace;letter-spacing:.13em;text-transform:uppercase;transition:.2s}
+.back:hover{color:var(--gold);border-color:#dabb6f66}
+.brand h1{margin:0;font:500 clamp(1.5rem,3.4vw,2.3rem)/1 Cinzel,serif;letter-spacing:.16em;text-transform:uppercase}
+.eyebrow{margin:0 0 .2rem;font:500 .55rem 'IBM Plex Mono',monospace;letter-spacing:.28em;text-transform:uppercase;color:#c9a963}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:clamp(1rem,2.4vw,1.5rem);margin-bottom:1.1rem;backdrop-filter:blur(6px)}
+.rot{margin:0 0 .85rem;font:500 .6rem 'IBM Plex Mono',monospace;letter-spacing:.22em;text-transform:uppercase;color:#c9a963}
+
+.estado{display:grid;grid-template-columns:auto 1fr;gap:clamp(1rem,3vw,2rem);align-items:center}
+@media(max-width:720px){.estado{grid-template-columns:1fr}}
+.esfera{position:relative;width:clamp(96px,15vw,140px);height:clamp(96px,15vw,140px);border-radius:50%;
+  background:radial-gradient(circle at 34% 28%,#e6dccb 0 8%,#a89c86 34%,#6d6353 66%,#2c2822 100%);
+  box-shadow:0 0 40px #dfbd7522,inset -14px -9px 22px #0009,inset 7px 5px 13px #ffffff18}
+.esfera::after{content:"";position:absolute;inset:-9px;border-radius:50%;border:1px solid #dabb6f33}
+.esfera .g{position:absolute;inset:0;display:grid;place-items:center;font:2.2rem/1 Spectral,serif;color:#0e0c09;opacity:.55}
+.titular{margin:0;font:500 clamp(1.7rem,4.6vw,3rem)/1.02 Cinzel,serif;letter-spacing:.09em;text-transform:uppercase}
+.titular.r{color:var(--retro)}
+.titular.d{color:var(--verde)}
+.lead{margin:.5rem 0 0;color:#cdc6ba;font-size:clamp(.92rem,1.3vw,1.05rem);line-height:1.5;max-width:60ch}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.6rem;margin-top:1.1rem}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.6rem .75rem}
+.stat .k{display:block;font:500 .53rem 'IBM Plex Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.stat .v{display:block;margin-top:.22rem;font:500 1.02rem Cinzel,serif;letter-spacing:.04em}
+.stat .s{display:block;font:.66rem 'IBM Plex Mono',monospace;color:#8d879a;margin-top:.1rem}
+
+/* línea de tiempo del ciclo */
+.linea{position:relative;margin:1.6rem 0 .6rem;height:6px;border-radius:3px;background:#ffffff12}
+.linea .sombra{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,#dfbd7533,#dfbd7566);border-radius:3px}
+.linea .retro{position:absolute;top:-3px;bottom:-3px;background:linear-gradient(90deg,#d2694a88,#d2694abb);border-radius:4px;box-shadow:0 0 16px #d2694a44}
+.linea .hoy{position:absolute;top:-11px;bottom:-11px;width:2px;background:var(--ivory);box-shadow:0 0 10px #fff8}
+.hitos{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem;margin-top:1.2rem}
+.hito{border:1px solid var(--line);border-radius:8px;padding:.65rem .8rem;background:var(--panel2)}
+.hito .k{font:500 .53rem 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#c9a963}
+.hito .f{display:block;margin-top:.28rem;font:500 .96rem Cinzel,serif}
+.hito .d{display:block;font:.68rem 'IBM Plex Mono',monospace;color:var(--muted);margin-top:.12rem}
+.hito.marca{border-color:#d2694a55;background:#1a0f0b99}
+
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th{text-align:left;font:500 .55rem 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:.5rem .35rem;border-bottom:1px solid var(--line)}
+td{padding:.5rem .35rem;border-bottom:1px solid #ffffff0f}
+td.m{font-family:'IBM Plex Mono',monospace;font-size:.82rem;font-variant-numeric:tabular-nums}
+tr.encurso td{background:#1a0f0b88}
+.chip{display:inline-block;font:500 .55rem 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;border:1px solid currentColor;border-radius:999px;padding:.05rem .5rem}
+.chip.r{color:var(--retro)}
+.field{display:flex;flex-direction:column;gap:.3rem;max-width:22rem}
+.field label{font:500 .53rem 'IBM Plex Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+select{background:#060b18;border:1px solid var(--line);border-radius:6px;padding:.45rem .6rem}
+ul.toques{list-style:none;margin:.9rem 0 0;padding:0;display:flex;flex-direction:column;gap:.4rem}
+ul.toques li{display:flex;gap:.6rem;align-items:baseline;border-bottom:1px solid #ffffff0f;padding-bottom:.4rem}
+ul.toques .gl{font-size:1.1rem;color:var(--gold);min-width:1.4rem;text-align:center}
+ul.toques .p{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--muted)}
+.footer-note{color:#7e7890;font-size:.78rem;line-height:1.6;border-top:1px solid var(--line);padding-top:1rem;margin-top:1.6rem}
+.aviso{color:#cdc6ba;font-style:italic;font-size:.9rem;border-left:2px solid #c9a96355;padding-left:.75rem;margin:.6rem 0 0}
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<div class="shell">
+  <header>
+    <a class="back" href="./">← Planetario</a>
+    <div class="brand">
+      <p class="eyebrow">Retrogradaciones · sombras · calendario</p>
+      <h1>Mercurio</h1>
+    </div>
+  </header>
+
+  <section class="panel">
+    <div class="estado">
+      <div class="esfera"><span class="g">☿︎</span></div>
+      <div>
+        <h2 class="titular" id="titular">—</h2>
+        <p class="lead" id="lead"></p>
+      </div>
+    </div>
+    <div class="stats" id="stats"></div>
+  </section>
+
+  <section class="panel">
+    <p class="rot" id="rotCiclo">El ciclo en curso</p>
+    <div class="linea" id="linea"></div>
+    <div class="hitos" id="hitos"></div>
+    <p class="aviso">La sombra es el tramo del zodiaco que Mercurio recorre tres veces: una de ida, otra de vuelta y otra de nuevo de ida. Todo lo que caiga ahí se toca tres veces.</p>
+  </section>
+
+  <section class="panel" id="panelNatal" hidden>
+    <p class="rot">Qué toca de una carta</p>
+    <div class="field">
+      <label for="selCarta">Carta guardada</label>
+      <select id="selCarta"></select>
+    </div>
+    <div id="toques"></div>
+  </section>
+
+  <section class="panel">
+    <p class="rot">Las próximas retrogradaciones</p>
+    <div style="overflow-x:auto">
+      <table id="tabla">
+        <thead><tr><th>Retrógrado</th><th>Directo</th><th>Tramo</th><th>Días</th><th>Sombra</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <p class="footer-note">
+    Las estaciones se calculan buscando el instante en que la velocidad de Mercurio cambia de signo, afinado por bisección hasta el minuto.
+    Astroplanetario calcula todo en tu navegador con un modelo astronómico aproximado, coherente con el resto del proyecto: suficiente para fechas y grados,
+    no para trabajos que exijan precisión al segundo. Las lecturas astrológicas son simbólicas.
+  </p>
+</div>
+
+<script src="app/efemerides.js"></script>
+<script>
+(() => {
+"use strict";
+const E = window.Efem;
+if(!E){ document.getElementById("titular").textContent = "No cargó el motor de efemérides"; return; }
+
+const DIA = 86400000;
+const fFecha = new Intl.DateTimeFormat("es-MX", {day:"numeric", month:"long", year:"numeric"});
+const fCorta = new Intl.DateTimeFormat("es-MX", {day:"2-digit", month:"short", year:"numeric"});
+const fHora  = new Intl.DateTimeFormat("es-MX", {hour:"2-digit", minute:"2-digit"});
+const grados = l => { const z = E.posZod(l); return `${z.texto} ${z.signo.n}`; };
+const cortos = l => { const z = E.posZod(l); return `${z.corto} ${z.signo.g}`; };
+
+const ahora = Date.now();
+const estaciones = E.estaciones("mercurio", ahora - 420*DIA, ahora + 8*365.25*DIA);
+const ciclos = [];
+for(let i = 0; i < estaciones.length - 1; i++){
+  if(estaciones[i].tipo !== "R" || estaciones[i+1].tipo !== "D") continue;
+  const R = estaciones[i], D = estaciones[i+1];
+  ciclos.push({
+    R, D,
+    sombraIni: E.cruce("mercurio", D.lon, R.ms - 70*DIA, R.ms),
+    sombraFin: E.cruce("mercurio", R.lon, D.ms, D.ms + 70*DIA),
+    dias: (D.ms - R.ms)/DIA
+  });
+}
+const enCurso = ciclos.find(c => ahora >= (c.sombraIni || c.R.ms) && ahora <= (c.sombraFin || c.D.ms));
+const proximo = ciclos.find(c => (c.sombraIni || c.R.ms) > ahora);
+const ciclo = enCurso || proximo;
+
+/* --- estado de hoy --- */
+const lonHoy = E.lon("mercurio", ahora), velHoy = E.velocidad("mercurio", ahora);
+const retro = velHoy < 0;
+const t = document.getElementById("titular");
+t.textContent = retro ? "Mercurio retrógrado" : "Mercurio directo";
+t.className = "titular " + (retro ? "r" : "d");
+
+const enSombra = enCurso && !retro;
+document.getElementById("lead").textContent = retro
+  ? `Va de vuelta sobre sus pasos, a ${Math.abs(velHoy).toFixed(2)}° por día. Vuelve a andar derecho el ${fFecha.format(new Date(ciclo.D.ms))}.`
+  : enSombra
+    ? (ahora < ciclo.R.ms
+        ? `Anda derecho, pero ya entró en la sombra previa: está recorriendo por primera vez el tramo que después desandará. Se detiene el ${fFecha.format(new Date(ciclo.R.ms))}.`
+        : `Ya anda derecho, aunque sigue dentro de la sombra: repasa por tercera vez el mismo tramo hasta el ${fFecha.format(new Date(ciclo.sombraFin))}.`)
+    : `Anda derecho y fuera de sombra, a ${velHoy.toFixed(2)}° por día. La próxima retrogradación empieza el ${fFecha.format(new Date(ciclo.R.ms))}.`;
+
+const proxEst = retro ? ciclo.D : ciclo.R;
+document.getElementById("stats").innerHTML = `
+  <div class="stat"><span class="k">Posición de hoy</span><span class="v">${grados(lonHoy)}</span><span class="s">zodiaco tropical</span></div>
+  <div class="stat"><span class="k">Velocidad</span><span class="v">${velHoy.toFixed(2)}°/día</span><span class="s">${retro ? "retrógrado" : "directo"}</span></div>
+  <div class="stat"><span class="k">Próxima estación</span><span class="v">${retro ? "Directo" : "Retrógrado"}</span><span class="s">${fCorta.format(new Date(proxEst.ms))} · ${cortos(proxEst.lon)}</span></div>
+  <div class="stat"><span class="k">Faltan</span><span class="v">${Math.max(0, Math.round((proxEst.ms - ahora)/DIA))} días</span><span class="s">${fHora.format(new Date(proxEst.ms))} h local</span></div>`;
+
+/* --- la línea de tiempo del ciclo --- */
+document.getElementById("rotCiclo").textContent = enCurso ? "El ciclo en curso" : "El próximo ciclo";
+const ini = ciclo.sombraIni || ciclo.R.ms, fin = ciclo.sombraFin || ciclo.D.ms, span = fin - ini;
+const pct = ms => Math.max(0, Math.min(100, (ms - ini)/span*100));
+document.getElementById("linea").innerHTML = `
+  <div class="sombra" style="left:0;right:0"></div>
+  <div class="retro" style="left:${pct(ciclo.R.ms)}%;width:${pct(ciclo.D.ms) - pct(ciclo.R.ms)}%"></div>
+  ${ahora >= ini && ahora <= fin ? `<div class="hoy" style="left:${pct(ahora)}%"></div>` : ""}`;
+
+const hito = (k, ms, extra, marca) => `
+  <div class="hito ${marca ? "marca" : ""}">
+    <span class="k">${k}</span>
+    <span class="f">${ms ? fFecha.format(new Date(ms)) : "—"}</span>
+    <span class="d">${extra}</span>
+  </div>`;
+document.getElementById("hitos").innerHTML =
+  hito("Entra en sombra", ciclo.sombraIni, ciclo.sombraIni ? cortos(ciclo.D.lon) + " · primera pasada" : "") +
+  hito("Se pone retrógrado", ciclo.R.ms, grados(ciclo.R.lon), true) +
+  hito("Vuelve a directo", ciclo.D.ms, grados(ciclo.D.lon), true) +
+  hito("Sale de la sombra", ciclo.sombraFin, ciclo.sombraFin ? cortos(ciclo.R.lon) + " · tercera pasada" : "");
+
+/* --- el calendario --- */
+const futuros = ciclos.filter(c => (c.sombraFin || c.D.ms) >= ahora).slice(0, 10);
+document.querySelector("#tabla tbody").innerHTML = futuros.map(c => {
+  const mismo = E.posZod(c.R.lon).signo.n === E.posZod(c.D.lon).signo.n;
+  return `<tr class="${c === enCurso ? "encurso" : ""}">
+    <td class="m">${fCorta.format(new Date(c.R.ms))}<br><span style="color:#9993a4">${cortos(c.R.lon)}</span></td>
+    <td class="m">${fCorta.format(new Date(c.D.ms))}<br><span style="color:#9993a4">${cortos(c.D.lon)}</span></td>
+    <td>${mismo ? E.posZod(c.R.lon).signo.n : `${E.posZod(c.D.lon).signo.n} – ${E.posZod(c.R.lon).signo.n}`}
+        ${c === enCurso ? '<span class="chip r">en curso</span>' : ""}</td>
+    <td class="m">${Math.round(c.dias)}</td>
+    <td class="m">${c.sombraIni ? fCorta.format(new Date(c.sombraIni)) : "—"} → ${c.sombraFin ? fCorta.format(new Date(c.sombraFin)) : "—"}</td>
+  </tr>`;
+}).join("");
+
+/* --- qué toca de una carta guardada --- */
+function cartasGuardadas(){
+  try {
+    const a = JSON.parse(localStorage.getItem("astroplanetario-cartas") || "[]");
+    return Array.isArray(a) ? a.filter(c => c && c.datos && c.datos.anio) : [];
+  } catch(e){ return []; }
+}
+const guardadas = cartasGuardadas();
+if(guardadas.length){
+  const panel = document.getElementById("panelNatal");
+  panel.hidden = false;
+  const sel = document.getElementById("selCarta");
+  sel.innerHTML = guardadas.map((c, i) =>
+    `<option value="${i}">${(c.datos.nombre || "Carta sin nombre").replace(/</g,"&lt;")} · ${c.datos.resumenFecha}</option>`).join("");
+
+  const dentro = (l, a, b) => E.mod360(l - a) <= E.mod360(b - a);   // ¿cae en el tramo a→b?
+  function pinta(){
+    const d = guardadas[sel.value].datos;
+    const ms = E.localAUTC(d.anio, d.mes, d.dia, d.horaConocida ? d.hora : 12, d.horaConocida ? d.min : 0, d.tz);
+    const tocados = E.ORDEN.map(id => ({id, lon: E.lon(id, ms)}))
+      .filter(p => dentro(p.lon, ciclo.D.lon, ciclo.R.lon));
+    const nombre = (d.nombre || "esa carta").replace(/</g,"&lt;");
+    document.getElementById("toques").innerHTML = tocados.length
+      ? `<p class="aviso">Mercurio pasará tres veces por ${tocados.length === 1 ? "este punto" : "estos puntos"} de la carta de ${nombre}: de ida, de regreso y otra vez de ida.</p>
+         <ul class="toques">${tocados.map(p => `
+           <li><span class="gl">${GLIFOS[p.id]}</span><span>${NOMBRES[p.id]}</span><span class="p">${grados(p.lon)}</span></li>`).join("")}</ul>`
+      : `<p class="aviso">En este ciclo Mercurio no pisa ningún planeta de la carta de ${nombre}: el tramo va de ${grados(ciclo.D.lon)} a ${grados(ciclo.R.lon)}.</p>`;
+  }
+  const GLIFOS = {sol:"☉︎",luna:"☽︎",mercurio:"☿︎",venus:"♀︎",marte:"♂︎",jupiter:"♃︎",saturno:"♄︎",urano:"♅︎",neptuno:"♆︎",pluton:"♇︎"};
+  const NOMBRES = {sol:"Sol",luna:"Luna",mercurio:"Mercurio",venus:"Venus",marte:"Marte",jupiter:"Júpiter",saturno:"Saturno",urano:"Urano",neptuno:"Neptuno",pluton:"Plutón"};
+  sel.addEventListener("change", pinta);
+  pinta();
+}
+})();
+</script>
+</body>
+</html>

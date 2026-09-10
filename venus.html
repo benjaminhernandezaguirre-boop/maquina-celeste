@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Venus · Astroplanetario</title>
+<meta name="description" content="El ciclo de ocho años de Venus: la rosa, el pentagrama en el zodiaco, lucero del alba y de la tarde, retrogradaciones y sinastría.">
+<meta name="theme-color" content="#02040b">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Spectral:ital,wght@0,300;0,400;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#02040b;--panel:#080c19e8;--panel2:#0c1121e8;--gold:#dfbd75;--ivory:#f1eadf;--muted:#9993a4;--line:#dabb6f2b;--venus:#ebcc9c;--rosa:#d8a7a0;--verde:#8fb27a;--retro:#d2694a}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#02040b;color:var(--ivory);font-family:Spectral,Georgia,serif}
+body{background:radial-gradient(circle at 16% 14%,#241a2a 0,transparent 26%),radial-gradient(circle at 84% 74%,#122036 0,transparent 28%),linear-gradient(145deg,#050815,#010207 68%);overflow-x:hidden}
+button,input,select,a{font:inherit;color:inherit}
+.stars{position:fixed;inset:0;pointer-events:none;opacity:.5;background-image:radial-gradient(circle,#fff 0 1px,transparent 1.25px),radial-gradient(circle,#fff 0 .8px,transparent 1px);background-size:185px 185px,92px 92px;background-position:0 0,42px 62px}
+.shell{position:relative;max-width:1120px;margin:0 auto;padding:clamp(.8rem,2.5vw,1.6rem) clamp(.8rem,3vw,1.8rem) 3rem}
+header{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.4rem}
+.back{flex:none;text-decoration:none;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:.4rem .9rem;font:500 .62rem 'IBM Plex Mono',monospace;letter-spacing:.13em;text-transform:uppercase;transition:.2s}
+.back:hover{color:var(--gold);border-color:#dabb6f66}
+.brand h1{margin:0;font:500 clamp(1.5rem,3.4vw,2.3rem)/1 Cinzel,serif;letter-spacing:.16em;text-transform:uppercase}
+.eyebrow{margin:0 0 .2rem;font:500 .55rem 'IBM Plex Mono',monospace;letter-spacing:.28em;text-transform:uppercase;color:#c9a963}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:clamp(1rem,2.4vw,1.5rem);margin-bottom:1.1rem;backdrop-filter:blur(6px)}
+.rot{margin:0 0 .85rem;font:500 .6rem 'IBM Plex Mono',monospace;letter-spacing:.22em;text-transform:uppercase;color:#c9a963}
+
+.estado{display:grid;grid-template-columns:auto 1fr;gap:clamp(1rem,3vw,2rem);align-items:center}
+@media(max-width:720px){.estado{grid-template-columns:1fr}}
+.esfera{position:relative;width:clamp(96px,14vw,132px);height:clamp(96px,14vw,132px);border-radius:50%;
+  background:radial-gradient(circle at 34% 28%,#fff3dc 0 8%,#ebcc9c 32%,#b8894f 64%,#3d2a17 100%);
+  box-shadow:0 0 44px #ebcc9c33,inset -14px -9px 22px #0009,inset 7px 5px 13px #ffffff22}
+.esfera .g{position:absolute;inset:0;display:grid;place-items:center;font:2rem/1 Spectral,serif;color:#3a2a16;opacity:.5}
+.titular{margin:0;font:500 clamp(1.5rem,4vw,2.5rem)/1.04 Cinzel,serif;letter-spacing:.08em;text-transform:uppercase;color:var(--venus)}
+.lead{margin:.5rem 0 0;color:#cdc6ba;font-size:clamp(.92rem,1.3vw,1.05rem);line-height:1.5;max-width:62ch}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem;margin-top:1.1rem}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.6rem .75rem}
+.stat .k{display:block;font:500 .53rem 'IBM Plex Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.stat .v{display:block;margin-top:.22rem;font:500 1rem Cinzel,serif;letter-spacing:.04em}
+.stat .s{display:block;font:.66rem 'IBM Plex Mono',monospace;color:#8d879a;margin-top:.1rem}
+
+.dibujos{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem}
+@media(max-width:800px){.dibujos{grid-template-columns:1fr}}
+canvas{width:100%;height:auto;display:block;border-radius:8px;background:#04060f;border:1px solid var(--line)}
+.pie{margin:.6rem 0 0;font-size:.84rem;line-height:1.5;color:#a9a2b6;font-style:italic}
+
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th{text-align:left;font:500 .55rem 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:.5rem .35rem;border-bottom:1px solid var(--line)}
+td{padding:.5rem .35rem;border-bottom:1px solid #ffffff0f}
+td.m{font-family:'IBM Plex Mono',monospace;font-size:.82rem;font-variant-numeric:tabular-nums}
+.chip{display:inline-block;font:500 .53rem 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;border:1px solid currentColor;border-radius:999px;padding:.05rem .5rem}
+.chip.inf{color:var(--rosa)}
+.chip.sup{color:var(--muted)}
+.chip.r{color:var(--retro)}
+
+.enlace{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.boton{display:inline-block;text-decoration:none;background:var(--venus);color:#2a1c0c;border-radius:999px;padding:.55rem 1.3rem;font:500 .7rem 'IBM Plex Mono',monospace;letter-spacing:.13em;text-transform:uppercase;transition:.2s}
+.boton:hover{background:#f6dcb2}
+.aviso{color:#cdc6ba;font-style:italic;font-size:.9rem;border-left:2px solid #c9a96355;padding-left:.75rem;margin:.8rem 0 0}
+.footer-note{color:#7e7890;font-size:.78rem;line-height:1.6;border-top:1px solid var(--line);padding-top:1rem;margin-top:1.6rem}
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<div class="shell">
+  <header>
+    <a class="back" href="./">← Planetario</a>
+    <div class="brand">
+      <p class="eyebrow">Ciclo de ocho años · luceros · sinastría</p>
+      <h1>Venus</h1>
+    </div>
+  </header>
+
+  <section class="panel">
+    <div class="estado">
+      <div class="esfera"><span class="g">♀︎</span></div>
+      <div>
+        <h2 class="titular" id="titular">—</h2>
+        <p class="lead" id="lead"></p>
+      </div>
+    </div>
+    <div class="stats" id="stats"></div>
+  </section>
+
+  <section class="panel">
+    <p class="rot">La rosa de los ocho años</p>
+    <div class="dibujos">
+      <div>
+        <canvas id="rosa" width="640" height="640"></canvas>
+        <p class="pie">El camino de Venus visto desde la Tierra durante ocho años. Cada pétalo es un acercamiento: cinco en total, y al quinto vuelve casi al mismo punto del cielo donde empezó.</p>
+      </div>
+      <div>
+        <canvas id="estrella" width="640" height="640"></canvas>
+        <p class="pie" id="pieEstrella">Los cinco puntos del zodiaco donde Venus se junta con el Sol por delante, unidos en el orden en que ocurren. De ahí viene el pentagrama de Venus.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <p class="rot">Conjunciones con el Sol</p>
+    <div style="overflow-x:auto">
+      <table id="tablaConj"><thead><tr><th>Fecha</th><th>Grado</th><th>Tipo</th><th>Qué pasa</th></tr></thead><tbody></tbody></table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <p class="rot">Retrogradaciones de Venus</p>
+    <div style="overflow-x:auto">
+      <table id="tablaRetro"><thead><tr><th>Retrógrado</th><th>Directo</th><th>Tramo</th><th>Días</th></tr></thead><tbody></tbody></table>
+    </div>
+    <p class="aviso">Venus retrograda cada dieciocho meses y solo cuarenta días: es el planeta que menos lo hace de los que se ven a simple vista.</p>
+  </section>
+
+  <section class="panel">
+    <div class="enlace">
+      <div>
+        <p class="rot" style="margin-bottom:.4rem">Sinastría y carta compuesta</p>
+        <p style="margin:0;color:#cdc6ba;max-width:52ch;line-height:1.5">Comparar dos cartas es trabajo de Venus. La herramienta vive dentro de la carta natal: eliges una carta guardada y la pone frente a la que tengas en pantalla, con los aspectos cruzados, las casas de cada uno y la carta compuesta.</p>
+      </div>
+      <a class="boton" href="astroplanetario.html?view=natal&amp;tab=sinastria">Abrir sinastría</a>
+    </div>
+  </section>
+
+  <p class="footer-note">
+    Las conjunciones y las estaciones se buscan por cambio de signo y se afinan por bisección hasta el minuto, con el mismo motor del resto del proyecto.
+    La rosa se dibuja con la posición real de Venus vista desde la Tierra, día por día. Las lecturas astrológicas son simbólicas.
+  </p>
+</div>
+
+<script src="app/efemerides.js"></script>
+<script>
+(() => {
+"use strict";
+const E = window.Efem;
+if(!E){ document.getElementById("titular").textContent = "No cargó el motor de efemérides"; return; }
+const DIA = 86400000;
+const fFecha = new Intl.DateTimeFormat("es-MX", {day:"numeric", month:"long", year:"numeric"});
+const fCorta = new Intl.DateTimeFormat("es-MX", {day:"2-digit", month:"short", year:"numeric"});
+const grados = l => { const z = E.posZod(l); return `${z.texto} ${z.signo.n}`; };
+const cortos = l => { const z = E.posZod(l); return `${z.corto} ${z.signo.g}`; };
+const ahora = Date.now();
+
+/* --- estado de hoy --- */
+const lonV = E.lon("venus", ahora), lonS = E.lon("sol", ahora);
+const velV = E.velocidad("venus", ahora);
+const elong = E.mod360(lonV - lonS);                 // 0-180 = por delante del Sol (tarde)
+const tarde = elong < 180;
+const separacion = tarde ? elong : 360 - elong;
+
+/* fase iluminada, con la geometría real de las tres posiciones */
+function fase(ms){
+  const T = E.siglos(E.julian(ms));
+  const v = E.helio("venus", T), t = E.helio("tierra", T);
+  const rv = Math.hypot(v.x, v.y, v.z), rt = Math.hypot(t.x, t.y, t.z);
+  const dx = v.x - t.x, dy = v.y - t.y, dz = v.z - t.z;
+  const d = Math.hypot(dx, dy, dz);
+  const cosI = (rv*rv + d*d - rt*rt)/(2*rv*d);        // ángulo de fase
+  return {iluminada:(1 + Math.max(-1, Math.min(1, cosI)))/2, distancia:d};
+}
+const f = fase(ahora);
+
+document.getElementById("titular").textContent =
+  velV < 0 ? "Venus retrógrado" : (tarde ? "Lucero de la tarde" : "Lucero del alba");
+document.getElementById("lead").textContent =
+  (tarde
+    ? `Va por delante del Sol, así que se pone después de él: se ve al anochecer, sobre el poniente.`
+    : `Va por detrás del Sol, así que sale antes: se ve al amanecer, sobre el naciente.`) +
+  ` Está a ${separacion.toFixed(1)}° del Sol` +
+  (velV < 0 ? `, y ahora mismo camina de espaldas a ${Math.abs(velV).toFixed(2)}° por día.` : `.`);
+
+document.getElementById("stats").innerHTML = `
+  <div class="stat"><span class="k">Posición de hoy</span><span class="v">${grados(lonV)}</span><span class="s">zodiaco tropical</span></div>
+  <div class="stat"><span class="k">Separación del Sol</span><span class="v">${separacion.toFixed(1)}°</span><span class="s">${tarde ? "por delante" : "por detrás"}</span></div>
+  <div class="stat"><span class="k">Cara iluminada</span><span class="v">${Math.round(f.iluminada*100)} %</span><span class="s">como una lunita</span></div>
+  <div class="stat"><span class="k">Distancia</span><span class="v">${(f.distancia*149.6).toFixed(1)} M km</span><span class="s">${f.distancia.toFixed(3)} UA</span></div>
+  <div class="stat"><span class="k">Velocidad</span><span class="v">${velV.toFixed(2)}°/día</span><span class="s">${velV < 0 ? "retrógrado" : "directo"}</span></div>`;
+
+/* --- conjunciones con el Sol --- */
+function conjunciones(ini, fin){
+  const paso = 2*DIA, out = [];
+  const dif = t => { let d = E.mod360(E.lon("venus", t) - E.lon("sol", t)); return d > 180 ? d - 360 : d; };
+  let tPrev = ini, fPrev = dif(tPrev);
+  for(let t = ini + paso; t <= fin; t += paso){
+    const fv = dif(t);
+    if(Math.abs(fPrev) < 20 && Math.abs(fv) < 20 && (fPrev < 0) !== (fv < 0)){
+      let a = tPrev, b = t, fa = fPrev;
+      for(let i = 0; i < 44; i++){
+        if(b - a < 60000) break;
+        const m = (a + b)/2, fm = dif(m);
+        if((fa < 0) !== (fm < 0)) b = m; else { a = m; fa = fm; }
+      }
+      const ms = (a + b)/2;
+      out.push({ms, lon:E.lon("venus", ms), inferior: E.velocidad("venus", ms) < 0});
+    }
+    tPrev = t; fPrev = fv;
+  }
+  return out;
+}
+const conj = conjunciones(ahora - 200*DIA, ahora + 9*365.25*DIA);
+const inferiores = conj.filter(c => c.inferior).slice(0, 6);
+
+document.querySelector("#tablaConj tbody").innerHTML = conj.filter(c => c.ms > ahora).slice(0, 8).map(c => `
+  <tr>
+    <td class="m">${fCorta.format(new Date(c.ms))}</td>
+    <td class="m">${cortos(c.lon)}</td>
+    <td><span class="chip ${c.inferior ? "inf" : "sup"}">${c.inferior ? "inferior" : "superior"}</span></td>
+    <td>${c.inferior
+      ? "Venus pasa entre la Tierra y el Sol: cierra un ciclo y cambia de lucero de la tarde a lucero del alba."
+      : "Venus pasa por detrás del Sol: la mitad del ciclo, cambia de lucero del alba a lucero de la tarde."}</td>
+  </tr>`).join("");
+
+/* --- retrogradaciones --- */
+const est = E.estaciones("venus", ahora - 200*DIA, ahora + 9*365.25*DIA);
+const retros = [];
+for(let i = 0; i < est.length - 1; i++){
+  if(est[i].tipo === "R" && est[i+1].tipo === "D") retros.push({R:est[i], D:est[i+1]});
+}
+document.querySelector("#tablaRetro tbody").innerHTML = retros.filter(r => r.D.ms > ahora).slice(0, 7).map(r => {
+  const mismo = E.posZod(r.R.lon).signo.n === E.posZod(r.D.lon).signo.n;
+  const activo = ahora >= r.R.ms && ahora <= r.D.ms;
+  return `<tr>
+    <td class="m">${fCorta.format(new Date(r.R.ms))}<br><span style="color:#9993a4">${cortos(r.R.lon)}</span></td>
+    <td class="m">${fCorta.format(new Date(r.D.ms))}<br><span style="color:#9993a4">${cortos(r.D.lon)}</span></td>
+    <td>${mismo ? E.posZod(r.R.lon).signo.n : `${E.posZod(r.D.lon).signo.n} – ${E.posZod(r.R.lon).signo.n}`}
+        ${activo ? '<span class="chip r">en curso</span>' : ""}</td>
+    <td class="m">${Math.round((r.D.ms - r.R.ms)/DIA)}</td>
+  </tr>`;
+}).join("");
+
+/* --- la rosa: Venus visto desde la Tierra, día a día --- */
+(() => {
+  const c = document.getElementById("rosa"), g = c.getContext("2d");
+  const L = c.width, cx = L/2, cy = L/2;
+  g.fillStyle = "#04060f"; g.fillRect(0, 0, L, L);
+  const puntos = [];
+  let max = 0;
+  for(let i = 0; i <= 2920; i++){
+    const T = E.siglos(E.julian(ahora + i*DIA));
+    const v = E.helio("venus", T), t = E.helio("tierra", T);
+    const x = v.x - t.x, y = v.y - t.y;
+    puntos.push([x, y]);
+    max = Math.max(max, Math.hypot(x, y));
+  }
+  const k = (L/2 - 26)/max;
+  g.strokeStyle = "#dabb6f22"; g.lineWidth = 1;
+  g.beginPath(); g.arc(cx, cy, L/2 - 26, 0, 7); g.stroke();
+  g.beginPath();
+  puntos.forEach(([x, y], i) => { const px = cx + x*k, py = cy - y*k; i ? g.lineTo(px, py) : g.moveTo(px, py); });
+  g.strokeStyle = "#ebcc9c"; g.lineWidth = 1.1; g.globalAlpha = .75; g.stroke(); g.globalAlpha = 1;
+  g.fillStyle = "#9eb5dc"; g.beginPath(); g.arc(cx, cy, 5, 0, 7); g.fill();
+  g.fillStyle = "#8d879a"; g.font = '13px "IBM Plex Mono", monospace'; g.textAlign = "center";
+  g.fillText("la Tierra", cx, cy + 24);
+})();
+
+/* --- el pentagrama en el zodiaco --- */
+(() => {
+  const c = document.getElementById("estrella"), g = c.getContext("2d");
+  const L = c.width, cx = L/2, cy = L/2, R = L/2 - 46;
+  g.fillStyle = "#04060f"; g.fillRect(0, 0, L, L);
+  const ang = lon => (180 - lon)*Math.PI/180;
+  g.strokeStyle = "#dabb6f26"; g.lineWidth = 1;
+  g.beginPath(); g.arc(cx, cy, R, 0, 7); g.stroke();
+  g.beginPath(); g.arc(cx, cy, R*0.86, 0, 7); g.stroke();
+  g.font = '15px Spectral, serif'; g.textAlign = "center"; g.textBaseline = "middle";
+  for(let i = 0; i < 12; i++){
+    const a = ang(i*30 + 15), rr = R*0.93;
+    g.fillStyle = "#7f7a8d";
+    g.fillText(E.SIGNOS[i].g, cx + Math.cos(a)*rr, cy + Math.sin(a)*rr);
+    const b = ang(i*30);
+    g.strokeStyle = "#ffffff14";
+    g.beginPath();
+    g.moveTo(cx + Math.cos(b)*R*0.86, cy + Math.sin(b)*R*0.86);
+    g.lineTo(cx + Math.cos(b)*R, cy + Math.sin(b)*R);
+    g.stroke();
+  }
+  if(inferiores.length >= 5){
+    const pts = inferiores.slice(0, 5).map(c2 => {
+      const a = ang(c2.lon);
+      return [cx + Math.cos(a)*R*0.72, cy + Math.sin(a)*R*0.72, c2];
+    });
+    g.strokeStyle = "#d8a7a0"; g.lineWidth = 1.6; g.globalAlpha = .85;
+    g.beginPath();
+    pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y));
+    g.closePath(); g.stroke(); g.globalAlpha = 1;
+    pts.forEach(([x, y, c2], i) => {
+      g.fillStyle = "#ebcc9c";
+      g.beginPath(); g.arc(x, y, 5.5, 0, 7); g.fill();
+      g.fillStyle = "#cdc6ba"; g.font = '12px "IBM Plex Mono", monospace';
+      const a = ang(c2.lon);
+      g.fillText(`${i+1}`, x + Math.cos(a)*17, y + Math.sin(a)*17);
+    });
+    document.getElementById("pieEstrella").textContent =
+      `Las cinco próximas conjunciones inferiores, unidas en orden: ${inferiores.slice(0,5).map(c2 => cortos(c2.lon)).join(" · ")}. ` +
+      `Entre una y otra pasan unos 584 días, y cinco de esas caben casi exactas en ocho años: por eso la figura se cierra.`;
+  }
+})();
+})();
+</script>
+</body>
+</html>
