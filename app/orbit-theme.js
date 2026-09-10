@@ -15,7 +15,7 @@
       back.className = 'astro-back';
       back.setAttribute('aria-label','Volver a Astroplanetario');
       back.innerHTML = '<span aria-hidden="true">←</span><span>Planetario</span>';
-      back.addEventListener('click', () => location.reload());
+      back.addEventListener('click', () => { location.href = './'; });
       header.insertBefore(back, header.firstChild || null);
     }
     return back;

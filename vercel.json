@@ -1,6 +1,15 @@
 {
   "headers": [
     {
+      "source": "/astroplanetario.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
       "source": "/app/lunar-zodiac-v2.js",
       "headers": [
         {

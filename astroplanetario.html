@@ -1,0 +1,3332 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Astroplanetario</title>
+<meta name="description" content="Planetario astrológico en vivo: órbitas del sistema solar en tiempo real, rueda zodiacal geocéntrica y cartas natales con casas, aspectos, significados y atacires.">
+<meta name="author" content="Astroplanetario">
+<meta name="theme-color" content="#05060F">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+
+<!-- Vista previa al compartir el enlace (WhatsApp, Facebook, X…).
+     Cambia las dos rutas de abajo por la dirección completa de tu sitio,
+     por ejemplo https://tudominio.com/portada.png -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_MX">
+<meta property="og:title" content="Astroplanetario">
+<meta property="og:description" content="Planetario astrológico en vivo: órbitas del sistema solar en tiempo real, rueda zodiacal geocéntrica y cartas natales con casas, aspectos, significados y atacires.">
+<meta property="og:image" content="hero-cosmica.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Astroplanetario">
+<meta name="twitter:description" content="Planetario astrológico en vivo: órbitas del sistema solar en tiempo real, rueda zodiacal geocéntrica y cartas natales con casas, aspectos, significados y atacires.">
+<meta name="twitter:image" content="hero-cosmica.webp">
+
+<style>:root{color-scheme:dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="app/natal-theme.css">
+<script src="app/natal-theme.js" defer></script>
+<link rel="stylesheet" href="app/zodiac-theme.css">
+<script src="app/zodiac-theme.js" defer></script>
+<link rel="stylesheet" href="app/orbit-theme.css">
+<script src="app/orbit-theme.js" defer></script>
+<link rel="stylesheet" href="app/orbit-time.css">
+<style>
+  :root{
+    --tinta:#05060F;
+    --tinta-2:#090C1A;
+    --panel:#0B0E1CE6;
+    --linea:#242847;
+    --linea-suave:#181B31;
+    --pergamino:#EDE4D2;
+    --tenue:#8E8CAB;
+    --laton:#E3BE75;
+    --laton-hondo:#8E7239;
+    --lila:#A292D8;
+    --fuego:#C4653F;
+    --tierra-el:#8E9463;
+    --aire:#9AA7C4;
+    --agua:#5F7EA8;
+    --sombra:0 18px 50px rgba(0,0,0,.65);
+    --esc:clamp(.72rem,.62rem + .3vw,.8rem);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:var(--tinta);color:var(--pergamino);
+    font-family:Spectral,Georgia,"Times New Roman",serif;
+    font-size:16px;line-height:1.55;overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+  :focus-visible{outline:2px solid var(--laton);outline-offset:2px;border-radius:2px}
+
+  #app{display:flex;flex-direction:column;height:100dvh;min-height:100dvh}
+
+  /* ---------- cabecera ---------- */
+  header{
+    display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;
+    padding:.65rem clamp(.8rem,2vw,1.4rem);
+    border-bottom:1px solid var(--linea-suave);
+    background:linear-gradient(180deg,#0A0C1AF2,#05060FCC);
+    position:relative;z-index:4;
+  }
+  .marca{display:flex;align-items:baseline;gap:.6rem;margin-right:auto;min-width:0}
+  .marca h1{
+    font-family:Cinzel,Georgia,serif;font-weight:600;
+    font-size:clamp(1rem,.9rem + .5vw,1.35rem);letter-spacing:.09em;
+    margin:0;text-transform:uppercase;color:var(--pergamino);white-space:nowrap;
+  }
+  .marca .sub{
+    font-size:var(--esc);color:var(--tenue);letter-spacing:.16em;text-transform:uppercase;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;white-space:nowrap;
+  }
+  @media (max-width:760px){.marca .sub{display:none}}
+
+  .grupo{display:flex;align-items:center;gap:.35rem}
+  .conmutador{
+    display:flex;border:1px solid var(--linea);border-radius:999px;overflow:hidden;
+    background:#0A0D1B;
+  }
+  .conmutador button{
+    padding:.34rem .95rem;font-size:var(--esc);letter-spacing:.12em;text-transform:uppercase;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;color:var(--tenue);transition:.25s;
+  }
+  .conmutador button[aria-pressed="true"]{background:var(--laton);color:#120D02}
+  .conmutador button:hover:not([aria-pressed="true"]){color:var(--pergamino)}
+
+  .reloj{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--esc);
+    color:var(--laton);letter-spacing:.06em;font-variant-numeric:tabular-nums;
+    display:flex;flex-direction:column;line-height:1.35;text-align:right;
+  }
+  .reloj span:last-child{color:var(--tenue);letter-spacing:.14em;text-transform:uppercase;font-size:.68rem}
+
+  select.velocidad{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--esc);
+    background:#0A0D1B;color:var(--pergamino);border:1px solid var(--linea);
+    border-radius:999px;padding:.32rem .7rem;cursor:pointer;letter-spacing:.04em;
+  }
+  .hoy{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:var(--esc);
+    border:1px solid var(--linea);border-radius:999px;padding:.32rem .8rem;color:var(--tenue);
+    letter-spacing:.12em;text-transform:uppercase;transition:.25s;
+  }
+  .hoy:hover{color:var(--laton);border-color:var(--laton-hondo)}
+
+  /* ---------- escenario ---------- */
+  #escena{position:relative;flex:1;min-height:0;overflow:hidden}
+  canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:manipulation}
+
+  .pista{
+    position:absolute;left:clamp(.8rem,2vw,1.4rem);bottom:.9rem;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.7rem;
+    color:#6C6A88;letter-spacing:.14em;text-transform:uppercase;pointer-events:none;
+  }
+  #globo{
+    position:absolute;pointer-events:none;transform:translate(-50%,-160%);
+    background:#0A0D1BF2;border:1px solid var(--linea);border-radius:3px;
+    padding:.3rem .6rem;font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:.72rem;letter-spacing:.05em;white-space:nowrap;opacity:0;transition:opacity .15s;
+    box-shadow:var(--sombra);
+  }
+  #globo b{color:var(--laton);font-weight:500}
+
+  /* ---------- ficha ---------- */
+  #ficha{
+    position:absolute;top:0;right:0;height:100%;width:min(390px,92vw);
+    background:var(--panel);backdrop-filter:blur(14px);
+    border-left:1px solid var(--linea);box-shadow:var(--sombra);
+    transform:translateX(102%);transition:transform .45s cubic-bezier(.22,.8,.28,1);
+    display:flex;flex-direction:column;z-index:5;
+  }
+  #ficha.abierta{transform:none}
+  .ficha-cab{
+    display:flex;gap:.9rem;align-items:flex-start;
+    padding:1.15rem 1.2rem 1rem;border-bottom:1px solid var(--linea-suave);
+  }
+  .glifo{
+    font-size:2.5rem;line-height:1;color:var(--laton);flex:none;
+    text-shadow:0 0 22px currentColor;font-family:Spectral,serif;
+  }
+  .ficha-cab h2{font-family:Cinzel,serif;font-size:1.35rem;margin:.1rem 0 .15rem;letter-spacing:.06em}
+  .epiteto{font-style:italic;color:var(--tenue);font-size:.9rem;margin:0}
+  .cerrar{
+    margin-left:auto;color:var(--tenue);font-size:1.4rem;line-height:1;
+    padding:.1rem .3rem;transition:color .2s;flex:none;
+  }
+  .cerrar:hover{color:var(--laton)}
+  .ficha-cuerpo{overflow-y:auto;padding:0 1.2rem 2rem;flex:1;scrollbar-width:thin}
+
+  .ahora{
+    display:flex;align-items:baseline;gap:.55rem;flex-wrap:wrap;
+    margin:1rem 0 1.15rem;padding:.7rem .85rem;
+    border:1px solid var(--laton-hondo);border-radius:2px;background:#12100833;
+  }
+  .ahora .grado{
+    font-family:"IBM Plex Mono",monospace;font-size:1.35rem;color:var(--laton);
+    font-variant-numeric:tabular-nums;letter-spacing:.02em;
+  }
+  .ahora .signo{font-family:Cinzel,serif;font-size:1.05rem;letter-spacing:.05em}
+  .ahora .rx{
+    font-family:"IBM Plex Mono",monospace;font-size:.7rem;letter-spacing:.1em;
+    border:1px solid var(--fuego);color:var(--fuego);border-radius:999px;padding:.05rem .5rem;
+    text-transform:uppercase;
+  }
+  .ahora .directo{
+    font-family:"IBM Plex Mono",monospace;font-size:.7rem;letter-spacing:.1em;
+    color:var(--tenue);text-transform:uppercase;
+  }
+  .ahora small{width:100%;color:var(--tenue);font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase}
+
+  .rotulo{
+    font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--laton-hondo);
+    margin:1.4rem 0 .55rem;padding-bottom:.3rem;border-bottom:1px solid var(--linea-suave);
+  }
+  dl.dignidades{display:grid;grid-template-columns:auto 1fr;gap:.4rem .9rem;margin:0}
+  dl.dignidades dt{
+    font-family:"IBM Plex Mono",monospace;font-size:.7rem;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--tenue);padding-top:.15rem;
+  }
+  dl.dignidades dd{margin:0;font-size:.95rem}
+  dl.dignidades dd em{font-style:normal;color:var(--tenue);font-size:.85rem}
+  .doble{color:var(--lila)}
+
+  ul.claves{list-style:none;display:flex;flex-wrap:wrap;gap:.35rem;padding:0;margin:0}
+  ul.claves li{
+    border:1px solid var(--linea);border-radius:999px;padding:.15rem .65rem;
+    font-size:.82rem;color:var(--pergamino);background:#0E1122;
+  }
+  .nota{
+    font-size:.92rem;color:#C9C2B4;font-style:italic;margin:.2rem 0 0;
+    border-left:2px solid var(--laton-hondo);padding-left:.75rem;
+  }
+  table.astro{width:100%;border-collapse:collapse;font-size:.86rem;color:var(--pergamino)}
+  table.astro th,table.astro td{text-align:left;padding:.3rem 0;border-bottom:1px solid var(--linea-suave)}
+  table.astro th{font-weight:400;color:var(--tenue);font-family:"IBM Plex Mono",monospace;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase}
+  table.astro td{text-align:right;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+
+  /* ---------- franja de efemérides ---------- */
+  footer{
+    border-top:1px solid var(--linea-suave);background:#070915;
+    padding:.5rem clamp(.6rem,2vw,1.2rem);overflow-x:auto;scrollbar-width:thin;
+  }
+  .efem{display:flex;gap:.35rem;min-width:max-content}
+  .efem button{
+    display:flex;flex-direction:column;align-items:center;gap:.1rem;
+    padding:.35rem .7rem;border:1px solid transparent;border-radius:3px;transition:.2s;min-width:5.4rem;
+  }
+  .efem button:hover{border-color:var(--linea);background:#0C0F1E}
+  .efem button.sel{border-color:var(--laton-hondo);background:#12100A}
+  .efem .g{font-size:1.15rem;line-height:1.1;color:var(--laton)}
+  .efem .p{
+    font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.02em;
+    color:var(--pergamino);font-variant-numeric:tabular-nums;white-space:nowrap;
+  }
+  .efem .p .r{color:var(--fuego)}
+  .efem .n{
+    font-family:"IBM Plex Mono",monospace;font-size:.6rem;letter-spacing:.14em;
+    text-transform:uppercase;color:#6C6A88;
+  }
+  @media (max-width:620px){
+    header{gap:.6rem;padding:.55rem .7rem}
+    .reloj{text-align:left}
+    #ficha{width:100%;top:auto;bottom:0;height:min(74%,520px);border-left:none;border-top:1px solid var(--linea);
+      transform:translateY(102%)}
+    #ficha.abierta{transform:none}
+    .pista{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    #ficha{transition:none}
+  }
+
+  /* ---------- carta natal: formulario ---------- */
+  #velo{
+    position:absolute;inset:0;z-index:6;display:none;
+    align-items:center;justify-content:center;padding:1rem;
+    background:radial-gradient(ellipse at center,#05060FCC,#05060FF2);
+    backdrop-filter:blur(3px);overflow-y:auto;
+  }
+  #velo.visible{display:flex}
+  form#natalForm{
+    width:min(560px,100%);background:#0A0D1BF7;border:1px solid var(--linea);
+    box-shadow:var(--sombra);padding:1.4rem 1.4rem 1.2rem;border-radius:3px;
+    display:grid;gap:.85rem;margin:auto;
+  }
+  form#natalForm h2{
+    font-family:Cinzel,serif;font-size:1.25rem;letter-spacing:.06em;margin:0;
+    display:flex;align-items:baseline;gap:.6rem;
+  }
+  form#natalForm h2 span{
+    font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--tenue);
+  }
+  .campos{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem}
+  .campo{display:flex;flex-direction:column;gap:.28rem;min-width:0}
+  .campo label{
+    font-family:"IBM Plex Mono",monospace;font-size:.64rem;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--tenue);
+  }
+  .campo input,.campo select{
+    font:inherit;font-size:.95rem;background:#060915;color:var(--pergamino);
+    border:1px solid var(--linea);border-radius:2px;padding:.42rem .55rem;width:100%;
+  }
+  .campo input:focus,.campo select:focus{border-color:var(--laton-hondo);outline:none}
+  .campo input[type="date"],.campo input[type="time"]{font-family:"IBM Plex Mono",monospace;color-scheme:dark}
+  .ancho{grid-column:1/-1}
+  .marcar{
+    display:flex;align-items:center;gap:.5rem;font-size:.88rem;color:var(--tenue);
+    cursor:pointer;user-select:none;
+  }
+  .marcar input{accent-color:var(--laton);width:1rem;height:1rem}
+  .aviso{
+    font-size:.85rem;color:#C9C2B4;font-style:italic;margin:0;
+    border-left:2px solid var(--laton-hondo);padding-left:.7rem;
+  }
+  .aviso.error{border-color:var(--fuego);color:#E6A188;font-style:normal}
+  #manual{display:none}
+  #manual.visible{display:grid}
+  .acciones{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin-top:.2rem}
+  .primario{
+    background:var(--laton);color:#120D02;border-radius:999px;padding:.5rem 1.4rem;
+    font-family:"IBM Plex Mono",monospace;font-size:.78rem;letter-spacing:.14em;
+    text-transform:uppercase;transition:.2s;
+  }
+  .primario:hover{background:#F0CE8A}
+  .secundario{
+    border:1px solid var(--linea);border-radius:999px;padding:.5rem 1.1rem;color:var(--tenue);
+    font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+  }
+  .secundario:hover{color:var(--laton);border-color:var(--laton-hondo)}
+
+  /* ---------- carta natal: barra y panel ---------- */
+  #barraNatal{
+    display:none;align-items:center;gap:.7rem;flex-wrap:wrap;
+    padding:.4rem clamp(.8rem,2vw,1.4rem);border-bottom:1px solid var(--linea-suave);
+    background:#080B18;font-family:"IBM Plex Mono",monospace;font-size:.74rem;
+    color:var(--tenue);letter-spacing:.04em;
+  }
+  #app.natal.con-carta #barraNatal{display:flex}
+  #app.natal .reloj,#app.natal .velocidad,#app.natal .hoy{display:none}
+  #barraDatos{display:flex;gap:.55rem;flex-wrap:wrap;align-items:center}
+  #barraDatos span+span::before{content:"·";color:var(--laton-hondo);margin-right:.55rem}
+  #barraNatal .quien{color:var(--pergamino);letter-spacing:.06em}
+  #app.natal footer{display:none}
+  ul.aspectos li.menor{display:none}
+  ul.aspectos.con-menores li.menor{display:grid}
+  #barraNatal .dato{color:var(--laton)}
+
+  #cartaPanel{
+    position:absolute;top:0;right:0;height:100%;width:min(410px,94vw);
+    background:var(--panel);backdrop-filter:blur(14px);border-left:1px solid var(--linea);
+    box-shadow:var(--sombra);display:none;flex-direction:column;z-index:5;
+  }
+  #app.natal #cartaPanel.abierto{display:flex}
+  .pest{display:flex;border-bottom:1px solid var(--linea-suave);flex:none}
+  .pest button{
+    flex:1;padding:.7rem .4rem;font-family:"IBM Plex Mono",monospace;font-size:.68rem;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--tenue);
+    border-bottom:2px solid transparent;transition:.2s;
+  }
+  .pest button[aria-selected="true"]{color:var(--laton);border-bottom-color:var(--laton)}
+  .hoja{overflow-y:auto;padding:.2rem 1.1rem 2rem;flex:1;scrollbar-width:thin}
+  .hoja[hidden]{display:none}
+
+  table.posiciones{width:100%;border-collapse:collapse;font-size:.88rem;color:var(--pergamino)}
+  table.posiciones th{
+    font-family:"IBM Plex Mono",monospace;font-size:.6rem;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--tenue);font-weight:400;text-align:left;
+    padding:.55rem .3rem .35rem;border-bottom:1px solid var(--linea);position:sticky;top:0;
+    background:#0B0E1CF2;
+  }
+  table.posiciones td{padding:.34rem .3rem;border-bottom:1px solid var(--linea-suave);vertical-align:middle}
+  table.posiciones tr.astro-fila{cursor:pointer}
+  table.posiciones tr.astro-fila:hover td{background:#12162B}
+  table.posiciones tr.activa td{background:#171207}
+  .cg{font-size:1.05rem;color:var(--laton)}
+  .cgrado{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .csigno{white-space:nowrap}
+  .ccasa{font-family:"IBM Plex Mono",monospace;color:var(--tenue);text-align:right}
+  .crx{color:var(--fuego);font-family:"IBM Plex Mono",monospace;font-size:.75rem}
+  tr.detalle td{background:#0A0D1A;font-size:.86rem;color:#C9C2B4;padding:.55rem .5rem .7rem}
+  tr.detalle b{color:var(--pergamino);font-weight:600}
+  .dignidad{
+    display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:.62rem;
+    letter-spacing:.1em;text-transform:uppercase;border-radius:999px;padding:.05rem .5rem;
+    border:1px solid currentColor;margin-left:.35rem;vertical-align:middle;
+  }
+  .d-dom{color:#9BC48A}.d-exa{color:var(--laton)}.d-exi{color:#D08A6E}.d-cai{color:var(--fuego)}.d-per{color:#7C7A96}
+
+  ul.aspectos{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+  ul.aspectos li{
+    display:grid;grid-template-columns:auto auto auto 1fr auto;gap:.5rem;align-items:center;
+    padding:.36rem .2rem;border-bottom:1px solid var(--linea-suave);font-size:.9rem;
+  }
+  ul.aspectos .as{font-size:1rem;text-align:center;width:1.4rem}
+  ul.aspectos .orbe{
+    font-family:"IBM Plex Mono",monospace;font-size:.74rem;color:var(--tenue);
+    font-variant-numeric:tabular-nums;
+  }
+  ul.aspectos .nom{font-size:.78rem;color:var(--tenue);letter-spacing:.04em}
+  .a-rojo{color:#D2694A}.a-azul{color:#7FA6D4}.a-oro{color:var(--laton)}.a-lila{color:var(--lila)}
+  .cuadro{
+    border:1px solid var(--laton-hondo);background:#12100833;padding:.6rem .8rem;
+    margin:.9rem 0 .4rem;display:grid;gap:.3rem;
+  }
+  .cuadro div{display:flex;justify-content:space-between;gap:1rem;font-size:.92rem}
+  .cuadro .k{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tenue)}
+  .cuadro .v{font-family:"IBM Plex Mono",monospace;color:var(--laton);font-variant-numeric:tabular-nums}
+
+  #plegar{display:none;flex:none;padding:0 .9rem;color:var(--tenue);font-size:.9rem}
+  #cartaPanel.plegado .hoja{display:none}
+  @media (max-width:620px){
+    #plegar{display:block}
+    #cartaPanel.plegado{height:2.9rem}
+    #cartaPanel{width:100%;top:auto;bottom:0;height:52%;border-left:none;border-top:1px solid var(--linea)}
+    #barraNatal{font-size:.66rem;gap:.4rem;padding:.35rem .7rem}
+    .ancho-solo{display:none}
+    #barraNatal .secundario{font-size:.6rem;padding:.3rem .6rem}
+    #barraNatal .acciones{gap:.35rem}
+    form#natalForm{padding:1.1rem 1rem}
+  }
+
+  /* ---------- glifo de Plutón dibujado ---------- */
+  .gpluton{width:.78em;height:1em;vertical-align:-.14em;display:inline-block}
+  .glifo .gpluton{width:2rem;height:2.55rem;vertical-align:-.35rem}
+
+  /* ---------- la carta natal se lee sobre papel, no sobre el cielo ---------- */
+  #app.natal #barraNatal{background:#EFEADF;border-bottom-color:#D5CEBF;color:#5C5B68}
+  #app.natal #barraNatal .quien{color:#22212B}
+  #app.natal #barraNatal .dato{color:#8A6A22}
+  #app.natal #barraDatos span+span::before{color:#BBAB80}
+  #app.natal .secundario{border-color:#CFC7B4;color:#5C5B68}
+  #app.natal .secundario:hover{color:#8A6A22;border-color:#8A6A22}
+  #app.natal .pista{color:#9A947F}
+  #app.natal #globo{background:#FBF8F1F2;border-color:#CFC7B4;color:#22212B;box-shadow:0 10px 26px #0000002E}
+  #app.natal #globo b{color:#8A6A22}
+
+  #app.natal #cartaPanel{background:#FBF8F1F5;border-left-color:#D5CEBF;color:#22212B}
+  #app.natal table.posiciones{color:#22212B}
+  #app.natal ul.aspectos{color:#22212B}
+  #app.natal .pest{border-bottom-color:#D5CEBF}
+  #app.natal .pest button{color:#6B6A78}
+  #app.natal .pest button[aria-selected="true"]{color:#8A6A22;border-bottom-color:#8A6A22}
+  #app.natal #plegar{color:#6B6A78}
+  #app.natal table.posiciones th{color:#6B6A78;border-bottom-color:#CFC7B4;background:#FBF8F1F5}
+  #app.natal table.posiciones td{border-bottom-color:#E7E1D3}
+  #app.natal table.posiciones tr.astro-fila:hover td{background:#F1EBDC}
+  #app.natal table.posiciones tr.activa td{background:#F7EDD3}
+  #app.natal .cg{color:#7A5F1C}
+  #app.natal .ccasa{color:#6B6A78}
+  #app.natal .crx{color:#B4472A}
+  #app.natal tr.detalle td{background:#F3EEE2;color:#4A4956}
+  #app.natal tr.detalle b{color:#22212B}
+  #app.natal ul.aspectos li{border-bottom-color:#E7E1D3}
+  #app.natal ul.aspectos .orbe,#app.natal ul.aspectos .nom{color:#6B6A78}
+  #app.natal .a-rojo{color:#B4472A}
+  #app.natal .a-azul{color:#2F5F9E}
+  #app.natal .a-oro{color:#8A6A22}
+  #app.natal .a-lila{color:#6B57A8}
+  #app.natal .d-dom{color:#4E7A3C}
+  #app.natal .d-exa{color:#8A6A22}
+  #app.natal .d-exi{color:#A85B33}
+  #app.natal .d-cai{color:#B4472A}
+  #app.natal .d-per{color:#77758A}
+  #app.natal .cuadro{border-color:#D9C89A;background:#F6EFDE}
+  #app.natal .cuadro .k{color:#6B6A78}
+  #app.natal .cuadro .v{color:#8A6A22}
+  #app.natal .aviso{color:#5C5B68;border-left-color:#BBAB80}
+  #app.natal .aviso.error{color:#A33B1C;border-left-color:#C0472A}
+  #app.natal .marcar{color:#5C5B68}
+  #app.natal .marcar input{accent-color:#8A6A22}
+
+  #app.natal #velo{background:#EFEADFF0;backdrop-filter:blur(2px)}
+  #app.natal form#natalForm{background:#FBF8F1;border-color:#D5CEBF;color:#22212B;box-shadow:0 18px 50px #00000026}
+  #app.natal form#natalForm h2{color:#22212B}
+  #app.natal form#natalForm h2 span,#app.natal .campo label{color:#6B6A78}
+  #app.natal .campo input,#app.natal .campo select{background:#FFFFFF;color:#22212B;border-color:#CFC7B4}
+  #app.natal .campo input:focus,#app.natal .campo select:focus{border-color:#8A6A22}
+  #app.natal .campo input[type="date"],#app.natal .campo input[type="time"]{color-scheme:light}
+  #app.natal .primario{background:#8A6A22;color:#FBF8F1}
+  #app.natal .primario:hover{background:#A07C2A}
+
+  /* ---------- pantalla de inicio ---------- */
+  #app.inicio header,#app.inicio footer,#app.inicio .pista,#app.inicio #ficha{display:none}
+  .marca{cursor:pointer;text-align:left;padding:0;border:none;background:none}
+  .marca:hover h1{color:var(--laton)}
+  #portada{
+    position:absolute;inset:0;z-index:8;display:flex;align-items:center;justify-content:center;
+    padding:clamp(.9rem,2.7vw,2rem);overflow-y:auto;
+    background:
+      radial-gradient(circle at 74% 34%,rgba(227,190,117,.08),transparent 24%),
+      radial-gradient(ellipse at 50% 43%,#05060F9A 0%,#05060FE7 66%,#05060FFA 100%);
+    animation:aparecer .7s ease both;
+  }
+  #portada::before{
+    content:"";position:absolute;inset:0;pointer-events:none;opacity:.34;
+    background-image:
+      linear-gradient(90deg,transparent 49.94%,#E3BE7510 50%,transparent 50.06%),
+      linear-gradient(0deg,transparent 49.94%,#E3BE750A 50%,transparent 50.06%);
+    background-size:180px 180px;mask-image:radial-gradient(circle at 72% 35%,#000,transparent 55%);
+  }
+  #portada.oculta{display:none}
+  @keyframes aparecer{from{opacity:0;transform:scale(1.012)}to{opacity:1;transform:none}}
+  .portada-caja{position:relative;width:min(1180px,100%);margin:auto}
+  .portada-hero{
+    display:grid;grid-template-columns:minmax(0,1.08fr) minmax(310px,.92fr);align-items:center;
+    gap:clamp(1rem,4vw,4rem);min-height:300px;
+  }
+  .portada-copy{text-align:left;position:relative;z-index:2}
+  .sello{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.66rem;letter-spacing:.34em;
+    text-transform:uppercase;color:var(--laton);margin:0 0 .9rem;
+  }
+  .portada-titulo{
+    font-family:Cinzel,Georgia,serif;font-weight:600;margin:0;
+    font-size:clamp(2.55rem,1.55rem + 3.8vw,5.25rem);letter-spacing:.105em;line-height:.98;
+    text-transform:uppercase;color:var(--pergamino);text-wrap:balance;
+    text-shadow:0 0 55px #E3BE7526,0 2px 24px #000;
+  }
+  .portada-frase{
+    margin:.95rem 0 .25rem;font-size:clamp(1.15rem,.95rem + .55vw,1.55rem);
+    letter-spacing:.055em;color:#D9D0BF;font-weight:300;
+  }
+  .portada-desc{max-width:620px;margin:.35rem 0 1rem;color:#9D9AB3;font-size:.96rem;line-height:1.55}
+  .portada-cielo{
+    display:inline-flex;align-items:center;gap:.55rem;margin:.2rem 0 0;padding:.42rem .75rem;
+    border:1px solid #8E723966;border-radius:999px;background:#0A0D1BB8;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.7rem;letter-spacing:.075em;
+    color:var(--laton);font-variant-numeric:tabular-nums;box-shadow:0 0 28px #E3BE750C;
+  }
+
+  /* Máquina celeste animada: decoración real de la portada, sin vídeo ni imagen fija. */
+  .maquina-hero{position:relative;width:min(390px,78vw);aspect-ratio:1;margin:auto;filter:drop-shadow(0 24px 50px #0009)}
+  .maquina-hero::before,.maquina-hero::after{
+    content:"";position:absolute;inset:9%;border-radius:50%;pointer-events:none;
+  }
+  .maquina-hero::before{
+    background:radial-gradient(circle,#E3BE751A 0 8%,#E3BE7507 22%,transparent 56%);
+    box-shadow:0 0 80px #E3BE7514 inset,0 0 70px #A292D812;
+    animation:respira 5.5s ease-in-out infinite;
+  }
+  .maquina-hero::after{inset:1%;border:1px solid #E3BE7521;box-shadow:0 0 45px #E3BE750C inset}
+  .aro-celeste{position:absolute;left:50%;top:50%;border-radius:50%;transform-origin:center;border:1px solid #E3BE7560}
+  .aro-celeste.a1{width:92%;height:92%;margin:-46%;animation:giro 52s linear infinite}
+  .aro-celeste.a2{width:72%;height:72%;margin:-36%;border-color:#A292D84C;animation:giroInv 39s linear infinite}
+  .aro-celeste.a3{width:48%;height:48%;margin:-24%;border-color:#E3BE753E;transform:rotateX(66deg) rotateZ(18deg);box-shadow:0 0 20px #E3BE7512}
+  .aro-celeste.a1::before,.aro-celeste.a2::before,.aro-celeste.a3::before{
+    content:"";position:absolute;width:8px;height:8px;border-radius:50%;background:var(--laton);
+    box-shadow:0 0 18px #E3BE75;left:50%;top:-4px;transform:translateX(-50%);
+  }
+  .zodiaco-gira{position:absolute;inset:6%;animation:giro 74s linear infinite}
+  .zodiaco-gira span{
+    --a:calc(var(--i)*30deg);position:absolute;left:50%;top:50%;width:2.2rem;height:2.2rem;
+    margin:-1.1rem;display:grid;place-items:center;color:#D7B56F;font-size:1.35rem;
+    transform:rotate(var(--a)) translateY(-142px) rotate(calc(-1 * var(--a)));
+    text-shadow:0 0 16px #E3BE7538;font-family:Spectral,serif;
+  }
+  .eje-celeste{position:absolute;left:50%;top:8%;height:84%;width:1px;background:linear-gradient(transparent,#E3BE7566 18% 82%,transparent);transform:rotate(18deg)}
+  .eje-celeste.e2{transform:rotate(108deg);opacity:.45}
+  .nucleo-celeste{
+    position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px;border-radius:50%;
+    display:grid;place-items:center;color:#FFF5D7;font-size:1.35rem;
+    background:radial-gradient(circle at 38% 34%,#FFF9DF,#F2C86D 25%,#7F5A1C 62%,#100B04 100%);
+    box-shadow:0 0 18px #F2C86DAA,0 0 62px #E3BE7550;animation:pulsoNucleo 3.4s ease-in-out infinite;
+  }
+  .nucleo-celeste::after{content:"";position:absolute;inset:-16px;border:1px solid #E3BE754A;border-radius:50%}
+  .maquina-etiqueta{
+    position:absolute;left:50%;bottom:5%;transform:translateX(-50%);white-space:nowrap;
+    font-family:"IBM Plex Mono",monospace;font-size:.59rem;letter-spacing:.24em;text-transform:uppercase;color:#6F6C86;
+  }
+  @keyframes giro{to{transform:rotate(360deg)}}
+  @keyframes giroInv{to{transform:rotate(-360deg)}}
+  @keyframes respira{50%{transform:scale(1.035);opacity:.78}}
+  @keyframes pulsoNucleo{50%{transform:scale(1.06);box-shadow:0 0 24px #F2C86DCC,0 0 84px #E3BE7564}}
+
+  .portada-opciones{
+    display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem;margin:1.15rem 0 .85rem;text-align:left;
+  }
+  .opcion{
+    position:relative;overflow:hidden;display:grid;grid-template-columns:auto 1fr;column-gap:.85rem;row-gap:.22rem;align-items:center;
+    padding:1rem 1.05rem 1.05rem;border:1px solid #242847;border-radius:7px;text-align:left;
+    background:linear-gradient(145deg,#0C1020E8,#080A16E8 70%);box-shadow:0 12px 32px #00000036;
+    transition:border-color .25s,transform .25s,background .25s,box-shadow .25s;
+  }
+  .opcion::after{content:"";position:absolute;inset:auto -15% -80% 38%;height:120%;background:radial-gradient(circle,#E3BE7514,transparent 64%);opacity:0;transition:.3s;pointer-events:none}
+  .opcion:hover,.opcion:focus-visible{
+    border-color:#8E7239;transform:translateY(-4px);background:linear-gradient(145deg,#111528F2,#090C19F2 70%);
+    box-shadow:0 18px 40px #0007,0 0 0 1px #E3BE7510 inset;
+  }
+  .opcion:hover::after{opacity:1}
+  .opcion svg{grid-row:1 / span 2;width:2.25rem;height:2.25rem;color:var(--laton);opacity:.92;flex:none;filter:drop-shadow(0 0 10px #E3BE7526)}
+  .op-nombre{font-family:Cinzel,Georgia,serif;font-size:1rem;letter-spacing:.07em;color:var(--pergamino)}
+  .op-linea{grid-column:1 / -1;margin-top:.25rem;font-size:.8rem;line-height:1.42;color:#8F8DA7}
+  .portada-pie{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.61rem;letter-spacing:.14em;
+    text-transform:uppercase;color:#575570;margin:0;text-align:center;
+  }
+  #app.natal canvas{touch-action:none}
+  #app.natal canvas.arrastrando{cursor:grabbing!important}
+  @media (prefers-reduced-motion:reduce){
+    #portada{animation:none}.maquina-hero *{animation:none!important}.opcion:hover,.opcion:focus-visible{transform:none}
+  }
+  @media (max-width:850px){
+    .portada-hero{grid-template-columns:1fr;text-align:center;gap:.4rem}.portada-copy{text-align:center}
+    .portada-desc{margin-left:auto;margin-right:auto}.maquina-hero{width:min(300px,72vw)}
+    .zodiaco-gira span{transform:rotate(var(--a)) translateY(-108px) rotate(calc(-1 * var(--a)))}
+    .portada-opciones{grid-template-columns:1fr 1fr}.opcion:last-child{grid-column:1/-1}
+  }
+  @media (max-width:620px){
+    #portada{align-items:flex-start}.portada-hero{min-height:0}.maquina-hero{width:min(245px,72vw)}
+    .zodiaco-gira span{font-size:1.05rem;transform:rotate(var(--a)) translateY(-88px) rotate(calc(-1 * var(--a)))}
+    .portada-titulo{font-size:clamp(2rem,11vw,3.2rem)}.portada-frase{font-size:1rem}.portada-desc{font-size:.86rem}
+    .portada-opciones{grid-template-columns:1fr;margin:.75rem 0}.opcion:last-child{grid-column:auto}
+    .opcion{padding:.82rem .9rem}.op-linea{font-size:.78rem}.portada-pie{font-size:.56rem}
+  }
+
+  .sent{padding:.85rem 0 .1rem;border-bottom:1px solid var(--linea-suave)}
+  .sent:last-child{border-bottom:none}
+  .sent h3{
+    font-family:Cinzel,Georgia,serif;font-size:1rem;font-weight:400;letter-spacing:.04em;
+    margin:0 0 .4rem;display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;
+  }
+  .sent h3 em{font-style:normal;color:var(--tenue);font-size:.85rem;letter-spacing:.06em}
+  .sent h3 .cg{font-size:1.15rem;min-width:1.3rem;text-align:center}
+  .sent p{margin:0 0 .4rem;font-size:.9rem;line-height:1.5;color:#C9C2B4}
+  .sent p b{color:var(--pergamino);font-weight:600;font-size:.72rem;letter-spacing:.08em;
+    text-transform:uppercase;font-family:"IBM Plex Mono",monospace;margin-right:.25rem}
+  .pie-sent{font-style:italic;color:var(--tenue)!important;font-size:.85rem!important}
+  #app.natal .sent{border-bottom-color:#E7E1D3}
+  #app.natal .sent h3{color:#22212B}
+  #app.natal .sent h3 em{color:#6B6A78}
+  #app.natal .sent p{color:#4A4956}
+  #app.natal .sent p b{color:#22212B}
+  #app.natal .pie-sent{color:#6B6A78!important}
+  #cartaPanel .pest button{padding:.7rem .25rem;font-size:.63rem;letter-spacing:.08em}
+
+  .pest-fila{display:flex;align-items:stretch;border-bottom:1px solid var(--linea-suave);flex:none}
+  .pest{flex:1;min-width:0;display:flex;overflow-x:auto;scrollbar-width:none;border-bottom:none}
+  .pest::-webkit-scrollbar{display:none}
+  .pest button{flex:0 0 auto;white-space:nowrap}
+  #plegar{flex:none;border-left:1px solid var(--linea-suave)}
+  #app.natal .pest-fila,#app.natal #plegar{border-color:#D5CEBF}
+  .mandos{display:grid;gap:.65rem;margin:.95rem 0 .3rem}
+  .campo[hidden],.mandos [hidden]{display:none}
+  .mandos .acciones{flex-wrap:wrap}
+  #app.natal .mandos .secundario{border-color:#CFC7B4;color:#5C5B68}
+  #app.natal .mandos .secundario:hover{color:#8A6A22;border-color:#8A6A22}
+</style>
+
+<div id="app">
+  <header>
+    <div class="marca" id="volverInicio" role="button" tabindex="0" title="Volver a la pantalla de inicio">
+      <h1>Astroplanetario</h1>
+      <span class="sub">Planetario astrológico en vivo</span>
+    </div>
+
+    <div class="grupo conmutador" role="group" aria-label="Vista">
+      <button id="btnOrbitas" aria-pressed="true">Órbitas</button>
+      <button id="btnRueda" aria-pressed="false">Rueda zodiacal</button>
+      <button id="btnNatal" aria-pressed="false">Carta natal</button>
+    </div>
+
+    <div class="grupo tiempo-grupo" id="tiempoGrupo">
+      <select class="velocidad" id="velocidad" aria-label="Dirección y velocidad del tiempo">
+        <option value="1">Tiempo real</option>
+        <option value="0">Pausa · fecha fija</option>
+        <optgroup label="Avanzar">
+          <option value="3600">+ 1 hora / seg</option>
+          <option value="86400">+ 1 día / seg</option>
+          <option value="604800">+ 1 semana / seg</option>
+          <option value="2592000">+ 1 mes / seg</option>
+          <option value="31536000">+ 1 año / seg</option>
+        </optgroup>
+        <optgroup label="Retroceder">
+          <option value="-1">− Tiempo real</option>
+          <option value="-3600">− 1 hora / seg</option>
+          <option value="-86400">− 1 día / seg</option>
+          <option value="-604800">− 1 semana / seg</option>
+          <option value="-2592000">− 1 mes / seg</option>
+          <option value="-31536000">− 1 año / seg</option>
+        </optgroup>
+      </select>
+      <button class="fecha-control" id="btnFechaExacta" type="button" aria-expanded="false" aria-controls="fechaPop">Ir a fecha</button>
+      <button class="hoy" id="btnHoy">Ahora</button>
+      <div class="carta-momento-wrap">
+        <label class="ciudad-momento-label" for="ciudadCartaMomento">Ciudad</label>
+        <input class="ciudad-momento" id="ciudadCartaMomento" list="ciudades" autocomplete="off" placeholder="Escribe ciudad" aria-label="Ciudad para la carta astral del momento">
+        <button class="carta-momento" id="btnCartaMomento" type="button">Sacar carta astral</button>
+      </div>
+
+      <div class="fecha-pop" id="fechaPop" hidden>
+        <p class="fecha-pop-titulo">Ir a una fecha exacta</p>
+        <div class="fecha-grid">
+          <label>Fecha<input id="fechaOrbital" type="date"></label>
+          <label>Hora local<input id="horaOrbital" type="time" step="60"></label>
+        </div>
+        <div class="fecha-rapida">
+          <button type="button" id="btnMenosAnio">− 1 año</button>
+          <button type="button" id="btnMasAnio">+ 1 año</button>
+        </div>
+        <div class="fecha-acciones">
+          <button type="button" id="btnCancelarFecha">Cancelar</button>
+          <button type="button" class="aplicar-fecha" id="btnAplicarFecha">Ir a fecha</button>
+        </div>
+        <small class="fecha-nota">La simulación queda pausada en la fecha elegida. Después puedes hacerla avanzar o retroceder desde el selector.</small>
+      </div>
+    </div>
+
+    <div class="reloj">
+      <span id="relojFecha">—</span>
+      <span id="relojZona">Hora local</span>
+    </div>
+  </header>
+
+  <div id="barraNatal">
+    <div id="barraDatos"></div>
+    <div class="acciones" style="margin:0">
+      <button class="secundario" id="btnEditar">Editar datos</button>
+      <button class="secundario" id="btnPngRueda" hidden><span class="ancho-solo">Descargar </span>rueda</button>
+      <button class="secundario" id="btnPngHoja" hidden>Hoja<span class="ancho-solo"> completa</span></button>
+    </div>
+  </div>
+
+  <div id="escena">
+    <canvas id="lienzo"></canvas>
+    <div id="portada">
+      <div class="portada-caja">
+        <div class="portada-hero">
+          <div class="portada-copy">
+            <p class="sello">Planetario astrológico</p>
+            <p class="portada-titulo">Máquina<br>Celeste</p>
+            <p class="portada-frase">Observa el cielo. Descubre tu mapa.</p>
+            <p class="portada-desc">Explora las órbitas del sistema solar, lee el zodiaco desde la Tierra y levanta cartas natales completas en una sola herramienta.</p>
+            <p class="portada-cielo" id="portadaCielo">Calculando el cielo de este momento…</p>
+          </div>
+          <div class="maquina-hero" aria-hidden="true">
+            <div class="aro-celeste a1"></div>
+            <div class="aro-celeste a2"></div>
+            <div class="aro-celeste a3"></div>
+            <div class="eje-celeste"></div><div class="eje-celeste e2"></div>
+            <div class="zodiaco-gira">
+              <span style="--i:0">♈︎</span><span style="--i:1">♉︎</span><span style="--i:2">♊︎</span><span style="--i:3">♋︎</span>
+              <span style="--i:4">♌︎</span><span style="--i:5">♍︎</span><span style="--i:6">♎︎</span><span style="--i:7">♏︎</span>
+              <span style="--i:8">♐︎</span><span style="--i:9">♑︎</span><span style="--i:10">♒︎</span><span style="--i:11">♓︎</span>
+            </div>
+            <div class="nucleo-celeste">✦</div>
+            <div class="maquina-etiqueta">mecánica celeste · zodiaco tropical</div>
+          </div>
+        </div>
+
+        <div class="portada-opciones">
+          <button class="opcion" data-vista="orbitas">
+            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="32" cy="32" r="27"/><circle cx="32" cy="32" r="16"/>
+              <circle cx="32" cy="32" r="4.5" fill="currentColor" stroke="none"/>
+              <circle cx="48" cy="32" r="3" fill="currentColor" stroke="none"/>
+              <circle cx="32" cy="5" r="2.6" fill="currentColor" stroke="none"/>
+            </svg>
+            <span class="op-nombre">Órbitas</span>
+            <span class="op-linea">El sistema solar girando ahora mismo. Toca un planeta y se abre su ficha: regencias, dignidades y datos.</span>
+          </button>
+
+          <button class="opcion" data-vista="rueda">
+            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="32" cy="32" r="27"/><circle cx="32" cy="32" r="19"/>
+              <path d="M5 32h54M32 5v54M8.6 45.5 55.4 18.5M18.5 55.4 45.5 8.6M18.5 8.6 45.5 55.4M8.6 18.5 55.4 45.5" stroke-width="1.2"/>
+              <circle cx="32" cy="32" r="3.4" fill="currentColor" stroke="none"/>
+            </svg>
+            <span class="op-nombre">Rueda zodiacal</span>
+            <span class="op-linea">Los doce signos vistos desde la Tierra, con el grado exacto que ocupa hoy cada astro y sus retrogradaciones.</span>
+          </button>
+
+          <button class="opcion" data-vista="natal">
+            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="32" cy="32" r="27"/><circle cx="32" cy="32" r="19"/>
+              <path d="M5 32h54M32 5v54"/>
+              <path d="M15.6 22.5 41.5 48.5 48.5 22.5Z" stroke-width="1.3"/>
+            </svg>
+            <span class="op-nombre">Carta natal</span>
+            <span class="op-linea">Fecha, hora y lugar de nacimiento: Ascendente, Medio Cielo, casas, nodos y aspectos, sobre fondo de papel.</span>
+          </button>
+        </div>
+
+        <p class="portada-pie">Para volver aquí, toca «Astroplanetario» en la esquina superior.</p>
+      </div>
+    </div>
+
+    <div class="pista">Toca un planeta para abrir su ficha · rueda del ratón para acercar</div>
+    <div id="globo"></div>
+
+    <aside id="ficha" aria-live="polite" aria-label="Ficha del astro">
+      <div class="ficha-cab">
+        <div class="glifo" id="fGlifo">☉︎</div>
+        <div>
+          <h2 id="fNombre">Sol</h2>
+          <p class="epiteto" id="fEpiteto"></p>
+        </div>
+        <button class="cerrar" id="fCerrar" aria-label="Cerrar ficha">✕</button>
+      </div>
+      <div class="ficha-cuerpo" id="fCuerpo"></div>
+    </aside>
+
+    <div id="velo">
+      <form id="natalForm" autocomplete="off">
+        <h2>Levantar una carta natal <span>datos de nacimiento</span></h2>
+        <div class="campos">
+          <div class="campo ancho">
+            <label for="nNombre">Nombre (opcional)</label>
+            <input id="nNombre" type="text" placeholder="Para encabezar la carta">
+          </div>
+          <div class="campo">
+            <label for="nFecha">Fecha de nacimiento</label>
+            <input id="nFecha" type="date" required>
+          </div>
+          <div class="campo">
+            <label for="nHora">Hora de nacimiento</label>
+            <input id="nHora" type="time" step="60" value="12:00">
+          </div>
+          <div class="campo ancho">
+            <label for="nLugar">Lugar de nacimiento</label>
+            <input id="nLugar" list="ciudades" placeholder="Escribe y elige de la lista">
+            <datalist id="ciudades"></datalist>
+          </div>
+          <div class="campo">
+            <label for="nCasas">Sistema de casas</label>
+            <select id="nCasas">
+              <option value="placidio">Placidio</option>
+              <option value="signos">Signos enteros</option>
+              <option value="igual">Casas iguales</option>
+              <option value="porfirio">Porfirio</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="nOrbe">Orbes de aspecto</label>
+            <select id="nOrbe">
+              <option value="1">Estándar</option>
+              <option value="0.7">Estrechos</option>
+              <option value="1.35">Amplios</option>
+            </select>
+          </div>
+        </div>
+
+        <label class="marcar"><input type="checkbox" id="nSinHora"> No sé la hora exacta</label>
+        <p class="aviso" id="nAvisoHora" hidden>Sin hora no hay Ascendente ni casas: la carta se levanta al mediodía y solo muestra los signos. La Luna puede moverse hasta 6° en el día.</p>
+
+        <div class="campos" id="manual">
+          <div class="campo"><label for="nLat">Latitud</label><input id="nLat" type="number" step="0.0001" placeholder="19.4326"></div>
+          <div class="campo"><label for="nLon">Longitud</label><input id="nLon" type="number" step="0.0001" placeholder="-99.1332"></div>
+          <div class="campo"><label for="nZona">Zona horaria</label><select id="nZona"></select></div>
+          <p class="aviso ancho">Latitud positiva al norte, longitud negativa al oeste. Toma las coordenadas de un mapa si el pueblo no aparece en la lista.</p>
+        </div>
+
+        <p class="aviso error" id="nError" hidden></p>
+
+        <div class="acciones">
+          <button type="submit" class="primario">Levantar carta</button>
+          <button type="button" class="secundario" id="nEjemplo">Usar un ejemplo</button>
+          <button type="button" class="secundario" id="nCancelar" hidden>Cancelar</button>
+        </div>
+      </form>
+    </div>
+
+    <aside id="cartaPanel" aria-label="Carta natal">
+      <div class="pest-fila">
+        <div class="pest" role="tablist">
+          <button role="tab" id="tabPos" aria-selected="true" aria-controls="hojaPos">Posiciones</button>
+          <button role="tab" id="tabAsp" aria-selected="false" aria-controls="hojaAsp">Aspectos</button>
+          <button role="tab" id="tabCasas" aria-selected="false" aria-controls="hojaCasas">Casas</button>
+          <button role="tab" id="tabSent" aria-selected="false" aria-controls="hojaSent">Significados</button>
+          <button role="tab" id="tabAtacir" aria-selected="false" aria-controls="hojaAtacir">Atacir</button>
+        </div>
+        <button id="plegar" aria-label="Plegar o desplegar el panel" title="Plegar">▾</button>
+      </div>
+      <div class="hoja" id="hojaPos" role="tabpanel"></div>
+      <div class="hoja" id="hojaAsp" role="tabpanel" hidden></div>
+      <div class="hoja" id="hojaCasas" role="tabpanel" hidden></div>
+      <div class="hoja" id="hojaSent" role="tabpanel" hidden></div>
+      <div class="hoja" id="hojaAtacir" role="tabpanel" hidden></div>
+    </aside>
+  </div>
+
+  <footer>
+    <div class="efem" id="efem"></div>
+  </footer>
+</div>
+
+<script>
+(() => {
+"use strict";
+const RAD = Math.PI/180, DEG = 180/Math.PI;
+const mod360 = x => ((x%360)+360)%360;
+
+/* ===================== Datos astronómicos =====================
+   Elementos keplerianos aproximados (J2000, válidos ~1800-2050).
+   a[UA], e, I[°], L[°] longitud media, w[°] longitud del perihelio,
+   N[°] longitud del nodo ascendente; cada uno con su variación por siglo. */
+const ELEM = {
+  mercurio:[0.38709927,0.20563593,7.00497902,252.25032350,77.45779628,48.33076593,
+            0.00000037,0.00001906,-0.00594749,149472.67411175,0.16047689,-0.12534081],
+  venus:   [0.72333566,0.00677672,3.39467605,181.97909950,131.60246718,76.67984255,
+            0.00000390,-0.00004107,-0.00078890,58517.81538729,0.00268329,-0.27769418],
+  tierra:  [1.00000261,0.01671123,-0.00001531,100.46457166,102.93768193,0.0,
+            0.00000562,-0.00004392,-0.01294668,35999.37244981,0.32327364,0.0],
+  marte:   [1.52371034,0.09339410,1.84969142,-4.55343205,-23.94362959,49.55953891,
+            0.00001847,0.00007882,-0.00813131,19140.30268499,0.44441088,-0.29257343],
+  jupiter: [5.20288700,0.04838624,1.30439695,34.39644051,14.72847983,100.47390909,
+            -0.00011607,-0.00013253,-0.00183714,3034.74612775,0.21252668,0.20469106],
+  saturno: [9.53667594,0.05386179,2.48599187,49.95424423,92.59887831,113.66242448,
+            -0.00125060,-0.00050991,0.00193609,1222.49362201,-0.41897216,-0.28867794],
+  urano:   [19.18916464,0.04725744,0.77263783,313.23810451,170.95427630,74.01692503,
+            -0.00196176,-0.00004397,-0.00242939,428.48202785,0.40805281,0.04240589],
+  neptuno: [30.06992276,0.00859048,1.77004347,-55.12002969,44.96476227,131.78422574,
+            0.00026291,0.00005105,0.00035372,218.45945325,-0.32241464,-0.00508664],
+  pluton:  [39.48211675,0.24882730,17.14001206,238.92903833,224.06891629,110.30393684,
+            -0.00031596,0.00005170,0.00004818,145.20780515,-0.04062942,-0.01183482]
+};
+
+const julian = ms => ms/86400000 + 2440587.5;
+const siglos = jd => (jd - 2451545.0)/36525;
+
+function helio(clave, T){                       // vector heliocéntrico eclíptico [UA]
+  const e0 = ELEM[clave];
+  const a = e0[0]+e0[6]*T, e = e0[1]+e0[7]*T, I = (e0[2]+e0[8]*T)*RAD;
+  const L = e0[3]+e0[9]*T, wb = e0[4]+e0[10]*T, N = (e0[5]+e0[11]*T)*RAD;
+  const w = wb*RAD - N;
+  let M = mod360(L - wb); if(M > 180) M -= 360;
+  M *= RAD;
+  let E = M + e*Math.sin(M);
+  for(let i=0;i<8;i++){ const d = (E - e*Math.sin(E) - M)/(1 - e*Math.cos(E)); E -= d; if(Math.abs(d)<1e-10) break; }
+  const xp = a*(Math.cos(E)-e), yp = a*Math.sqrt(1-e*e)*Math.sin(E);
+  const cw=Math.cos(w), sw=Math.sin(w), cN=Math.cos(N), sN=Math.sin(N), cI=Math.cos(I), sI=Math.sin(I);
+  return {
+    x:(cw*cN - sw*sN*cI)*xp + (-sw*cN - cw*sN*cI)*yp,
+    y:(cw*sN + sw*cN*cI)*xp + (-sw*sN + cw*cN*cI)*yp,
+    z:(sw*sI)*xp + (cw*sI)*yp
+  };
+}
+
+function lunaLon(T){                             // longitud eclíptica geocéntrica de la Luna
+  const Lp = 218.3164477 + 481267.88123421*T - 0.0015786*T*T;
+  const D  = (297.8501921 + 445267.1114034*T - 0.0018819*T*T)*RAD;
+  const M  = (357.5291092 + 35999.0502909*T)*RAD;
+  const Mp = (134.9633964 + 477198.8675055*T + 0.0087414*T*T)*RAD;
+  const F  = (93.2720950 + 483202.0175233*T - 0.0036539*T*T)*RAD;
+  const s = Math.sin;
+  const dl = 6.288774*s(Mp) + 1.274027*s(2*D-Mp) + 0.658314*s(2*D) + 0.213618*s(2*Mp)
+           - 0.185116*s(M) - 0.114332*s(2*F) + 0.058793*s(2*D-2*Mp) + 0.057066*s(2*D-M-Mp)
+           + 0.053322*s(2*D+Mp) + 0.045758*s(2*D-M) - 0.040923*s(M-Mp) - 0.034720*s(D)
+           - 0.030383*s(M+Mp) + 0.015327*s(2*D-2*F) - 0.012528*s(Mp+2*F) + 0.010980*s(Mp-2*F);
+  return mod360(Lp + dl);
+}
+
+/* longitud eclíptica geocéntrica de cualquier astro del catálogo */
+function lonGeo(clave, T){
+  if(clave === "luna") return lunaLon(T);
+  const t = helio("tierra", T);
+  if(clave === "sol") return mod360(Math.atan2(-t.y, -t.x)*DEG);
+  const p = helio(clave, T);
+  return mod360(Math.atan2(p.y - t.y, p.x - t.x)*DEG);
+}
+function distGeo(clave, T){
+  if(clave === "luna") return 0.00257;
+  const t = helio("tierra", T);
+  if(clave === "sol") return Math.hypot(t.x,t.y,t.z);
+  const p = helio(clave, T);
+  return Math.hypot(p.x-t.x, p.y-t.y, p.z-t.z);
+}
+
+/* ===================== Zodiaco ===================== */
+const SIGNOS = [
+  {n:"Aries",g:"♈\uFE0E",el:"fuego"},{n:"Tauro",g:"♉\uFE0E",el:"tierra"},{n:"Géminis",g:"♊\uFE0E",el:"aire"},
+  {n:"Cáncer",g:"♋\uFE0E",el:"agua"},{n:"Leo",g:"♌\uFE0E",el:"fuego"},{n:"Virgo",g:"♍\uFE0E",el:"tierra"},
+  {n:"Libra",g:"♎\uFE0E",el:"aire"},{n:"Escorpio",g:"♏\uFE0E",el:"agua"},{n:"Sagitario",g:"♐\uFE0E",el:"fuego"},
+  {n:"Capricornio",g:"♑\uFE0E",el:"tierra"},{n:"Acuario",g:"♒\uFE0E",el:"aire"},{n:"Piscis",g:"♓\uFE0E",el:"agua"}
+];
+const COLOR_EL = {fuego:"#C4653F",tierra:"#8E9463",aire:"#9AA7C4",agua:"#5F7EA8"};
+
+function posZod(lon){
+  const i = Math.floor(mod360(lon)/30);
+  const dentro = mod360(lon) - i*30;
+  const gr = Math.floor(dentro);
+  const mi = Math.floor((dentro-gr)*60);
+  const dosD = n => String(n).padStart(2,"0");
+  return {signo:SIGNOS[i], grado:gr, minuto:mi,
+          texto:`${dosD(gr)}° ${dosD(mi)}′`, corto:`${dosD(gr)}°${dosD(mi)}′`};
+}
+
+/* ===================== Catálogo de astros ===================== */
+const ASTROS = [
+  { id:"sol", nombre:"Sol", glifo:"☉\uFE0E", color:"#FFCF6E", radio:17, orbita:null,
+    epiteto:"El corazón del cielo",
+    moderna:"Leo", tradicional:"Leo", exalta:"Aries", exilio:"Acuario", caida:"Libra",
+    casa:"V", dia:"Domingo", metal:"Oro", ciclo:"365,25 días · ~30 días por signo",
+    claves:["identidad","voluntad","vitalidad","propósito","padre"],
+    nota:"Luminaria diurna. No retrograda nunca: su movimiento marca el ritmo de referencia de toda la carta.",
+    astro:[["Diámetro","1 392 700 km"],["Masa","99,86 % del sistema"],["Rotación","~25 días (ecuador)"],["Temp. superficie","5 500 °C"]] },
+
+  { id:"luna", nombre:"Luna", glifo:"☽\uFE0E", color:"#DCD8CB", radio:9, orbita:null,
+    epiteto:"La marea interior",
+    moderna:"Cáncer", tradicional:"Cáncer", exalta:"Tauro", exilio:"Capricornio", caida:"Escorpio",
+    casa:"IV", dia:"Lunes", metal:"Plata", ciclo:"27,32 días · ~2 días y medio por signo",
+    claves:["emoción","memoria","hábito","cuidado","madre"],
+    nota:"Luminaria nocturna y el astro más veloz: cambia de signo cada dos días y medio, por eso la hora de nacimiento pesa tanto al calcularla.",
+    astro:[["Diámetro","3 475 km"],["Distancia media","384 400 km"],["Ciclo sinódico","29,53 días"],["Rotación","Acoplada a la Tierra"]] },
+
+  { id:"mercurio", nombre:"Mercurio", glifo:"☿\uFE0E", color:"#B9A88F", radio:5, orbita:"mercurio",
+    epiteto:"El mensajero",
+    moderna:"Géminis y Virgo", tradicional:"Géminis y Virgo", exalta:"Virgo (15°)",
+    exilio:"Sagitario y Piscis", caida:"Piscis",
+    casa:"III y VI", dia:"Miércoles", metal:"Azogue", ciclo:"88 días · ~3 semanas por signo",
+    claves:["mente","lenguaje","comercio","tránsito","aprendizaje"],
+    nota:"Único planeta que rige y se exalta en el mismo signo. Retrograda unas tres veces al año, cerca de tres semanas cada vez.",
+    astro:[["Diámetro","4 879 km"],["Distancia al Sol","0,39 UA"],["Año","88 días terrestres"],["Día solar","176 días terrestres"]] },
+
+  { id:"venus", nombre:"Venus", glifo:"♀\uFE0E", color:"#EBCC9C", radio:8, orbita:"venus",
+    epiteto:"La estrella de la mañana",
+    moderna:"Tauro y Libra", tradicional:"Tauro y Libra", exalta:"Piscis (27°)",
+    exilio:"Aries y Escorpio", caida:"Virgo",
+    casa:"II y VII", dia:"Viernes", metal:"Cobre", ciclo:"225 días · ~4 semanas por signo",
+    claves:["vínculo","valor","placer","estética","acuerdo"],
+    nota:"Benéfica menor de la tradición. Nunca se aleja más de 48° del Sol: o sale antes que él o se pone después, jamás en oposición.",
+    astro:[["Diámetro","12 104 km"],["Distancia al Sol","0,72 UA"],["Año","225 días terrestres"],["Rotación","243 días, retrógrada"]] },
+
+  { id:"tierra", nombre:"Tierra", glifo:"⊕\uFE0E", color:"#6FA8DC", radio:8, orbita:"tierra",
+    epiteto:"El punto de observación",
+    moderna:"—", tradicional:"—", exalta:"—", exilio:"—", caida:"—",
+    casa:"—", dia:"—", metal:"—", ciclo:"365,25 días alrededor del Sol",
+    claves:["observador","aquí","ahora"],
+    nota:"La astrología occidental no le asigna regencia porque toda la carta se traza desde ella: lo que llamamos «el Sol en Libra» es, en realidad, la Tierra vista desde el lado opuesto del cielo.",
+    astro:[["Diámetro","12 742 km"],["Distancia al Sol","1,00 UA"],["Año","365,26 días"],["Inclinación del eje","23,44°"]] },
+
+  { id:"marte", nombre:"Marte", glifo:"♂\uFE0E", color:"#D2694A", radio:6, orbita:"marte",
+    epiteto:"El filo",
+    moderna:"Aries", tradicional:"Aries y Escorpio", exalta:"Capricornio (28°)",
+    exilio:"Libra y Tauro", caida:"Cáncer",
+    casa:"I y VIII", dia:"Martes", metal:"Hierro", ciclo:"687 días · ~6 semanas por signo",
+    claves:["deseo","acción","corte","defensa","coraje"],
+    nota:"En la tradición regía dos signos: Aries de día y Escorpio de noche. Desde 1930, la astrología moderna cede Escorpio a Plutón y le deja solo Aries; muchas escuelas siguen leyéndolo como corregente de Escorpio.",
+    astro:[["Diámetro","6 779 km"],["Distancia al Sol","1,52 UA"],["Año","687 días terrestres"],["Día solar","24 h 39 min"]] },
+
+  { id:"jupiter", nombre:"Júpiter", glifo:"♃\uFE0E", color:"#D9A066", radio:13, orbita:"jupiter",
+    epiteto:"La gran benéfica",
+    moderna:"Sagitario", tradicional:"Sagitario y Piscis", exalta:"Cáncer (15°)",
+    exilio:"Géminis y Virgo", caida:"Capricornio",
+    casa:"IX y XII", dia:"Jueves", metal:"Estaño", ciclo:"11,86 años · ~1 año por signo",
+    claves:["expansión","sentido","fe","abundancia","viaje"],
+    nota:"Regía Piscis antes del descubrimiento de Neptuno (1846). Como tarda casi un año por signo, marca generaciones cortas y el famoso «retorno de Júpiter» a los 12, 24 y 36 años.",
+    astro:[["Diámetro","139 820 km"],["Distancia al Sol","5,20 UA"],["Año","11,86 años"],["Día","9 h 56 min"]] },
+
+  { id:"saturno", nombre:"Saturno", glifo:"♄\uFE0E", color:"#E0C27A", radio:11, orbita:"saturno", anillo:true,
+    epiteto:"El guardián del umbral",
+    moderna:"Capricornio", tradicional:"Capricornio y Acuario", exalta:"Libra (21°)",
+    exilio:"Cáncer y Leo", caida:"Aries",
+    casa:"X y XI", dia:"Sábado", metal:"Plomo", ciclo:"29,46 años · ~2 años y medio por signo",
+    claves:["límite","tiempo","estructura","deber","madurez"],
+    nota:"Última frontera visible a simple vista: para la tradición, el borde del cielo conocido. Su retorno a los 29 años es el tránsito más citado de la astrología.",
+    astro:[["Diámetro","116 460 km"],["Distancia al Sol","9,54 UA"],["Año","29,46 años"],["Anillos","~7 000 km de espesor"]] },
+
+  { id:"urano", nombre:"Urano", glifo:"♅\uFE0E", color:"#7FD4D4", radio:9, orbita:"urano",
+    epiteto:"El rayo",
+    moderna:"Acuario (desde 1781)", tradicional:"Acuario era de Saturno", exalta:"Escorpio (atribuida)",
+    exilio:"Leo", caida:"Tauro (atribuida)",
+    casa:"XI", dia:"—", metal:"Uranio", ciclo:"84 años · ~7 años por signo",
+    claves:["ruptura","libertad","invención","súbito"],
+    nota:"Planeta transpersonal: pasa siete años en cada signo, así que describe a una generación entera más que a una persona. Su descubrimiento coincide con las revoluciones de finales del XVIII.",
+    astro:[["Diámetro","50 724 km"],["Distancia al Sol","19,19 UA"],["Año","84 años"],["Inclinación del eje","98° — rueda de lado"]] },
+
+  { id:"neptuno", nombre:"Neptuno", glifo:"♆\uFE0E", color:"#5A7FD4", radio:9, orbita:"neptuno",
+    epiteto:"La niebla luminosa",
+    moderna:"Piscis (desde 1846)", tradicional:"Piscis era de Júpiter", exalta:"Leo (atribuida)",
+    exilio:"Virgo", caida:"Acuario (atribuida)",
+    casa:"XII", dia:"—", metal:"Neptunio", ciclo:"164,8 años · ~14 años por signo",
+    claves:["disolución","imaginación","compasión","ensueño"],
+    nota:"Catorce años por signo: en una vida entera se recorren cinco o seis signos como mucho. En carta natal se lee sobre todo por casa y por aspecto, no por signo.",
+    astro:[["Diámetro","49 244 km"],["Distancia al Sol","30,07 UA"],["Año","164,8 años"],["Vientos","hasta 2 100 km/h"]] },
+
+  { id:"pluton", nombre:"Plutón", glifo:"♇\uFE0E", color:"#A78D77", radio:5, orbita:"pluton",
+    epiteto:"El subsuelo",
+    moderna:"Escorpio (desde 1930)", tradicional:"Escorpio era de Marte", exalta:"Aries (atribuida)",
+    exilio:"Tauro", caida:"Libra (atribuida)",
+    casa:"VIII", dia:"—", metal:"Plutonio", ciclo:"248 años · de 12 a 31 años por signo",
+    claves:["poder","crisis","transformación","raíz oculta"],
+    nota:"Su órbita es tan excéntrica que en Escorpio tardó doce años y en Tauro tardará treinta y uno. La astronomía lo reclasificó como planeta enano en 2006; la astrología lo mantiene por su valor simbólico.",
+    astro:[["Diámetro","2 377 km"],["Distancia al Sol","39,48 UA (media)"],["Año","248 años"],["Categoría","Planeta enano desde 2006"]] }
+];
+const porId = Object.fromEntries(ASTROS.map(a=>[a.id,a]));
+const ORDEN_EFEM = ["sol","luna","mercurio","venus","marte","jupiter","saturno","urano","neptuno","pluton"];
+
+/* --- glifo de Plutón: círculo, media luna hacia arriba y cruz --- */
+const SVG_PLUTON = '<svg class="gpluton" viewBox="0 0 100 132" aria-label="Plutón" role="img">' +
+  '<g fill="none" stroke="currentColor" stroke-width="11" stroke-linecap="round">' +
+  '<circle cx="50" cy="38" r="23"/><path d="M14 40a36 36 0 0 0 72 0"/>' +
+  '<path d="M50 76v50"/><path d="M27 104h46"/></g></svg>';
+function gh(glifo){ return glifo === porId.pluton.glifo ? SVG_PLUTON : glifo; }
+function trazaPluton(g, x, y, alto){
+  const u = alto/132;
+  g.save();
+  g.translate(x - 50*u, y - 66*u); g.scale(u, u);
+  g.strokeStyle = g.fillStyle; g.lineWidth = 11; g.lineCap = "round";
+  g.beginPath(); g.arc(50, 38, 23, 0, 7); g.stroke();
+  g.beginPath(); g.arc(50, 40, 36, 0, Math.PI); g.stroke();
+  g.beginPath(); g.moveTo(50, 76); g.lineTo(50, 126); g.moveTo(27, 104); g.lineTo(73, 104); g.stroke();
+  g.restore();
+}
+function pintaGlifo(g, glifo, x, y, tam){
+  if(glifo === porId.pluton.glifo){ trazaPluton(g, x, y, tam*1.22); return; }
+  g.font = `${tam}px Spectral, serif`;
+  g.fillText(glifo, x, y);
+}
+
+
+/* ===================== Tiempo ===================== */
+let factor = 1, anclaReal = Date.now(), anclaSim = Date.now();
+function ahoraSim(){ return anclaSim + (Date.now()-anclaReal)*factor; }
+const velSel = document.getElementById("velocidad");
+function fijaTiempo(ms, nuevoFactor=0){
+  anclaSim = ms; anclaReal = Date.now(); factor = nuevoFactor;
+  const valor = String(nuevoFactor);
+  if([...velSel.options].some(o => o.value === valor)) velSel.value = valor;
+}
+function partesLocales(ms){
+  const d = new Date(ms), dos = n => String(n).padStart(2,"0");
+  return {
+    fecha:`${d.getFullYear()}-${dos(d.getMonth()+1)}-${dos(d.getDate())}`,
+    hora:`${dos(d.getHours())}:${dos(d.getMinutes())}`
+  };
+}
+function msFechaOrbital(){
+  const f = document.getElementById("fechaOrbital").value;
+  const h = document.getElementById("horaOrbital").value || "12:00";
+  if(!f) return NaN;
+  const [Y,M,D] = f.split("-").map(Number), [hh,mm] = h.split(":").map(Number);
+  return new Date(Y,M-1,D,hh||0,mm||0,0,0).getTime();
+}
+velSel.addEventListener("change", () => {
+  anclaSim = ahoraSim(); anclaReal = Date.now(); factor = Number(velSel.value);
+});
+document.getElementById("btnHoy").addEventListener("click", () => {
+  fijaTiempo(Date.now(), 1);
+});
+
+const btnFechaExacta = document.getElementById("btnFechaExacta");
+const fechaPop = document.getElementById("fechaPop");
+function abreFecha(){
+  const p = partesLocales(ahoraSim());
+  document.getElementById("fechaOrbital").value = p.fecha;
+  document.getElementById("horaOrbital").value = p.hora;
+  fechaPop.hidden = false; btnFechaExacta.setAttribute("aria-expanded","true");
+}
+function cierraFecha(){ fechaPop.hidden = true; btnFechaExacta.setAttribute("aria-expanded","false"); }
+btnFechaExacta.addEventListener("click", () => fechaPop.hidden ? abreFecha() : cierraFecha());
+document.getElementById("btnCancelarFecha").addEventListener("click", cierraFecha);
+document.getElementById("btnAplicarFecha").addEventListener("click", () => {
+  const ms = msFechaOrbital();
+  if(Number.isFinite(ms)){ fijaTiempo(ms, 0); cierraFecha(); }
+});
+function mueveAnio(delta){
+  const ms = msFechaOrbital();
+  const d = Number.isFinite(ms) ? new Date(ms) : new Date(ahoraSim());
+  const dia = d.getDate();
+  d.setDate(1); d.setFullYear(d.getFullYear()+delta);
+  const ultimo = new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
+  d.setDate(Math.min(dia,ultimo));
+  const p = partesLocales(d.getTime());
+  document.getElementById("fechaOrbital").value = p.fecha;
+  document.getElementById("horaOrbital").value = p.hora;
+}
+document.getElementById("btnMenosAnio").addEventListener("click", () => mueveAnio(-1));
+document.getElementById("btnMasAnio").addEventListener("click", () => mueveAnio(1));
+document.addEventListener("keydown", e => { if(e.key === "Escape" && !fechaPop.hidden) cierraFecha(); });
+
+function partesEnZona(ms, tz){
+  const fmt = new Intl.DateTimeFormat("en-CA",{
+    timeZone:tz, year:"numeric", month:"2-digit", day:"2-digit",
+    hour:"2-digit", minute:"2-digit", hourCycle:"h23"
+  });
+  const p = Object.fromEntries(fmt.formatToParts(new Date(ms)).map(x => [x.type,x.value]));
+  return {fecha:`${p.year}-${p.month}-${p.day}`, hora:`${p.hour}:${p.minute}`};
+}
+
+document.getElementById("btnCartaMomento").addEventListener("click", () => {
+  const instante = ahoraSim();
+  const entrada = document.getElementById("ciudadCartaMomento");
+  const escrito = (entrada?.value || document.getElementById("nLugar")?.value || "").trim();
+  const normal = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+  const ciudad = CIUDADES.find(c => normal(c.etiqueta) === normal(escrito))
+              || CIUDADES.find(c => normal(c.n) === normal(escrito));
+
+  if(!escrito){
+    if(entrada){ entrada.classList.add("falta-ciudad"); entrada.focus(); }
+    return;
+  }
+
+  if(entrada) entrada.classList.remove("falta-ciudad");
+  const lugar = document.getElementById("nLugar");
+  const f = document.getElementById("nFecha"), h = document.getElementById("nHora");
+
+  if(!ciudad){
+    const p = partesLocales(instante);
+    if(f) f.value = p.fecha;
+    if(h) h.value = p.hora;
+    if(lugar){ lugar.value = escrito; lugar.dispatchEvent(new Event("input",{bubbles:true})); }
+    cambiaVista("natal");
+    const veloNatal = document.getElementById("velo");
+    if(veloNatal) veloNatal.classList.add("visible");
+    const err = document.getElementById("nError");
+    if(err){ err.textContent = "Elige una ciudad de la lista para levantar la carta automáticamente, o completa las coordenadas manuales."; err.hidden = false; }
+    const cancelar = document.getElementById("nCancelar");
+    if(cancelar) cancelar.hidden = false;
+    return;
+  }
+
+  // Conserva el instante exacto del simulador y lo expresa en la zona horaria elegida.
+  const p = partesEnZona(instante, ciudad.tz);
+  if(f) f.value = p.fecha;
+  if(h) h.value = p.hora;
+  if(lugar){ lugar.value = ciudad.etiqueta; lugar.dispatchEvent(new Event("input",{bubbles:true})); }
+  if(entrada) entrada.value = ciudad.etiqueta;
+  const sinHoraEl = document.getElementById("nSinHora");
+  if(sinHoraEl?.checked){ sinHoraEl.checked = false; sinHoraEl.dispatchEvent(new Event("change")); }
+
+  cambiaVista("natal");
+  const veloNatal = document.getElementById("velo");
+  if(veloNatal) veloNatal.classList.add("visible");
+  const cancelar = document.getElementById("nCancelar");
+  if(cancelar) cancelar.hidden = false;
+  setTimeout(() => document.getElementById("natalForm")?.requestSubmit(), 0);
+});
+
+const fmtFecha = new Intl.DateTimeFormat("es-MX",{dateStyle:"long",timeStyle:"short"});
+
+/* ===================== Lienzo ===================== */
+const lienzo = document.getElementById("lienzo");
+const ctx = lienzo.getContext("2d");
+let W=0, H=0, dpr=1, estrellas=[], nebulosa=null;
+let vista = "orbitas", zoom = 1;
+let natalPan = {x:0,y:0};
+let arrastreNatal = null, suprimirClickNatal = false;
+const blancos = [];                  // zonas sensibles del último fotograma
+let seleccion = null, sobre = null;
+
+function medir(){
+  const c = lienzo.parentElement.getBoundingClientRect();
+  dpr = Math.min(window.devicePixelRatio||1, 2);
+  W = Math.max(320, c.width); H = Math.max(280, c.height);
+  lienzo.width = W*dpr; lienzo.height = H*dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  sembrarEstrellas(); pintarNebulosa();
+}
+function sembrarEstrellas(){
+  const n = Math.round(W*H/2600);
+  estrellas = Array.from({length:n}, () => ({
+    x:Math.random()*W, y:Math.random()*H,
+    r:Math.random()*Math.random()*1.5+.25,
+    a:.25+Math.random()*.7, f:.3+Math.random()*1.6, d:Math.random()*7,
+    t:Math.random()<.06 ? (Math.random()<.5?"#BFD4FF":"#FFD9B0") : "#FFFFFF"
+  }));
+}
+function pintarNebulosa(){
+  nebulosa = document.createElement("canvas");
+  nebulosa.width = W; nebulosa.height = H;
+  const n = nebulosa.getContext("2d");
+  const manchas = [
+    [W*0.16,H*0.24,Math.max(W,H)*0.55,"rgba(74,52,132,0.30)"],
+    [W*0.86,H*0.78,Math.max(W,H)*0.50,"rgba(24,66,110,0.26)"],
+    [W*0.62,H*0.10,Math.max(W,H)*0.38,"rgba(120,68,50,0.14)"],
+    [W*0.35,H*0.92,Math.max(W,H)*0.42,"rgba(40,40,96,0.22)"]
+  ];
+  for(const [x,y,r,c] of manchas){
+    const g = n.createRadialGradient(x,y,0,x,y,r);
+    g.addColorStop(0,c); g.addColorStop(1,"rgba(0,0,0,0)");
+    n.fillStyle = g; n.fillRect(0,0,W,H);
+  }
+  // polvo estelar fino
+  n.globalAlpha = .5;
+  for(let i=0;i<420;i++){
+    n.fillStyle = "rgba(255,255,255,0.05)";
+    n.fillRect(Math.random()*W, Math.random()*H, 1, 1);
+  }
+  n.globalAlpha = 1;
+}
+new ResizeObserver(medir).observe(document.getElementById("escena"));
+
+lienzo.addEventListener("wheel", e => {
+  e.preventDefault();
+  const anterior = zoom;
+  zoom = Math.min(2.85, Math.max(.55, zoom * (e.deltaY < 0 ? 1.12 : .89)));
+  // En carta natal conservamos el punto visual bajo el cursor al acercar o alejar.
+  if(vista === "natal" && carta && anterior !== zoom){
+    const r = lienzo.getBoundingClientRect();
+    const mx = e.clientX-r.left, my = e.clientY-r.top;
+    const factorZoom = zoom/anterior;
+    const panelEl = document.getElementById("cartaPanel");
+    const puesto = panelEl.classList.contains("abierto") ? panelEl.getBoundingClientRect() : null;
+    const abajo = W <= 620 && puesto;
+    const altoLibre = abajo ? Math.max(160, H-puesto.height) : H;
+    const anchoLibre = abajo ? W : Math.max(260, W-(puesto ? puesto.width : 0));
+    const baseX = anchoLibre/2, baseY = altoLibre/2;
+    natalPan.x = mx - baseX - (mx-baseX-natalPan.x)*factorZoom;
+    natalPan.y = my - baseY - (my-baseY-natalPan.y)*factorZoom;
+  }
+}, {passive:false});
+
+/* ---- fondo ---- */
+function fondo(ms){
+  ctx.fillStyle = "#05060F"; ctx.fillRect(0,0,W,H);
+  if(nebulosa) ctx.drawImage(nebulosa,0,0);
+  const t = ms/1000;
+  for(const s of estrellas){
+    const a = s.a * (0.55 + 0.45*Math.sin(t*s.f + s.d));
+    ctx.globalAlpha = a; ctx.fillStyle = s.t;
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+/* ---- esfera con brillo ---- */
+function esfera(x,y,r,color,brillo=1){
+  const g = ctx.createRadialGradient(x-r*.35, y-r*.4, r*.08, x, y, r*(2.9*brillo));
+  g.addColorStop(0, color); g.addColorStop(.22, color+"66"); g.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x,y,r*3*brillo,0,7); ctx.fill();
+  const b = ctx.createRadialGradient(x-r*.4, y-r*.45, r*.1, x, y, r);
+  b.addColorStop(0,"#FFFFFF"); b.addColorStop(.25,color); b.addColorStop(1, mezcla(color,"#000000",.55));
+  ctx.fillStyle = b; ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill();
+}
+function planetaCinematico(x,y,r,color,sunX,sunY,activo=false){
+  esfera(x,y,r,color,activo?1.22:.88);
+  const dx=sunX-x, dy=sunY-y, len=Math.max(1,Math.hypot(dx,dy));
+  const ux=dx/len, uy=dy/len;
+  ctx.save();
+  ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.clip();
+  const sombra=ctx.createLinearGradient(x+ux*r*1.08,y+uy*r*1.08,x-ux*r*1.08,y-uy*r*1.08);
+  sombra.addColorStop(0,'rgba(0,0,0,0)');
+  sombra.addColorStop(.48,'rgba(0,0,0,.06)');
+  sombra.addColorStop(.76,'rgba(0,0,0,.34)');
+  sombra.addColorStop(1,'rgba(0,0,0,.76)');
+  ctx.fillStyle=sombra; ctx.fillRect(x-r-2,y-r-2,r*2+4,r*2+4);
+  const luz=ctx.createRadialGradient(x+ux*r*.46,y+uy*r*.46,r*.03,x+ux*r*.18,y+uy*r*.18,r*1.1);
+  luz.addColorStop(0,'rgba(255,248,224,.19)'); luz.addColorStop(.36,'rgba(255,240,205,.045)'); luz.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=luz; ctx.fillRect(x-r-2,y-r-2,r*2+4,r*2+4);
+  ctx.restore();
+  ctx.strokeStyle=activo ? color+'A0' : 'rgba(230,226,216,.11)';
+  ctx.lineWidth=activo?1.35:.75; ctx.beginPath(); ctx.arc(x,y,r+.6,0,7); ctx.stroke();
+}
+function mezcla(hex, hex2, k){
+  const p = h => [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+  const a = p(hex), b = p(hex2);
+  return "#"+a.map((v,i)=>Math.round(v+(b[i]-v)*k).toString(16).padStart(2,"0")).join("");
+}
+function etiqueta(x,y,txt,color,activo){
+  ctx.font = `${activo?500:400} 11px "IBM Plex Mono", monospace`;
+  ctx.textAlign = "center"; ctx.textBaseline = "top";
+  ctx.fillStyle = activo ? "#EDE4D2" : color+"CC";
+  ctx.shadowColor = "rgba(0,0,0,.9)"; ctx.shadowBlur = 6;
+  ctx.fillText(txt, x, y);
+  ctx.shadowBlur = 0;
+}
+
+/* ---- vista de órbitas (heliocéntrica, escala comprimida y perspectiva) ---- */
+const compr = r => Math.log(1 + r/0.25);            // escala logarítmica: los interiores respiran
+const COMP_MAX = compr(41);
+const VISTA_ORBITAL = {inclinacion:.52, giro:-.18};
+function proyOrbital(x,y,z,k){
+  const r = Math.hypot(x,y,z);
+  if(r === 0) return [0,0,0,1];
+  const rr = compr(r)*k;
+  let X=x/r*rr, Y=y/r*rr, Z=z/r*rr;
+  // Giramos la eclíptica y luego la inclinamos: se perciben los planos orbitales reales.
+  const cg=Math.cos(VISTA_ORBITAL.giro), sg=Math.sin(VISTA_ORBITAL.giro);
+  const xg=X*cg-Y*sg, yg=X*sg+Y*cg;
+  const ci=Math.cos(VISTA_ORBITAL.inclinacion), si=Math.sin(VISTA_ORBITAL.inclinacion);
+  const yp=yg*ci-Z*si, zp=yg*si+Z*ci;
+  const persp = Math.max(.82,Math.min(1.18,1-zp/(Math.max(W,H)*2.7)));
+  return [xg*persp,yp*persp,zp,persp];
+}
+function centro(){ return [W/2 - desvio(), H/2]; }
+function desvio(){
+  const panel = vista === "natal"
+    ? document.getElementById("cartaPanel").classList.contains("abierto")
+    : ficha.classList.contains("abierta");
+  return (panel && W > 900) ? Math.min(200, W*0.145) : 0;
+}
+function dibujaOrbitas(T, ms){
+  const [cx, cy] = centro();
+  const k = Math.min(W,H)/2 * 0.955 * zoom / COMP_MAX;
+
+  // Halo solar y disco eclíptico tenue: ayuda a leer profundidad sin inventar posiciones.
+  const halo = ctx.createRadialGradient(cx,cy,0,cx,cy,Math.min(W,H)*.42);
+  halo.addColorStop(0,"rgba(255,207,110,.095)"); halo.addColorStop(.24,"rgba(227,190,117,.025)"); halo.addColorStop(1,"rgba(0,0,0,0)");
+
+ctx.fillStyle=halo; ctx.fillRect(0,0,W,H);
+
+// Ejes de referencia de la eclíptica: guía visual, no modifica la geometría orbital.
+const ex1=proyOrbital(41,0,0,k), ex2=proyOrbital(-41,0,0,k);
+const ey1=proyOrbital(0,41,0,k), ey2=proyOrbital(0,-41,0,k);
+ctx.save(); ctx.setLineDash([2,8]); ctx.lineWidth=.7;
+ctx.strokeStyle='rgba(218,184,110,.075)';
+ctx.beginPath(); ctx.moveTo(cx+ex1[0],cy-ex1[1]); ctx.lineTo(cx+ex2[0],cy-ex2[1]); ctx.stroke();
+ctx.strokeStyle='rgba(151,165,202,.055)';
+ctx.beginPath(); ctx.moveTo(cx+ey1[0],cy-ey1[1]); ctx.lineTo(cx+ey2[0],cy-ey2[1]); ctx.stroke();
+ctx.restore();
+
+// Órbitas: usamos x/y/z reales de los elementos orbitales y las proyectamos con perspectiva.
+  ctx.lineCap="round";
+  for(const a of ASTROS){
+    if(!a.orbita) continue;
+    const sel = seleccion === a.id || sobre === a.id;
+    const per = ELEM[a.orbita][9];
+    const paso = 36525/Math.abs(per)*360/144;
+    let prev=null;
+    for(let i=0;i<=144;i++){
+      const p = helio(a.orbita, T + (i*paso)/36525);
+      const pr = proyOrbital(p.x,p.y,p.z,k);
+      if(prev){
+        const depth=(prev[2]+pr[2])*.5;
+        const normal=.5+.5*Math.tanh(depth/(Math.min(W,H)*.18));
+        const alpha = sel ? (.28+.30*normal) : (.045+.085*normal);
+        ctx.strokeStyle = sel ? a.color+Math.round(alpha*255).toString(16).padStart(2,"0") : `rgba(237,228,210,${alpha})`;
+        ctx.lineWidth = sel ? 1.35 : .85;
+        ctx.beginPath(); ctx.moveTo(cx+prev[0],cy-prev[1]); ctx.lineTo(cx+pr[0],cy-pr[1]); ctx.stroke();
+      }
+      prev=pr;
+    }
+  }
+
+  // Sol: pulso mínimo, como variación de brillo y no como cambio de tamaño físico.
+  const pul = 1 + 0.018*Math.sin(ms/1500);
+  esfera(cx, cy, porId.sol.radio*pul, porId.sol.color, 1.75);
+  ctx.strokeStyle="#E3BE7544"; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.arc(cx,cy,porId.sol.radio*2.35,0,7); ctx.stroke();
+  blancos.push({id:"sol", x:cx, y:cy, r:26});
+  etiqueta(cx, cy+31, "SOL", porId.sol.color, seleccion==="sol");
+
+  // Calculamos todos los planetas primero y los ordenamos por profundidad.
+  const visibles=[];
+  for(const a of ASTROS){
+    if(!a.orbita) continue;
+    const p = helio(a.orbita, T);
+    const pr = proyOrbital(p.x,p.y,p.z,k);
+    visibles.push({a,p,pr});
+  }
+  visibles.sort((A,B)=>A.pr[2]-B.pr[2]);
+
+  for(const {a,pr} of visibles){
+    const [px,py,z,ps] = pr;
+    const x = cx+px, y = cy-py;
+    const act = seleccion === a.id || sobre === a.id;
+    const profundidad = Math.max(.82,Math.min(1.16,ps));
+    const rr = a.radio*profundidad*(act?1.18:1);
+
+    // Pequeña sombra de contacto y halo: mejora la lectura de cada cuerpo contra la nebulosa.
+    ctx.fillStyle="rgba(0,0,0,.22)"; ctx.beginPath(); ctx.ellipse(x+2,y+rr*.7,rr*.9,rr*.32,0,0,7); ctx.fill();
+    planetaCinematico(x, y, rr, a.color, cx, cy, act);
+
+    if(a.anillo){
+      ctx.save(); ctx.translate(x,y); ctx.rotate(-.35); ctx.scale(1,.31);
+      ctx.strokeStyle = a.color+"BB"; ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.arc(0,0,rr*1.95,0,7); ctx.stroke();
+      ctx.strokeStyle = a.color+"52"; ctx.lineWidth = 1.1;
+      ctx.beginPath(); ctx.arc(0,0,rr*2.45,0,7); ctx.stroke();
+      ctx.restore();
+    }
+
+    blancos.push({id:a.id, x, y, r:Math.max(16,rr+9)});
+    etiqueta(x, y+rr+8, a.nombre.toUpperCase(), a.color, act);
+
+    if(a.id === "tierra"){
+      const ll = lunaLon(T)*RAD;
+      const d = 22*Math.max(.75,zoom)*profundidad;
+      const lx = x + Math.cos(ll)*d, ly = y - Math.sin(ll)*d*.82;
+      ctx.strokeStyle = "#FFFFFF18"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.ellipse(x,y,d,d*.82,0,0,7); ctx.stroke();
+      planetaCinematico(lx, ly, 4*profundidad, porId.luna.color, cx, cy, false);
+      blancos.push({id:"luna", x:lx, y:ly, r:13});
+    }
+  }
+}
+
+/* ---- vista de rueda zodiacal (geocéntrica) ---- */
+function dibujaRueda(T){
+  const [cx, cy] = centro();
+  const R = Math.min(W - 2*desvio(), H)/2 * 0.9 * zoom;
+  const rExt = R, rInt = R*0.80, rPl = R*0.66, rCen = R*0.30;
+  const aPant = lon => (180 - lon) * RAD;           // 0° Aries a la izquierda, sentido antihorario
+
+  // sectores de los doce signos
+  for(let i=0;i<12;i++){
+    const a0 = aPant(i*30), a1 = aPant(i*30+30);
+    const col = COLOR_EL[SIGNOS[i].el];
+    ctx.beginPath();
+    ctx.arc(cx,cy,rExt,a1,a0); ctx.arc(cx,cy,rInt,a0,a1,true); ctx.closePath();
+    ctx.fillStyle = col+"1F"; ctx.fill();
+    ctx.strokeStyle = "#2A2E4E"; ctx.lineWidth = 1; ctx.stroke();
+
+    const am = aPant(i*30+15), rm = (rExt+rInt)/2;
+    const gx = cx+Math.cos(am)*rm, gy = cy+Math.sin(am)*rm;
+    ctx.fillStyle = col; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.font = `${Math.round(R*0.075)}px Spectral, serif`;
+    ctx.fillText(SIGNOS[i].g, gx, gy - R*0.026);
+    ctx.fillStyle = "#8E8CAB"; ctx.font = `${Math.max(8,Math.round(R*0.028))}px "IBM Plex Mono", monospace`;
+    ctx.fillText(SIGNOS[i].n.toUpperCase(), gx, gy + R*0.045);
+  }
+  // grados cada 5°
+  ctx.strokeStyle = "#FFFFFF22";
+  for(let d=0; d<360; d+=5){
+    const a = aPant(d), largo = d%30===0 ? R*0.055 : R*0.022;
+    ctx.beginPath();
+    ctx.moveTo(cx+Math.cos(a)*rInt, cy+Math.sin(a)*rInt);
+    ctx.lineTo(cx+Math.cos(a)*(rInt-largo), cy+Math.sin(a)*(rInt-largo));
+    ctx.stroke();
+  }
+  // Tierra al centro
+  esfera(cx, cy, Math.max(8,R*0.045), porId.tierra.color, 1.1);
+  blancos.push({id:"tierra", x:cx, y:cy, r:R*0.07});
+  ctx.fillStyle="#6C6A88"; ctx.textAlign="center"; ctx.textBaseline="top";
+  ctx.font = `9px "IBM Plex Mono", monospace`;
+  ctx.fillText("TIERRA", cx, cy+R*0.06);
+
+  // astros sobre la rueda, separando los que se apiñan
+  const usados = [];
+  for(const id of ORDEN_EFEM){
+    const a = porId[id], lon = lonGeo(id, T), z = posZod(lon);
+    let radio = rPl;
+    while(usados.some(u => Math.abs(((u.lon-lon+540)%360)-180) < 9 && Math.abs(u.r-radio) < R*0.05)) radio -= R*0.062;
+    usados.push({lon, r:radio});
+    const ang = aPant(lon);
+    const x = cx+Math.cos(ang)*radio, y = cy+Math.sin(ang)*radio;
+
+    ctx.strokeStyle = a.color+"3A"; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx+Math.cos(ang)*(rInt-R*0.01), cy+Math.sin(ang)*(rInt-R*0.01));
+    ctx.lineTo(x,y); ctx.stroke();
+
+    const act = seleccion===id || sobre===id;
+    ctx.fillStyle = act ? "#EDE4D2" : a.color;
+    ctx.shadowColor = a.color; ctx.shadowBlur = act ? 20 : 10;
+    ctx.textAlign="center"; ctx.textBaseline="middle";
+    pintaGlifo(ctx, a.glifo, x, y, Math.round(R*0.062));
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = act ? "#EDE4D2" : "#9A98B6";
+    ctx.font = `${Math.max(8,Math.round(R*0.027))}px "IBM Plex Mono", monospace`;
+    ctx.fillText(z.corto, x, y + R*0.055);
+    blancos.push({id, x, y, r:Math.max(17,R*0.05)});
+  }
+}
+
+/* ===================== Bucle ===================== */
+function fotograma(ms){
+  const ahora = ahoraSim();
+  const T = siglos(julian(ahora));
+  blancos.length = 0;
+  if(vista === "natal"){ ctx.fillStyle = PAPEL.fondo; ctx.fillRect(0,0,W,H); dibujaNatal(); }
+  else { fondo(ms); vista === "orbitas" ? dibujaOrbitas(T, ms) : dibujaRueda(T); }
+  document.getElementById("relojFecha").textContent = fmtFecha.format(new Date(ahora));
+  if(ms - ultimoEfem > 400){ refrescaEfem(T); ultimoEfem = ms; }
+  requestAnimationFrame(fotograma);
+}
+let ultimoEfem = -1e9;
+
+/* ===================== Interacción ===================== */
+const globo = document.getElementById("globo");
+function enPunto(ev){
+  const r = lienzo.getBoundingClientRect();
+  const x = ev.clientX - r.left, y = ev.clientY - r.top;
+  let mejor = null, dm = 1e9;
+  for(const b of blancos){
+    const d = Math.hypot(b.x-x, b.y-y);
+    if(d < b.r && d < dm){ dm = d; mejor = b; }
+  }
+  return mejor;
+}
+lienzo.addEventListener("pointerdown", ev => {
+  if(vista !== "natal" || !carta || !portada.classList.contains("oculta")) return;
+  arrastreNatal = {id:ev.pointerId,x:ev.clientX,y:ev.clientY,px:natalPan.x,py:natalPan.y,movio:false};
+  try{ lienzo.setPointerCapture(ev.pointerId); }catch(e){}
+  lienzo.classList.add("arrastrando");
+  lienzo.style.cursor="grabbing";
+  globo.style.opacity="0";
+  ev.preventDefault();
+});
+
+lienzo.addEventListener("pointermove", ev => {
+  if(arrastreNatal && ev.pointerId === arrastreNatal.id){
+    const dx=ev.clientX-arrastreNatal.x, dy=ev.clientY-arrastreNatal.y;
+    natalPan.x=arrastreNatal.px+dx; natalPan.y=arrastreNatal.py+dy;
+    if(Math.hypot(dx,dy)>4) arrastreNatal.movio=true;
+    sobre=null; globo.style.opacity="0"; lienzo.style.cursor="grabbing";
+    return;
+  }
+
+  const b = enPunto(ev);
+  sobre = b ? b.id : null;
+  lienzo.style.cursor = vista === "natal" ? (b ? "pointer" : "grab") : (b ? "pointer" : "crosshair");
+  if(b){
+    let html = "";
+    if(vista === "natal" && carta){
+      const c = carta.cuerpos.concat(carta.puntos).find(o => o.id === b.id);
+      if(c){
+        const z = posZod(c.lon), casa = carta.cusp ? casaDe(c.lon, carta.cusp) : null;
+        html = `<b>${gh(c.glifo)} ${c.nombre}</b> — ${z.texto} ${z.signo.n}${casa ? ` · casa ${ROMANOS[casa]}` : ""}`;
+      }
+    }
+    if(!html){
+      const a = porId[b.id];
+      if(!a){ globo.style.opacity = "0"; return; }
+      const T = siglos(julian(ahoraSim()));
+      const z = posZod(lonGeo(b.id === "tierra" ? "sol" : b.id, T));
+      html = `<b>${gh(a.glifo)} ${a.nombre}</b>${b.id === "tierra" ? "" : ` — ${z.texto} ${z.signo.n}`}`;
+    }
+    globo.innerHTML = html;
+    globo.style.left = b.x+"px"; globo.style.top = b.y+"px"; globo.style.opacity = "1";
+  } else globo.style.opacity = "0";
+});
+
+function terminaArrastreNatal(ev){
+  if(!arrastreNatal || (ev.pointerId != null && ev.pointerId !== arrastreNatal.id)) return;
+  suprimirClickNatal = !!arrastreNatal.movio;
+  try{ lienzo.releasePointerCapture(arrastreNatal.id); }catch(e){}
+  arrastreNatal=null; lienzo.classList.remove("arrastrando");
+  lienzo.style.cursor = vista === "natal" ? "grab" : "crosshair";
+}
+lienzo.addEventListener("pointerup", terminaArrastreNatal);
+lienzo.addEventListener("pointercancel", terminaArrastreNatal);
+lienzo.addEventListener("pointerleave", () => {
+  sobre=null; globo.style.opacity="0";
+  if(!arrastreNatal) lienzo.style.cursor = vista === "natal" ? "grab" : "crosshair";
+});
+lienzo.addEventListener("dblclick", ev => {
+  if(vista !== "natal" || !carta) return;
+  natalPan.x=0; natalPan.y=0; zoom=1;
+  suprimirClickNatal=true;
+  ev.preventDefault();
+});
+lienzo.addEventListener("click", ev => {
+  if(vista === "natal" && suprimirClickNatal){ suprimirClickNatal=false; return; }
+  const b = enPunto(ev);
+  if(vista === "natal"){ if(b) marcaFila(b.id, true); return; }
+  if(b) abrirFicha(b.id); else cerrarFicha();
+});
+
+document.getElementById("btnOrbitas").addEventListener("click", () => cambiaVista("orbitas"));
+document.getElementById("btnRueda").addEventListener("click", () => cambiaVista("rueda"));
+document.getElementById("btnNatal").addEventListener("click", () => cambiaVista("natal"));
+function cambiaVista(v){
+  if(v === "zodiaco") v = "rueda";
+  vista = v; zoom = 1;
+  if(v === "natal"){ natalPan.x=0; natalPan.y=0; }
+  for(const [b,val] of [["btnOrbitas","orbitas"],["btnRueda","rueda"],["btnNatal","natal"]])
+    document.getElementById(b).setAttribute("aria-pressed", String(v===val));
+  document.getElementById("app").classList.toggle("natal", v==="natal");
+  document.getElementById("app").classList.toggle("zodiac", v==="rueda");
+  document.getElementById("app").classList.toggle("orbits", v==="orbitas");
+  document.querySelector(".pista").textContent = v === "natal"
+    ? "Arrastra para recorrer la carta · rueda para acercar · doble clic para recentrar"
+    : "Toca un planeta para abrir su ficha · rueda del ratón para acercar";
+  const panel = document.getElementById("cartaPanel");
+  if(v === "natal"){
+    cerrarFicha();
+    if(!carta){ velo.classList.add("visible"); document.getElementById("nCancelar").hidden = true; }
+    else { panel.classList.add("abierto"); pintaCarta(); pintaBarra(); }
+  } else {
+    velo.classList.remove("visible");
+    panel.classList.remove("abierto");
+  }
+}
+
+/* ===================== Ficha ===================== */
+const ficha = document.getElementById("ficha");
+document.getElementById("fCerrar").addEventListener("click", cerrarFicha);
+document.addEventListener("keydown", e => { if(e.key === "Escape") cerrarFicha(); });
+
+function cerrarFicha(){ ficha.classList.remove("abierta"); seleccion = null; pintaEfemSeleccion(); }
+
+function fila(dt, dd){ return dd && dd !== "—" ? `<dt>${dt}</dt><dd>${dd}</dd>` : `<dt>${dt}</dt><dd><em>no aplica</em></dd>`; }
+
+function abrirFicha(id){
+  const a = porId[id]; if(!a) return;
+  seleccion = id;
+  document.getElementById("fGlifo").innerHTML = gh(a.glifo);
+  document.getElementById("fGlifo").style.color = a.color;
+  document.getElementById("fNombre").textContent = a.nombre;
+  document.getElementById("fEpiteto").textContent = a.epiteto;
+
+  const T = siglos(julian(ahoraSim()));
+  const cuerpo = document.getElementById("fCuerpo");
+  let bloqueAhora = "";
+  if(id !== "tierra"){
+    const lon = lonGeo(id, T);
+    const z = posZod(lon);
+    const antes = lonGeo(id, T - 1/36525);
+    const retro = ((lon - antes + 540) % 360) - 180 < 0;
+    bloqueAhora = `
+      <div class="ahora">
+        <span class="grado">${z.texto}</span>
+        <span class="signo">${z.signo.g} ${z.signo.n}</span>
+        ${retro ? '<span class="rx">℞ retrógrado</span>' : '<span class="directo">directo</span>'}
+        <small>Posición geocéntrica · zodiaco tropical · ${fmtFecha.format(new Date(ahoraSim()))}</small>
+      </div>`;
+  } else {
+    bloqueAhora = `<div class="ahora"><span class="signo">Desde aquí se mide todo</span>
+      <small>Distancia al Sol: ${distGeo("sol",T).toFixed(4)} UA en este instante</small></div>`;
+  }
+
+  const dobles = a.tradicional.includes(" y ") ? "doble" : "";
+  const dg = DIGNIDAD[id];
+  const romanoDe = n => { const i = SIGNOS.findIndex(x => x.n === n); return i < 0 ? "—" : ROMANOS[i+1]; };
+  const listaCasas = arr => arr.map(x => `casa ${romanoDe(x)} <em>(${x})</em>`).join(" · ");
+  const bloqueCasas = dg ? `
+    <div class="rotulo">En qué casa</div>
+    <dl class="dignidades">
+      <dt>Domicilio</dt><dd>${listaCasas(dg.dom)}</dd>
+      <dt>Exaltación</dt><dd>${listaCasas([dg.exa])}</dd>
+      <dt>Exilio</dt><dd>${listaCasas(dg.exi)}</dd>
+      <dt>Caída</dt><dd>${listaCasas([dg.cai])}</dd>
+      ${GOZO[id] ? `<dt>Gozo</dt><dd>casa ${ROMANOS[GOZO[id]]} <em>(tradición)</em></dd>` : ""}
+    </dl>
+    <p class="nota">Estas casas salen de la correspondencia natural: cada casa lleva el número de su signo (Aries–I, Tauro–II, Géminis–III…). El gozo es otra cosa: es la casa donde la tradición dice que el planeta se alegra, sin relación con el signo.</p>` : "";
+  cuerpo.innerHTML = `
+    ${bloqueAhora}
+    <div class="rotulo">Regencias</div>
+    <dl class="dignidades">
+      ${fila("Moderna", a.moderna)}
+      ${fila("Tradicional", `<span class="${dobles}">${a.tradicional}</span>`)}
+    </dl>
+    <div class="rotulo">Dignidades</div>
+    <dl class="dignidades">
+      ${fila("Exaltación", a.exalta)}
+      ${fila("Exilio", a.exilio)}
+      ${fila("Caída", a.caida)}
+      ${fila("Casa natural", a.casa)}
+    </dl>
+    ${bloqueCasas}
+    <div class="rotulo">Correspondencias</div>
+    <dl class="dignidades">
+      ${fila("Día", a.dia)}
+      ${fila("Metal", a.metal)}
+      ${fila("Ciclo", a.ciclo)}
+    </dl>
+    <div class="rotulo">Palabras clave</div>
+    <ul class="claves">${a.claves.map(c=>`<li>${c}</li>`).join("")}</ul>
+    <div class="rotulo">Para la clase</div>
+    <p class="nota">${a.nota}</p>
+    <div class="rotulo">Datos astronómicos</div>
+    <table class="astro"><tbody>
+      ${a.astro.map(([k,v])=>`<tr><th scope="row">${k}</th><td>${v}</td></tr>`).join("")}
+      ${id!=="tierra"&&id!=="sol"&&id!=="luna" ? `<tr><th scope="row">Distancia a la Tierra</th><td>${distGeo(id,T).toFixed(3)} UA</td></tr>` : ""}
+    </tbody></table>`;
+  cuerpo.scrollTop = 0;
+  ficha.classList.add("abierta");
+  pintaEfemSeleccion();
+}
+
+/* ===================== Franja de efemérides ===================== */
+const efem = document.getElementById("efem");
+efem.innerHTML = ORDEN_EFEM.map(id => {
+  const a = porId[id];
+  return `<button data-id="${id}" title="Ver ficha de ${a.nombre}">
+    <span class="g" style="color:${a.color}">${gh(a.glifo)}</span>
+    <span class="p" id="ef-${id}">—</span>
+    <span class="n">${a.nombre}</span></button>`;
+}).join("");
+efem.addEventListener("click", e => {
+  const b = e.target.closest("button"); if(b) abrirFicha(b.dataset.id);
+});
+function refrescaEfem(T){
+  const cielo = document.getElementById("portadaCielo");
+  if(cielo && !portada.classList.contains("oculta")){
+    const zs = posZod(lonGeo("sol", T)), zl = posZod(lonGeo("luna", T));
+    cielo.textContent = `En este momento · Sol ${zs.texto} ${zs.signo.n} · Luna ${zl.texto} ${zl.signo.n}`;
+  }
+  for(const id of ORDEN_EFEM){
+    const lon = lonGeo(id, T), z = posZod(lon);
+    const antes = lonGeo(id, T - 1/36525);
+    const retro = ((lon - antes + 540) % 360) - 180 < 0;
+    const el = document.getElementById("ef-"+id);
+    if(el) el.innerHTML = `${z.corto} ${z.signo.g}${retro?' <span class="r">℞</span>':""}`;
+  }
+}
+function pintaEfemSeleccion(){
+  efem.querySelectorAll("button").forEach(b => b.classList.toggle("sel", b.dataset.id === seleccion));
+}
+
+/* ===================== Significados generales =====================
+   Lecturas breves de orientación para el alumno: cada planeta por signo
+   y por casa, el Ascendente y los aspectos. Orden de signos: Aries a Piscis;
+   orden de casas: I a XII. */
+const EN_SIGNO = {
+  sol:[
+    "Se afirma empezando cosas. Necesita que se le note el empuje; aprende templando la prisa.",
+    "Se afirma construyendo y conservando. Busca seguridad tangible y ritmo propio; aprende soltando lo que ya no sostiene.",
+    "Se afirma preguntando y contando. Vive de la curiosidad y el intercambio; aprende eligiendo un tema y quedándose en él.",
+    "Se afirma cuidando y perteneciendo. Los suyos son el centro; aprende poniendo límite al refugio.",
+    "En domicilio: se afirma creando y siendo visto. Brilla con naturalidad; aprende compartiendo el escenario.",
+    "Se afirma sirviendo y afinando. Le importa el detalle bien hecho; aprende perdonándose lo imperfecto.",
+    "En caída: se afirma frente al otro. Busca equilibrio y acuerdo; aprende sosteniendo su propio criterio.",
+    "Se afirma en lo hondo y en la crisis. No le sirve lo superficial; aprende soltando el control.",
+    "Se afirma buscando sentido. Necesita horizonte, viaje o estudio; aprende aterrizando la promesa.",
+    "Se afirma con el tiempo y el trabajo. Ambición seria y paciente; aprende midiendo la exigencia.",
+    "En exilio: se afirma diferenciándose. Piensa en el grupo y en lo que viene; aprende bajando de la idea al vínculo.",
+    "Se afirma disolviendo fronteras. Sensible y permeable; aprende distinguiendo lo suyo de lo ajeno."
+  ],
+  luna:[
+    "Reacciona rápido y a solas. Se calma actuando; el enojo se le pasa pronto.",
+    "En exaltación: se calma con lo estable, el cuerpo y lo conocido. Le pesa el cambio brusco.",
+    "Necesita hablar lo que siente. Se calma nombrando; puede racionalizar la emoción.",
+    "En domicilio: memoria larga y necesidad de pertenecer. Cuida como fue cuidada.",
+    "Necesita ser vista y querida con calidez. Se calma con juego y reconocimiento.",
+    "Necesita orden y utilidad. Se calma resolviendo; tiende a preocuparse por lo pequeño.",
+    "Necesita compañía y armonía. Se calma acordando; le cuesta el conflicto abierto.",
+    "En caída: siente hondo y guarda. Intimidad total o nada; los ciclos emocionales la transforman.",
+    "Necesita aire y horizonte. Se calma moviéndose; se ahoga en lo doméstico estrecho.",
+    "En exilio: contiene lo que siente. Se calma con estructura y responsabilidad.",
+    "Necesita espacio y perspectiva. Se calma con amistad más que con intimidad.",
+    "Necesita retiro y compasión. Se calma en el silencio; absorbe el clima emocional ajeno."
+  ],
+  mercurio:[
+    "Piensa rápido y dice antes de matizar. Bueno para decidir, impaciente para escuchar.",
+    "Piensa despacio y en concreto. Tarda en cambiar de opinión, pero lo aprendido se le queda.",
+    "En domicilio: mente ágil, curiosa y dispersa. Aprende de todo un poco.",
+    "Piensa con la memoria y el afecto. Recuerda climas y tonos más que datos.",
+    "Piensa en grande y comunica con estilo. Le cuesta rectificar en público.",
+    "En domicilio y exaltación: análisis fino y preciso. Riesgo de perderse en el detalle.",
+    "Piensa comparando. Ve las dos caras y le cuesta cerrar la decisión.",
+    "Mente investigadora. Busca lo que no se dice y guarda lo que sabe.",
+    "En exilio: piensa en panorama. Grandes ideas, poco detalle.",
+    "Mente estructurada y realista. Habla poco y con peso.",
+    "Mente conceptual y original. Ve el sistema antes que a la persona.",
+    "En exilio y caída: piensa en imágenes. Intuye lo que no logra argumentar."
+  ],
+  venus:[
+    "En exilio: le gusta la conquista y el arranque. Se enfría cuando llega la rutina.",
+    "En domicilio: afecto fiel, sensual y de ritmo lento. Aprecia lo tangible.",
+    "Se vincula conversando. Necesita variedad y chispa mental.",
+    "Ama cuidando y siendo cuidada. Vínculo con memoria y casa.",
+    "Ama con generosidad y algo de teatro. Necesita que se lo demuestren.",
+    "En caída: ama sirviendo y afinando. Le cuesta recibir sin corregir.",
+    "En domicilio: talento para el acuerdo y la belleza. Evita el desencuentro.",
+    "En exilio: vínculo intenso y exclusivo. Todo o nada.",
+    "Ama en libertad y aventura. Necesita compartir una búsqueda.",
+    "Ama con compromiso y tiempo. Reservada al principio, leal después.",
+    "Ama sin ataduras; la amistad es la puerta. Vínculos poco convencionales.",
+    "En exaltación: amor compasivo y entregado. Cuidado con idealizar de más."
+  ],
+  marte:[
+    "En domicilio: acción directa y valiente. Empieza fácil, sostener le cuesta.",
+    "En exilio tradicional: fuerza lenta y terca. Cuesta arrancar y cuesta parar.",
+    "Pelea con palabras. Energía repartida en muchos frentes.",
+    "En caída: enojo indirecto y protector de los suyos. Actúa por afecto.",
+    "Acción con orgullo y presencia. Defiende en público lo que ama.",
+    "Trabaja con método y aguante. Se irrita con lo mal hecho.",
+    "En exilio: evita el choque y negocia. Acumula lo que no dice.",
+    "Domicilio tradicional: deseo profundo y estratégico. Golpea una vez y donde importa.",
+    "Actúa por convicción. Entusiasmo fácil que se disemina.",
+    "En exaltación: energía disciplinada y con blanco. Rinde a largo plazo.",
+    "Actúa por una causa y en grupo. Rebeldía fría.",
+    "Energía difusa y compasiva. Pelea mejor por otros que por sí mismo."
+  ],
+  jupiter:[
+    "Crece emprendiendo. Confía en el impulso propio.",
+    "Crece acumulando y disfrutando. Generosidad concreta.",
+    "En exilio: crece aprendiendo de todo, aunque le falte hondura.",
+    "En exaltación: crece cuidando. La abundancia llega por lo propio y los suyos.",
+    "Crece creando y dando. Necesita que se lo reconozcan.",
+    "En exilio: crece perfeccionando y sirviendo; la vista se le hace pequeña.",
+    "Crece asociándose. La suerte entra por los vínculos.",
+    "Crece atravesando crisis. Recursos que llegan de otros.",
+    "En domicilio: fe, viaje y sentido. Promete más de lo que cumple.",
+    "En caída: crece con esfuerzo y regla. La prudencia le frena el vuelo.",
+    "Crece en comunidad y en lo nuevo. Generoso con el grupo.",
+    "Domicilio tradicional: fe, compasión y entrega. Le falta el límite."
+  ],
+  saturno:[
+    "En caída: le cuesta la iniciativa. Madura atreviéndose.",
+    "Estructura los recursos. Miedo de fondo a la carencia.",
+    "Mente rigurosa; le cuesta hablar suelto. Aprende con disciplina.",
+    "En exilio: familia exigente o poco disponible. Madura cuidándose a sí mismo.",
+    "En exilio: le cuesta brillar. Madura creando sin pedir permiso.",
+    "Método, oficio y autoexigencia. El trabajo bien hecho como refugio.",
+    "En exaltación: justicia, compromiso y palabra que se cumple.",
+    "Control de lo profundo. Madura soltando lo que no le pertenece.",
+    "Fe puesta a prueba. El sentido se construye, no se hereda.",
+    "En domicilio: autoridad y tiempo. Ambición que se sostiene.",
+    "Domicilio tradicional: estructura para el grupo y reglas propias.",
+    "Pone límite a lo difuso. Madura aceptando lo que no controla."
+  ],
+  urano:[
+    "Generación que rompe empezando de cero.",
+    "Generación que trastoca el valor, el dinero y la tierra.",
+    "Generación que reinventa la palabra y la manera de comunicarse.",
+    "Generación que cambia la idea de familia y de casa.",
+    "Generación que rompe con la autoridad y con el brillo personal.",
+    "Generación que reforma el trabajo, la salud y la técnica.",
+    "Generación que reinventa el vínculo y el contrato.",
+    "Generación que remueve el tabú y lo que se comparte.",
+    "Generación que sacude la creencia y el dogma.",
+    "Generación que rompe estructuras e instituciones.",
+    "En domicilio: generación de red, tecnología y utopía.",
+    "Generación que despierta lo espiritual y lo colectivo."
+  ],
+  neptuno:[
+    "Ideal del héroe; espiritualidad de la acción.",
+    "Ideal de la tierra y la belleza; espejismos con el dinero.",
+    "Ideal de la palabra; confusión en lo que se informa.",
+    "Ideal del hogar y la patria; nostalgia compartida.",
+    "Ideal del artista y del ídolo.",
+    "En exilio: ideal del servicio; el detalle se pierde en la niebla.",
+    "Ideal del amor romántico y de la paz.",
+    "Fascinación por lo oculto y por el abismo.",
+    "Ideal religioso y del viaje interior.",
+    "Disuelve estructuras; ilusión y desencanto con lo institucional.",
+    "Sueño colectivo y tecnológico; fraternidad idealizada.",
+    "En domicilio: compasión, arte y entrega sin borde."
+  ],
+  pluton:[
+    "Transformación por la voluntad; poder para empezar otra vez.",
+    "Transformación del valor y la propiedad; poder de lo material.",
+    "Transformación del lenguaje; poder de la información.",
+    "Transformación de la familia y las raíces.",
+    "Transformación del poder personal y de la autoridad.",
+    "Transformación del trabajo, la salud y lo cotidiano.",
+    "Transformación de los vínculos y de los pactos.",
+    "En domicilio: intensidad, tabú y regeneración.",
+    "Transformación de las creencias y de las verdades heredadas.",
+    "Transformación de las instituciones y del mando.",
+    "Transformación de lo colectivo y de la tecnología.",
+    "Transformación de lo espiritual y de lo inconsciente."
+  ]
+};
+
+const EN_CASA = {
+  sol:["La identidad se juega en la propia presencia; se le nota al entrar.",
+    "Se afirma por lo que tiene y por lo que vale su trabajo.",
+    "Brilla hablando, escribiendo y en el trato cercano.",
+    "El centro está en la casa, la familia y las raíces.",
+    "Brilla creando, jugando y en el amor; le va el escenario.",
+    "Se realiza en el oficio diario y en el cuidado del cuerpo.",
+    "Se descubre frente al otro; los vínculos lo definen.",
+    "Se transforma por las crisis y por lo que comparte con otro.",
+    "Necesita horizonte: estudio, viaje o creencia propia.",
+    "Se juega en la vocación y en el lugar público; busca reconocimiento.",
+    "Brilla en el grupo, la amistad y los proyectos comunes.",
+    "Se realiza en lo íntimo y en el retiro; brilla sin testigos."],
+  luna:["El ánimo se le ve en la cara; humor cambiante y trato receptivo.",
+    "La seguridad emocional se busca en lo material y en lo propio.",
+    "Necesita conversar lo que siente; apego al entorno cercano.",
+    "En su casa natural: raíces, memoria familiar y necesidad de refugio.",
+    "Se emociona creando y con los hijos; afecto juguetón.",
+    "El ánimo se regula con la rutina; el cuerpo avisa lo emocional.",
+    "Necesita pareja o socio; el humor depende del vínculo.",
+    "Emociones hondas y reservadas; apego a lo compartido.",
+    "Necesidad de horizonte; nostalgia de lo lejano.",
+    "La vida emocional queda a la vista; vocación de cuidar.",
+    "El grupo y los amigos son la familia elegida.",
+    "Vida emocional privada; necesita retiro y silencio."],
+  mercurio:["Piensa y habla como se presenta; la identidad se juega en la palabra.",
+    "La mente puesta en el recurso; habilidad para el negocio.",
+    "En su casa natural: aprendizaje, hermanos y trato diario.",
+    "La mente vuelve a casa; estudia o trabaja desde ahí.",
+    "Pensamiento creativo y lúdico; enseña jugando.",
+    "Mente al servicio del oficio; buena para el método.",
+    "Piensa dialogando; acuerdos y contratos.",
+    "Mente investigadora; interés por lo oculto y por lo financiero.",
+    "Mente que estudia y viaja; le atrae lo lejano.",
+    "La palabra es la carta de presentación pública.",
+    "Piensa en red; ideas que circulan en el grupo.",
+    "Mente silenciosa e intuitiva; le cuesta poner en palabras."],
+  venus:["Encanto en la presencia; se cuida la imagen.",
+    "Gusto por lo bello y lo que dura; talento para valorar.",
+    "Afecto en el trato diario y en el modo de decir.",
+    "El amor se vive en casa; se embellece el hogar.",
+    "Romance, juego y creación; amor demostrativo.",
+    "El afecto se muestra sirviendo; vínculos en el trabajo.",
+    "En su casa natural: pareja, sociedad y acuerdo.",
+    "Vínculo intenso; dinero o bienes compartidos.",
+    "Amor por lo lejano y lo distinto; vínculos de viaje o estudio.",
+    "El encanto sirve a la vocación; imagen pública amable.",
+    "Amistad y amor se mezclan; vínculos dentro del grupo.",
+    "Amor discreto o secreto; entrega sin condiciones."],
+  marte:["Energía a la vista; se actúa primero y se piensa después.",
+    "Se pelea por los recursos; empuje para ganarse lo propio.",
+    "Discusión y palabra afilada; roce con hermanos o vecinos.",
+    "La energía se descarga en casa; tensión familiar o mudanzas.",
+    "Deseo, competencia y juego; empuje creativo.",
+    "Trabajo duro y aguante; irritación con la rutina.",
+    "Los vínculos encienden; se aprende del conflicto.",
+    "En su casa natural tradicional: crisis, deseo y recursos ajenos.",
+    "Se pelea por las ideas; cruzadas y viajes con impulso.",
+    "Ambición visible; se abre camino en la vocación.",
+    "Empuje dentro del grupo; liderazgo de proyectos.",
+    "Energía contenida; enojo que no encuentra salida directa."],
+  jupiter:["Confianza que se nota; optimismo y algo de exceso.",
+    "Crecen los recursos; generosidad y también gasto.",
+    "Curiosidad amplia; enseña y divulga.",
+    "Abundancia en casa; familia numerosa o protectora.",
+    "Suerte en la creación, el juego y los hijos.",
+    "Crecimiento por el trabajo diario; exceso en la rutina.",
+    "Suerte por los vínculos; socios que abren puertas.",
+    "Recursos que llegan de otros: apoyos, herencias, sociedades.",
+    "En su casa natural: estudio, viaje y sentido.",
+    "Reconocimiento público; vocación que se expande.",
+    "Grupo generoso; proyectos que crecen.",
+    "Protección discreta; fe interior."],
+  saturno:["Responsabilidad temprana; se madura antes de tiempo.",
+    "Los recursos cuestan; se aprende a administrar.",
+    "Palabra medida; estudios con esfuerzo.",
+    "Familia exigente o ausente; se construye la casa propia.",
+    "Cuesta jugar y crear; la expresión madura despacio.",
+    "Disciplina de trabajo; el cuerpo pide reglas.",
+    "Compromiso serio y tardío; vínculos que enseñan el límite.",
+    "Se aprende del duelo y de lo compartido.",
+    "La fe se examina; estudios largos.",
+    "En su casa natural: vocación, autoridad y tiempo.",
+    "Amistades pocas y duraderas; responsabilidad en el grupo.",
+    "Soledad que forma; miedos que se trabajan en privado."],
+  urano:["Se es distinto y se nota; identidad libre.",
+    "Ingresos irregulares; el valor puesto en lo propio.",
+    "Mente original; aprende a saltos.",
+    "Raíces movidas; casa poco convencional.",
+    "Creación original; amor en libertad.",
+    "Trabajo fuera de norma; la rutina no se sostiene.",
+    "Vínculos abiertos o que llegan de golpe.",
+    "Cambios bruscos en lo que se comparte.",
+    "Creencias propias; ruptura con el dogma.",
+    "Vocación fuera de molde; cambios de rumbo.",
+    "En su casa natural: grupo, red y causa.",
+    "Despertares repentinos en lo íntimo."],
+  neptuno:["Presencia difusa y magnética; imagen cambiante.",
+    "Confusión con el dinero; el valor puesto en lo intangible.",
+    "Mente poética; se entiende sin explicar.",
+    "Raíces idealizadas o inciertas.",
+    "Creación inspirada; amor idealizado.",
+    "Trabajo de servicio o cuidado; cuerpo sensible.",
+    "Idealización del otro; vínculos de rescate.",
+    "Frontera porosa en lo íntimo; intuición honda.",
+    "Búsqueda espiritual; fe sin dogma.",
+    "Vocación artística o de servicio; imagen pública difusa.",
+    "Ideales de grupo; amistades soñadas.",
+    "En su casa natural: retiro, arte y compasión."],
+  pluton:["Presencia intensa; se renace varias veces.",
+    "Poder y crisis con los recursos propios.",
+    "Palabra que remueve; mente investigadora.",
+    "Raíces con historia pesada; se transforma el origen.",
+    "Creación intensa; amores que transforman.",
+    "Se transforma por el trabajo y por el cuerpo.",
+    "Vínculos de poder; el otro como espejo.",
+    "En su casa natural: crisis, herencia y regeneración.",
+    "Creencias que se derrumban y se rehacen.",
+    "Poder público; caídas y regresos en la vocación.",
+    "Transformación por el grupo; causas intensas.",
+    "Lo oculto que sale a la luz; trabajo interior profundo."]
+};
+
+const ASC_SIGNO = [
+  "Se entra al mundo de frente y rápido; cuerpo activo y trato directo.",
+  "Se entra despacio, con calma y sentido del gusto.",
+  "Se entra preguntando; trato ágil y curioso.",
+  "Se entra con cautela; trato protector.",
+  "Se entra con presencia; se ocupa el espacio.",
+  "Se entra observando; trato prudente y servicial.",
+  "Se entra agradando; trato diplomático.",
+  "Se entra midiendo; presencia intensa y reservada.",
+  "Se entra con entusiasmo; trato franco.",
+  "Se entra con reserva; se toma en serio desde joven.",
+  "Se entra distinto; trato cordial pero a distancia.",
+  "Se entra sin bordes; trato empático y adaptable."
+];
+
+const SENTIDO_ASPECTO = {
+  "Conjunción":"Dos funciones fundidas: actúan juntas, para bien y para mal.",
+  "Oposición":"Dos funciones enfrentadas: se resuelve alternando, no eligiendo.",
+  "Trígono":"Facilidad que fluye sola y por eso se da por sentada.",
+  "Cuadratura":"Tensión que obliga a hacer algo: el motor de la carta.",
+  "Sextil":"Oportunidad que hay que tomar; no se da sola.",
+  "Quincuncio":"Dos funciones que no se ven entre sí; se ajusta con incomodidad.",
+  "Semisextil":"Roce leve entre signos vecinos: matiz, no conflicto."
+};
+
+/* gozos planetarios de la tradición: la casa donde el planeta se alegra */
+const GOZO = {mercurio:1, luna:3, venus:5, marte:6, sol:9, jupiter:11, saturno:12};
+
+/* ===================== Carta natal ===================== */
+
+/* --- dignidades por signo, para leer al planeta en su posición --- */
+const DIGNIDAD = {
+  sol:      {dom:["Leo"],                  exa:"Aries",      exi:["Acuario"],            cai:"Libra"},
+  luna:     {dom:["Cáncer"],               exa:"Tauro",      exi:["Capricornio"],        cai:"Escorpio"},
+  mercurio: {dom:["Géminis","Virgo"],      exa:"Virgo",      exi:["Sagitario","Piscis"], cai:"Piscis"},
+  venus:    {dom:["Tauro","Libra"],        exa:"Piscis",     exi:["Aries","Escorpio"],   cai:"Virgo"},
+  marte:    {dom:["Aries","Escorpio"],     exa:"Capricornio",exi:["Libra","Tauro"],      cai:"Cáncer"},
+  jupiter:  {dom:["Sagitario","Piscis"],   exa:"Cáncer",     exi:["Géminis","Virgo"],    cai:"Capricornio"},
+  saturno:  {dom:["Capricornio","Acuario"],exa:"Libra",      exi:["Cáncer","Leo"],       cai:"Aries"},
+  urano:    {dom:["Acuario"],              exa:"Escorpio",   exi:["Leo"],                cai:"Tauro"},
+  neptuno:  {dom:["Piscis"],               exa:"Leo",        exi:["Virgo"],              cai:"Acuario"},
+  pluton:   {dom:["Escorpio"],             exa:"Aries",      exi:["Tauro"],              cai:"Libra"}
+};
+function dignidadDe(id, signo){
+  const d = DIGNIDAD[id]; if(!d) return null;
+  if(d.dom.includes(signo)) return {t:"domicilio", c:"d-dom"};
+  if(d.exa === signo) return {t:"exaltación", c:"d-exa"};
+  if(d.exi.includes(signo)) return {t:"exilio", c:"d-exi"};
+  if(d.cai === signo) return {t:"caída", c:"d-cai"};
+  return {t:"peregrino", c:"d-per"};
+}
+
+const CASAS_SIGNIFICADO = {
+  1:"Identidad, cuerpo y manera de asomarse al mundo",
+  2:"Recursos propios, valor y sustento",
+  3:"Mente cotidiana, hermanos, entorno cercano",
+  4:"Hogar, raíces, familia y final de las cosas",
+  5:"Creación, juego, romance e hijos",
+  6:"Trabajo diario, rutina, salud y servicio",
+  7:"Vínculos, sociedades y adversarios declarados",
+  8:"Crisis, herencias y lo que se comparte con otro",
+  9:"Sentido, estudios largos y viajes lejanos",
+  10:"Vocación, autoridad y lugar público",
+  11:"Comunidad, amistades y proyectos por venir",
+  12:"Retiro, inconsciente, encierro y cierre de ciclo"
+};
+const ROMANOS = ["","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
+
+/* --- puntos calculados --- */
+const PUNTOS = {
+  nodoN: {nombre:"Nodo Norte", glifo:"☊︎", color:"#C9BFA6"},
+  nodoS: {nombre:"Nodo Sur",   glifo:"☋︎", color:"#8E8CAB"},
+  lilith:{nombre:"Lilith",     glifo:"⚸︎", color:"#A292D8"},
+  fortuna:{nombre:"Fortuna",   glifo:"⊗︎", color:"#9BC48A"},
+  asc:   {nombre:"Ascendente", glifo:"AC", color:"#E3BE75"},
+  mc:    {nombre:"Medio Cielo",glifo:"MC", color:"#E3BE75"}
+};
+function nodoNorte(T){ return mod360(125.0445479 - 1934.1362891*T + 0.0020754*T*T + T*T*T/467441); }
+function lilithMedia(T){ return mod360(83.3532465 + 4069.0137287*T - 0.0103200*T*T - T*T*T/80053 + 180); }
+function oblicuidad(T){ return 23.4392911 - 0.0130042*T - 1.64e-7*T*T + 5.04e-7*T*T*T; }
+function gmst(jd){
+  const T = (jd-2451545)/36525;
+  return mod360(280.46061837 + 360.98564736629*(jd-2451545) + 0.000387933*T*T - T*T*T/38710000);
+}
+
+/* --- ángulos y casas --- */
+function angulos(jd, lat, lon){
+  const T = siglos(jd), eps = oblicuidad(T)*RAD, phi = lat*RAD;
+  const ramcDeg = mod360(gmst(jd) + lon), ramc = ramcDeg*RAD;
+  const mc = mod360(Math.atan2(Math.sin(ramc), Math.cos(ramc)*Math.cos(eps))*DEG);
+  let asc = mod360(Math.atan2(Math.cos(ramc), -(Math.sin(ramc)*Math.cos(eps) + Math.tan(phi)*Math.sin(eps)))*DEG);
+  if(mod360(asc - mc) > 180) asc = mod360(asc + 180);
+  return {mc, asc, ramc:ramcDeg, eps:eps*DEG, lat, lon};
+}
+function placidio(ramcDeg, latDeg, epsDeg){
+  const eps = epsDeg*RAD, phi = latDeg*RAD;
+  const lonDeRA = a => mod360(Math.atan2(Math.sin(a*RAD), Math.cos(a*RAD)*Math.cos(eps))*DEG);
+  function cuspide(inicio, f, nocturna){
+    let alpha = ramcDeg + inicio;
+    for(let i=0;i<30;i++){
+      const lam = lonDeRA(alpha)*RAD;
+      const dec = Math.asin(Math.sin(eps)*Math.sin(lam));
+      const x = -Math.tan(phi)*Math.tan(dec);
+      if(Math.abs(x) >= 1) return null;                 // círculo polar: sin solución
+      const D = Math.acos(x)*DEG;                       // semiarco diurno
+      const nuevo = nocturna ? ramcDeg + 180 - f*(180-D) : ramcDeg + f*D;
+      if(Math.abs(nuevo-alpha) < 1e-9){ alpha = nuevo; break; }
+      alpha = nuevo;
+    }
+    return lonDeRA(alpha);
+  }
+  const c11 = cuspide(30,1/3,false), c12 = cuspide(60,2/3,false);
+  const c2 = cuspide(120,2/3,true),  c3 = cuspide(150,1/3,true);
+  return [c11,c12,c2,c3].some(v => v === null) ? null : {c11,c12,c2,c3};
+}
+function cuspides(sistema, ang){
+  const c = new Array(13);
+  const {asc, mc} = ang;
+  if(sistema === "signos"){
+    const base = Math.floor(asc/30)*30;
+    for(let i=1;i<=12;i++) c[i] = mod360(base + (i-1)*30);
+    return {c, sistema:"signos"};
+  }
+  if(sistema === "igual"){
+    for(let i=1;i<=12;i++) c[i] = mod360(asc + (i-1)*30);
+    return {c, sistema:"igual"};
+  }
+  if(sistema === "placidio"){
+    const p = placidio(ang.ramc, ang.lat, ang.eps);
+    if(p){
+      c[1]=asc; c[10]=mc; c[11]=p.c11; c[12]=p.c12; c[2]=p.c2; c[3]=p.c3;
+      c[4]=mod360(mc+180); c[7]=mod360(asc+180);
+      c[5]=mod360(p.c11+180); c[6]=mod360(p.c12+180);
+      c[8]=mod360(p.c2+180); c[9]=mod360(p.c3+180);
+      return {c, sistema:"placidio"};
+    }
+    return Object.assign(cuspides("signos", ang), {aviso:"Placidio no tiene solución más allá del círculo polar; se usaron signos enteros."});
+  }
+  // porfirio: cada cuadrante partido en tres
+  c[1]=asc; c[10]=mc; c[4]=mod360(mc+180); c[7]=mod360(asc+180);
+  const q1 = mod360(asc - mc)/3, q2 = mod360(mod360(mc+180) - asc)/3;
+  c[11]=mod360(mc+q1); c[12]=mod360(mc+2*q1);
+  c[2]=mod360(asc+q2); c[3]=mod360(asc+2*q2);
+  c[5]=mod360(c[11]+180); c[6]=mod360(c[12]+180);
+  c[8]=mod360(c[2]+180);  c[9]=mod360(c[3]+180);
+  return {c, sistema:"porfirio"};
+}
+function casaDe(lon, c){
+  if(!c) return null;
+  for(let i=1;i<=12;i++){
+    const a = c[i], b = c[i===12?1:i+1];
+    if(mod360(lon-a) < mod360(b-a)) return i;
+  }
+  return 1;
+}
+
+/* --- aspectos --- */
+const ASPECTOS = [
+  {n:"Conjunción", g:"☌︎", a:0,   orbe:8, cl:"a-oro",  mayor:true},
+  {n:"Oposición",  g:"☍︎", a:180, orbe:8, cl:"a-rojo", mayor:true},
+  {n:"Trígono",    g:"△",       a:120, orbe:7, cl:"a-azul", mayor:true},
+  {n:"Cuadratura", g:"□",       a:90,  orbe:7, cl:"a-rojo", mayor:true},
+  {n:"Sextil",     g:"✳",       a:60,  orbe:5, cl:"a-azul", mayor:true},
+  {n:"Quincuncio", g:"⚻",       a:150, orbe:2.5,cl:"a-lila",mayor:false},
+  {n:"Semisextil", g:"⚺",       a:30,  orbe:2, cl:"a-lila", mayor:false}
+];
+function calculaAspectos(lista, factor){
+  const res = [];
+  for(let i=0;i<lista.length;i++) for(let j=i+1;j<lista.length;j++){
+    const A = lista[i], B = lista[j];
+    let d = Math.abs(mod360(A.lon - B.lon)); if(d > 180) d = 360 - d;
+    for(const asp of ASPECTOS){
+      const luminaria = ["sol","luna"].includes(A.id) || ["sol","luna"].includes(B.id);
+      const orbe = (asp.orbe + (luminaria && asp.mayor ? 2 : 0)) * factor;
+      const dif = Math.abs(d - asp.a);
+      if(dif <= orbe){ res.push({A, B, asp, dif}); break; }
+    }
+  }
+  return res.sort((x,y) => x.dif - y.dif);
+}
+const gradoMin = d => {
+  const g = Math.floor(d), m = Math.round((d-g)*60);
+  return m === 60 ? `${g+1}°00′` : `${g}°${String(m).padStart(2,"0")}′`;
+};
+
+/* --- ciudades: nombre | región | lat | lon | zona horaria IANA --- */
+const CIUDADES = `
+Ciudad de México|México|19.4326|-99.1332|America/Mexico_City
+Guadalajara|Jalisco, MX|20.6597|-103.3496|America/Mexico_City
+Monterrey|Nuevo León, MX|25.6866|-100.3161|America/Monterrey
+Puebla|Puebla, MX|19.0414|-98.2063|America/Mexico_City
+Toluca|Estado de México, MX|19.2826|-99.6557|America/Mexico_City
+Ecatepec|Estado de México, MX|19.6097|-99.0600|America/Mexico_City
+Naucalpan|Estado de México, MX|19.4785|-99.2396|America/Mexico_City
+Nezahualcóyotl|Estado de México, MX|19.4003|-99.0145|America/Mexico_City
+Tijuana|Baja California, MX|32.5149|-117.0382|America/Tijuana
+Mexicali|Baja California, MX|32.6245|-115.4523|America/Tijuana
+Ensenada|Baja California, MX|31.8667|-116.5964|America/Tijuana
+León|Guanajuato, MX|21.1250|-101.6860|America/Mexico_City
+Guanajuato|Guanajuato, MX|21.0190|-101.2574|America/Mexico_City
+Irapuato|Guanajuato, MX|20.6767|-101.3563|America/Mexico_City
+Celaya|Guanajuato, MX|20.5230|-100.8156|America/Mexico_City
+Salamanca|Guanajuato, MX|20.5700|-101.1900|America/Mexico_City
+Ciudad Juárez|Chihuahua, MX|31.6904|-106.4245|America/Ciudad_Juarez
+Chihuahua|Chihuahua, MX|28.6330|-106.0691|America/Chihuahua
+Delicias|Chihuahua, MX|28.1900|-105.4700|America/Chihuahua
+Querétaro|Querétaro, MX|20.5888|-100.3899|America/Mexico_City
+Mérida|Yucatán, MX|20.9674|-89.5926|America/Merida
+Valladolid|Yucatán, MX|20.6896|-88.2011|America/Merida
+San Luis Potosí|San Luis Potosí, MX|22.1565|-100.9855|America/Mexico_City
+Aguascalientes|Aguascalientes, MX|21.8853|-102.2916|America/Mexico_City
+Hermosillo|Sonora, MX|29.0729|-110.9559|America/Hermosillo
+Ciudad Obregón|Sonora, MX|27.4828|-109.9306|America/Hermosillo
+Nogales|Sonora, MX|31.3186|-110.9458|America/Hermosillo
+Saltillo|Coahuila, MX|25.4383|-100.9737|America/Monterrey
+Torreón|Coahuila, MX|25.5428|-103.4068|America/Monterrey
+Monclova|Coahuila, MX|26.9100|-101.4200|America/Monterrey
+Piedras Negras|Coahuila, MX|28.7000|-100.5236|America/Matamoros
+Culiacán|Sinaloa, MX|24.8091|-107.3940|America/Mazatlan
+Mazatlán|Sinaloa, MX|23.2494|-106.4111|America/Mazatlan
+Los Mochis|Sinaloa, MX|25.7935|-108.9963|America/Mazatlan
+Morelia|Michoacán, MX|19.7060|-101.1950|America/Mexico_City
+Uruapan|Michoacán, MX|19.4116|-102.0562|America/Mexico_City
+Zamora|Michoacán, MX|19.9855|-102.2836|America/Mexico_City
+Lázaro Cárdenas|Michoacán, MX|17.9583|-102.2000|America/Mexico_City
+Veracruz|Veracruz, MX|19.1738|-96.1342|America/Mexico_City
+Xalapa|Veracruz, MX|19.5438|-96.9102|America/Mexico_City
+Coatzacoalcos|Veracruz, MX|18.1345|-94.4590|America/Mexico_City
+Poza Rica|Veracruz, MX|20.5333|-97.4500|America/Mexico_City
+Córdoba|Veracruz, MX|18.8833|-96.9333|America/Mexico_City
+Orizaba|Veracruz, MX|18.8511|-97.0997|America/Mexico_City
+Cancún|Quintana Roo, MX|21.1619|-86.8515|America/Cancun
+Playa del Carmen|Quintana Roo, MX|20.6296|-87.0739|America/Cancun
+Chetumal|Quintana Roo, MX|18.5002|-88.2961|America/Cancun
+Cozumel|Quintana Roo, MX|20.5083|-86.9458|America/Cancun
+Villahermosa|Tabasco, MX|17.9892|-92.9475|America/Mexico_City
+Tuxtla Gutiérrez|Chiapas, MX|16.7516|-93.1029|America/Mexico_City
+San Cristóbal de las Casas|Chiapas, MX|16.7370|-92.6376|America/Mexico_City
+Tapachula|Chiapas, MX|14.9089|-92.2625|America/Mexico_City
+Oaxaca de Juárez|Oaxaca, MX|17.0732|-96.7266|America/Mexico_City
+Salina Cruz|Oaxaca, MX|16.1667|-95.2000|America/Mexico_City
+Acapulco|Guerrero, MX|16.8531|-99.8237|America/Mexico_City
+Chilpancingo|Guerrero, MX|17.5514|-99.5006|America/Mexico_City
+Iguala|Guerrero, MX|18.3447|-99.5397|America/Mexico_City
+Zihuatanejo|Guerrero, MX|17.6383|-101.5514|America/Mexico_City
+Cuernavaca|Morelos, MX|18.9186|-99.2342|America/Mexico_City
+Cuautla|Morelos, MX|18.8125|-98.9542|America/Mexico_City
+Pachuca|Hidalgo, MX|20.1011|-98.7591|America/Mexico_City
+Tulancingo|Hidalgo, MX|20.0833|-98.3667|America/Mexico_City
+Tepic|Nayarit, MX|21.5042|-104.8946|America/Mazatlan
+Puerto Vallarta|Jalisco, MX|20.6534|-105.2253|America/Mexico_City
+Zapopan|Jalisco, MX|20.7214|-103.3918|America/Mexico_City
+Tlaquepaque|Jalisco, MX|20.6409|-103.2938|America/Mexico_City
+Colima|Colima, MX|19.2433|-103.7240|America/Mexico_City
+Manzanillo|Colima, MX|19.1138|-104.3383|America/Mexico_City
+Durango|Durango, MX|24.0277|-104.6532|America/Monterrey
+Gómez Palacio|Durango, MX|25.5611|-103.4989|America/Monterrey
+Zacatecas|Zacatecas, MX|22.7709|-102.5832|America/Mexico_City
+Fresnillo|Zacatecas, MX|23.1769|-102.8686|America/Mexico_City
+Campeche|Campeche, MX|19.8301|-90.5349|America/Merida
+Ciudad del Carmen|Campeche, MX|18.6500|-91.8167|America/Merida
+La Paz|Baja California Sur, MX|24.1426|-110.3128|America/Mazatlan
+San José del Cabo|Baja California Sur, MX|23.0631|-109.7020|America/Mazatlan
+Tampico|Tamaulipas, MX|22.2331|-97.8611|America/Monterrey
+Ciudad Victoria|Tamaulipas, MX|23.7369|-99.1411|America/Monterrey
+Reynosa|Tamaulipas, MX|26.0808|-98.2880|America/Matamoros
+Matamoros|Tamaulipas, MX|25.8797|-97.5045|America/Matamoros
+Nuevo Laredo|Tamaulipas, MX|27.4761|-99.5164|America/Matamoros
+Tlaxcala|Tlaxcala, MX|19.3139|-98.2404|America/Mexico_City
+Tehuacán|Puebla, MX|18.4617|-97.3928|America/Mexico_City
+Cholula|Puebla, MX|19.0633|-98.3061|America/Mexico_City
+Buenos Aires|Argentina|-34.6037|-58.3816|America/Argentina/Buenos_Aires
+Córdoba|Argentina|-31.4201|-64.1888|America/Argentina/Cordoba
+Rosario|Argentina|-32.9442|-60.6505|America/Argentina/Cordoba
+Mendoza|Argentina|-32.8895|-68.8458|America/Argentina/Mendoza
+La Plata|Argentina|-34.9215|-57.9545|America/Argentina/Buenos_Aires
+Santiago|Chile|-33.4489|-70.6693|America/Santiago
+Valparaíso|Chile|-33.0472|-71.6127|America/Santiago
+Concepción|Chile|-36.8201|-73.0444|America/Santiago
+Lima|Perú|-12.0464|-77.0428|America/Lima
+Arequipa|Perú|-16.4090|-71.5375|America/Lima
+Trujillo|Perú|-8.1090|-79.0215|America/Lima
+Cusco|Perú|-13.5320|-71.9675|America/Lima
+Bogotá|Colombia|4.7110|-74.0721|America/Bogota
+Medellín|Colombia|6.2442|-75.5812|America/Bogota
+Cali|Colombia|3.4516|-76.5320|America/Bogota
+Barranquilla|Colombia|10.9685|-74.7813|America/Bogota
+Cartagena|Colombia|10.3910|-75.4794|America/Bogota
+Bucaramanga|Colombia|7.1193|-73.1227|America/Bogota
+Caracas|Venezuela|10.4806|-66.9036|America/Caracas
+Maracaibo|Venezuela|10.6317|-71.6406|America/Caracas
+Valencia|Venezuela|10.1620|-68.0077|America/Caracas
+Quito|Ecuador|-0.1807|-78.4678|America/Guayaquil
+Guayaquil|Ecuador|-2.1710|-79.9224|America/Guayaquil
+Cuenca|Ecuador|-2.9001|-79.0059|America/Guayaquil
+La Paz|Bolivia|-16.4897|-68.1193|America/La_Paz
+Santa Cruz de la Sierra|Bolivia|-17.7833|-63.1821|America/La_Paz
+Cochabamba|Bolivia|-17.3895|-66.1568|America/La_Paz
+Asunción|Paraguay|-25.2637|-57.5759|America/Asuncion
+Montevideo|Uruguay|-34.9011|-56.1645|America/Montevideo
+San José|Costa Rica|9.9281|-84.0907|America/Costa_Rica
+Ciudad de Panamá|Panamá|8.9824|-79.5199|America/Panama
+Managua|Nicaragua|12.1149|-86.2362|America/Managua
+San Salvador|El Salvador|13.6929|-89.2182|America/El_Salvador
+Tegucigalpa|Honduras|14.0723|-87.1921|America/Tegucigalpa
+San Pedro Sula|Honduras|15.5042|-88.0250|America/Tegucigalpa
+Ciudad de Guatemala|Guatemala|14.6349|-90.5069|America/Guatemala
+Quetzaltenango|Guatemala|14.8347|-91.5180|America/Guatemala
+La Habana|Cuba|23.1136|-82.3666|America/Havana
+Santo Domingo|República Dominicana|18.4861|-69.9312|America/Santo_Domingo
+Santiago de los Caballeros|República Dominicana|19.4517|-70.6970|America/Santo_Domingo
+San Juan|Puerto Rico|18.4655|-66.1057|America/Puerto_Rico
+São Paulo|Brasil|-23.5505|-46.6333|America/Sao_Paulo
+Río de Janeiro|Brasil|-22.9068|-43.1729|America/Sao_Paulo
+Brasilia|Brasil|-15.7939|-47.8828|America/Sao_Paulo
+Madrid|España|40.4168|-3.7038|Europe/Madrid
+Barcelona|España|41.3874|2.1686|Europe/Madrid
+Valencia|España|39.4699|-0.3763|Europe/Madrid
+Sevilla|España|37.3891|-5.9845|Europe/Madrid
+Zaragoza|España|41.6488|-0.8891|Europe/Madrid
+Málaga|España|36.7213|-4.4214|Europe/Madrid
+Murcia|España|37.9922|-1.1307|Europe/Madrid
+Palma de Mallorca|España|39.5696|2.6502|Europe/Madrid
+Bilbao|España|43.2630|-2.9350|Europe/Madrid
+Alicante|España|38.3452|-0.4810|Europe/Madrid
+Granada|España|37.1773|-3.5986|Europe/Madrid
+Valladolid|España|41.6523|-4.7245|Europe/Madrid
+Vigo|España|42.2406|-8.7207|Europe/Madrid
+A Coruña|España|43.3623|-8.4115|Europe/Madrid
+Santander|España|43.4623|-3.8100|Europe/Madrid
+Pamplona|España|42.8125|-1.6458|Europe/Madrid
+Salamanca|España|40.9701|-5.6635|Europe/Madrid
+Toledo|España|39.8628|-4.0273|Europe/Madrid
+Las Palmas de Gran Canaria|España|28.1235|-15.4363|Atlantic/Canary
+Santa Cruz de Tenerife|España|28.4636|-16.2518|Atlantic/Canary
+Los Ángeles|Estados Unidos|34.0522|-118.2437|America/Los_Angeles
+San Diego|Estados Unidos|32.7157|-117.1611|America/Los_Angeles
+San Francisco|Estados Unidos|37.7749|-122.4194|America/Los_Angeles
+Las Vegas|Estados Unidos|36.1699|-115.1398|America/Los_Angeles
+Phoenix|Estados Unidos|33.4484|-112.0740|America/Phoenix
+Denver|Estados Unidos|39.7392|-104.9903|America/Denver
+Houston|Estados Unidos|29.7604|-95.3698|America/Chicago
+San Antonio|Estados Unidos|29.4241|-98.4936|America/Chicago
+Dallas|Estados Unidos|32.7767|-96.7970|America/Chicago
+El Paso|Estados Unidos|31.7619|-106.4850|America/Denver
+Chicago|Estados Unidos|41.8781|-87.6298|America/Chicago
+Nueva York|Estados Unidos|40.7128|-74.0060|America/New_York
+Miami|Estados Unidos|25.7617|-80.1918|America/New_York
+Atlanta|Estados Unidos|33.7490|-84.3880|America/New_York
+Washington|Estados Unidos|38.9072|-77.0369|America/New_York
+Boston|Estados Unidos|42.3601|-71.0589|America/New_York
+Seattle|Estados Unidos|47.6062|-122.3321|America/Los_Angeles
+Toronto|Canadá|43.6532|-79.3832|America/Toronto
+Montreal|Canadá|45.5019|-73.5674|America/Toronto
+Londres|Reino Unido|51.5074|-0.1278|Europe/London
+París|Francia|48.8566|2.3522|Europe/Paris
+Roma|Italia|41.9028|12.4964|Europe/Rome
+Berlín|Alemania|52.5200|13.4050|Europe/Berlin
+Lisboa|Portugal|38.7223|-9.1393|Europe/Lisbon
+Ámsterdam|Países Bajos|52.3676|4.9041|Europe/Amsterdam
+Bruselas|Bélgica|50.8503|4.3517|Europe/Brussels
+Zúrich|Suiza|47.3769|8.5417|Europe/Zurich
+Viena|Austria|48.2082|16.3738|Europe/Vienna
+Atenas|Grecia|37.9838|23.7275|Europe/Athens
+Estambul|Turquía|41.0082|28.9784|Europe/Istanbul
+Moscú|Rusia|55.7558|37.6173|Europe/Moscow
+El Cairo|Egipto|30.0444|31.2357|Africa/Cairo
+Casablanca|Marruecos|33.5731|-7.5898|Africa/Casablanca
+Lagos|Nigeria|6.5244|3.3792|Africa/Lagos
+Johannesburgo|Sudáfrica|-26.2041|28.0473|Africa/Johannesburg
+Dubái|Emiratos Árabes Unidos|25.2048|55.2708|Asia/Dubai
+Bombay|India|19.0760|72.8777|Asia/Kolkata
+Nueva Delhi|India|28.6139|77.2090|Asia/Kolkata
+Bangkok|Tailandia|13.7563|100.5018|Asia/Bangkok
+Pekín|China|39.9042|116.4074|Asia/Shanghai
+Shanghái|China|31.2304|121.4737|Asia/Shanghai
+Hong Kong|China|22.3193|114.1694|Asia/Hong_Kong
+Tokio|Japón|35.6762|139.6503|Asia/Tokyo
+Seúl|Corea del Sur|37.5665|126.9780|Asia/Seoul
+Sídney|Australia|-33.8688|151.2093|Australia/Sydney
+Melbourne|Australia|-37.8136|144.9631|Australia/Melbourne
+Auckland|Nueva Zelanda|-36.8485|174.7633|Pacific/Auckland
+`.trim().split("\n").map(l => {
+  const p = l.split("|");
+  return {n:p[0], r:p[1], lat:+p[2], lon:+p[3], tz:p[4], etiqueta:`${p[0]}, ${p[1]}`};
+});
+
+/* --- zona horaria: el navegador trae la base histórica (incluye horarios de verano) --- */
+function utcMs(y,mo,d,h,mi){
+  const t = Date.UTC(y, mo-1, d, h, mi, 0);
+  if(y >= 0 && y < 100){ const f = new Date(t); f.setUTCFullYear(y); return f.getTime(); }
+  return t;
+}
+function desfaseZona(tz, ms){
+  const dtf = new Intl.DateTimeFormat("en-US",{timeZone:tz, hourCycle:"h23",
+    year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit"});
+  const p = Object.fromEntries(dtf.formatToParts(new Date(ms)).map(o => [o.type, o.value]));
+  return utcMs(+p.year, +p.month, +p.day, +p.hour, +p.minute) + (+p.second)*1000 - ms;
+}
+function localAUTC(y,mo,d,h,mi,tz){
+  const base = utcMs(y,mo,d,h,mi);
+  let t = base;
+  for(let i=0;i<4;i++) t = base - desfaseZona(tz, t);
+  return t;
+}
+function textoDesfase(tz, ms){
+  const min = Math.round(desfaseZona(tz, ms)/60000);
+  const s = min < 0 ? "−" : "+", a = Math.abs(min);
+  return `UTC${s}${String(Math.floor(a/60)).padStart(2,"0")}:${String(a%60).padStart(2,"0")}`;
+}
+
+/* --- levantar la carta --- */
+let carta = null;
+function levantarCarta(d){
+  const ms = localAUTC(d.anio, d.mes, d.dia, d.hora, d.min, d.tz);
+  const jd = julian(ms), T = siglos(jd);
+
+  const cuerpos = ORDEN_EFEM.map(id => {
+    const lon = lonGeo(id, T), antes = lonGeo(id, T - 1/36525);
+    return {id, nombre:porId[id].nombre, glifo:porId[id].glifo, color:porId[id].color,
+            lon, retro: (((lon - antes + 540) % 360) - 180) < 0, tipo:"astro"};
+  });
+  const nn = nodoNorte(T);
+  const puntos = [
+    {id:"nodoN", nombre:PUNTOS.nodoN.nombre, glifo:PUNTOS.nodoN.glifo, color:PUNTOS.nodoN.color, lon:nn, retro:true, tipo:"punto"},
+    {id:"nodoS", nombre:PUNTOS.nodoS.nombre, glifo:PUNTOS.nodoS.glifo, color:PUNTOS.nodoS.color, lon:mod360(nn+180), retro:true, tipo:"punto"},
+    {id:"lilith",nombre:PUNTOS.lilith.nombre,glifo:PUNTOS.lilith.glifo,color:PUNTOS.lilith.color,lon:lilithMedia(T), retro:false, tipo:"punto"}
+  ];
+
+  let ang = null, cusp = null, aviso = null, fortuna = null, diurna = null;
+  if(d.horaConocida){
+    ang = angulos(jd, d.lat, d.lon);
+    const r = cuspides(d.sistema, ang);
+    cusp = r.c; aviso = r.aviso || null; d.sistemaReal = r.sistema;
+    const sol = cuerpos[0], luna = cuerpos[1];
+    const casaSol = casaDe(sol.lon, cusp);
+    diurna = casaSol >= 7 && casaSol <= 12;
+    const lonFort = diurna ? mod360(ang.asc + luna.lon - sol.lon) : mod360(ang.asc + sol.lon - luna.lon);
+    fortuna = {id:"fortuna", nombre:PUNTOS.fortuna.nombre, glifo:PUNTOS.fortuna.glifo,
+               color:PUNTOS.fortuna.color, lon:lonFort, retro:false, tipo:"punto"};
+    puntos.push(fortuna);
+  }
+
+  const paraAspectos = cuerpos.concat(puntos.filter(p => p.id === "nodoN"));
+  if(ang){
+    paraAspectos.push({id:"asc", nombre:"Ascendente", glifo:PUNTOS.asc.glifo, color:PUNTOS.asc.color, lon:ang.asc, tipo:"angulo"});
+    paraAspectos.push({id:"mc",  nombre:"Medio Cielo", glifo:PUNTOS.mc.glifo,  color:PUNTOS.mc.color,  lon:ang.mc,  tipo:"angulo"});
+  }
+  const aspectos = calculaAspectos(paraAspectos, d.factorOrbe);
+
+  carta = {datos:d, ms, jd, cuerpos, puntos, ang, cusp, aspectos, aviso, diurna};
+  return carta;
+}
+
+/* --- dibujo de la carta: tinta sobre papel --- */
+const PAPEL = {
+  fondo:"#F4F0E6", borde:"#CFC7B4", ticks:"#00000026", casa:"#00000018", eje:"#A8801F",
+  tinta:"#22212B", suave:"#6B6A78", acento:"#8A6A22", caja:"#F4F0E6E6",
+  el:{fuego:"#B14A26", tierra:"#6B733F", aire:"#5A6C8C", agua:"#3E5D8A"},
+  asp:{"a-oro":"#9A7420AA","a-rojo":"#C0472AAA","a-azul":"#2F5F9EAA","a-lila":"#6B57A888"}
+};
+
+function dibujaNatal(){
+  if(!carta){ return; }
+  const panelEl = document.getElementById("cartaPanel");
+  const puesto = panelEl.classList.contains("abierto") ? panelEl.getBoundingClientRect() : null;
+  const abajo = W <= 620 && puesto;
+  const altoLibre = abajo ? Math.max(160, H - puesto.height) : H;
+  const anchoLibre = abajo ? W : Math.max(260, W - (puesto ? puesto.width : 0));
+  const [cx, cy] = [anchoLibre/2 + natalPan.x, altoLibre/2 + natalPan.y];
+  const R = Math.min(anchoLibre, altoLibre)/2 * (abajo ? 0.9 : 0.94) * zoom;
+  pintaRueda(ctx, cx, cy, R, true, atacirActivo ? capaAtacir() : null);
+}
+
+function pintaRueda(g, cx, cy, R, vivo, capa){
+  const {ang, cusp, cuerpos, puntos, aspectos} = carta;
+  const giro = ang ? ang.asc : 0;
+  const aPant = lon => (180 - mod360(lon - giro)) * RAD;
+  const rExt = R, rInt = R*0.845, rCasa = R*0.30, rAsp = R*0.285;
+
+  // anillo de signos
+  for(let i=0;i<12;i++){
+    const a0 = aPant(i*30), a1 = aPant(i*30+30), col = PAPEL.el[SIGNOS[i].el];
+    g.beginPath(); g.arc(cx,cy,rExt,a1,a0); g.arc(cx,cy,rInt,a0,a1,true); g.closePath();
+    g.fillStyle = col+"26"; g.fill();
+    g.strokeStyle = PAPEL.borde; g.lineWidth = 1; g.stroke();
+    const am = aPant(i*30+15), rm = (rExt+rInt)/2;
+    g.fillStyle = col; g.textAlign="center"; g.textBaseline="middle";
+    g.font = `${Math.round(R*0.062)}px Spectral, serif`;
+    g.fillText(SIGNOS[i].g, cx+Math.cos(am)*rm, cy+Math.sin(am)*rm);
+  }
+  // grados
+  g.strokeStyle = PAPEL.ticks;
+  for(let d=0; d<360; d+=5){
+    const a = aPant(d), l = d%30===0 ? R*0.045 : R*0.018;
+    g.beginPath();
+    g.moveTo(cx+Math.cos(a)*rInt, cy+Math.sin(a)*rInt);
+    g.lineTo(cx+Math.cos(a)*(rInt-l), cy+Math.sin(a)*(rInt-l));
+    g.stroke();
+  }
+
+  // casas
+  if(cusp){
+    for(let i=1;i<=12;i++){
+      const a = aPant(cusp[i]), eje = (i===1||i===10||i===4||i===7);
+      g.strokeStyle = eje ? PAPEL.eje+"CC" : PAPEL.casa;
+      g.lineWidth = eje ? 1.6 : 1;
+      g.beginPath();
+      g.moveTo(cx+Math.cos(a)*rCasa, cy+Math.sin(a)*rCasa);
+      g.lineTo(cx+Math.cos(a)*rInt,  cy+Math.sin(a)*rInt);
+      g.stroke();
+      const mitad = mod360(cusp[i===12?1:i+1] - cusp[i])/2;
+      const am = aPant(cusp[i] + mitad);
+      const nx = cx+Math.cos(am)*(rCasa+R*0.055), ny = cy+Math.sin(am)*(rCasa+R*0.055);
+      g.fillStyle = PAPEL.caja;
+      g.beginPath(); g.arc(nx, ny, Math.max(9,R*0.028), 0, 7); g.fill();
+      g.fillStyle = PAPEL.suave; g.textAlign="center"; g.textBaseline="middle";
+      g.font = `${Math.max(9,Math.round(R*0.03))}px "IBM Plex Mono", monospace`;
+      g.fillText(ROMANOS[i], nx, ny);
+    }
+    for(const [lon, txt] of [[ang.asc,"AC"],[ang.mc,"MC"],[mod360(ang.asc+180),"DC"],[mod360(ang.mc+180),"IC"]]){
+      const a = aPant(lon);
+      g.fillStyle = PAPEL.acento; g.textAlign="center"; g.textBaseline="middle";
+      g.font = `600 ${Math.max(10,Math.round(R*0.032))}px "IBM Plex Mono", monospace`;
+      g.fillText(txt, cx+Math.cos(a)*(rExt+R*0.045), cy+Math.sin(a)*(rExt+R*0.045));
+    }
+  }
+
+  // aspectos
+  for(const {A,B,asp} of (capa ? [] : aspectos)){
+    if(A.tipo === "angulo" || B.tipo === "angulo") continue;
+    const a1 = aPant(A.lon), a2 = aPant(B.lon);
+    g.strokeStyle = PAPEL.asp[asp.cl];
+    g.lineWidth = asp.mayor ? 1.2 : 0.8;
+    g.setLineDash(asp.mayor ? [] : [3,4]);
+    g.beginPath();
+    g.moveTo(cx+Math.cos(a1)*rAsp, cy+Math.sin(a1)*rAsp);
+    g.lineTo(cx+Math.cos(a2)*rAsp, cy+Math.sin(a2)*rAsp);
+    g.stroke();
+  }
+  g.setLineDash([]);
+  g.strokeStyle = PAPEL.borde; g.lineWidth = 1;
+  g.beginPath(); g.arc(cx,cy,rAsp,0,7); g.stroke();
+  g.beginPath(); g.arc(cx,cy,rCasa,0,7); g.stroke();
+  g.beginPath(); g.arc(cx,cy,rExt,0,7); g.stroke();
+
+  // astros
+  const colocados = [];
+  const todos = cuerpos.concat(puntos);
+  for(const c of todos){
+    let radio = capa ? R*0.515 : R*0.70;
+    while(colocados.some(u => Math.abs(((u.lon-c.lon+540)%360)-180) < 9 && Math.abs(u.r-radio) < R*0.065)) radio -= R*(capa ? 0.062 : 0.082);
+    colocados.push({lon:c.lon, r:radio});
+    const a = aPant(c.lon), x = cx+Math.cos(a)*radio, y = cy+Math.sin(a)*radio;
+    const act = vivo && (seleccion === c.id || sobre === c.id);
+    const tinta = mezcla(c.color, "#000000", 0.52);
+    g.strokeStyle = tinta + "44"; g.lineWidth = 1;
+    g.beginPath();
+    g.moveTo(cx+Math.cos(a)*(rInt-R*0.008), cy+Math.sin(a)*(rInt-R*0.008));
+    g.lineTo(x,y); g.stroke();
+    if(act){
+      g.fillStyle = "#F7EDD3";
+      g.beginPath(); g.arc(x, y, R*0.042, 0, 7); g.fill();
+    }
+    g.fillStyle = act ? PAPEL.acento : tinta;
+    g.textAlign="center"; g.textBaseline="middle";
+    pintaGlifo(g, c.glifo, x, y, Math.max(13, Math.round(R*0.055)));
+    g.shadowBlur = 0;
+    if(R > 190){
+      const z = posZod(c.lon);
+      g.fillStyle = act ? PAPEL.acento : PAPEL.suave;
+      g.font = `${Math.max(9,Math.round(R*0.024))}px "IBM Plex Mono", monospace`;
+      g.fillText(z.corto + (c.retro && c.tipo==="astro" ? " ℞" : ""), x, y + R*0.05);
+    }
+    if(vivo) blancos.push({id:c.id, x, y, r:Math.max(15,R*0.045)});
+  }
+
+  // anillo del atacir
+  if(capa){
+    g.strokeStyle = PAPEL.borde; g.lineWidth = 1;
+    g.beginPath(); g.arc(cx, cy, R*0.635, 0, 7); g.stroke();
+    const puestos = [];
+    for(const m of capa.movidos){
+      let radio = R*0.79;
+      while(puestos.some(u => Math.abs(((u.lon-m.lon+540)%360)-180) < 8 && Math.abs(u.r-radio) < R*0.045)) radio -= R*0.048;
+      puestos.push({lon:m.lon, r:radio});
+      const a = aPant(m.lon), x = cx+Math.cos(a)*radio, y = cy+Math.sin(a)*radio;
+      g.strokeStyle = PAPEL.eje + "44"; g.lineWidth = 1;
+      g.beginPath();
+      g.moveTo(cx+Math.cos(a)*(rInt-R*0.008), cy+Math.sin(a)*(rInt-R*0.008));
+      g.lineTo(x, y); g.stroke();
+      g.fillStyle = PAPEL.acento; g.textAlign = "center"; g.textBaseline = "middle";
+      pintaGlifo(g, m.glifo, x, y, Math.max(12, Math.round(R*0.05)));
+      if(R > 190){
+        const z = posZod(m.lon);
+        g.fillStyle = PAPEL.suave;
+        g.font = `${Math.max(9,Math.round(R*0.022))}px "IBM Plex Mono", monospace`;
+        g.fillText(z.corto, x, y + R*0.045);
+      }
+    }
+    for(const c of capa.cerca){
+      const a1 = aPant(mod360(c.P.lon + capa.arco)), a2 = aPant(c.N.lon);
+      g.strokeStyle = TINTA_ASP[c.asp.cl] + "BB"; g.lineWidth = 1.5;
+      g.beginPath();
+      g.moveTo(cx+Math.cos(a1)*rAsp, cy+Math.sin(a1)*rAsp);
+      g.lineTo(cx+Math.cos(a2)*rAsp, cy+Math.sin(a2)*rAsp);
+      g.stroke();
+    }
+  }
+
+  // encabezado dentro de la rueda
+  g.textAlign="center"; g.textBaseline="middle";
+  g.fillStyle = PAPEL.tinta; g.font = `${Math.max(11,Math.round(R*0.05))}px Cinzel, serif`;
+  g.fillText(carta.datos.nombre || "Carta natal", cx, cy - R*0.055);
+  g.fillStyle = PAPEL.suave; g.font = `${Math.max(8,Math.round(R*0.026))}px "IBM Plex Mono", monospace`;
+  g.fillText(carta.datos.resumenFecha, cx, cy + R*0.02);
+  g.fillText(carta.datos.lugarTexto, cx, cy + R*0.065);
+  if(capa){
+    g.fillStyle = PAPEL.acento;
+    g.font = `${Math.max(8,Math.round(R*0.024))}px "IBM Plex Mono", monospace`;
+    g.fillText(`${capa.clave.n.split(" · ")[0]} · ${fmtCorta.format(new Date(capa.fecha))}`, cx, cy + R*0.115);
+  }
+}
+
+
+/* --- exportar la carta como imagen --- */
+const NOMBRE_SISTEMA = {placidio:"Placidio", signos:"signos enteros", igual:"casas iguales", porfirio:"Porfirio"};
+const TINTA_ASP = {"a-oro":"#9A7420","a-rojo":"#C0472A","a-azul":"#2F5F9E","a-lila":"#6B57A8"};
+
+function filaHoja(g, y, glifo, nombre, texto, casa, x, ancho){
+  g.textAlign = "center"; g.textBaseline = "middle"; g.fillStyle = PAPEL.acento;
+  pintaGlifo(g, glifo, x + 18, y, 27);
+  g.textAlign = "left"; g.fillStyle = PAPEL.tinta;
+  g.font = "26px Spectral, Georgia, serif";
+  g.fillText(nombre, x + 52, y);
+  g.font = '24px "IBM Plex Mono", monospace';
+  g.fillText(texto, x + 245, y);
+  g.textAlign = "right"; g.fillStyle = PAPEL.suave;
+  g.font = '23px "IBM Plex Mono", monospace';
+  g.fillText(casa, x + ancho, y);
+}
+function rotuloHoja(g, y, texto, x, ancho){
+  g.textAlign = "left"; g.textBaseline = "middle"; g.fillStyle = PAPEL.acento;
+  g.font = '21px "IBM Plex Mono", monospace';
+  g.fillText(texto, x, y);
+  g.strokeStyle = PAPEL.borde; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(x, y + 20); g.lineTo(x + ancho, y + 20); g.stroke();
+}
+async function fabricaHoja(modo){
+  if(!carta) return null;
+  try { await document.fonts.ready; } catch(e){}
+  const d = carta.datos;
+
+  if(modo === "rueda"){
+    const L = 1800, c = document.createElement("canvas");
+    c.width = L; c.height = L;
+    const g = c.getContext("2d");
+    g.fillStyle = PAPEL.fondo; g.fillRect(0, 0, L, L);
+    pintaRueda(g, L/2, L/2, L*0.452, false, atacirActivo ? capaAtacir() : null);
+    return c;
+  }
+
+  const margen = 60, lado = 1500, colX = margen + lado + 70, colW = 640;
+  const ancho = colX + colW + margen;
+  const conAngulos = carta.ang ? 2 : 0;
+  const nFilas = carta.cuerpos.length + carta.puntos.length + conAngulos;
+  const altoCol = 60 + nFilas*46 + 60 + 60 + carta.aspectos.length*36;
+  const alto = Math.max(230 + lado + margen, 230 + altoCol + margen);
+  const c = document.createElement("canvas");
+  c.width = ancho; c.height = alto;
+  const g = c.getContext("2d");
+  g.fillStyle = PAPEL.fondo; g.fillRect(0, 0, ancho, alto);
+
+  // encabezado
+  g.textAlign = "left"; g.textBaseline = "alphabetic"; g.fillStyle = PAPEL.tinta;
+  g.font = "58px Cinzel, Georgia, serif";
+  g.fillText(d.nombre || "Carta natal", margen, 96);
+  g.fillStyle = PAPEL.suave; g.font = '25px "IBM Plex Mono", monospace';
+  g.fillText(`${d.resumenFecha} · ${d.lugarTexto}`, margen, 140);
+  const detalle = carta.ang
+    ? `${d.husoTexto} · casas ${NOMBRE_SISTEMA[d.sistemaReal || d.sistema]} · carta ${carta.diurna ? "diurna" : "nocturna"}`
+    : `${d.husoTexto} · sin hora: no hay Ascendente ni casas`;
+  g.fillText(detalle, margen, 176);
+  g.strokeStyle = PAPEL.borde; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(margen, 200); g.lineTo(ancho - margen, 200); g.stroke();
+
+  pintaRueda(g, margen + lado/2, 230 + lado/2, lado*0.465, false, atacirActivo ? capaAtacir() : null);
+
+  // columna de datos
+  let y = 250;
+  rotuloHoja(g, y, "POSICIONES", colX, colW); y += 52;
+  if(carta.ang){
+    for(const [gl, nom, lon] of [[PUNTOS.asc.glifo,"Ascendente",carta.ang.asc],[PUNTOS.mc.glifo,"Medio Cielo",carta.ang.mc]]){
+      const z = posZod(lon);
+      filaHoja(g, y, gl, nom, `${z.texto} ${z.signo.n}`, "—", colX, colW); y += 46;
+    }
+  }
+  for(const c2 of carta.cuerpos.concat(carta.puntos)){
+    const z = posZod(c2.lon), casa = carta.cusp ? ROMANOS[casaDe(c2.lon, carta.cusp)] : "—";
+    filaHoja(g, y, c2.glifo, c2.nombre, `${z.texto} ${z.signo.n}${c2.retro && c2.tipo === "astro" ? " ℞" : ""}`, casa, colX, colW);
+    y += 46;
+  }
+  y += 46;
+  rotuloHoja(g, y, "ASPECTOS", colX, colW); y += 50;
+  for(const {A, B, asp, dif} of carta.aspectos){
+    g.textAlign = "center"; g.textBaseline = "middle"; g.fillStyle = PAPEL.tinta;
+    pintaGlifo(g, A.glifo, colX + 16, y, 25);
+    g.fillStyle = TINTA_ASP[asp.cl]; g.font = "25px Spectral, Georgia, serif";
+    g.fillText(asp.g, colX + 54, y);
+    g.fillStyle = PAPEL.tinta;
+    pintaGlifo(g, B.glifo, colX + 92, y, 25);
+    g.textAlign = "left"; g.fillStyle = PAPEL.suave; g.font = "21px Spectral, Georgia, serif";
+    g.fillText(`${asp.n} · ${A.nombre} y ${B.nombre}`, colX + 124, y);
+    g.textAlign = "right"; g.font = '20px "IBM Plex Mono", monospace';
+    g.fillText(gradoMin(dif), colX + colW, y);
+    y += 36;
+  }
+  g.textAlign = "left"; g.fillStyle = PAPEL.borde; g.font = '18px "IBM Plex Mono", monospace';
+  g.fillText("Astroplanetario · zodiaco tropical · posiciones geocéntricas", margen, alto - 26);
+  return c;
+}
+function descargaHoja(modo){
+  fabricaHoja(modo).then(c => {
+    if(!c) return;
+    c.toBlob(b => {
+      if(!b) return;
+      const u = URL.createObjectURL(b), a = document.createElement("a");
+      const base = ((carta && carta.datos.nombre) || "carta-natal").replace(/[^\wÁÉÍÓÚÑáéíóúñ -]/g, "").trim() || "carta-natal";
+      a.href = u; a.download = `${base}${modo === "rueda" ? " - rueda" : " - hoja completa"}.png`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(u), 4000);
+    });
+  });
+}
+
+/* --- panel de resultados --- */
+let filaAbierta = null;
+function pintaCarta(){
+  if(!carta) return;
+  const {cuerpos, puntos, ang, cusp, aspectos, datos} = carta;
+
+  // posiciones
+  const filas = [];
+  if(ang){
+    filas.push(filaSimple(PUNTOS.asc.glifo, "Ascendente", ang.asc, null, false, "asc"));
+    filas.push(filaSimple(PUNTOS.mc.glifo, "Medio Cielo", ang.mc, null, false, "mc"));
+  }
+  for(const c of cuerpos) filas.push(filaAstro(c, cusp));
+  for(const p of puntos)  filas.push(filaSimple(p.glifo, p.nombre, p.lon, cusp ? casaDe(p.lon,cusp) : null, false, p.id));
+
+  document.getElementById("hojaPos").innerHTML = `
+    ${carta.aviso ? `<p class="aviso" style="margin:.8rem 0 0">${carta.aviso}</p>` : ""}
+    ${!datos.horaConocida ? `<p class="aviso" style="margin:.8rem 0 0">Carta sin hora: no hay Ascendente ni casas. Los grados de la Luna son aproximados.</p>` : ""}
+    <table class="posiciones"><thead><tr>
+      <th></th><th>Astro</th><th>Posición</th><th style="text-align:right">Casa</th>
+    </tr></thead><tbody>${filas.join("")}</tbody></table>`;
+
+  // aspectos
+  document.getElementById("hojaAsp").innerHTML = aspectos.length ? `
+    <label class="marcar" style="margin:.8rem 0 .4rem"><input type="checkbox" id="soloMayores"> Ocultar aspectos menores</label>
+    <ul class="aspectos con-menores" id="listaAspectos">${aspectos.map(({A,B,asp,dif}) => `
+      <li class="${asp.mayor ? "mayor" : "menor"}">
+        <span class="cg">${gh(A.glifo)}</span>
+        <span class="as ${asp.cl}">${asp.g}</span>
+        <span class="cg">${gh(B.glifo)}</span>
+        <span class="nom">${asp.n} · ${A.nombre} y ${B.nombre}</span>
+        <span class="orbe">${gradoMin(dif)}</span>
+      </li>`).join("")}</ul>
+    <p class="aviso" style="margin-top:1rem">Orbe = distancia al aspecto exacto. Cuanto menor, más fuerte. Las líneas continuas del centro son aspectos mayores; las punteadas, menores.</p>`
+    : `<p class="aviso" style="margin-top:1rem">No hay aspectos dentro de los orbes elegidos.</p>`;
+
+  // casas
+  document.getElementById("hojaCasas").innerHTML = cusp ? `
+    <div class="cuadro">
+      <div><span class="k">Sistema</span><span class="v">${({placidio:"Placidio",signos:"Signos enteros",igual:"Casas iguales",porfirio:"Porfirio"})[datos.sistemaReal||datos.sistema]}</span></div>
+      <div><span class="k">Carta</span><span class="v">${carta.diurna ? "Diurna" : "Nocturna"}</span></div>
+      <div><span class="k">Latitud</span><span class="v">${datos.lat.toFixed(4)}°</span></div>
+      <div><span class="k">Longitud</span><span class="v">${datos.lon.toFixed(4)}°</span></div>
+      <div><span class="k">Huso aplicado</span><span class="v">${datos.husoTexto}</span></div>
+    </div>
+    <table class="posiciones"><thead><tr><th>Casa</th><th>Cúspide</th><th>Regente</th><th></th></tr></thead><tbody>
+      ${Array.from({length:12},(_,k)=>{
+        const i=k+1, z=posZod(cusp[i]);
+        const reg = REGENTE_TRAD[z.signo.n];
+        return `<tr><td class="ccasa" style="text-align:left">${ROMANOS[i]}</td>
+          <td class="cgrado">${z.texto}</td>
+          <td class="csigno">${z.signo.g} ${z.signo.n}</td>
+          <td class="cg" title="Regente tradicional: ${porId[reg].nombre}">${gh(porId[reg].glifo)}</td></tr>
+          <tr class="detalle"><td colspan="4">${CASAS_SIGNIFICADO[i]}</td></tr>`;
+      }).join("")}
+    </tbody></table>`
+    : `<p class="aviso" style="margin-top:1rem">Sin hora de nacimiento no se pueden calcular las casas. Si el consultante la averigua (acta de nacimiento o registro civil), vuelve a levantar la carta.</p>`;
+
+  pintaSignificados();
+  if(atacirActivo) pintaAtacir();
+  enlazaFilas();
+  const cb = document.getElementById("soloMayores");
+  if(cb) cb.addEventListener("change", () => {
+    document.getElementById("listaAspectos").classList.toggle("con-menores", !cb.checked);
+  });
+}
+const REGENTE_TRAD = {
+  Aries:"marte", Tauro:"venus", "Géminis":"mercurio", "Cáncer":"luna", Leo:"sol", Virgo:"mercurio",
+  Libra:"venus", Escorpio:"marte", Sagitario:"jupiter", Capricornio:"saturno", Acuario:"saturno", Piscis:"jupiter"
+};
+function filaSimple(glifo, nombre, lon, casa, retro, id){
+  const z = posZod(lon);
+  return `<tr class="astro-fila" data-id="${id}">
+    <td class="cg">${gh(glifo)}</td>
+    <td>${nombre}</td>
+    <td><span class="cgrado">${z.texto}</span> <span class="csigno">${z.signo.g} ${z.signo.n}</span>${retro?' <span class="crx">℞</span>':""}</td>
+    <td class="ccasa">${casa?ROMANOS[casa]:"—"}</td></tr>`;
+}
+function filaAstro(c, cusp){
+  const z = posZod(c.lon), casa = cusp ? casaDe(c.lon, cusp) : null;
+  const dig = dignidadDe(c.id, z.signo.n);
+  const a = porId[c.id];
+  const detalle = `<b>${a.nombre} en ${z.signo.n}</b>${casa?` · casa ${ROMANOS[casa]}`:""}${dig?` <span class="dignidad ${dig.c}">${dig.t}</span>`:""}<br>
+    ${a.claves.slice(0,3).join(", ")} — ${casa?CASAS_SIGNIFICADO[casa].toLowerCase():"sin casa (falta la hora)"}.<br>
+    Regencia tradicional: ${a.tradicional}. ${c.retro?"Retrógrado en el nacimiento.":""}`;
+  return `<tr class="astro-fila" data-id="${c.id}">
+      <td class="cg">${gh(c.glifo)}</td>
+      <td>${c.nombre}</td>
+      <td><span class="cgrado">${z.texto}</span> <span class="csigno">${z.signo.g} ${z.signo.n}</span>${c.retro?' <span class="crx">℞</span>':""}</td>
+      <td class="ccasa">${casa?ROMANOS[casa]:"—"}</td>
+    </tr>
+    <tr class="detalle" data-detalle="${c.id}" hidden><td colspan="4">${detalle}</td></tr>`;
+}
+function enlazaFilas(){
+  document.querySelectorAll("#hojaPos tr.astro-fila").forEach(tr => {
+    tr.addEventListener("click", () => marcaFila(tr.dataset.id, true));
+  });
+}
+function marcaFila(id, alterna){
+  const hoja = document.getElementById("hojaPos");
+  hoja.querySelectorAll("tr.astro-fila").forEach(t => t.classList.toggle("activa", t.dataset.id === id));
+  hoja.querySelectorAll("tr.detalle").forEach(t => {
+    const mio = t.dataset.detalle === id;
+    t.hidden = !mio || (alterna && filaAbierta === id);
+  });
+  filaAbierta = (alterna && filaAbierta === id) ? null : id;
+  seleccion = id;
+  const fila = hoja.querySelector(`tr.astro-fila[data-id="${id}"]`);
+  if(fila) fila.scrollIntoView({block:"nearest", behavior:"smooth"});
+}
+
+
+/* --- significados generales, para que el alumno se oriente --- */
+const NOTA_PUNTO = {
+  nodoN:"Hacia dónde crecer: lo que todavía no se domina y hay que practicar a propósito.",
+  nodoS:"Lo que ya se trae sabido. Cómodo, y por eso fácil de repetir de más.",
+  lilith:"La parte que no se acomoda ni negocia: incomoda, y no se rinde.",
+  fortuna:"Donde el cuerpo y el ánimo se juntan: un lugar de bienestar concreto."
+};
+function bloqueSentido(c, cusp){
+  const idx = Math.floor(mod360(c.lon)/30), z = SIGNOS[idx];
+  const casa = cusp ? casaDe(c.lon, cusp) : null;
+  const dig = dignidadDe(c.id, z.n);
+  const enSigno = EN_SIGNO[c.id] ? EN_SIGNO[c.id][idx] : NOTA_PUNTO[c.id];
+  const enCasa = (EN_CASA[c.id] && casa) ? EN_CASA[c.id][casa-1] : null;
+  return `<div class="sent">
+    <h3><span class="cg">${gh(c.glifo)}</span> ${c.nombre} en ${z.n}${casa ? ` <em>· casa ${ROMANOS[casa]}</em>` : ""}
+      ${dig ? `<span class="dignidad ${dig.c}">${dig.t}</span>` : ""}</h3>
+    <p><b>En el signo.</b> ${enSigno}</p>
+    ${enCasa ? `<p><b>En la casa.</b> ${enCasa}</p>` : (casa ? `<p><b>En la casa.</b> ${CASAS_SIGNIFICADO[casa]}.</p>` : "")}
+  </div>`;
+}
+function pintaSignificados(){
+  const {cuerpos, puntos, cusp, ang} = carta;
+  const asc = ang ? (() => {
+    const i = Math.floor(mod360(ang.asc)/30);
+    return `<div class="sent">
+      <h3><span class="cg">AC</span> Ascendente en ${SIGNOS[i].n}</h3>
+      <p>${ASC_SIGNO[i]}</p>
+      <p class="pie-sent">Es la manera de aparecer y de arrancar, no el fondo del carácter: eso lo dicen el Sol y la Luna.</p>
+    </div>`;
+  })() : `<p class="aviso" style="margin:.8rem 0 0">Sin hora de nacimiento no hay Ascendente ni casas, así que solo se leen los signos.</p>`;
+
+  document.getElementById("hojaSent").innerHTML = `
+    <p class="aviso" style="margin:.85rem 0 .2rem">Lecturas breves para orientarse. Son puntos de partida: en una carta real, cada pieza se matiza con las demás.</p>
+    ${asc}
+    <div class="rotulo">Planetas</div>
+    ${cuerpos.map(c => bloqueSentido(c, cusp)).join("")}
+    <div class="rotulo">Puntos calculados</div>
+    ${puntos.map(c => bloqueSentido(c, cusp)).join("")}
+    <div class="rotulo">Qué dice cada aspecto</div>
+    <dl class="dignidades">
+      ${Object.entries(SENTIDO_ASPECTO).map(([k,v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("")}
+    </dl>`;
+}
+
+/* ===================== Atacires =====================
+   Progresión de clave fija: toda la carta avanza a velocidad constante.
+   El punto movido es el promisor; el punto natal que alcanza, el significador.
+   Claves nombradas por los años que tarda la vuelta completa de 360°. */
+const CLAVES_ATACIR = [
+  {grupo:"Atacires", claves:[
+    {id:"a5",   n:"Atacir 5",   dias:5.1},
+    {id:"a12",  n:"Atacir 12",  dias:12.175},
+    {id:"a13",  n:"Atacir 13",  dias:13.2},
+    {id:"a15",  n:"Atacir 15",  dias:15.8},
+    {id:"a25",  n:"Atacir 25",  dias:25.36},
+    {id:"a45",  n:"Atacir 45",  dias:45.625},
+    {id:"a60",  n:"Atacir 60",  dias:60.875},
+    {id:"a64",  n:"Atacir 64",  dias:64.9},
+    {id:"a72",  n:"Atacir 72",  dias:73},
+    {id:"a84",  n:"Atacir 84",  dias:85.225},
+    {id:"a96",  n:"Atacir 96",  dias:97.4},
+    {id:"a120", n:"Atacir 120", dias:121.666},
+    {id:"a144", n:"Atacir 144", dias:146},
+    {id:"a156", n:"Atacir 156", dias:158.8},
+    {id:"a360", n:"Atacir 360", dias:365.2}
+  ]},
+  {grupo:"Otras claves fijas", claves:[
+    {id:"prec",  n:"Precesión · 1° por 72 años",     dias:26297.44},
+    {id:"mes",   n:"1° por mes · 12° por año",       dias:30.4369},
+    {id:"d3",    n:"3° por año · 30° en 10 años",    dias:121.747},
+    {id:"d30",   n:"30° por año",                    dias:12.1747},
+    {id:"d360",  n:"360° por año",                   dias:1.01456},
+    {id:"dia1",  n:"1° por día",                     dias:1},
+    {id:"dia2",  n:"1° cada 2 días",                 dias:2},
+    {id:"d30dia",n:"30° por día",                    dias:0.0333333}
+  ]},
+  {grupo:"Arco solar", claves:[
+    {id:"naibod", n:"Naibod · 0°59′08″ por año", dias:370.59},
+    {id:"solreal",n:"Arco solar real · 1 día = 1 año", solar:true}
+  ]}
+];
+const TODAS_CLAVES = CLAVES_ATACIR.flatMap(g => g.claves);
+const ANG_ATACIR = [
+  {n:"Conjunción", g:"☌︎", a:0,   cl:"a-oro"},
+  {n:"Sextil",     g:"✳",       a:60,  cl:"a-azul"},
+  {n:"Cuadratura", g:"□",       a:90,  cl:"a-rojo"},
+  {n:"Trígono",    g:"△",       a:120, cl:"a-azul"},
+  {n:"Oposición",  g:"☍︎", a:180, cl:"a-rojo"}
+];
+const ORBE_ATACIR = 1;                       // grados de orbe para "contacto activo"
+
+let atacirActivo = false;
+const estadoAtacir = {clave:"a360", diasLibres:null, fecha:null};
+
+function claveActual(){
+  if(estadoAtacir.clave === "libre" && estadoAtacir.diasLibres > 0)
+    return {id:"libre", n:"Clave propia", dias:estadoAtacir.diasLibres};
+  return TODAS_CLAVES.find(c => c.id === estadoAtacir.clave) || TODAS_CLAVES.find(c => c.id === "a360");
+}
+/* grados que avanza la clave en un año, y años que tarda la vuelta completa */
+const porAnio = clave => clave.solar ? 0.98565 : 365.2422/clave.dias;
+const vueltaAnios = clave => 360/porAnio(clave);
+function puntosMoviles(){
+  const l = carta.cuerpos.concat(carta.puntos)
+    .map(c => ({id:c.id, nombre:c.nombre, glifo:c.glifo, color:c.color, lon:c.lon}));
+  if(carta.ang){
+    l.push({id:"asc", nombre:"Ascendente", glifo:PUNTOS.asc.glifo, color:PUNTOS.asc.color, lon:carta.ang.asc});
+    l.push({id:"mc",  nombre:"Medio Cielo", glifo:PUNTOS.mc.glifo,  color:PUNTOS.mc.color,  lon:carta.ang.mc});
+  }
+  return l;
+}
+/* arco solar real: el Sol avanza un día por cada año de vida */
+function arcoSolar(ms){
+  const anios = (ms - carta.ms)/(365.2422*86400000);
+  return mod360(lonGeo("sol", siglos(julian(carta.ms + anios*86400000))) - carta.cuerpos[0].lon);
+}
+const arcoDe = (ms, clave) => clave.solar ? arcoSolar(ms) : (ms - carta.ms)/(clave.dias*86400000);
+function msDeArco(arco, clave){
+  if(!clave.solar) return carta.ms + arco*clave.dias*86400000;
+  let t = carta.ms + arco*370.6*86400000;                 // primera aproximación
+  for(let i=0;i<10;i++){                                   // y se afina por Newton
+    const f = arcoSolar(t) - arco;
+    if(Math.abs(f) < 1e-7) break;
+    const d = arcoSolar(t + 86400000) - arcoSolar(t);
+    if(!isFinite(d) || Math.abs(d) < 1e-10) break;
+    t -= (f/d)*86400000;
+  }
+  return t;
+}
+
+/* todos los contactos entre dos arcos, ordenados por fecha */
+function contactosAtacir(clave, arcoDesde, arcoHasta){
+  const pts = puntosMoviles(), out = [];
+  if(arcoHasta - arcoDesde > 1080) arcoHasta = arcoDesde + 1080;   // dos vueltas y media, tope
+  for(const P of pts) for(const N of pts){
+    if(P.id === N.id) continue;
+    for(const asp of ANG_ATACIR){
+      const desvios = (asp.a === 0 || asp.a === 180) ? [asp.a] : [asp.a, -asp.a];
+      for(const dv of desvios){
+        const base = mod360(N.lon + dv - P.lon);
+        const k0 = Math.floor((arcoDesde - base)/360), k1 = Math.ceil((arcoHasta - base)/360);
+        for(let k = k0; k <= k1; k++){
+          const arco = base + 360*k;
+          if(arco < arcoDesde || arco > arcoHasta) continue;
+          out.push({P, N, asp, arco, ms: msDeArco(arco, clave)});
+        }
+      }
+    }
+  }
+  return out.sort((a, b) => a.arco - b.arco);
+}
+
+/* capa que se dibuja por fuera de la natal */
+function capaAtacir(){
+  if(!carta) return null;
+  const clave = claveActual();
+  const fecha = estadoAtacir.fecha == null ? Date.now() : estadoAtacir.fecha;
+  const arco = arcoDe(fecha, clave);
+  const movidos = puntosMoviles().map(p => Object.assign({}, p, {lonNatal:p.lon, lon:mod360(p.lon + arco)}));
+  const cerca = contactosAtacir(clave, arco - ORBE_ATACIR, arco + ORBE_ATACIR);
+  return {clave, fecha, arco, movidos, cerca};
+}
+
+const fmtDia = new Intl.DateTimeFormat("es-MX", {day:"numeric", month:"long", year:"numeric"});
+const fmtCorta = new Intl.DateTimeFormat("es-MX", {day:"2-digit", month:"2-digit", year:"numeric"});
+function edadEn(ms){
+  const anios = (ms - carta.ms)/(365.2422*86400000);
+  if(anios < 0) return "antes de nacer";
+  const a = Math.floor(anios), m = Math.round((anios - a)*12);
+  return m === 12 ? `${a+1} años` : `${a} a${a === 1 ? "ño" : "ños"}${m ? ` y ${m} ${m === 1 ? "mes" : "meses"}` : ""}`;
+}
+const arcoTexto = arco => {
+  const s = arco < 0 ? "−" : "", v = Math.abs(arco);
+  const g = Math.floor(v), m = Math.round((v - g)*60);
+  return `${s}${m === 60 ? g+1 : g}° ${String(m === 60 ? 0 : m).padStart(2,"0")}′`;
+};
+
+function pintaAtacir(){
+  if(!carta) return;
+  const capa = capaAtacir();
+  if(!capa) return;
+  const {clave, fecha, arco, movidos, cerca} = capa;
+  const proximos = contactosAtacir(clave, arco + 0.0001, arco + Math.min(porAnio(clave)*12, 720)).slice(0, 30);
+  const fechaISO = new Date(fecha - new Date(fecha).getTimezoneOffset()*60000).toISOString().slice(0,10);
+
+  const linea = c => `<li>
+      <span class="cg">${gh(c.P.glifo)}</span>
+      <span class="as ${c.asp.cl}">${c.asp.g}</span>
+      <span class="cg">${gh(c.N.glifo)}</span>
+      <span class="nom">${c.P.nombre} llega a ${c.asp.n.toLowerCase()} de ${c.N.nombre} natal</span>
+      <span class="orbe">${fmtDia.format(new Date(c.ms))}</span>
+    </li>`;
+
+  document.getElementById("hojaAtacir").innerHTML = `
+    <div class="mandos">
+      <div class="campo">
+        <label for="atClave">Clave</label>
+        <select id="atClave">
+          ${CLAVES_ATACIR.map(g => `<optgroup label="${g.grupo}">${g.claves.map(c =>
+              `<option value="${c.id}" ${c.id === estadoAtacir.clave ? "selected" : ""}>${c.n}${c.solar ? "" : ` — 1° cada ${String(c.dias).replace(".", ",")} días`}</option>`).join("")}</optgroup>`).join("")}
+          <optgroup label="A tu medida"><option value="libre" ${estadoAtacir.clave === "libre" ? "selected" : ""}>Clave propia…</option></optgroup>
+        </select>
+      </div>
+      <div class="campo" id="atLibreCampo" ${estadoAtacir.clave === "libre" ? "" : "hidden"}>
+        <label for="atDias">1° cada cuántos días</label>
+        <input id="atDias" type="number" step="0.001" min="0.01" value="${estadoAtacir.diasLibres || 365.2}">
+      </div>
+      <div class="campo">
+        <label for="atFecha">Fecha del atacir</label>
+        <input id="atFecha" type="date" value="${fechaISO}">
+      </div>
+      <div class="acciones" style="margin:0">
+        <button class="secundario" id="atHoy">Hoy</button>
+        <button class="secundario" id="atMenos">− 1 año</button>
+        <button class="secundario" id="atMas">+ 1 año</button>
+      </div>
+    </div>
+
+    <div class="cuadro">
+      <div><span class="k">Arco recorrido</span><span class="v">${arcoTexto(arco)}</span></div>
+      <div><span class="k">Edad</span><span class="v">${edadEn(fecha)}</span></div>
+      <div><span class="k">Clave</span><span class="v">${clave.solar ? "arco solar real" : `1° cada ${String(clave.dias).replace(".", ",")} d`}</span></div>
+      <div><span class="k">Vuelta completa</span><span class="v">${vueltaAnios(clave) >= 1 ? Math.round(vueltaAnios(clave)) + " años" : Math.round(vueltaAnios(clave)*365.2422) + " días"}</span></div>
+    </div>
+
+    <div class="rotulo">Contactos dentro del orbe · ±${ORBE_ATACIR}°</div>
+    ${cerca.length
+      ? `<ul class="aspectos">${cerca.map(linea).join("")}</ul>`
+      : `<p class="aviso">Ningún contacto dentro del orbe en esta fecha. Mira la lista de abajo para el siguiente.</p>`}
+
+    <div class="rotulo">Próximos contactos</div>
+    ${proximos.length
+      ? `<ul class="aspectos">${proximos.map(linea).join("")}</ul>
+         <p class="aviso" style="margin-top:.9rem">Se listan los primeros ${proximos.length} a partir de esa fecha. El promisor es el punto movido; el significador, el punto natal que alcanza.</p>`
+      : `<p class="aviso">No hay contactos en el tramo consultado.</p>`}
+
+    <div class="rotulo">Posiciones movidas</div>
+    <table class="posiciones"><thead><tr><th></th><th>Promisor</th><th>Natal</th><th>Atacir</th></tr></thead><tbody>
+      ${movidos.map(p => {
+        const zn = posZod(p.lonNatal), za = posZod(p.lon);
+        return `<tr><td class="cg">${gh(p.glifo)}</td><td>${p.nombre}</td>
+          <td class="cgrado">${zn.corto} ${zn.signo.g}</td>
+          <td class="cgrado" style="color:var(--laton)">${za.corto} ${za.signo.g}</td></tr>`;
+      }).join("")}
+    </tbody></table>
+    <p class="aviso" style="margin-top:.9rem">La rueda muestra la carta natal por dentro y el atacir por fuera. Las líneas del centro son los contactos en curso.</p>`;
+
+  const sel = document.getElementById("atClave");
+  sel.addEventListener("change", () => {
+    estadoAtacir.clave = sel.value;
+    if(sel.value === "libre") estadoAtacir.diasLibres = estadoAtacir.diasLibres || 365.2;
+    pintaAtacir();
+  });
+  const dias = document.getElementById("atDias");
+  if(dias) dias.addEventListener("change", () => {
+    const v = parseFloat(dias.value);
+    if(v > 0){ estadoAtacir.diasLibres = v; pintaAtacir(); }
+  });
+  document.getElementById("atFecha").addEventListener("change", e => {
+    const [a, m, d] = e.target.value.split("-").map(Number);
+    if(a) { estadoAtacir.fecha = new Date(a, m-1, d, 12).getTime(); pintaAtacir(); }
+  });
+  document.getElementById("atHoy").addEventListener("click", () => { estadoAtacir.fecha = Date.now(); pintaAtacir(); });
+  document.getElementById("atMenos").addEventListener("click", () => { estadoAtacir.fecha = (estadoAtacir.fecha || Date.now()) - 365.2422*86400000; pintaAtacir(); });
+  document.getElementById("atMas").addEventListener("click", () => { estadoAtacir.fecha = (estadoAtacir.fecha || Date.now()) + 365.2422*86400000; pintaAtacir(); });
+}
+
+/* --- formulario --- */
+const velo = document.getElementById("velo");
+const formulario = document.getElementById("natalForm");
+const dl = document.getElementById("ciudades");
+dl.innerHTML = CIUDADES.map(c => `<option value="${c.etiqueta}"></option>`).join("");
+const zonaSel = document.getElementById("nZona");
+(() => {
+  let zonas = [];
+  try { zonas = Intl.supportedValuesOf("timeZone"); } catch(e){ zonas = []; }
+  if(!zonas.length) zonas = [...new Set(CIUDADES.map(c => c.tz))].sort();
+  zonaSel.innerHTML = zonas.map(z => `<option value="${z}">${z}</option>`).join("");
+  zonaSel.value = zonas.includes("America/Mexico_City") ? "America/Mexico_City" : zonas[0];
+})();
+
+const sinHora = document.getElementById("nSinHora");
+sinHora.addEventListener("change", () => {
+  document.getElementById("nHora").disabled = sinHora.checked;
+  document.getElementById("nAvisoHora").hidden = !sinHora.checked;
+});
+document.getElementById("nLugar").addEventListener("input", e => {
+  const hay = CIUDADES.some(c => c.etiqueta.toLowerCase() === e.target.value.trim().toLowerCase());
+  document.getElementById("manual").classList.toggle("visible", !hay && e.target.value.trim().length > 2);
+});
+document.getElementById("nEjemplo").addEventListener("click", () => {
+  document.getElementById("nNombre").value = "Ejemplo de clase";
+  document.getElementById("nFecha").value = "1990-03-21";
+  document.getElementById("nHora").value = "06:30";
+  document.getElementById("nLugar").value = "Ciudad de México, México";
+  document.getElementById("manual").classList.remove("visible");
+});
+document.getElementById("nCancelar").addEventListener("click", () => velo.classList.remove("visible"));
+
+const mesesEs = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+formulario.addEventListener("submit", ev => {
+  ev.preventDefault();
+  const err = document.getElementById("nError");
+  err.hidden = true;
+  const f = document.getElementById("nFecha").value;
+  if(!f){ err.textContent = "Falta la fecha de nacimiento."; err.hidden = false; return; }
+  const [anio, mes, dia] = f.split("-").map(Number);
+  const horaConocida = !sinHora.checked;
+  const [hora, min] = (horaConocida ? document.getElementById("nHora").value || "12:00" : "12:00").split(":").map(Number);
+
+  const escrito = document.getElementById("nLugar").value.trim();
+  let ciudad = CIUDADES.find(c => c.etiqueta.toLowerCase() === escrito.toLowerCase())
+            || CIUDADES.find(c => c.n.toLowerCase() === escrito.toLowerCase());
+  let lat, lon, tz, lugarTexto;
+  if(ciudad){ lat = ciudad.lat; lon = ciudad.lon; tz = ciudad.tz; lugarTexto = ciudad.etiqueta; }
+  else {
+    lat = parseFloat(document.getElementById("nLat").value);
+    lon = parseFloat(document.getElementById("nLon").value);
+    tz = zonaSel.value;
+    if(!isFinite(lat) || !isFinite(lon)){
+      document.getElementById("manual").classList.add("visible");
+      err.textContent = "No encontré ese lugar en la lista. Escribe latitud, longitud y zona horaria abajo.";
+      err.hidden = false; return;
+    }
+    lugarTexto = escrito || `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
+  }
+
+  const datos = {
+    nombre: document.getElementById("nNombre").value.trim(),
+    anio, mes, dia, hora, min, horaConocida, lat, lon, tz, lugarTexto,
+    sistema: document.getElementById("nCasas").value,
+    factorOrbe: parseFloat(document.getElementById("nOrbe").value),
+    resumenFecha: `${dia} de ${mesesEs[mes-1]} de ${anio}${horaConocida ? ` · ${String(hora).padStart(2,"0")}:${String(min).padStart(2,"0")}` : " · hora desconocida"}`
+  };
+  const msPrueba = localAUTC(anio, mes, dia, hora, min, tz);
+  datos.husoTexto = `${tz} (${textoDesfase(tz, msPrueba)})`;
+
+  estadoAtacir.fecha = null;
+  levantarCarta(datos);
+  guardaUltima(datos);
+  velo.classList.remove("visible");
+  document.getElementById("cartaPanel").classList.add("abierto");
+  document.getElementById("nCancelar").hidden = false;
+  pintaCarta();
+  pintaBarra();
+  zoom = 1;
+  natalPan.x=0; natalPan.y=0;
+});
+
+function guardaUltima(d){
+  try { localStorage.setItem("maquina-celeste-carta", JSON.stringify(d)); } catch(e){}
+}
+function recuperaUltima(){
+  try {
+    const s = localStorage.getItem("maquina-celeste-carta");
+    if(!s) return null;
+    const d = JSON.parse(s);
+    return (d && d.anio) ? d : null;
+  } catch(e){ return null; }
+}
+
+function pintaBarra(){
+  if(!carta) return;
+  const d = carta.datos;
+  document.getElementById("app").classList.add("con-carta");
+  document.getElementById("btnPngRueda").hidden = false;
+  document.getElementById("btnPngHoja").hidden = false;
+  document.getElementById("barraDatos").innerHTML =
+    `<span class="quien">${d.nombre || "Carta sin nombre"}</span>
+     <span class="dato">${d.resumenFecha}</span>
+     <span>${d.lugarTexto}</span>
+     <span>${d.husoTexto}</span>`;
+}
+
+document.getElementById("plegar").addEventListener("click", () => {
+  const panel = document.getElementById("cartaPanel");
+  panel.classList.toggle("plegado");
+  document.getElementById("plegar").textContent = panel.classList.contains("plegado") ? "▴" : "▾";
+});
+
+/* pestañas del panel */
+const pestañas = [["tabPos","hojaPos"],["tabAsp","hojaAsp"],["tabCasas","hojaCasas"],["tabSent","hojaSent"],["tabAtacir","hojaAtacir"]];
+for(const [b,h] of pestañas){
+  document.getElementById(b).addEventListener("click", () => {
+    for(const [bb,hh] of pestañas){
+      document.getElementById(bb).setAttribute("aria-selected", String(bb===b));
+      document.getElementById(hh).hidden = hh !== h;
+    }
+    atacirActivo = (h === "hojaAtacir");
+    if(atacirActivo) pintaAtacir();
+  });
+}
+
+/* ===================== Arranque ===================== */
+const portada = document.getElementById("portada");
+function muestraInicio(){
+  cambiaVista("orbitas");
+  cerrarFicha();
+  document.getElementById("app").classList.add("inicio");
+  portada.classList.remove("oculta");
+}
+function entraA(v){
+  document.getElementById("app").classList.remove("inicio");
+  portada.classList.add("oculta");
+  cambiaVista(v);
+}
+portada.querySelectorAll(".opcion").forEach(b => b.addEventListener("click", () => entraA(b.dataset.vista)));
+const marca = document.getElementById("volverInicio");
+marca.addEventListener("click", muestraInicio);
+marca.addEventListener("keydown", e => {
+  if(e.key === "Enter" || e.key === " "){ e.preventDefault(); muestraInicio(); }
+});
+
+document.getElementById("btnEditar").addEventListener("click", () => {
+  velo.classList.add("visible");
+  document.getElementById("nCancelar").hidden = !carta;
+});
+document.getElementById("btnPngRueda").addEventListener("click", () => descargaHoja("rueda"));
+document.getElementById("btnPngHoja").addEventListener("click", () => descargaHoja("completa"));
+(() => {                                   // recupera los últimos datos escritos en este navegador
+  const d = recuperaUltima(); if(!d) return;
+  document.getElementById("nNombre").value = d.nombre || "";
+  document.getElementById("nFecha").value =
+    `${d.anio}-${String(d.mes).padStart(2,"0")}-${String(d.dia).padStart(2,"0")}`;
+  document.getElementById("nHora").value = `${String(d.hora).padStart(2,"0")}:${String(d.min).padStart(2,"0")}`;
+  document.getElementById("nLugar").value = d.lugarTexto || "";
+  document.getElementById("nCasas").value = d.sistema || "placidio";
+  if(!d.horaConocida){ sinHora.checked = true; sinHora.dispatchEvent(new Event("change")); }
+})();
+
+medir();
+requestAnimationFrame(fotograma);
+document.getElementById("app").classList.add("inicio");
+abrirFicha("marte");     // deja la ficha lista detrás de la portada, para quien entre por Órbitas
+})();
+</script>
+
+
+<script>
+/* Entrada directa desde el planetario: ?view=orbitas|rueda|natal  (&auto=1 levanta el ejemplo) */
+(function(){
+  var q = new URLSearchParams(location.search), v = q.get('view');
+  if(['orbitas','rueda','natal'].indexOf(v) < 0) return;
+  var intentos = 0;
+  function abrir(){
+    var tarjeta = document.querySelector('.opcion[data-vista="' + v + '"]');
+    if(!tarjeta){ if(++intentos < 40) setTimeout(abrir, 60); return; }
+    tarjeta.click();
+    if(v === 'natal' && q.get('auto') === '1'){
+      setTimeout(function(){ var f = document.getElementById('natalForm'); if(f) f.requestSubmit(); }, 320);
+    }
+  }
+  if(document.readyState === 'complete') setTimeout(abrir, 60);
+  else window.addEventListener('load', function(){ setTimeout(abrir, 60); });
+})();
+</script>
+</body>
+</html>
