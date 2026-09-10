@@ -149,13 +149,14 @@ saturno:[9.53667594,.05386179,2.48599187,49.95424423,92.59887831,113.66242448,-.
 urano:[19.18916464,.04725744,.77263783,313.23810451,170.9542763,74.01692503,-.00196176,-.00004397,-.00242939,428.48202785,.40805281,.04240589],
 neptuno:[30.06992276,.00859048,1.77004347,-55.12002969,44.96476227,131.78422574,.00026291,.00005105,.00035372,218.45945325,-.32241464,-.00508664],
 pluton:[39.48211675,.2488273,17.14001206,238.92903833,224.06891629,110.30393684,-.00031596,.0000517,.00004818,145.20780515,-.04062942,-.01183482]};
-const julian=ms=>ms/DAY+2440587.5, siglos=jd=>(jd-2451545)/36525;
+/* TT, no UT: aquí no se calculan ángulos, así que basta con esto */
+const julian=ms=>ms/DAY+2440587.5+(window.Efem?Efem.deltaT(ms)/86400:0), siglos=jd=>(jd-2451545)/36525;
 function helio(k,T){const e0=ELEM[k],a=e0[0]+e0[6]*T,e=e0[1]+e0[7]*T,I=(e0[2]+e0[8]*T)*RAD,L=e0[3]+e0[9]*T,wb=e0[4]+e0[10]*T,N=(e0[5]+e0[11]*T)*RAD,w=wb*RAD-N;let M=mod360(L-wb);if(M>180)M-=360;M*=RAD;let E=M+e*Math.sin(M);for(let i=0;i<9;i++){const d=(E-e*Math.sin(E)-M)/(1-e*Math.cos(E));E-=d;if(Math.abs(d)<1e-11)break}const xp=a*(Math.cos(E)-e),yp=a*Math.sqrt(1-e*e)*Math.sin(E),cw=Math.cos(w),sw=Math.sin(w),cN=Math.cos(N),sN=Math.sin(N),cI=Math.cos(I),sI=Math.sin(I);return{x:(cw*cN-sw*sN*cI)*xp+(-sw*cN-cw*sN*cI)*yp,y:(cw*sN+sw*cN*cI)*xp+(-sw*sN+cw*cN*cI)*yp,z:sw*sI*xp+cw*sI*yp}}
 function lunarArgs(T){return{Lp:218.3164477+481267.88123421*T-.0015786*T*T,D:(297.8501921+445267.1114034*T-.0018819*T*T)*RAD,M:(357.5291092+35999.0502909*T)*RAD,Mp:(134.9633964+477198.8675055*T+.0087414*T*T)*RAD,F:(93.272095+483202.0175233*T-.0036539*T*T)*RAD}}
-function lunaLonT(T){const {Lp,D,M,Mp,F}=lunarArgs(T),s=Math.sin;const dl=6.288774*s(Mp)+1.274027*s(2*D-Mp)+.658314*s(2*D)+.213618*s(2*Mp)-.185116*s(M)-.114332*s(2*F)+.058793*s(2*D-2*Mp)+.057066*s(2*D-M-Mp)+.053322*s(2*D+Mp)+.045758*s(2*D-M)-.040923*s(M-Mp)-.03472*s(D)-.030383*s(M+Mp)+.015327*s(2*D-2*F)-.012528*s(Mp+2*F)+.01098*s(Mp-2*F);return mod360(Lp+dl)}
+function lunaLonT(T){return Efem.lonGeo('luna',T)}
 function lunaLon(ms){return lunaLonT(siglos(julian(ms)))}
 function lunaDist(ms){const T=siglos(julian(ms)),{D,M,Mp}=lunarArgs(T),c=Math.cos;return 385000.56-20905.355*c(Mp)-3699.111*c(2*D-Mp)-2955.968*c(2*D)-569.925*c(2*Mp)+246.158*c(2*Mp-2*D)-204.586*c(M-2*D)-170.733*c(Mp+2*D)-152.137*c(Mp+M-2*D)-129.62*c(Mp-M)+108.743*c(D)}
-function lonGeo(k,T){if(k==='luna')return lunaLonT(T);const t=helio('tierra',T);if(k==='sol')return mod360(Math.atan2(-t.y,-t.x)*DEG);const p=helio(k,T);return mod360(Math.atan2(p.y-t.y,p.x-t.x)*DEG)}
+function lonGeo(k,T){return Efem.lonGeo(k,T)}
 function sunLon(ms){return lonGeo('sol',siglos(julian(ms)))}
 function phaseAngle(ms){return mod360(lunaLon(ms)-sunLon(ms))}
 function nodoNorte(T){return mod360(125.0445479-1934.1362891*T+.0020754*T*T+T*T*T/467441)}

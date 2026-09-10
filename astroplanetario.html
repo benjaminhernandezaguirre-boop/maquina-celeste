@@ -875,6 +875,7 @@
           <button role="tab" id="tabSent" aria-selected="false" aria-controls="hojaSent">Significados</button>
           <button role="tab" id="tabAtacir" aria-selected="false" aria-controls="hojaAtacir">Atacir</button>
           <button role="tab" id="tabTransitos" aria-selected="false" aria-controls="hojaTransitos">Tránsitos</button>
+          <button role="tab" id="tabRevolucion" aria-selected="false" aria-controls="hojaRevolucion">Revolución</button>
           <button role="tab" id="tabSinastria" aria-selected="false" aria-controls="hojaSinastria">Sinastría</button>
         </div>
         <button id="plegar" aria-label="Plegar o desplegar el panel" title="Plegar">▾</button>
@@ -885,6 +886,7 @@
       <div class="hoja" id="hojaSent" role="tabpanel" hidden></div>
       <div class="hoja" id="hojaAtacir" role="tabpanel" hidden></div>
       <div class="hoja" id="hojaTransitos" role="tabpanel" hidden></div>
+      <div class="hoja" id="hojaRevolucion" role="tabpanel" hidden></div>
       <div class="hoja" id="hojaSinastria" role="tabpanel" hidden></div>
     </aside>
   </div>
@@ -928,6 +930,146 @@ const ELEM = {
 const julian = ms => ms/86400000 + 2440587.5;
 const siglos = jd => (jd - 2451545.0)/36525;
 
+/* ===================== Marco de referencia y escala de tiempo =====================
+   Dos correcciones que cambian todas las posiciones y que conviene entender:
+
+   1. Precesión. Los elementos orbitales de arriba están referidos al equinoccio
+      de J2000, pero el zodiaco tropical se mide desde el punto vernal del día
+      que se calcula. Entre uno y otro hay la precesión de los equinoccios: hoy
+      pasa de los veintidós minutos de arco y crece unos 50″ al año. Sin ella un
+      planeta lento entra en signo con días o semanas de retraso.
+      La Luna, los nodos y Lilith salen de las fórmulas de Meeus, que ya vienen
+      referidas al equinoccio de la fecha: a ésas no se les suma nada.
+
+   2. ΔT. Los astros se calculan en tiempo terrestre (TT) y la hora sidérea —y
+      con ella el Ascendente y las casas— en tiempo universal (UT). La
+      diferencia ronda hoy los 69 segundos; en la Luna son casi 40″ de arco.
+
+   Encima van la nutación, la aberración de la luz y el tiempo que tarda la luz
+   en llegar, que es lo que hace falta para dar posiciones aparentes, que son
+   las que publican las efemérides. */
+
+/* ΔT = TT − UT en segundos (polinomios de Espenak y Meeus). */
+function deltaT(ms){
+  const f = new Date(ms), y = f.getUTCFullYear() + (f.getUTCMonth() + 0.5)/12;
+  let t;
+  if(y >= 2005){ t = y - 2000; return 62.92 + 0.32217*t + 0.005589*t*t; }
+  if(y >= 1986){ t = y - 2000; return 63.86 + 0.3345*t - 0.060374*t*t + 0.0017275*t*t*t
+                                    + 0.000651814*Math.pow(t,4) + 0.00002373599*Math.pow(t,5); }
+  if(y >= 1961){ t = y - 1975; return 45.45 + 1.067*t - t*t/260 - t*t*t/718; }
+  if(y >= 1941){ t = y - 1950; return 29.07 + 0.407*t - t*t/233 + t*t*t/2547; }
+  if(y >= 1920){ t = y - 1920; return 21.20 + 0.84493*t - 0.076100*t*t + 0.0020936*t*t*t; }
+  if(y >= 1900){ t = y - 1900; return -2.79 + 1.494119*t - 0.0598939*t*t + 0.0061966*t*t*t - 0.000197*Math.pow(t,4); }
+  t = y - 1860; return 7.62 + 0.5737*t - 0.251754*t*t + 0.01680668*t*t*t
+                      - 0.0004473624*Math.pow(t,4) + Math.pow(t,5)/233174;
+}
+const jdTT  = ms => julian(ms) + deltaT(ms)/86400;   // día juliano en tiempo terrestre
+const sigTT = ms => siglos(jdTT(ms));                // siglos julianos en TT
+
+/* Precesión general en longitud desde J2000 (grados). */
+const precesion = T => (5029.0966*T + 1.11113*T*T - 0.000006*T*T*T)/3600;
+
+/* Nutación en longitud y en oblicuidad (grados), términos principales. */
+let _nutT = NaN, _nutV = null;
+function nutacion(T){
+  if(T !== _nutT){
+    _nutT = T;
+    const O  = (125.04452 - 1934.136261*T)*RAD;
+    const L  = (280.46650 + 36000.7698*T)*RAD;
+    const Lp = (218.31650 + 481267.8813*T)*RAD;
+    const s = Math.sin, c = Math.cos;
+    _nutV = {
+      dpsi: (-17.20*s(O) - 1.32*s(2*L) - 0.23*s(2*Lp) + 0.21*s(2*O))/3600,
+      deps: (  9.20*c(O) + 0.57*c(2*L) + 0.10*c(2*Lp) - 0.09*c(2*O))/3600
+    };
+  }
+  return _nutV;
+}
+
+/* Longitud heliocéntrica de la Tierra por serie periódica (VSOP87D, sólo la
+   longitud), ya referida a la eclíptica y el equinoccio de la fecha. Es lo que
+   sube la precisión del Sol de medio grado a un segundo de arco, y con ella la
+   hora exacta de una revolución solar. Coeficientes en 1e-8 rad. */
+const VS_L0 = [
+[175347046,0,0],[3341656,4.6692568,6283.0758500],[34894,4.62610,12566.15170],
+[3497,2.7441,5753.3849],[3418,2.8289,3.5231],[3136,3.6277,77713.7715],
+[2676,4.4181,7860.4194],[2343,6.1352,3930.2097],[1324,0.7425,11506.7698],
+[1273,2.0371,529.6910],[1199,1.1096,1577.3435],[990,5.233,5884.927],
+[902,2.045,26.298],[857,3.508,398.149],[780,1.179,5223.694],
+[753,2.533,5507.553],[505,4.583,18849.228],[492,4.205,775.523],
+[357,2.920,0.067],[317,5.849,11790.629],[284,1.899,796.298],
+[271,0.315,10977.079],[243,0.345,5486.778],[206,4.806,2544.314],
+[205,1.869,5573.143],[202,2.458,6069.777],[156,0.833,213.299],
+[132,3.411,2942.463],[126,1.083,20.775],[115,0.645,0.980],
+[103,0.636,4694.003],[102,0.976,15720.839],[102,4.267,7.114],
+[99,6.21,2146.17],[98,0.68,155.42],[86,5.98,161000.69],
+[85,1.30,6275.96],[85,3.67,71430.70],[80,1.81,17260.15],
+[79,3.04,12036.46],[75,1.76,5088.63],[74,3.50,3154.69],
+[74,4.68,801.82],[70,0.83,9437.76],[62,3.98,8827.39],
+[61,1.82,7084.90],[57,2.78,6286.60],[56,4.39,14143.50],
+[56,3.47,6279.55],[52,0.19,12139.55],[52,1.33,1748.02],
+[51,0.28,5856.48],[49,0.49,1194.45],[41,5.37,8429.24],
+[41,2.40,19651.05],[39,6.17,10447.39],[37,6.04,10213.29],
+[37,2.57,1059.38],[36,1.71,2352.87],[36,1.78,6812.77],
+[33,0.59,17789.85],[30,0.44,83996.85],[30,2.74,1349.87],[25,3.16,4690.48]];
+const VS_L1 = [
+[628331966747,0,0],[206059,2.678235,6283.075850],[4303,2.6351,12566.1517],
+[425,1.590,3.523],[119,5.796,26.298],[109,2.966,1577.344],
+[93,2.59,18849.23],[72,1.14,529.69],[68,1.87,398.15],
+[67,4.41,5507.55],[59,2.89,5223.69],[56,2.17,155.42],
+[45,0.40,796.30],[36,0.47,775.52],[29,2.65,7.11],
+[21,5.34,0.98],[19,1.85,5486.78],[19,4.97,213.30],
+[17,2.99,6275.96],[16,0.03,2544.31],[16,1.43,2146.17],
+[15,1.21,10977.08],[12,2.83,1748.02],[12,3.26,5088.63],
+[12,5.27,1194.45],[12,2.08,4694.00],[11,0.77,553.57],
+[10,1.30,6286.60],[10,4.24,1349.87],[9,2.70,242.73],
+[9,5.64,951.72],[8,5.30,2352.87],[6,2.65,9437.76],[6,4.67,4690.48]];
+const VS_L2 = [
+[52919,0,0],[8720,1.0721,6283.0758],[309,0.867,12566.152],
+[27,0.05,3.52],[16,5.19,26.30],[16,3.68,155.42],
+[10,0.76,18849.23],[9,2.06,77713.77],[7,0.83,775.52],
+[5,4.66,1577.34],[4,1.03,7.11],[4,3.44,5573.14],
+[3,5.14,796.30],[3,6.05,5507.55],[3,1.19,242.73],
+[3,6.12,529.69],[3,0.31,398.15],[3,2.28,553.57],
+[2,4.38,5223.69],[2,3.75,0.98]];
+const VS_L3 = [[289,5.844,6283.076],[35,0,0],[17,5.49,12566.15],
+[3,5.20,155.42],[1,4.72,3.52],[1,5.30,18849.23],[1,5.97,242.73]];
+const VS_L4 = [[114,3.142,0],[8,4.13,6283.08],[1,3.84,12566.15]];
+const VS_L5 = [[1,3.14,0]];
+function serieVS(tabla, tau){
+  let s = 0;
+  for(let i = 0; i < tabla.length; i++) s += tabla[i][0]*Math.cos(tabla[i][1] + tabla[i][2]*tau);
+  return s;
+}
+function tierraLonFina(T){                       // grados, equinoccio de la fecha
+  const tau = T/10;                              // milenios julianos
+  const L = (serieVS(VS_L0,tau) + serieVS(VS_L1,tau)*tau + serieVS(VS_L2,tau)*tau*tau
+           + serieVS(VS_L3,tau)*tau*tau*tau + serieVS(VS_L4,tau)*Math.pow(tau,4)
+           + serieVS(VS_L5,tau)*Math.pow(tau,5))/1e8;
+  return L*DEG;
+}
+
+/* La Tierra no está en el baricentro Tierra-Luna: se aparta hasta 4700 km, que
+   son seis segundos de arco en la posición del Sol. */
+const MU_LUNA = 0.0121505, LUZ = 173.144632674;   // masa relativa · UA por día
+let _ctT = NaN, _ctV = null;
+function centroTierra(T){
+  if(T !== _ctT){
+    _ctT = T;
+    const b = tierraEn(T);
+    const D  = (297.8501921 + 445267.1114034*T - 0.0018819*T*T)*RAD;
+    const M  = (357.5291092 + 35999.0502909*T)*RAD;
+    const Mp = (134.9633964 + 477198.8675055*T + 0.0087414*T*T)*RAD;
+    const c = Math.cos;
+    const km = 385000.56 - 20905.355*c(Mp) - 3699.111*c(2*D-Mp) - 2955.968*c(2*D)
+             - 569.925*c(2*Mp) + 246.158*c(2*D-2*Mp) - 152.138*c(2*D-M-Mp);
+    const r = km/149597870.7, l = lunaLon(T)*RAD;
+    _ctV = {x: b.x + MU_LUNA*r*Math.cos(l), y: b.y + MU_LUNA*r*Math.sin(l), z: b.z};
+  }
+  return _ctV;
+}
+
+
 function helio(clave, T){                       // vector heliocéntrico eclíptico [UA]
   const e0 = ELEM[clave];
   const a = e0[0]+e0[6]*T, e = e0[1]+e0[7]*T, I = (e0[2]+e0[8]*T)*RAD;
@@ -967,17 +1109,25 @@ function tierraEn(T){
   return _tierraV;
 }
 
-/* longitud eclíptica geocéntrica de cualquier astro del catálogo */
+/* longitud eclíptica geocéntrica aparente, referida al equinoccio de la fecha */
 function lonGeo(clave, T){
-  if(clave === "luna") return lunaLon(T);
-  const t = tierraEn(T);
-  if(clave === "sol") return mod360(Math.atan2(-t.y, -t.x)*DEG);
-  const p = helio(clave, T);
-  return mod360(Math.atan2(p.y - t.y, p.x - t.x)*DEG);
+  const nut = nutacion(T).dpsi;
+  if(clave === "luna") return mod360(lunaLon(T) + nut);      // Meeus ya va en la fecha
+  const t = centroTierra(T);
+  if(clave === "sol"){
+    const R = Math.hypot(t.x, t.y, t.z);
+    return mod360(tierraLonFina(T) + 180 - 0.09033/3600 + nut - 20.4898/R/3600);
+  }
+  let p = helio(clave, T);                                   // corrección por tiempo-luz
+  for(let i = 0; i < 2; i++){
+    const d = Math.hypot(p.x-t.x, p.y-t.y, p.z-t.z);
+    p = helio(clave, T - (d/LUZ)/36525);
+  }
+  return mod360(Math.atan2(p.y - t.y, p.x - t.x)*DEG + precesion(T) + nut);
 }
 function distGeo(clave, T){
   if(clave === "luna") return 0.00257;
-  const t = tierraEn(T);
+  const t = centroTierra(T);
   if(clave === "sol") return Math.hypot(t.x,t.y,t.z);
   const p = helio(clave, T);
   return Math.hypot(p.x-t.x, p.y-t.y, p.z-t.z);
@@ -1564,7 +1714,7 @@ function dibujaRueda(T){
 /* ===================== Bucle ===================== */
 function fotograma(ms){
   const ahora = ahoraSim();
-  const T = siglos(julian(ahora));
+  const T = sigTT(ahora);
   blancos.length = 0;
   if(vista === "natal"){ ctx.fillStyle = PAPEL.fondo; ctx.fillRect(0,0,W,H); dibujaNatal(); }
   else { fondo(ms); vista === "orbitas" ? dibujaOrbitas(T, ms) : dibujaRueda(T); }
@@ -1620,7 +1770,7 @@ lienzo.addEventListener("pointermove", ev => {
     if(!html){
       const a = porId[b.id];
       if(!a){ globo.style.opacity = "0"; return; }
-      const T = siglos(julian(ahoraSim()));
+      const T = sigTT(ahoraSim());
       const z = posZod(lonGeo(b.id === "tierra" ? "sol" : b.id, T));
       html = `<b>${gh(a.glifo)} ${a.nombre}</b>${b.id === "tierra" ? "" : ` — ${z.texto} ${z.signo.n}`}`;
     }
@@ -1698,7 +1848,7 @@ function abrirFicha(id){
   document.getElementById("fNombre").textContent = a.nombre;
   document.getElementById("fEpiteto").textContent = a.epiteto;
 
-  const T = siglos(julian(ahoraSim()));
+  const T = sigTT(ahoraSim());
   const cuerpo = document.getElementById("fCuerpo");
   let bloqueAhora = "";
   if(id !== "tierra"){
@@ -2154,8 +2304,9 @@ function gmst(jd){
 
 /* --- ángulos y casas --- */
 function angulos(jd, lat, lon){
-  const T = siglos(jd), eps = oblicuidad(T)*RAD, phi = lat*RAD;
-  const ramcDeg = mod360(gmst(jd) + lon), ramc = ramcDeg*RAD;
+  const T = siglos(jd), nut = nutacion(T);
+  const eps = (oblicuidad(T) + nut.deps)*RAD, phi = lat*RAD;
+  const ramcDeg = mod360(gmst(jd) + nut.dpsi*Math.cos(eps) + lon), ramc = ramcDeg*RAD;
   const mc = mod360(Math.atan2(Math.sin(ramc), Math.cos(ramc)*Math.cos(eps))*DEG);
   let asc = mod360(Math.atan2(Math.cos(ramc), -(Math.sin(ramc)*Math.cos(eps) + Math.tan(phi)*Math.sin(eps)))*DEG);
   if(mod360(asc - mc) > 180) asc = mod360(asc + 180);
@@ -2481,8 +2632,13 @@ function textoDesfase(tz, ms){
 /* --- levantar la carta --- */
 let carta = null;
 function levantarCarta(d, asignar){
-  const ms = localAUTC(d.anio, d.mes, d.dia, d.hora, d.min, d.tz);
-  const jd = julian(ms), T = siglos(jd);
+  const res = cartaDeInstante(localAUTC(d.anio, d.mes, d.dia, d.hora, d.min, d.tz), d);
+  if(asignar !== false) carta = res;
+  return res;
+}
+/* la carta de un instante dado en UTC: la usan la natal y la revolución solar */
+function cartaDeInstante(ms, d){
+  const jdUT = julian(ms), jd = jdTT(ms), T = siglos(jd);
 
   const cuerpos = ORDEN_EFEM.map(id => {
     const lon = lonGeo(id, T), antes = lonGeo(id, T - 1/36525);
@@ -2498,7 +2654,7 @@ function levantarCarta(d, asignar){
 
   let ang = null, cusp = null, aviso = null, fortuna = null, diurna = null;
   if(d.horaConocida){
-    ang = angulos(jd, d.lat, d.lon);
+    ang = angulos(jdUT, d.lat, d.lon);
     const r = cuspides(d.sistema, ang);
     cusp = r.c; aviso = r.aviso || null; d.sistemaReal = r.sistema;
     const sol = cuerpos[0], luna = cuerpos[1];
@@ -2517,9 +2673,7 @@ function levantarCarta(d, asignar){
   }
   const aspectos = calculaAspectos(paraAspectos, d.factorOrbe);
 
-  const res = {datos:d, ms, jd, cuerpos, puntos, ang, cusp, aspectos, aviso, diurna};
-  if(asignar !== false) carta = res;
-  return res;
+  return {datos:d, ms, jd, cuerpos, puntos, ang, cusp, aspectos, aviso, diurna};
 }
 
 /* --- dibujo de la carta: tinta sobre papel --- */
@@ -2530,17 +2684,41 @@ const PAPEL = {
   asp:{"a-oro":"#9A7420AA","a-rojo":"#C0472AAA","a-azul":"#2F5F9EAA","a-lila":"#6B57A888"}
 };
 
-/* qué anillo exterior toca dibujar, según la pestaña abierta */
-function cartaEnRueda(){
-  if(sinastriaActivo && compuestaActiva){ const C = laCompuesta(); if(C) return C; }
-  return carta;
+/* Qué anillo exterior toca dibujar, según la pestaña abierta. La rueda se
+   redibuja sesenta veces por segundo, así que la capa se guarda y sólo se
+   rehace cuando cambia algo de lo que depende: si no, cada fotograma repetía
+   las bisecciones de los tránsitos. */
+function firmaCapa(){
+  if(!carta) return "nada";
+  const b = huellaCarta(carta.datos);
+  if(sinastriaActivo && compuestaActiva) return "comp|" + b;
+  if(atacirActivo)    return ["atacir", b, claveActual().id, estadoAtacir.fecha].join("|");
+  if(transitosActivo) return ["tran", b, estadoTransitos.fecha == null ? Math.floor(Date.now()/60000)
+                                       : estadoTransitos.fecha, estadoTransitos.orbe].join("|");
+  if(revolucionActivo)return ["rs", b, estadoRS.anio, estadoRS.donde, estadoRS.lat, estadoRS.lon].join("|");
+  if(sinastriaActivo) return ["sin", b, estadoSin.idB, estadoSin.factorOrbe].join("|");
+  return "nada";
 }
-function capaExterior(){
+function construyeCapa(){
   if(sinastriaActivo && compuestaActiva) return null;
-  if(atacirActivo) return capaAtacir();
-  if(transitosActivo) return capaTransitos();
-  if(sinastriaActivo) return capaSinastria();
+  if(atacirActivo)     return capaAtacir();
+  if(transitosActivo)  return capaTransitos();
+  if(revolucionActivo) return capaRevolucion();
+  if(sinastriaActivo)  return capaSinastria();
   return null;
+}
+let _capaFirma = null, _capaVal = null;
+function capaExterior(){
+  const f = firmaCapa();
+  if(f !== _capaFirma){ _capaFirma = f; _capaVal = construyeCapa(); }
+  return _capaVal;
+}
+let _ruedaFirma = null, _ruedaVal = null;
+function cartaEnRueda(){
+  if(!(sinastriaActivo && compuestaActiva)) return carta;
+  const f = ["comp", carta ? huellaCarta(carta.datos) : "", estadoSin.idB, estadoComp.metodo].join("|");
+  if(f !== _ruedaFirma){ _ruedaFirma = f; _ruedaVal = laCompuesta(); }
+  return _ruedaVal || carta;
 }
 function dibujaNatal(){
   if(!carta){ return; }
@@ -2873,10 +3051,15 @@ function pintaCarta(){
       }).join("")}
     </tbody></table>`
     : `<p class="aviso" style="margin-top:1rem">Sin hora de nacimiento no se pueden calcular las casas. Si el consultante la averigua (acta de nacimiento o registro civil), vuelve a levantar la carta.</p>`;
+  if(cusp) document.getElementById("hojaCasas").innerHTML += `
+    <p class="aviso" style="margin-top:1.1rem">Estas casas son las de tu ciudad. En otro punto de la Tierra el cielo es el mismo
+      pero los ángulos cambian: lo que aquí salía, allá culminaba.
+      <a href="astrocarto.html" style="color:inherit">Míralo en el mapa del mundo →</a></p>`;
 
   pintaSignificados();
   if(atacirActivo) pintaAtacir();
   if(transitosActivo) pintaTransitos();
+  if(revolucionActivo) pintaRevolucion();
   if(sinastriaActivo) pintaSinastria();
   enlazaFilas();
   const cb = document.getElementById("soloMayores");
@@ -3045,7 +3228,7 @@ function puntosMoviles(ch){
 /* arco solar real: el Sol avanza un día por cada año de vida */
 function arcoSolar(ms){
   const anios = (ms - carta.ms)/(365.2422*86400000);
-  return mod360(lonGeo("sol", siglos(julian(carta.ms + anios*86400000))) - carta.cuerpos[0].lon);
+  return mod360(lonGeo("sol", sigTT(carta.ms + anios*86400000)) - carta.cuerpos[0].lon);
 }
 const arcoDe = (ms, clave) => clave.solar ? arcoSolar(ms) : (ms - carta.ms)/(clave.dias*86400000);
 function msDeArco(arco, clave){
@@ -3207,7 +3390,7 @@ let transitosActivo = false;
 const estadoTransitos = {fecha:null, orbe:2, conLuna:false};
 const ORBES_TRANSITO = [{v:1, n:"Estrecho · 1°"}, {v:2, n:"Estándar · 2°"}, {v:3, n:"Amplio · 3°"}];
 
-const lonTransito = (id, ms) => lonGeo(id, siglos(julian(ms)));
+const lonTransito = (id, ms) => lonGeo(id, sigTT(ms));
 const velocidadDe = (id, ms) => {
   let d = lonTransito(id, ms + 43200000) - lonTransito(id, ms - 43200000);
   if(d > 180) d -= 360; if(d < -180) d += 360;
@@ -3279,7 +3462,7 @@ function calendarioTransitos(msIni, msFin, conLuna){
   const rejilla = {};
   for(const id of ids) rejilla[id] = new Array(n);
   for(let i = 0; i < n; i++){
-    const T = siglos(julian(msIni + i*paso));
+    const T = sigTT(msIni + i*paso);
     for(const id of ids) rejilla[id][i] = lonGeo(id, T);
   }
   for(const id of ids){
@@ -3307,7 +3490,7 @@ function calendarioTransitos(msIni, msFin, conLuna){
 function capaTransitos(){
   if(!carta) return null;
   const fecha = estadoTransitos.fecha == null ? Date.now() : estadoTransitos.fecha;
-  const Tf = siglos(julian(fecha));
+  const Tf = sigTT(fecha);
   const movidos = ORDEN_EFEM.map(id => ({
     id, nombre:porId[id].nombre, glifo:porId[id].glifo, color:porId[id].color,
     lon: lonGeo(id, Tf), vel: velocidadDe(id, fecha)
@@ -3410,10 +3593,276 @@ function pintaTransitos(){
   document.getElementById("trLuna").addEventListener("change", ev => { estadoTransitos.conLuna = ev.target.checked; pintaTransitos(); });
 }
 
+/* ===================== Revolución solar =====================
+   La carta del instante exacto en que el Sol vuelve a su grado natal. Vale de
+   un cumpleaños al siguiente y no sustituye a la carta natal: la colorea. Todo
+   depende de dos cosas —el minuto del retorno y el lugar donde se levanta—, así
+   que las dos se eligen a la vista. */
+let revolucionActivo = false;
+const estadoRS = {anio:null, donde:"natal", lugarTexto:"", lat:null, lon:null, tz:null};
+const REGENTE_MOD = {Escorpio:"pluton", Acuario:"urano", Piscis:"neptuno"};
+
+const difSolRS = (ms, obj) => { let d = mod360(lonTransito("sol", ms) - obj); return d > 180 ? d - 360 : d; };
+
+/* el instante del retorno, buscado alrededor del cumpleaños del año pedido */
+function instanteRevolucion(anio){
+  if(!carta) return null;
+  const obj = carta.cuerpos[0].lon;
+  const centro = carta.ms + (anio - new Date(carta.ms).getUTCFullYear())*365.2422*86400000;
+  const paso = 21600000, vent = 5*86400000;          // seis horas dentro de cinco días
+  let tPrev = centro - vent, fPrev = difSolRS(tPrev, obj);
+  for(let t = tPrev + paso; t <= centro + vent; t += paso){
+    const f = difSolRS(t, obj);
+    if(fPrev < 0 && f >= 0){
+      let a = tPrev, b = t;
+      for(let i = 0; i < 60 && b - a > 500; i++){
+        const m = (a + b)/2;
+        if(difSolRS(m, obj) < 0) a = m; else b = m;
+      }
+      return (a + b)/2;
+    }
+    tPrev = t; fPrev = f;
+  }
+  return null;
+}
+
+/* el año de revolución que corre hoy: si el cumpleaños aún no llega, el anterior */
+function anioRSCorriente(){
+  if(!carta) return new Date().getFullYear();
+  const y = new Date().getFullYear(), ms = instanteRevolucion(y);
+  return (ms !== null && ms > Date.now()) ? y - 1 : y;
+}
+const anioRS = () => estadoRS.anio == null ? anioRSCorriente() : estadoRS.anio;
+
+function lugarRS(){
+  const n = carta.datos;
+  if(estadoRS.donde === "otro" && estadoRS.lat != null)
+    return {lat:estadoRS.lat, lon:estadoRS.lon, tz:estadoRS.tz, texto:estadoRS.lugarTexto, propio:false};
+  return {lat:n.lat, lon:n.lon, tz:n.tz, texto:n.lugarTexto || "el lugar de nacimiento", propio:true};
+}
+
+let _rsFirma = null, _rsVal = null;
+function laRevolucion(){
+  if(!carta || !carta.datos.horaConocida) return null;
+  const anio = anioRS(), L = lugarRS();
+  const firma = [huellaCarta(carta.datos), anio, L.lat, L.lon, L.tz].join("|");
+  if(firma === _rsFirma) return _rsVal;
+  _rsFirma = firma;
+  const ms = instanteRevolucion(anio);
+  if(ms == null){ _rsVal = null; return null; }
+  const n = carta.datos;
+  const R = cartaDeInstante(ms, {
+    nombre:`Revolución solar ${anio}`, lat:L.lat, lon:L.lon, tz:L.tz, horaConocida:true,
+    sistema:n.sistema, factorOrbe:n.factorOrbe, lugarTexto:L.texto, anio
+  });
+  R.revolucion = true; R.anio = anio;
+  _rsVal = R;
+  return R;
+}
+
+function capaRevolucion(){
+  const R = laRevolucion();
+  if(!R) return null;
+  const movidos = puntosMoviles(R);
+  const cruces = aspectosEntre(movidos, puntosMoviles(carta), carta.datos.factorOrbe || 1);
+  return {
+    clave:{n:`Revolución ${R.anio}`}, fecha:R.ms, arco:0, movidos,
+    cerca: cruces.filter(c => c.asp.mayor && c.dif <= 3).map(c => ({P:c.A, N:c.B, asp:{cl:c.asp.cl, mayor:true}}))
+  };
+}
+
+/* --- las lecturas que de verdad se usan al leer una revolución --- */
+function ejesDelAnio(R){
+  const casaNat = l => carta.cusp ? ROMANOS[casaDe(l, carta.cusp)] : "—";
+  const casaRev = l => R.cusp ? ROMANOS[casaDe(l, R.cusp)] : "—";
+  const zz = l => { const z = posZod(l); return `${z.texto} ${z.signo.g} ${z.signo.n}`; };
+  const sol = R.cuerpos[0], luna = R.cuerpos[1];
+  const signoAsc = posZod(R.ang.asc).signo.n;
+  const idTrad = REGENTE_TRAD[signoAsc], idMod = REGENTE_MOD[signoAsc];
+  const regs = [];
+  for(const [id, etiq] of [[idTrad, "tradicional"], [idMod, "moderno"]]){
+    if(!id || regs.some(r => r.id === id)) continue;
+    const p = R.cuerpos.find(c => c.id === id);
+    if(p) regs.push({id, etiq, p});
+  }
+  const filas = [
+    ["Ascendente de la revolución", zz(R.ang.asc), `cae en tu casa ${casaNat(R.ang.asc)} natal`],
+    ["Medio Cielo de la revolución", zz(R.ang.mc), `cae en tu casa ${casaNat(R.ang.mc)} natal`],
+    ["Tu Ascendente natal", zz(carta.ang.asc), `cae en la casa ${casaRev(carta.ang.asc)} de la revolución`],
+    ["Sol de la revolución", zz(sol.lon), `casa ${casaRev(sol.lon)} de la revolución · casa ${casaNat(sol.lon)} natal`],
+    ["Luna de la revolución", zz(luna.lon), `casa ${casaRev(luna.lon)} de la revolución · casa ${casaNat(luna.lon)} natal`]
+  ];
+  for(const r of regs)
+    filas.push([`Regente ${r.etiq} del Ascendente · ${porId[r.id].nombre}`, zz(r.p.lon),
+                `casa ${casaRev(r.p.lon)} de la revolución · casa ${casaNat(r.p.lon)} natal`]);
+  return {filas, casaSolar: R.cusp ? casaDe(sol.lon, R.cusp) : null};
+}
+
+/* planetas pegados a los cuatro ángulos de la revolución: lo primero que se mira */
+function enAngulosRS(R){
+  if(!R.ang) return [];
+  const ejes = [["Ascendente", R.ang.asc], ["Medio Cielo", R.ang.mc],
+                ["Descendente", mod360(R.ang.asc+180)], ["Fondo del Cielo", mod360(R.ang.mc+180)]];
+  const out = [];
+  for(const c of R.cuerpos) for(const [nom, lonE] of ejes){
+    let d = Math.abs(mod360(c.lon - lonE)); if(d > 180) d = 360 - d;
+    if(d <= 5) out.push({c, nom, d});
+  }
+  return out.sort((a,b) => a.d - b.d);
+}
+
+function pintaRevolucion(){
+  if(!carta) return;
+  const hoja = document.getElementById("hojaRevolucion");
+  if(!carta.datos.horaConocida){
+    hoja.innerHTML = `<p class="aviso" style="margin-top:1rem">La revolución solar se levanta para el minuto exacto en que
+      el Sol vuelve a su grado natal, y ese minuto depende de la hora de nacimiento: media hora de diferencia en el parto
+      mueve el retorno medio día, y con él todo el Ascendente del año. Sin hora conocida no se puede calcular con honestidad.</p>`;
+    return;
+  }
+  const R = laRevolucion();
+  if(!R){ hoja.innerHTML = `<p class="aviso">No se encontró el retorno para ese año.</p>`; return; }
+
+  const anio = R.anio, L = lugarRS(), edad = anio - new Date(carta.ms).getUTCFullYear();
+  const loc = partesEnZona(R.ms, L.tz);
+  const ejes = ejesDelAnio(R), ang = enAngulosRS(R);
+  const casaNat = l => carta.cusp ? ROMANOS[casaDe(l, carta.cusp)] : "—";
+  const cruces = aspectosEntre(puntosMoviles(R), puntosMoviles(carta), carta.datos.factorOrbe || 1)
+                   .filter(c => c.asp.mayor);
+
+  const proximas = [];
+  for(let y = anio; y < anio + 6; y++){
+    const ms = instanteRevolucion(y);
+    if(ms == null) continue;
+    const a = angulos(julian(ms), L.lat, L.lon);
+    proximas.push({y, ms, asc:a.asc});
+  }
+
+  hoja.innerHTML = `
+    <div class="mandos">
+      <div class="campo">
+        <label for="rsAnio">Año de la revolución</label>
+        <input id="rsAnio" type="number" min="${new Date(carta.ms).getUTCFullYear()}" max="2050" step="1" value="${anio}">
+      </div>
+      <div class="acciones" style="margin:0">
+        <button class="secundario" id="rsMenos">− año</button>
+        <button class="secundario" id="rsMas">+ año</button>
+        <button class="secundario" id="rsHoy">El año en curso</button>
+      </div>
+      <div class="campo">
+        <label for="rsDonde">Lugar donde se levanta</label>
+        <select id="rsDonde">
+          <option value="natal" ${L.propio ? "selected" : ""}>El de nacimiento</option>
+          <option value="otro" ${L.propio ? "" : "selected"}>Otro lugar</option>
+        </select>
+      </div>
+      <div class="campo" id="rsCampoLugar" ${L.propio ? "hidden" : ""}>
+        <label for="rsLugar">Ciudad</label>
+        <input id="rsLugar" list="ciudades" placeholder="Escribe y elige de la lista" value="${(estadoRS.lugarTexto||"").replace(/"/g,"&quot;")}">
+      </div>
+    </div>
+
+    <div class="cuadro">
+      <div><span class="k">El Sol vuelve a su grado</span><span class="v">${fmtDia.format(new Date(R.ms))} · ${loc.hora}</span></div>
+      <div><span class="k">Hora de</span><span class="v">${L.texto} (${textoDesfase(L.tz, R.ms)})</span></div>
+      <div><span class="k">Cumple</span><span class="v">${edad} años</span></div>
+      <div><span class="k">Casa solar del año</span><span class="v">${ejes.casaSolar ? ROMANOS[ejes.casaSolar] : "—"}</span></div>
+    </div>
+    ${ejes.casaSolar ? `<p class="aviso">Casa ${ROMANOS[ejes.casaSolar]}: ${CASAS_SIGNIFICADO[ejes.casaSolar].toLowerCase()}. Es el terreno donde el año pide que pongas la atención.</p>` : ""}
+
+    <div class="rotulo">Los ejes del año</div>
+    <table class="posiciones"><tbody>
+      ${ejes.filas.map(([a,b,c]) => `<tr><td style="white-space:normal">${a}</td>
+        <td><span class="cgrado">${b}</span></td><td class="ccasa" style="white-space:normal;text-align:right">${c}</td></tr>`).join("")}
+    </tbody></table>
+    <p class="aviso" style="margin-top:.9rem">El Ascendente de la revolución dice desde dónde se vive el año; la casa natal donde
+      cae dice qué asunto tuyo lo recibe. El regente de ese Ascendente es el que lleva el hilo: mira en qué casa se mete.</p>
+
+    <div class="rotulo">Planetas en los ángulos de la revolución</div>
+    ${ang.length
+      ? `<ul class="aspectos">${ang.map(({c,nom,d}) => `<li class="mayor">
+            <span class="cg">${gh(c.glifo)}</span>
+            <span class="nom">${c.nombre} sobre el ${nom} de la revolución</span>
+            <span class="orbe">${gradoMin(d)}</span></li>`).join("")}</ul>
+         <p class="aviso" style="margin-top:.9rem">Un planeta pegado a un ángulo manda en el año por encima de casi todo lo demás.</p>`
+      : `<p class="aviso">Ningún planeta a menos de 5° de los ángulos. El año se lee entonces por las casas y por los contactos con la natal.</p>`}
+
+    <div class="rotulo">Posiciones de la revolución</div>
+    <table class="posiciones"><thead><tr>
+      <th></th><th>Astro</th><th>Posición</th><th style="text-align:right">Casa RS</th><th style="text-align:right">Casa natal</th>
+    </tr></thead><tbody>
+      ${[{glifo:PUNTOS.asc.glifo, nombre:"Ascendente", lon:R.ang.asc, eje:true},
+         {glifo:PUNTOS.mc.glifo, nombre:"Medio Cielo", lon:R.ang.mc, eje:true}]
+        .concat(R.cuerpos, R.puntos).map(c => {
+        const z = posZod(c.lon);
+        return `<tr><td class="cg">${gh(c.glifo)}</td><td>${c.nombre}</td>
+          <td><span class="cgrado">${z.texto}</span> <span class="csigno">${z.signo.g} ${z.signo.n}</span>${c.retro ? ' <span class="crx">℞</span>' : ""}</td>
+          <td class="ccasa">${c.eje ? "—" : (R.cusp ? ROMANOS[casaDe(c.lon, R.cusp)] : "—")}</td>
+          <td class="ccasa">${casaNat(c.lon)}</td></tr>`;
+      }).join("")}
+    </tbody></table>
+
+    <div class="rotulo">Aspectos dentro de la revolución</div>
+    ${R.aspectos.length
+      ? `<ul class="aspectos">${R.aspectos.map(({A,B,asp,dif}) => `<li class="${asp.mayor ? "mayor" : "menor"}">
+            <span class="cg">${gh(A.glifo)}</span><span class="as ${asp.cl}">${asp.g}</span><span class="cg">${gh(B.glifo)}</span>
+            <span class="nom">${asp.n} · ${A.nombre} y ${B.nombre}</span>
+            <span class="orbe">${gradoMin(dif)}</span></li>`).join("")}</ul>`
+      : `<p class="aviso">Sin aspectos dentro de los orbes.</p>`}
+
+    <div class="rotulo">La revolución sobre tu carta natal</div>
+    ${cruces.length
+      ? `<ul class="aspectos">${cruces.slice(0, 40).map(({A,B,asp,dif}) => `<li class="mayor">
+            <span class="cg">${gh(A.glifo)}</span><span class="as ${asp.cl}">${asp.g}</span><span class="cg">${gh(B.glifo)}</span>
+            <span class="nom">${A.nombre} de la revolución ${asp.n.toLowerCase()} a ${B.nombre} natal</span>
+            <span class="orbe">${gradoMin(dif)}</span></li>`).join("")}</ul>
+         <p class="aviso" style="margin-top:.9rem">Sólo aspectos mayores. Aquí es donde la revolución toca lo que ya estaba en la carta:
+           un año no inventa nada, activa lo que hay.</p>`
+      : `<p class="aviso">Sin contactos mayores dentro de orbe.</p>`}
+
+    <div class="rotulo">Las próximas revoluciones</div>
+    <table class="posiciones"><thead><tr><th>Año</th><th>Fecha del retorno</th><th style="text-align:right">Ascendente</th></tr></thead>
+      <tbody>${proximas.map(p => {
+        const z = posZod(p.asc);
+        return `<tr${p.y === anio ? ' style="font-weight:600"' : ""}><td>${p.y}</td>
+          <td>${fmtCorta.format(new Date(p.ms))} · ${partesEnZona(p.ms, L.tz).hora}</td>
+          <td class="ccasa"><span class="cgrado">${z.texto}</span> <span class="csigno">${z.signo.g} ${z.signo.n}</span></td></tr>`;
+      }).join("")}</tbody></table>
+
+    <p class="aviso" style="margin-top:1rem">La revolución se levanta para el lugar donde estarás ese día, y ahí hay escuela:
+      unos la levantan siempre en el lugar de nacimiento y otros en el domicilio del año, que es lo que cambia el Ascendente y las casas.
+      Por eso están las dos opciones arriba: cambia el lugar y verás moverse la rueda sin que se muevan los planetas.
+      La rueda del centro muestra tu natal por dentro y la revolución por fuera.</p>`;
+
+  const rep = () => { pintaRevolucion(); dibujaNatal(); };
+  document.getElementById("rsAnio").addEventListener("change", ev => {
+    const v = parseInt(ev.target.value, 10);
+    if(v) { estadoRS.anio = v; rep(); }
+  });
+  document.getElementById("rsMenos").addEventListener("click", () => { estadoRS.anio = anioRS() - 1; rep(); });
+  document.getElementById("rsMas").addEventListener("click", () => { estadoRS.anio = anioRS() + 1; rep(); });
+  document.getElementById("rsHoy").addEventListener("click", () => { estadoRS.anio = null; rep(); });
+  document.getElementById("rsDonde").addEventListener("change", ev => {
+    estadoRS.donde = ev.target.value;
+    document.getElementById("rsCampoLugar").hidden = ev.target.value !== "otro";
+    if(ev.target.value === "natal"){ rep(); }
+  });
+  const inp = document.getElementById("rsLugar");
+  if(inp) inp.addEventListener("change", ev => {
+    const escrito = ev.target.value.trim();
+    const c = CIUDADES.find(x => x.etiqueta.toLowerCase() === escrito.toLowerCase())
+           || CIUDADES.find(x => x.n.toLowerCase() === escrito.toLowerCase());
+    if(!c) return;
+    estadoRS.lat = c.lat; estadoRS.lon = c.lon; estadoRS.tz = c.tz;
+    estadoRS.lugarTexto = c.etiqueta; estadoRS.donde = "otro";
+    rep();
+  });
+}
+
 /* ===================== Sinastría =====================
    Dos cartas comparadas: la de la pantalla por dentro y la elegida por fuera.
    Los aspectos se buscan cruzados, cada punto de una contra cada punto de la otra. */
-let sinastriaActivo = false;
+let sinastriaActivo = false, volverASinastria = false;
 const estadoSin = {idB:null, factorOrbe:1};
 const cacheB = {};
 
@@ -3462,8 +3911,22 @@ function pintaSinastria(){
   const hoja = document.getElementById("hojaSinastria");
 
   if(!guardadas.length || guardadas.every(c => huellaCarta(c.datos) === huellaCarta(carta.datos))){
-    hoja.innerHTML = `<p class="aviso" style="margin-top:.9rem">Para comparar dos cartas necesitas otra guardada además de esta.
-      Levanta la otra carta desde «Editar datos» y vuelve aquí: se guarda sola.</p>`;
+    hoja.innerHTML = `
+      <div class="cuadro" style="margin-top:.9rem">
+        <div><span class="k">En pantalla</span><span class="v">${nombreA.replace(/</g,"&lt;")}</span></div>
+        <div><span class="k">Falta</span><span class="v">la segunda carta</span></div>
+      </div>
+      <p class="aviso">La sinastría compara la carta que tienes abierta con otra. Levanta aquí la de la otra persona:
+        se guarda sola y al terminar vuelves solo a esta pestaña, ya con las dos.</p>
+      <div class="acciones" style="margin-top:.9rem">
+        <button type="button" class="primario" id="sinNueva">Levantar la otra carta</button>
+      </div>`;
+    document.getElementById("sinNueva").addEventListener("click", () => {
+      volverASinastria = true;
+      document.getElementById("nNombre").value = "";
+      velo.classList.add("visible");
+      document.getElementById("nCancelar").hidden = false;
+    });
     return;
   }
   const propia = huellaCarta(carta.datos);
@@ -3826,6 +4289,7 @@ function avisoGuardadas(texto){
 /* levanta una carta y deja todo en su sitio: lo usan el formulario y la lista */
 function aplicaCarta(datos){
   estadoAtacir.fecha = null;
+  estadoRS.anio = null; estadoRS.donde = "natal";
   estadoTransitos.fecha = null;
   levantarCarta(datos);
   guardaUltima(datos);
@@ -3838,6 +4302,11 @@ function aplicaCarta(datos){
   pintaGuardadas();
   zoom = 1;
   if(typeof natalPan === "object"){ natalPan.x = 0; natalPan.y = 0; }
+  if(volverASinastria){                       // venías de «levantar la otra carta»
+    volverASinastria = false;
+    const bot = document.getElementById("tabSinastria");
+    if(bot) setTimeout(() => bot.click(), 60);
+  }
 }
 function llenaFormulario(d){
   document.getElementById("nNombre").value = d.nombre || "";
@@ -3928,7 +4397,9 @@ document.getElementById("plegar").addEventListener("click", () => {
 });
 
 /* pestañas del panel */
-const pestañas = [["tabPos","hojaPos"],["tabAsp","hojaAsp"],["tabCasas","hojaCasas"],["tabSent","hojaSent"],["tabAtacir","hojaAtacir"],["tabTransitos","hojaTransitos"],["tabSinastria","hojaSinastria"]];
+const pestañas = [["tabPos","hojaPos"],["tabAsp","hojaAsp"],["tabCasas","hojaCasas"],["tabSent","hojaSent"],
+                  ["tabAtacir","hojaAtacir"],["tabTransitos","hojaTransitos"],["tabRevolucion","hojaRevolucion"],
+                  ["tabSinastria","hojaSinastria"]];
 for(const [b,h] of pestañas){
   document.getElementById(b).addEventListener("click", () => {
     for(const [bb,hh] of pestañas){
@@ -3937,10 +4408,12 @@ for(const [b,h] of pestañas){
     }
     atacirActivo = (h === "hojaAtacir");
     transitosActivo = (h === "hojaTransitos");
+    revolucionActivo = (h === "hojaRevolucion");
     sinastriaActivo = (h === "hojaSinastria");
     if(!sinastriaActivo) compuestaActiva = false;
     if(atacirActivo) pintaAtacir();
     if(transitosActivo) pintaTransitos();
+    if(revolucionActivo) pintaRevolucion();
     if(sinastriaActivo) pintaSinastria();
   });
 }
@@ -4026,7 +4499,8 @@ abrirFicha("marte");     // deja la ficha lista detrás de la portada, para quie
     var pestana = q.get('tab');
     if(v === 'natal' && pestana){
       var mapa = {posiciones:'tabPos', aspectos:'tabAsp', casas:'tabCasas', significados:'tabSent',
-                  atacir:'tabAtacir', transitos:'tabTransitos', sinastria:'tabSinastria'};
+                  atacir:'tabAtacir', transitos:'tabTransitos', revolucion:'tabRevolucion',
+                  sinastria:'tabSinastria'};
       var bot = document.getElementById(mapa[pestana]);
       if(bot) setTimeout(function(){ bot.click(); }, 220);
     }

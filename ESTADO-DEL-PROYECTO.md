@@ -3,6 +3,17 @@
 Todo lo que hemos hecho, en un solo lugar. **Descomprime encima del repo, respetando las carpetas**,
 y haz commit. No borra nada tuyo: solo reemplaza los archivos de esta lista.
 
+## Cómo aplicarlo con GitHub Desktop
+
+1. Abre la carpeta del repositorio clonado (en GitHub Desktop: **Repository → Show in Explorer/Finder**).
+2. Descomprime este zip **dentro de esa carpeta**, aceptando reemplazar. La estructura ya coincide:
+   los archivos sueltos van a la raíz y los de `app/` y `scripts/` a sus carpetas.
+3. Vuelve a GitHub Desktop: en la pestaña **Changes** verás la lista de archivos modificados.
+4. Escribe un mensaje abajo a la izquierda, **Commit to main**, y luego **Push origin**.
+5. Vercel se entera solo y vuelve a desplegar en un minuto.
+
+Si algún archivo no aparece como cambiado, es que ya lo tenías igual: no pasa nada.
+
 ## Los archivos
 
 | Archivo | Estado |
@@ -12,8 +23,9 @@ y haz commit. No borra nada tuyo: solo reemplaza los archivos de esta lista.
 | `mercurio.html` | Retrogradaciones, sombras y calendario. |
 | `venus.html` | Ciclo de ocho años, rosa, pentagrama, luceros y entrada a sinastría. |
 | `saturno.html` | Línea de vida: retornos y ciclos de los planetas lentos. |
-| `luna.html` | El tuyo, con un cambio: las ciudades salen del motor compartido. |
-| `app/efemerides.js` | El motor de cálculo compartido (`window.Efem`) y las 195 ciudades. |
+| `astrocarto.html` | **Nuevo.** Astrocartografía: el mapa del mundo con las líneas de ángulo. Lleva el contorno del mundo incrustado, así que no pide nada por la red. |
+| `luna.html` | El tuyo, ya sin astronomía propia: la pide toda al motor compartido. |
+| `app/efemerides.js` | El motor de cálculo compartido (`window.Efem`), las 195 ciudades y las correcciones de marco y tiempo. |
 | `app/natal-theme.js`, `app/orbit-theme.js`, `app/zodiac-theme.js` | Los tuyos, con el botón «← Planetario» arreglado. |
 | `vercel.json` | Cabeceras `no-cache` para las páginas nuevas. |
 | `scripts/partir.py` | Opcional: vuelve a partir la app en ocho trozos si alguna herramienta te los pide. |
@@ -28,6 +40,21 @@ y haz commit. No borra nada tuyo: solo reemplaza los archivos de esta lista.
 5. **Las siete pestañas no cabían** y «Sinastría» quedaba escondida. Ahora van en dos filas.
 6. **El cálculo de tránsitos tardaba 2,7 segundos.** La posición de la Tierra se recalculaba una vez por
    planeta en cada instante. Memorizada: 30 milisegundos. Aceleró toda la página, no solo los tránsitos.
+7. **Faltaba la precesión de los equinoccios.** Éste era el gordo. Los elementos orbitales están
+   referidos al equinoccio de J2000, pero el zodiaco tropical se mide desde el punto vernal del día que
+   se calcula. Sin esa corrección todos los planetas salían unos 22′ atrasados, y como el Ascendente sí
+   estaba bien, planetas y ángulos no estaban en el mismo sistema. Medido contra las entradas de signo
+   publicadas: Plutón en Acuario salía con 17 días de retraso, Neptuno en Aries con 10, Urano en
+   Géminis con 8. Ahora los cuatro caen dentro del día.
+8. **Faltaba ΔT.** Los astros se calculan en tiempo terrestre y la hora sidérea —y con ella el
+   Ascendente— en tiempo universal. Iba todo en universal: hoy son 69 segundos, que en la Luna son 40″.
+9. **El Sol tenía medio grado de holgura.** Se cambió por una serie periódica (VSOP87, sólo la longitud
+   de la Tierra) más nutación y aberración. Contra doce equinoccios y solsticios publicados entre 1990 y
+   2026, el peor desvío queda en medio minuto de tiempo. Sin esto la revolución solar no valía: diez
+   minutos de error en el retorno mueven el Ascendente dos grados y medio.
+10. **La rueda recalculaba la capa exterior sesenta veces por segundo.** Cada fotograma repetía las
+   bisecciones de los tránsitos. Ahora la capa se guarda y sólo se rehace cuando cambia algo de lo que
+   depende.
 
 ## Lo que se añadió
 
@@ -35,11 +62,40 @@ y haz commit. No borra nada tuyo: solo reemplaza los archivos de esta lista.
 - **Tránsitos** en rueda doble, con activos, fechas exactas y calendario de doce meses.
 - **Sinastría y carta compuesta**, con los dos métodos de casas compuestas a elegir.
 - **Mercurio, Venus y Saturno** con página propia.
+- **Revolución solar**: pestaña propia. Calcula el minuto exacto del retorno del Sol, permite levantarla
+  en el lugar de nacimiento o en cualquier otra ciudad —las dos escuelas—, y da los ejes del año
+  (Ascendente de la revolución y la casa natal donde cae, tu Ascendente natal en las casas de la
+  revolución, la casa solar del año, el regente del Ascendente en las dos regencias), los planetas
+  pegados a los ángulos, la tabla de posiciones con doble casa, los aspectos internos, los contactos
+  con la natal y las seis revoluciones siguientes.
+- **Astrocartografía** (`astrocarto.html`): las cuatro líneas de cada planeta —AC, MC, DC, IC— sobre el
+  mapa del mundo, con los continentes dibujados. Se enciende y se apaga cada astro y cada tipo de línea;
+  se elige entre cálculo *en mundo* (con la latitud real del astro) y *zodiacal* (proyectado sobre la
+  eclíptica), que para Plutón cambia el trazo miles de kilómetros y da para una clase entera. Tocando el
+  mapa dice qué líneas pasan por ahí, hay una tabla de qué cruza una ciudad y otra de por dónde pasa una
+  línea concreta, sobre las 195 ciudades del motor. Se entra desde la portada y desde la pestaña Casas.
 - **Enlaces directos a pestaña**: `astroplanetario.html?view=natal&tab=sinastria`
-  (sirven `posiciones`, `aspectos`, `casas`, `significados`, `atacir`, `transitos`, `sinastria`).
+  (sirven `posiciones`, `aspectos`, `casas`, `significados`, `atacir`, `transitos`, `revolucion`, `sinastria`).
 
 ## Lo que sigue pendiente
 
-Está en `PENDIENTES.md`. De lo más cercano: el sprite del zodiaco no es una imagen válida,
-el título de Luna se encima con la tarjeta del signo, y `astroplanetario.html` y `luna.html`
-todavía llevan su propia copia de la astronomía en vez de usar `app/efemerides.js`.
+Está en `PENDIENTES.md`, que ahora viene dentro del repo y está al día.
+
+De la astrocartografía quedan los paranes, las líneas de espacio local, reubicar la carta entera para
+otra ciudad y el zoom por continente. De lo pequeño queda: el sprite del zodiaco no es una imagen válida y el título de Luna se encima con
+la tarjeta del signo. `luna.html` ya no duplica la astronomía; `astroplanetario.html` sí sigue con su
+copia, pero a propósito: así se abre con doble clic sin servidor. Las dos copias son idénticas y se
+parchan juntas.
+
+### Sobre la precisión, para que puedas responder a un alumno
+
+| | |
+|---|---|
+| Sol | mejor que 2″ de arco (medio minuto de tiempo en un ingreso) |
+| Luna | alrededor de 1′ |
+| Mercurio a Marte | unos pocos minutos de arco |
+| Júpiter a Plutón | unos minutos de arco; Saturno es el peor por la resonancia con Júpiter |
+| Ascendente y casas | limitados por la hora de nacimiento, no por el cálculo |
+
+Quirón sigue fuera a propósito: su órbita cruza la de Saturno y la de Urano y el modelo de elementos
+aproximados no la sostiene con honestidad.

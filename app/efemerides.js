@@ -36,6 +36,146 @@ const ELEM = {
 const julian = ms => ms/86400000 + 2440587.5;
 const siglos = jd => (jd - 2451545.0)/36525;
 
+/* ===================== Marco de referencia y escala de tiempo =====================
+   Dos correcciones que cambian todas las posiciones y que conviene entender:
+
+   1. Precesión. Los elementos orbitales de arriba están referidos al equinoccio
+      de J2000, pero el zodiaco tropical se mide desde el punto vernal del día
+      que se calcula. Entre uno y otro hay la precesión de los equinoccios: hoy
+      pasa de los veintidós minutos de arco y crece unos 50″ al año. Sin ella un
+      planeta lento entra en signo con días o semanas de retraso.
+      La Luna, los nodos y Lilith salen de las fórmulas de Meeus, que ya vienen
+      referidas al equinoccio de la fecha: a ésas no se les suma nada.
+
+   2. ΔT. Los astros se calculan en tiempo terrestre (TT) y la hora sidérea —y
+      con ella el Ascendente y las casas— en tiempo universal (UT). La
+      diferencia ronda hoy los 69 segundos; en la Luna son casi 40″ de arco.
+
+   Encima van la nutación, la aberración de la luz y el tiempo que tarda la luz
+   en llegar, que es lo que hace falta para dar posiciones aparentes, que son
+   las que publican las efemérides. */
+
+/* ΔT = TT − UT en segundos (polinomios de Espenak y Meeus). */
+function deltaT(ms){
+  const f = new Date(ms), y = f.getUTCFullYear() + (f.getUTCMonth() + 0.5)/12;
+  let t;
+  if(y >= 2005){ t = y - 2000; return 62.92 + 0.32217*t + 0.005589*t*t; }
+  if(y >= 1986){ t = y - 2000; return 63.86 + 0.3345*t - 0.060374*t*t + 0.0017275*t*t*t
+                                    + 0.000651814*Math.pow(t,4) + 0.00002373599*Math.pow(t,5); }
+  if(y >= 1961){ t = y - 1975; return 45.45 + 1.067*t - t*t/260 - t*t*t/718; }
+  if(y >= 1941){ t = y - 1950; return 29.07 + 0.407*t - t*t/233 + t*t*t/2547; }
+  if(y >= 1920){ t = y - 1920; return 21.20 + 0.84493*t - 0.076100*t*t + 0.0020936*t*t*t; }
+  if(y >= 1900){ t = y - 1900; return -2.79 + 1.494119*t - 0.0598939*t*t + 0.0061966*t*t*t - 0.000197*Math.pow(t,4); }
+  t = y - 1860; return 7.62 + 0.5737*t - 0.251754*t*t + 0.01680668*t*t*t
+                      - 0.0004473624*Math.pow(t,4) + Math.pow(t,5)/233174;
+}
+const jdTT  = ms => julian(ms) + deltaT(ms)/86400;   // día juliano en tiempo terrestre
+const sigTT = ms => siglos(jdTT(ms));                // siglos julianos en TT
+
+/* Precesión general en longitud desde J2000 (grados). */
+const precesion = T => (5029.0966*T + 1.11113*T*T - 0.000006*T*T*T)/3600;
+
+/* Nutación en longitud y en oblicuidad (grados), términos principales. */
+let _nutT = NaN, _nutV = null;
+function nutacion(T){
+  if(T !== _nutT){
+    _nutT = T;
+    const O  = (125.04452 - 1934.136261*T)*RAD;
+    const L  = (280.46650 + 36000.7698*T)*RAD;
+    const Lp = (218.31650 + 481267.8813*T)*RAD;
+    const s = Math.sin, c = Math.cos;
+    _nutV = {
+      dpsi: (-17.20*s(O) - 1.32*s(2*L) - 0.23*s(2*Lp) + 0.21*s(2*O))/3600,
+      deps: (  9.20*c(O) + 0.57*c(2*L) + 0.10*c(2*Lp) - 0.09*c(2*O))/3600
+    };
+  }
+  return _nutV;
+}
+
+/* Longitud heliocéntrica de la Tierra por serie periódica (VSOP87D, sólo la
+   longitud), ya referida a la eclíptica y el equinoccio de la fecha. Es lo que
+   sube la precisión del Sol de medio grado a un segundo de arco, y con ella la
+   hora exacta de una revolución solar. Coeficientes en 1e-8 rad. */
+const VS_L0 = [
+[175347046,0,0],[3341656,4.6692568,6283.0758500],[34894,4.62610,12566.15170],
+[3497,2.7441,5753.3849],[3418,2.8289,3.5231],[3136,3.6277,77713.7715],
+[2676,4.4181,7860.4194],[2343,6.1352,3930.2097],[1324,0.7425,11506.7698],
+[1273,2.0371,529.6910],[1199,1.1096,1577.3435],[990,5.233,5884.927],
+[902,2.045,26.298],[857,3.508,398.149],[780,1.179,5223.694],
+[753,2.533,5507.553],[505,4.583,18849.228],[492,4.205,775.523],
+[357,2.920,0.067],[317,5.849,11790.629],[284,1.899,796.298],
+[271,0.315,10977.079],[243,0.345,5486.778],[206,4.806,2544.314],
+[205,1.869,5573.143],[202,2.458,6069.777],[156,0.833,213.299],
+[132,3.411,2942.463],[126,1.083,20.775],[115,0.645,0.980],
+[103,0.636,4694.003],[102,0.976,15720.839],[102,4.267,7.114],
+[99,6.21,2146.17],[98,0.68,155.42],[86,5.98,161000.69],
+[85,1.30,6275.96],[85,3.67,71430.70],[80,1.81,17260.15],
+[79,3.04,12036.46],[75,1.76,5088.63],[74,3.50,3154.69],
+[74,4.68,801.82],[70,0.83,9437.76],[62,3.98,8827.39],
+[61,1.82,7084.90],[57,2.78,6286.60],[56,4.39,14143.50],
+[56,3.47,6279.55],[52,0.19,12139.55],[52,1.33,1748.02],
+[51,0.28,5856.48],[49,0.49,1194.45],[41,5.37,8429.24],
+[41,2.40,19651.05],[39,6.17,10447.39],[37,6.04,10213.29],
+[37,2.57,1059.38],[36,1.71,2352.87],[36,1.78,6812.77],
+[33,0.59,17789.85],[30,0.44,83996.85],[30,2.74,1349.87],[25,3.16,4690.48]];
+const VS_L1 = [
+[628331966747,0,0],[206059,2.678235,6283.075850],[4303,2.6351,12566.1517],
+[425,1.590,3.523],[119,5.796,26.298],[109,2.966,1577.344],
+[93,2.59,18849.23],[72,1.14,529.69],[68,1.87,398.15],
+[67,4.41,5507.55],[59,2.89,5223.69],[56,2.17,155.42],
+[45,0.40,796.30],[36,0.47,775.52],[29,2.65,7.11],
+[21,5.34,0.98],[19,1.85,5486.78],[19,4.97,213.30],
+[17,2.99,6275.96],[16,0.03,2544.31],[16,1.43,2146.17],
+[15,1.21,10977.08],[12,2.83,1748.02],[12,3.26,5088.63],
+[12,5.27,1194.45],[12,2.08,4694.00],[11,0.77,553.57],
+[10,1.30,6286.60],[10,4.24,1349.87],[9,2.70,242.73],
+[9,5.64,951.72],[8,5.30,2352.87],[6,2.65,9437.76],[6,4.67,4690.48]];
+const VS_L2 = [
+[52919,0,0],[8720,1.0721,6283.0758],[309,0.867,12566.152],
+[27,0.05,3.52],[16,5.19,26.30],[16,3.68,155.42],
+[10,0.76,18849.23],[9,2.06,77713.77],[7,0.83,775.52],
+[5,4.66,1577.34],[4,1.03,7.11],[4,3.44,5573.14],
+[3,5.14,796.30],[3,6.05,5507.55],[3,1.19,242.73],
+[3,6.12,529.69],[3,0.31,398.15],[3,2.28,553.57],
+[2,4.38,5223.69],[2,3.75,0.98]];
+const VS_L3 = [[289,5.844,6283.076],[35,0,0],[17,5.49,12566.15],
+[3,5.20,155.42],[1,4.72,3.52],[1,5.30,18849.23],[1,5.97,242.73]];
+const VS_L4 = [[114,3.142,0],[8,4.13,6283.08],[1,3.84,12566.15]];
+const VS_L5 = [[1,3.14,0]];
+function serieVS(tabla, tau){
+  let s = 0;
+  for(let i = 0; i < tabla.length; i++) s += tabla[i][0]*Math.cos(tabla[i][1] + tabla[i][2]*tau);
+  return s;
+}
+function tierraLonFina(T){                       // grados, equinoccio de la fecha
+  const tau = T/10;                              // milenios julianos
+  const L = (serieVS(VS_L0,tau) + serieVS(VS_L1,tau)*tau + serieVS(VS_L2,tau)*tau*tau
+           + serieVS(VS_L3,tau)*tau*tau*tau + serieVS(VS_L4,tau)*Math.pow(tau,4)
+           + serieVS(VS_L5,tau)*Math.pow(tau,5))/1e8;
+  return L*DEG;
+}
+
+/* La Tierra no está en el baricentro Tierra-Luna: se aparta hasta 4700 km, que
+   son seis segundos de arco en la posición del Sol. */
+const MU_LUNA = 0.0121505, LUZ = 173.144632674;   // masa relativa · UA por día
+let _ctT = NaN, _ctV = null;
+function centroTierra(T){
+  if(T !== _ctT){
+    _ctT = T;
+    const b = tierraEn(T);
+    const D  = (297.8501921 + 445267.1114034*T - 0.0018819*T*T)*RAD;
+    const M  = (357.5291092 + 35999.0502909*T)*RAD;
+    const Mp = (134.9633964 + 477198.8675055*T + 0.0087414*T*T)*RAD;
+    const c = Math.cos;
+    const km = 385000.56 - 20905.355*c(Mp) - 3699.111*c(2*D-Mp) - 2955.968*c(2*D)
+             - 569.925*c(2*Mp) + 246.158*c(2*D-2*Mp) - 152.138*c(2*D-M-Mp);
+    const r = km/149597870.7, l = lunaLon(T)*RAD;
+    _ctV = {x: b.x + MU_LUNA*r*Math.cos(l), y: b.y + MU_LUNA*r*Math.sin(l), z: b.z};
+  }
+  return _ctV;
+}
+
+
 function helio(clave, T){                       // vector heliocéntrico eclíptico [UA]
   const e0 = ELEM[clave];
   const a = e0[0]+e0[6]*T, e = e0[1]+e0[7]*T, I = (e0[2]+e0[8]*T)*RAD;
@@ -75,17 +215,25 @@ function tierraEn(T){
   return _tierraV;
 }
 
-/* longitud eclíptica geocéntrica de cualquier astro del catálogo */
+/* longitud eclíptica geocéntrica aparente, referida al equinoccio de la fecha */
 function lonGeo(clave, T){
-  if(clave === "luna") return lunaLon(T);
-  const t = tierraEn(T);
-  if(clave === "sol") return mod360(Math.atan2(-t.y, -t.x)*DEG);
-  const p = helio(clave, T);
-  return mod360(Math.atan2(p.y - t.y, p.x - t.x)*DEG);
+  const nut = nutacion(T).dpsi;
+  if(clave === "luna") return mod360(lunaLon(T) + nut);      // Meeus ya va en la fecha
+  const t = centroTierra(T);
+  if(clave === "sol"){
+    const R = Math.hypot(t.x, t.y, t.z);
+    return mod360(tierraLonFina(T) + 180 - 0.09033/3600 + nut - 20.4898/R/3600);
+  }
+  let p = helio(clave, T);                                   // corrección por tiempo-luz
+  for(let i = 0; i < 2; i++){
+    const d = Math.hypot(p.x-t.x, p.y-t.y, p.z-t.z);
+    p = helio(clave, T - (d/LUZ)/36525);
+  }
+  return mod360(Math.atan2(p.y - t.y, p.x - t.x)*DEG + precesion(T) + nut);
 }
 function distGeo(clave, T){
   if(clave === "luna") return 0.00257;
-  const t = tierraEn(T);
+  const t = centroTierra(T);
   if(clave === "sol") return Math.hypot(t.x,t.y,t.z);
   const p = helio(clave, T);
   return Math.hypot(p.x-t.x, p.y-t.y, p.z-t.z);
@@ -384,14 +532,81 @@ function textoDesfase(tz, ms){
 }
 
 
+
+/* ===================== Coordenadas ecuatoriales =====================
+   Para la astrocartografía no basta la longitud: hacen falta la ascensión
+   recta y la declinación, y para eso la latitud eclíptica, que es la que dice
+   cuánto se aparta el astro del plano del zodiaco. La Luna llega a 5° y
+   Plutón a 17°, así que ignorarla movería las líneas cientos de kilómetros. */
+
+const oblicuidad = T => 23.4392911 - 0.0130042*T - 1.64e-7*T*T + 5.04e-7*T*T*T;
+
+/* latitud eclíptica de la Luna (Meeus abreviado, grados) */
+function lunaLat(T){
+  const D  = (297.8501921 + 445267.1114034*T - 0.0018819*T*T)*RAD;
+  const M  = (357.5291092 + 35999.0502909*T)*RAD;
+  const Mp = (134.9633964 + 477198.8675055*T + 0.0087414*T*T)*RAD;
+  const F  = (93.2720950 + 483202.0175233*T - 0.0036539*T*T)*RAD;
+  const s = Math.sin;
+  return 5.128122*s(F) + 0.280602*s(Mp+F) + 0.277693*s(Mp-F) + 0.173237*s(2*D-F)
+       + 0.055413*s(2*D-Mp+F) + 0.046271*s(2*D-Mp-F) + 0.032573*s(2*D+F)
+       + 0.017198*s(2*Mp+F) + 0.009266*s(2*D+Mp-F) + 0.008822*s(2*Mp-F)
+       + 0.008216*s(2*D-M-F) + 0.004324*s(2*D-2*Mp-F) + 0.004200*s(2*D+Mp+F)
+       - 0.003359*s(2*D+M-F) + 0.002463*s(2*D-M-Mp+F) + 0.002211*s(2*D-M+F)
+       + 0.002065*s(2*D-M-Mp-F) - 0.001870*s(M-Mp-F) + 0.001828*s(4*D-Mp-F)
+       - 0.001794*s(M+F) - 0.001749*s(3*F) - 0.001565*s(M-Mp+F);
+}
+
+/* posición geocéntrica aparente completa: longitud y latitud eclípticas */
+function posGeo(clave, T){
+  const nut = nutacion(T).dpsi;
+  if(clave === "luna") return {lon: mod360(lunaLon(T) + nut), lat: lunaLat(T)};
+  const t = centroTierra(T);
+  if(clave === "sol"){
+    const R = Math.hypot(t.x, t.y, t.z);
+    return {lon: mod360(tierraLonFina(T) + 180 - 0.09033/3600 + nut - 20.4898/R/3600),
+            lat: -Math.asin(t.z/R)*DEG};
+  }
+  let p = helio(clave, T);
+  for(let i = 0; i < 2; i++){
+    const d = Math.hypot(p.x-t.x, p.y-t.y, p.z-t.z);
+    p = helio(clave, T - (d/LUZ)/36525);
+  }
+  const x = p.x-t.x, y = p.y-t.y, z = p.z-t.z;
+  return {lon: mod360(Math.atan2(y, x)*DEG + precesion(T) + nut),
+          lat: Math.atan2(z, Math.hypot(x, y))*DEG};
+}
+
+/* de eclíptica a ecuatorial: ascensión recta y declinación, en grados */
+function ecuatorial(lon, lat, T){
+  const eps = (oblicuidad(T) + nutacion(T).deps)*RAD, l = lon*RAD, b = lat*RAD;
+  return {
+    ar:  mod360(Math.atan2(Math.sin(l)*Math.cos(eps) - Math.tan(b)*Math.sin(eps), Math.cos(l))*DEG),
+    dec: Math.asin(Math.sin(b)*Math.cos(eps) + Math.cos(b)*Math.sin(eps)*Math.sin(l))*DEG
+  };
+}
+
+/* hora sidérea media y aparente en Greenwich, en grados. Ojo: en tiempo
+   universal, no terrestre, porque mide el giro de la Tierra. */
+function gmst(jdUT){
+  const T = (jdUT - 2451545)/36525;
+  return mod360(280.46061837 + 360.98564736629*(jdUT - 2451545) + 0.000387933*T*T - T*T*T/38710000);
+}
+function horaSidereaGw(ms){
+  const jdUT = julian(ms), T = (jdUT - 2451545)/36525, n = nutacion(T);
+  return mod360(gmst(jdUT) + n.dpsi*Math.cos((oblicuidad(T) + n.deps)*RAD));
+}
+
 function nodoNorte(T){ return mod360(125.0445479 - 1934.1362891*T + 0.0020754*T*T + T*T*T/467441); }
 function lilithMedia(T){ return mod360(83.3532465 + 4069.0137287*T - 0.0103200*T*T - T*T*T/80053 + 180); }
 
-const lon = (id, ms) => id === "nodoN" ? nodoNorte(siglos(julian(ms))) : lonGeo(id, siglos(julian(ms)));
+const lon = (id, ms) => id === "nodoN" ? nodoNorte(sigTT(ms)) : lonGeo(id, sigTT(ms));
 window.Efem = {
   RAD, DEG, mod360, julian, siglos, helio, lonGeo, distGeo, lunaLon,
   SIGNOS, posZod, CIUDADES,
   lon, velocidad, estaciones, cruce, nodoNorte,
+  deltaT, jdTT, sigTT, precesion, nutacion, centroTierra,
+  posGeo, lunaLat, ecuatorial, oblicuidad, gmst, horaSidereaGw,
   utcMs, desfaseZona, localAUTC, textoDesfase,
   ORDEN: ["sol","luna","mercurio","venus","marte","jupiter","saturno","urano","neptuno","pluton"]
 };
