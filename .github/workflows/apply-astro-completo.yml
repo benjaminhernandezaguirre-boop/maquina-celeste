@@ -1,0 +1,95 @@
+name: Apply Astroplanetario complete overlay
+
+on:
+  push:
+    branches:
+      - astro-completo-20260910
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Rebuild and verify package
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            cat _astro_full/package.part00
+            cat _astro_full/package.part01
+            cat _astro_full/package.part02
+            cat _astro_full/package.part03
+            for i in 010 011 012 013 014 015 016 017 018 019 020 021 022 023 024; do
+              cat "_astro_full2/package.part${i}"
+            done
+            cat _astro_tail/package.part025
+            for i in 026 027 028 029 030 031 032; do
+              cat "_astro_tail/package.part${i}"
+            done
+          } | tr -d '\r\n\t ' > /tmp/package.b64
+
+          base64 -d /tmp/package.b64 > /tmp/astroplanetario-completo.zip
+          echo "f1fb483dd00438c3e82ec725a0b4d1ed94e6f453b0cd5d7fef2f1e07dfe26d07  /tmp/astroplanetario-completo.zip" | sha256sum -c -
+          unzip -t /tmp/astroplanetario-completo.zip
+          rm -rf /tmp/astro-package
+          mkdir -p /tmp/astro-package
+          unzip -q /tmp/astroplanetario-completo.zip -d /tmp/astro-package
+
+          cat > /tmp/expected-files.txt <<'EOF'
+          ESTADO-DEL-PROYECTO.md
+          app/efemerides.js
+          app/natal-theme.js
+          app/orbit-theme.js
+          app/zodiac-theme.js
+          astroplanetario.html
+          index.html
+          luna.html
+          mercurio.html
+          saturno.html
+          scripts/partir.py
+          venus.html
+          vercel.json
+          EOF
+          sed -i 's/^          //' /tmp/expected-files.txt
+          find /tmp/astro-package -type f -printf '%P\n' | sort > /tmp/actual-files.txt
+          sort -o /tmp/expected-files.txt /tmp/expected-files.txt
+          diff -u /tmp/expected-files.txt /tmp/actual-files.txt
+
+      - name: Overlay only package files
+        shell: bash
+        run: |
+          set -euo pipefail
+          src=/tmp/astro-package
+          mkdir -p app scripts
+          cp "$src/astroplanetario.html" astroplanetario.html
+          cp "$src/index.html" index.html
+          cp "$src/mercurio.html" mercurio.html
+          cp "$src/venus.html" venus.html
+          cp "$src/saturno.html" saturno.html
+          cp "$src/luna.html" luna.html
+          cp "$src/vercel.json" vercel.json
+          cp "$src/ESTADO-DEL-PROYECTO.md" ESTADO-DEL-PROYECTO.md
+          cp "$src/app/efemerides.js" app/efemerides.js
+          cp "$src/app/natal-theme.js" app/natal-theme.js
+          cp "$src/app/orbit-theme.js" app/orbit-theme.js
+          cp "$src/app/zodiac-theme.js" app/zodiac-theme.js
+          cp "$src/scripts/partir.py" scripts/partir.py
+          chmod +x scripts/partir.py
+
+          rm -rf _astro_full _astro_full2 _astro_tail
+          rm -f .github/workflows/apply-astro-completo.yml
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "Actualiza Astroplanetario con paquete completo"
+          git push
