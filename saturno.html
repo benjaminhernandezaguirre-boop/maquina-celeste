@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Saturno · Astroplanetario</title>
+<meta name="description" content="Línea de vida: retorno de Saturno, oposición de Urano, cuadratura de Neptuno y retornos nodales, fechados para una carta.">
+<meta name="theme-color" content="#02040b">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Spectral:ital,wght@0,300;0,400;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#02040b;--panel:#080c19e8;--panel2:#0c1121e8;--gold:#dfbd75;--ivory:#f1eadf;--muted:#9993a4;--line:#dabb6f2b;--violet:#a997d8;--blue:#9eb5dc}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#02040b;color:var(--ivory);font-family:Spectral,Georgia,serif}
+body{background:radial-gradient(circle at 15% 12%,#1c1a2e 0,transparent 26%),radial-gradient(circle at 85% 76%,#122036 0,transparent 28%),linear-gradient(145deg,#050815,#010207 68%);overflow-x:hidden}
+button,input,select{font:inherit;color:inherit}
+.stars{position:fixed;inset:0;pointer-events:none;opacity:.5;background-image:radial-gradient(circle,#fff 0 1px,transparent 1.25px),radial-gradient(circle,#fff 0 .8px,transparent 1px);background-size:190px 190px,95px 95px;background-position:0 0,45px 65px}
+.shell{position:relative;max-width:1120px;margin:0 auto;padding:clamp(.8rem,2.5vw,1.6rem) clamp(.8rem,3vw,1.8rem) 3rem}
+header{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.4rem}
+.back{flex:none;text-decoration:none;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:.4rem .9rem;font:500 .62rem 'IBM Plex Mono',monospace;letter-spacing:.13em;text-transform:uppercase;transition:.2s}
+.back:hover{color:var(--gold);border-color:#dabb6f66}
+.brand h1{margin:0;font:500 clamp(1.5rem,3.4vw,2.3rem)/1 Cinzel,serif;letter-spacing:.16em;text-transform:uppercase}
+.eyebrow{margin:0 0 .2rem;font:500 .55rem 'IBM Plex Mono',monospace;letter-spacing:.28em;text-transform:uppercase;color:#c9a963}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:clamp(1rem,2.4vw,1.5rem);margin-bottom:1.1rem;backdrop-filter:blur(6px)}
+.rot{margin:0 0 .85rem;font:500 .6rem 'IBM Plex Mono',monospace;letter-spacing:.22em;text-transform:uppercase;color:#c9a963}
+.field{display:flex;flex-direction:column;gap:.3rem;min-width:12rem}
+.field[hidden]{display:none}
+.field label{font:500 .53rem 'IBM Plex Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+select,input{background:#060b18;border:1px solid var(--line);border-radius:6px;padding:.45rem .6rem;color-scheme:dark}
+.mandos{display:flex;gap:.8rem;flex-wrap:wrap;align-items:flex-end}
+
+.ahora{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.7rem;margin-top:1rem}
+.tarjeta{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.75rem .85rem}
+.tarjeta .k{font:500 .53rem 'IBM Plex Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.tarjeta .v{display:block;margin-top:.25rem;font:500 1.05rem Cinzel,serif;letter-spacing:.03em}
+.tarjeta .s{display:block;font:.68rem 'IBM Plex Mono',monospace;color:#8d879a;margin-top:.15rem}
+
+.vida{position:relative;height:78px;margin:1.2rem 0 .4rem}
+.vida .riel{position:absolute;left:0;right:0;top:38px;height:4px;background:#ffffff14;border-radius:2px}
+.vida .dec{position:absolute;top:46px;font:500 .55rem 'IBM Plex Mono',monospace;color:#6f6a80;transform:translateX(-50%)}
+.vida .tic{position:absolute;top:34px;width:1px;height:12px;background:#ffffff20}
+.vida .ev{position:absolute;top:30px;width:8px;height:20px;border-radius:3px;transform:translateX(-50%);opacity:.85;cursor:default}
+.vida .ev:hover{opacity:1;transform:translateX(-50%) scaleY(1.25)}
+.vida .yo{position:absolute;top:20px;width:2px;height:40px;background:var(--ivory);box-shadow:0 0 10px #fff9;transform:translateX(-50%)}
+.vida .yo::after{content:"hoy";position:absolute;top:-14px;left:50%;transform:translateX(-50%);font:500 .5rem 'IBM Plex Mono',monospace;letter-spacing:.1em;color:var(--ivory)}
+.leyenda{display:flex;gap:.9rem;flex-wrap:wrap;font:500 .55rem 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:.3rem}
+.leyenda span{display:flex;align-items:center;gap:.32rem}
+.leyenda i{width:9px;height:9px;border-radius:2px;display:inline-block}
+
+.decada{margin-top:1.3rem}
+.decada h3{margin:0 0 .5rem;font:500 .62rem 'IBM Plex Mono',monospace;letter-spacing:.2em;text-transform:uppercase;color:#c9a963;border-bottom:1px solid var(--line);padding-bottom:.3rem}
+ul.eventos{list-style:none;margin:0;padding:0}
+ul.eventos li{display:grid;grid-template-columns:4.2rem 1fr auto;gap:.7rem;align-items:baseline;padding:.5rem .2rem;border-bottom:1px solid #ffffff0d}
+ul.eventos li.pasado{opacity:.5}
+ul.eventos li.proximo{background:#12100833;border-left:2px solid var(--gold);padding-left:.5rem}
+.edad{font:500 1rem Cinzel,serif;color:var(--gold)}
+.edad small{display:block;font:.58rem 'IBM Plex Mono',monospace;color:#6f6a80;letter-spacing:.06em}
+.nombre{font-size:.98rem}
+.nombre em{display:block;font-style:italic;color:#a9a2b6;font-size:.85rem;line-height:1.45;margin-top:.12rem}
+.cuando{font:.72rem 'IBM Plex Mono',monospace;color:var(--muted);text-align:right;white-space:nowrap}
+.cuando b{display:block;color:var(--ivory);font-weight:500}
+.pases{font:.62rem 'IBM Plex Mono',monospace;color:#7d7790}
+.aviso{color:#cdc6ba;font-style:italic;font-size:.9rem;border-left:2px solid #c9a96355;padding-left:.75rem;margin:.8rem 0 0}
+.footer-note{color:#7e7890;font-size:.78rem;line-height:1.6;border-top:1px solid var(--line);padding-top:1rem;margin-top:1.6rem}
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<div class="shell">
+  <header>
+    <a class="back" href="./">← Planetario</a>
+    <div class="brand">
+      <p class="eyebrow">Línea de vida · ciclos de los planetas lentos</p>
+      <h1>Saturno</h1>
+    </div>
+  </header>
+
+  <section class="panel">
+    <div class="mandos" id="mandos"></div>
+    <div class="ahora" id="ahora"></div>
+  </section>
+
+  <section class="panel">
+    <p class="rot">Los cien años</p>
+    <div class="vida" id="vida"></div>
+    <div class="leyenda" id="leyenda"></div>
+  </section>
+
+  <section class="panel">
+    <p class="rot">La cuenta completa</p>
+    <div id="lista"></div>
+    <p class="aviso">Cuando un planeta lento retrograda encima del grado, pasa tres veces por el mismo punto. Aquí se marca la primera y la última: el tramo entero es el que se vive.</p>
+  </section>
+
+  <p class="footer-note">
+    Cada fecha se busca por cambio de signo y se afina por bisección hasta el minuto, sobre el mismo motor de efemérides del resto del proyecto.
+    No incluye a Quirón: su órbita es inestable y el modelo aproximado que usamos aquí no lo sostiene con honradez. Las lecturas son simbólicas.
+  </p>
+</div>
+
+<script src="app/efemerides.js"></script>
+<script>
+(() => {
+"use strict";
+const E = window.Efem;
+if(!E){ document.getElementById("mandos").textContent = "No cargó el motor de efemérides"; return; }
+const DIA = 86400000, ANIO = 365.2422*DIA;
+const fFecha = new Intl.DateTimeFormat("es-MX", {day:"numeric", month:"long", year:"numeric"});
+const fCorta = new Intl.DateTimeFormat("es-MX", {month:"short", year:"numeric"});
+
+const COLOR = {saturno:"#e0c27a", jupiter:"#d9a066", urano:"#7fd4d4", neptuno:"#7f9ad4", pluton:"#a78d77", nodoN:"#c9bfa6"};
+const CICLOS = [
+  {id:"saturno", ang:90,  n:"Cuadratura creciente de Saturno", d:"Primer roce con el límite: lo que se empezó se pone a prueba."},
+  {id:"saturno", ang:180, n:"Oposición de Saturno",            d:"La mitad del ciclo: lo construido se ve desde enfrente."},
+  {id:"saturno", ang:270, n:"Cuadratura menguante de Saturno", d:"Crisis de conciencia: se suelta lo que ya no sostiene."},
+  {id:"saturno", ang:0,   n:"Retorno de Saturno",              d:"Saturno vuelve a su grado natal: se pasan cuentas y se elige la forma adulta de la vida."},
+  {id:"jupiter", ang:0,   n:"Retorno de Júpiter",              d:"Vuelve el mismo sentido de expansión: se reabre una puerta."},
+  {id:"urano",   ang:90,  n:"Cuadratura creciente de Urano",   d:"Primer tirón de independencia: hay que salirse del molde heredado."},
+  {id:"urano",   ang:180, n:"Oposición de Urano",              d:"La media vida: lo que se dejó guardado pide salir."},
+  {id:"urano",   ang:270, n:"Cuadratura menguante de Urano",   d:"Segunda libertad, esta vez sin pedirle permiso a nadie."},
+  {id:"urano",   ang:0,   n:"Retorno de Urano",                d:"Se cierra el círculo entero: la vida vista completa."},
+  {id:"neptuno", ang:90,  n:"Cuadratura de Neptuno",           d:"Se deshace el ideal con el que se venía viviendo."},
+  {id:"neptuno", ang:180, n:"Oposición de Neptuno",            d:"Lo material se vuelve transparente."},
+  {id:"pluton",  ang:90,  n:"Cuadratura de Plutón",            d:"Lo que se transformó de raíz se pone a prueba."},
+  {id:"nodoN",   ang:0,   n:"Retorno nodal",                   d:"Vuelve la misma encrucijada de camino."},
+  {id:"nodoN",   ang:180, n:"Medio retorno nodal",             d:"El punto opuesto del camino: se ve de dónde se viene."}
+];
+
+/* --- de dónde salen los datos de nacimiento --- */
+function guardadas(){
+  try {
+    const a = JSON.parse(localStorage.getItem("astroplanetario-cartas") || "[]");
+    return Array.isArray(a) ? a.filter(c => c && c.datos && c.datos.anio) : [];
+  } catch(e){ return []; }
+}
+const lista = guardadas();
+let nacimiento = null, nombre = "";
+
+const mandos = document.getElementById("mandos");
+mandos.innerHTML = `
+  ${lista.length ? `<div class="field" style="flex:1 1 18rem">
+    <label for="selCarta">Carta guardada</label>
+    <select id="selCarta">${lista.map((c,i)=>`<option value="${i}">${(c.datos.nombre||"Carta sin nombre").replace(/</g,"&lt;")} · ${c.datos.resumenFecha}</option>`).join("")}
+    <option value="manual">Otra fecha…</option></select>
+  </div>` : ""}
+  <div class="field" id="campoFecha" ${lista.length ? "hidden" : ""}>
+    <label for="fNac">Fecha de nacimiento</label>
+    <input id="fNac" type="date">
+  </div>`;
+
+function calcula(){
+  const crono = performance.now();
+  const marca = document.getElementById("vida");
+  const T0 = nacimiento, T1 = nacimiento + 100*ANIO, ahora = Date.now();
+  const paso = 5*DIA, n = Math.ceil((T1 - T0)/paso) + 1;
+
+  const ids = [...new Set(CICLOS.map(c => c.id))];
+  const rejilla = {}, natal = {};
+  for(const id of ids){
+    rejilla[id] = new Array(n);
+    natal[id] = E.lon(id, T0);
+  }
+  for(let i = 0; i < n; i++){
+    const t = T0 + i*paso;
+    for(const id of ids) rejilla[id][i] = E.lon(id, t);
+  }
+
+  const eventos = [];
+  for(const c of CICLOS){
+    const objetivo = E.mod360(natal[c.id] + c.ang), lons = rejilla[c.id];
+    let pases = [], fPrev = null;
+    for(let i = 0; i < n; i++){
+      let f = E.mod360(lons[i] - objetivo); if(f > 180) f -= 360;
+      if(fPrev !== null && Math.abs(fPrev) < 25 && Math.abs(f) < 25 && (fPrev < 0) !== (f < 0)){
+        const ms = E.cruce(c.id, objetivo, T0 + (i-1)*paso, T0 + i*paso, paso);
+        if(ms) pases.push(ms);
+      }
+      fPrev = f;
+    }
+    /* los pases que caen juntos son el mismo tránsito yendo y viniendo */
+    let grupo = [];
+    const cierra = () => {
+      if(!grupo.length) return;
+      eventos.push({ciclo:c, ini:grupo[0], fin:grupo[grupo.length-1], pases:grupo.length});
+      grupo = [];
+    };
+    for(const ms of pases){
+      if(ms - T0 < 400*DIA) continue;          // el planeta aún no se despega del grado de nacimiento
+      if(grupo.length && ms - grupo[grupo.length-1] > 420*DIA) cierra();
+      grupo.push(ms);
+    }
+    cierra();
+  }
+  eventos.sort((a, b) => a.ini - b.ini);
+
+  const edad = ms => (ms - T0)/ANIO;
+  const proximo = eventos.find(e => e.ini > ahora);
+
+  /* tarjetas de arriba */
+  const pasado = [...eventos].reverse().find(e => e.fin < ahora);
+  document.getElementById("ahora").innerHTML = `
+    <div class="tarjeta"><span class="k">Edad de hoy</span><span class="v">${Math.floor(edad(ahora))} años</span><span class="s">${nombre || "carta sin nombre"}</span></div>
+    ${pasado ? `<div class="tarjeta"><span class="k">Lo último que pasó</span><span class="v">${pasado.ciclo.n}</span><span class="s">${fFecha.format(new Date(pasado.ini))} · a los ${edad(pasado.ini).toFixed(1)}</span></div>` : ""}
+    ${proximo ? `<div class="tarjeta"><span class="k">Lo que viene</span><span class="v">${proximo.ciclo.n}</span><span class="s">${fFecha.format(new Date(proximo.ini))} · a los ${edad(proximo.ini).toFixed(1)}</span></div>` : ""}
+    <div class="tarjeta"><span class="k">Hitos en cien años</span><span class="v">${eventos.length}</span><span class="s">de seis ciclos distintos</span></div>`;
+
+  /* la barra de los cien años */
+  const pct = ms => Math.max(0, Math.min(100, edad(ms)));
+  marca.innerHTML = `<div class="riel"></div>` +
+    [0,10,20,30,40,50,60,70,80,90,100].map(a =>
+      `<div class="tic" style="left:${a}%"></div><div class="dec" style="left:${a}%">${a}</div>`).join("") +
+    eventos.map(e =>
+      `<div class="ev" style="left:${pct(e.ini)}%;background:${COLOR[e.ciclo.id]}" title="${e.ciclo.n} · ${edad(e.ini).toFixed(1)} años"></div>`).join("") +
+    (edad(ahora) >= 0 && edad(ahora) <= 100 ? `<div class="yo" style="left:${pct(ahora)}%"></div>` : "");
+  document.getElementById("leyenda").innerHTML = [["saturno","Saturno"],["jupiter","Júpiter"],["urano","Urano"],["neptuno","Neptuno"],["pluton","Plutón"],["nodoN","Nodos"]]
+    .map(([id,n]) => `<span><i style="background:${COLOR[id]}"></i>${n}</span>`).join("");
+
+  /* la lista por décadas */
+  const porDecada = {};
+  for(const e of eventos){
+    const d = Math.floor(edad(e.ini)/10)*10;
+    (porDecada[d] = porDecada[d] || []).push(e);
+  }
+  window.__ms = Math.round(performance.now() - crono);
+  document.getElementById("lista").innerHTML = Object.keys(porDecada).map(Number).sort((a,b)=>a-b).map(d => `
+    <div class="decada">
+      <h3>De los ${d} a los ${d+10}</h3>
+      <ul class="eventos">
+        ${porDecada[d].map(e => {
+          const est = e.fin < ahora ? "pasado" : (e === proximo ? "proximo" : "");
+          return `<li class="${est}">
+            <span class="edad">${edad(e.ini).toFixed(1)}<small>años</small></span>
+            <span class="nombre">${e.ciclo.n}<em>${e.ciclo.d}</em>
+              ${e.pases > 1 ? `<span class="pases">${e.pases} pases · hasta ${fCorta.format(new Date(e.fin))}</span>` : ""}</span>
+            <span class="cuando"><b>${fFecha.format(new Date(e.ini))}</b>${e.pases > 1 ? `${e.pases} pases` : "un solo pase"}</span>
+          </li>`;
+        }).join("")}
+      </ul>
+    </div>`).join("");
+}
+
+function usaCarta(d){
+  nacimiento = E.localAUTC(d.anio, d.mes, d.dia, d.horaConocida ? d.hora : 12, d.horaConocida ? d.min : 0, d.tz);
+  nombre = d.nombre || "";
+  calcula();
+}
+const sel = document.getElementById("selCarta");
+if(sel){
+  sel.addEventListener("change", () => {
+    const campo = document.getElementById("campoFecha");
+    if(sel.value === "manual"){ campo.hidden = false; return; }
+    campo.hidden = true; usaCarta(lista[sel.value].datos);
+  });
+  usaCarta(lista[0].datos);
+}
+document.getElementById("fNac").addEventListener("change", ev => {
+  const [a, m, d] = ev.target.value.split("-").map(Number);
+  if(!a) return;
+  nacimiento = Date.UTC(a, m-1, d, 12); nombre = "";
+  calcula();
+});
+if(!lista.length){
+  document.getElementById("ahora").innerHTML = `<p class="aviso" style="grid-column:1/-1">Escribe una fecha de nacimiento arriba, o levanta una carta en el planetario y vuelve: las guardadas aparecen aquí solas.</p>`;
+}
+})();
+</script>
+</body>
+</html>
