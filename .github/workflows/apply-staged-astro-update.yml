@@ -54,3 +54,5 @@ jobs:
           git add -A
           git commit -m "Integra nueva versión de Astroplanetario"
           git push origin astro-update-20260909
+
+# retry after correcting staged package part 00
