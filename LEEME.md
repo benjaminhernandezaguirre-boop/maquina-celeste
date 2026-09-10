@@ -55,8 +55,8 @@ del archivo y las líneas `og:title` y `twitter:title`.
 - Los botones de descarga de imagen (rueda y hoja completa) funcionan bien en un sitio
   publicado y al abrir el archivo directamente.
 - Las posiciones de los planetas se calculan con los elementos orbitales de la NASA
-  y la teoría lunar abreviada de Meeus, con precisión de fracciones de minuto de arco:
-  suficiente para signos, casas y aspectos.
+  y la teoría lunar abreviada de Meeus. La precisión depende del astro y de la fecha;
+  consulta las mediciones y límites en `ASTROCARTOGRAFIA-VALIDACION.md`.
 - El navegador guarda los últimos datos de nacimiento que se escribieron, solo en esa
   computadora, para no tener que teclearlos otra vez.
 
@@ -99,3 +99,10 @@ Medio Cielo y casas.
 Antes de dar por validada la precisión fina del módulo, conviene contrastar varios
 casos contra efemérides profesionales (por ejemplo Swiss Ephemeris/Astrodienst) y
 verificar signo, grado y minutos de arco con una tolerancia pequeña.
+
+
+## Astrocartografía: versión corregida
+
+Astrocartografía y la carta natal comparten `app/efemerides.js`. Conserva la carpeta
+`app` completa al publicar o abrir el sitio localmente. La geometría del mapa está
+en `app/astrocartografia.js`. Consulta [las pruebas y límites de precisión](ASTROCARTOGRAFIA-VALIDACION.md).

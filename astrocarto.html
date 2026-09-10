@@ -53,9 +53,9 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
 .chip{display:inline-block;font:500 .53rem 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;border:1px solid currentColor;border-radius:999px;padding:.05rem .5rem}
 .aviso{color:#cdc6ba;font-style:italic;font-size:.9rem;border-left:2px solid #c9a96355;padding-left:.75rem;margin:.8rem 0 0}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.6rem;margin-top:1rem}
-.stat{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.6rem .75rem}
+.stat{min-width:0;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:.6rem .75rem}
 .stat .k{display:block;font:500 .53rem 'IBM Plex Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
-.stat .v{display:block;margin-top:.22rem;font:500 .98rem Cinzel,serif;letter-spacing:.04em}
+.stat .v{display:block;margin-top:.22rem;font:500 .88rem/1.4 Cinzel,serif;letter-spacing:.04em;overflow-wrap:anywhere}
 .dosco{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem}
 @media(max-width:820px){.dosco{grid-template-columns:1fr}}
 .leyenda{display:flex;flex-wrap:wrap;gap:.9rem;margin-top:.7rem;font:500 .6rem 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
@@ -76,13 +76,22 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
   <div class="campos">
     <div class="campo"><label for="guardada">Carta guardada</label>
       <select id="guardada"><option value="">— escribe los datos abajo —</option></select></div>
-    <div class="campo"><label for="fecha">Fecha</label><input id="fecha" type="date"></div>
-    <div class="campo"><label for="hora">Hora</label><input id="hora" type="time" step="60" value="12:00"></div>
+    <div class="campo"><label for="fecha">Fecha</label><input id="fecha" type="date" min="1800-01-01" max="2050-12-31" required></div>
+    <div class="campo"><label for="hora">Hora</label><input id="hora" type="time" step="60" required></div>
     <div class="campo ancho"><label for="lugar">Lugar de nacimiento</label>
       <input id="lugar" list="ciudades" placeholder="Escribe y elige de la lista"><datalist id="ciudades"></datalist></div>
+    <div class="campo"><label for="ocurrencia">Si la hora ocurrió dos veces</label>
+      <select id="ocurrencia"><option value="reject">Pedir aclaración</option><option value="earlier">Primera ocurrencia</option><option value="later">Segunda ocurrencia</option></select></div>
     <button class="bot" id="dibujar">Dibujar</button>
   </div>
-  <p class="aviso" id="aviso" hidden></p>
+  <details id="manualLugar" style="margin-top:.8rem"><summary>Coordenadas y zona para otro lugar</summary>
+    <div class="campos" style="margin-top:.6rem">
+      <div class="campo"><label for="latManual">Latitud (norte +)</label><input id="latManual" type="number" min="-90" max="90" step="any"></div>
+      <div class="campo"><label for="lonManual">Longitud (este +)</label><input id="lonManual" type="number" min="-180" max="180" step="any"></div>
+      <div class="campo"><label for="zonaManual">Zona horaria</label><input id="zonaManual" placeholder="America/Mexico_City"></div>
+    </div>
+  </details>
+  <p class="aviso" id="aviso" role="status" hidden></p>
   <div class="stats" id="resumen" hidden></div>
 </section>
 
@@ -104,7 +113,7 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
     <span><i style="border-top-style:solid;border-top-width:3px"></i> MC · culmina</span>
     <span><i style="border-top-style:dotted;border-top-width:3px"></i> IC · fondo del cielo</span>
   </div>
-  <p class="pie">Toca cualquier punto del mapa y abajo aparece qué líneas pasan por ahí. El círculo dorado es el lugar de nacimiento.</p>
+  <p class="pie">Toca cualquier punto del mapa para consultar las líneas cercanas. Los filtros se aplican al mapa y a ambas tablas. El círculo dorado es el lugar de nacimiento.</p>
 </section>
 
 <section class="panel">
@@ -113,7 +122,7 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
     <div class="campo ancho"><label for="ciudad">Ciudad</label>
       <input id="ciudad" list="ciudades" placeholder="Escribe y elige de la lista"></div>
     <div class="campo"><label for="orbe">Hasta</label>
-      <select id="orbe"><option value="2">2° · unos 200 km</option><option value="5" selected>5° · unos 550 km</option><option value="10">10° · unos 1100 km</option></select></div>
+      <select id="orbe"><option value="200">200 km</option><option value="550" selected>550 km</option><option value="1100">1100 km</option></select></div>
   </div>
   <div class="tabla-caja"><table id="tablaLugar"><tbody></tbody></table></div>
 </section>
@@ -129,7 +138,10 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
 </section>
 
 <section class="panel">
-  <p class="rot">Cómo se lee</p>
+  <p class="rot">Alcance del cálculo</p>
+  <p class="lead">Modelo astronómico aproximado para 1800–2050, con horizonte geométrico geocéntrico. No incluye refracción, relieve ni paralaje del observador. La precisión depende del astro y la fecha, y disminuye cerca de las tangencias polares. No se garantiza precisión de segundos de arco.</p>
+  <p class="pie">Distancias mínimas sobre una Tierra esférica a cada línea, incluidos sus extremos. Las ciudades son una selección de 195 lugares. Las zonas históricas dependen de la base de datos del navegador. UTC aproxima UT1; ΔT usa polinomios históricos y predictivos.</p>
+  <p class="rot" style="margin-top:1rem">Cómo se lee</p>
   <p class="lead">Una carta natal es el cielo de un instante visto desde un punto de la Tierra. Cambia el punto y el cielo es
     el mismo, pero cambian los ángulos: lo que en tu ciudad estaba saliendo, en otra estaba culminando. La astrocartografía
     dibuja precisamente eso: las líneas del mundo donde cada planeta de tu carta estaba exactamente en uno de los cuatro ángulos.</p>
@@ -159,6 +171,7 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
 </section>
 </div>
 <script src="app/efemerides.js"></script>
+<script src="app/astrocartografia.js"></script>
 <script>
 /* Contorno del mundo (Natural Earth 110m, simplificado y codificado como
    polilínea delta a 0,05°). Va incrustado a propósito: la página tiene que
@@ -166,6 +179,7 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
 const MAPA = {"tierra": ["liA`cBVd@lDCp@KTMoDDs@]i@N", "~eEjbBlADr@Mp@[WOiAFeAXKP", "lw@p`Bq@POVEd@|BT~CP|ACr@KEQuAIa@M}A}@oAG{@F", "nvCzzAs@Do@EVLd@Ht@Cf@MGMo@F", "|{CzzA{@LhACv@K]Gg@H", "vzB|xAk@Bk@CWTvD?f@GTOYGkBH", "ptAtwACPP\\zALr@?SOzAH\\K@OeASo@@ISAo@WQc@EULq@bA", "~_FzhBe@UgAJs@M}@P{@SuBEuBXiEV{CFqBIiDF_BJyEUGS|C?~BI`@OjBGGQ]_@FObAK\\M|@KaB@{AEy@LiC[_@KLOnBWfFKXMpAYJm@w@N_CIa@P}@CuC_@{@C@OLMKMs@GWLiBQoBEqCYy@D{@Eu@FiBGqBFcF?yAQq@FyAUaAf@i@Ko@NcBNkBIgDLUQl@Yr@CTMVm@uDJi@JOLu@@{CQi@Hs@Ca@]a@Pm@Fq@C_@NuCLm@[g@Lw@Cg@H[Js@CqAQ{COg@GWKGQBOp@}@@OCOa@]EOJ_@SQkBs@MQo@Se@AYM{@Ks@U_@EWJNJx@R\\E^Bv@RRJDNALSLZHd@@dAj@DLa@\\_ATc@l@SJKNCb@[l@DTj@\\t@Dh@Xz@N|CT^PhG@KNiBPYLj@JdACv@JD^o@JGNs@LsADiEb@eEPmCX{@^wDe@yCScBAqDNYQw@KcB?cKg@l@[?OlFFHMC]QI}BQ_BWc@OaGUeEe@gAYKOh@IMOYK}B]_@OSQ[Ko@@SLo@@?OUMi@BILo@@eBKm@BONk@MwEa@c@GWM]Hg@Es@`@m@GQOg@Ku@BOL_@McCEwADk@Xk@GiCAcE_@]Ik@c@i@DOLa@Hi@Cy@Xg@IMQmASuAM_BYe@B}@We@?_@GGOa@ImBQgAF_@HCP{@Vo@B{@Te@@aAWqBPoAB_@f@@JBPdAVENk@?BLf@^]Jm@Bm@Ec@_@o@W]_@wCQ_@]YMiAQUMs@Me@BkAGk@@]IS[a@\\_@FuDA_AJsBKg@D}BcAw@PmAd@kA?uAI{@Uk@A]G_@Do@Xk@AkARq@Bg@Ay@Yc@AmAFiAEgAFoAK}CIKc@YJEP]\\a@D_FEaBB[LFLYJwARqCPm@@YMcB`@_BFQNm@H]Lm@DwDB_CT[JBNfA|@r@DVLr@HPLv@ZZ^@^q@l@iABOPdCLjA@`@VDPd@\\s@LUNqAZsBV{ALSRsBFc@LoBI{AJz~LH", "tsAhbAs@Vw@HPRd@@RMLN`@Jj@CZKh@Ep@Uh@Ut@k@mCn@SQMYc@Q[Dc@n@", "dhAz~@_@PJLt@JPM`@PRQo@Wa@HWO", "{vAb}@|@@@SIYYLe@BHX", "wtD~q@e@Lu@MW@An@LLB^LIZZ^CVa@DYVc@AQYB", "gwEbr@IP[OKN?N|@~@OR^?`@N`@`Ap@\\d@AXKh@CFMU]q@g@YE}@c@YUO]OIEU[QGN", "gyEdl@]h@?YQHE\\_@L[@UMSBTx@\\?HJCPh@v@\\NFINEWa@LUj@OAM[MG]@YNa@p@s@N[MCUT_@HIb@", "{oEtZLHr@[r@q@BMO?ULsAbA", "}}EtTMJDRVDTEBQMKQBIE", "~_FtSe`MHVFDM_@I~_MOFT", "q}@|OEn@KRBPFJLWFJG\\@NJH@`@|AvGbAXt@WJU@c@L]B]G[QG?KS_@AWNk@Be@MUEYiAOw@o@KSDQQDU[?WMQW`@IX", "mrDdPM^YO_@`@BPI`@ERIBI`@BTMXaBx@DHWVOj@OIOPIEEh@mAfAK^@n@Q`@@b@Pt@ATX`A\\Rf@rALRH\\Bh@VJj@@b@Nj@`@v@YESTFb@ZtB_@XWNq@ROf@EMQH]RZ`@DSUEUOSB]^`@XLL^^OAUl@k@EIp@WZ?d@SfAB`BZd@ClA\\DTNNx@Bb@Gv@FVRJAd@Vx@?|@a@?WSCEICi@BWTg@DUAWPe@POB]Zq@QPLe@SJKN@S^w@Qu@BWO[A\\QYqAm@QCKDw@SOKU@i@Kw@{@Ae@[a@Q`@OGLQKSQHE_@]a@SGAIQB?Ic@K]RUTq@BFUS_@QIDIOUWMUBa@G@S\\MUCYHUNa@HKCWJWKMBIGQRXd@L?ENXf@AJ}@`@q@d@_@HEJe@LYMa@{AFu@E]GGDMQu@MOKRAXIBAPMRAb@", "{uCxKN?t@[e@Gc@VBJ", "ahEhKf@AFEAOYDSP", "ciE~JDF\\c@FWK?_@r@", "qzCtK`@FDCUe@e@OEIiAOODxAf@X\\", "krCbIMHYAIN~ALMWU?IM", "sxCbIDTz@Jt@E?M_@GYJYCc@M", "{fElI?F\\Qd@[ECQHa@PIL", "wfCnGmABGQiAROX{@Fo@Tl@Nj@OlAAnBYNBhAODOd@C[e@o@@q@PCN", "mgDvFTZB]O[IJ?P", "{aEnGJBPMNYH]ECCJq@n@BH", "_}DzET@DJh@PT?v@UCKc@DUCEQEACTUCa@[BWW?GD@TJX", "a~ChCNLXGFOg@AIJ", "abDzBO\\`@OrAAIUo@Ak@J", "m~DrDJHPe@f@]\\KKIs@\\]\\ER", "ufDl@I~@i@Va@i@m@Wc@?_AZi@FoCp@q@h@ETaAXIRd@BIZc@XYh@UA@P_@FJDi@PBJX@HIjAIt@o@Rc@r@Ox@VC\\\\L~@Ib@_@f@GHJr@?Q_@WKHi@Pa@lAa@`@Cz@c@JPLBHM?Q\\Si@M]@BKx@?NWb@EPSu@IUM_APEL", "q{Cw@^d@\\Ff@GbBFD\\c@b@SQkAMBRPENTb@Ne@r@FLc@l@?XRJNMQa@d@NHKCMZWAe@XJEfBXBPIKe@De@N?L[QYC_@]kAa@]]Js@Bm@?e@]GH", "{_Dm@@b@TCDVQTJBNYJq@G_@MMARWBCN", "gcChFj@?`@_@p@a@n@w@p@uAb@a@X_Ab@YRa@\\Uh@k@BUwAH}B|Bg@?a@ZW`@]PN^ULM@GZMT[BSVHp@@|@", "irCiAm@d@n@BJZ?b@d@Z?f@Nz@DMl@PNWZARMn@NLSz@ADu@RKPa@Da@Ce@WY]L]GGa@aAO_AgA_Aq@U]OASTAN{@VBNX@EPZLVb@]d@FP", "_}CoIEn@Ld@Li@RRM\\JPn@UH]KQXSJPRAZTFKOa@o@YMP]IEQ[A@]_@PGb@", "odBwF`@HR_@Dy@Q_A[Te@dADf@PJ", "_zC{Kf@r@V[QUCYUADZ]g@Bd@", "csCsJr@d@Q[u@u@Se@G^n@p@", "kwC{MWJW??Pj@ZAe@DS", "{{CeNKj@^IKd@RF@[JADWWB?OX]g@?IN", "}vCiOJ`@d@q@c@?MN", "svCcVYJKKCJFNMZH`@VJD^I^SDQEq@TBTMHBP^SLSJLVWb@DRGAOKKJGDLRUDw@OJC}@Kc@W?", "~pAyUHHt@@@OEE_@?U@EF", "b_BiUJDl@UEGOAc@BUHEHZ@", "vyAyWc@DCG_@?a@HGLU?@JQ?SNNNPG^ATHDILDNZHE@KXEj@?PDTKCKaAFMGPQ?OVEGIW@", "}hCkV`@R`@K?a@QQk@KW?GNPPFT", "laE{VDFHEBYGK?IYHOR\\N", "rbBm[OLe@CiAr@c@F@H[@]NBHXDnB@YUNIXCLKFUV@n@Sr@ELGMIf@AZTN?DHRBNCm@c@}@OaABc@L", "|_Bu\\H@HWLIGYK@M^?V", "ovCo[P`@Ta@B]Wg@_@]QJ\\vA", "igDui@CLTVNKRFJVXK?QWWUBOO]F", "gj@qk@ZNCHf@PREHOUAEI[@e@K", "s\\sk@UL{@??DUCDJx@BAGp@GGO", "kRyn@L^EJFThBg@CUo@BeAG", "oJor@WZDr@PANLLI@q@HUU@SK", "goDmm@N^ERRZr@RdA@v@l@ZO?]dAFn@Rl@?g@\\XbAXNRMIc@XKN[e@KUYg@S[[oAKk@Fg@eA[PqAu@Wq@Dk@OYi@GUv@?^d@h@Af@", "}Jus@J\\PGHYGOYME`@", "{rDev@[F[QIl@z@H`@f@~@[Tj@j@@Dg@S_@k@AUuAo@h@]L", "pnAey@aABRNLBr@QHMOKMR", "flAk|@fAKb@QMCs@Hg@NAF", "jyCs{@RD`ASJMb@MFIf@GNUCGgBPa@^g@POT", "deAk~@Xb@YM[FLLa@JSIe@JJ\\[GQl@Nb@l@EIa@JCl@`@V?[Sd@IvB@DKWMPIa@Yi@}@WWc@MQ@\\b@", "zdDqbAe@AJj@a@^N?x@o@FQAKSB", "qrDm~@g@dAx@KXx@g@f@@Z\\WX^Fa@Cg@Bi@I]Au@Vg@Cu@c@QNSQCW~@?f@Of@", "nGi`AdAVx@Ea@i@Ti@uAq@_@?k@VTZEZ\\b@", "{NodAV^h@UDQy@KMR", "f~DkfAf@LRIDQw@S[@OJ`@R", "vBihAh@j@sAEH`@b@b@g@@g@r@YDc@z@q@FDXRJORb@Tt@AbAJPGXPd@CZNTG{@i@c@I~@EHOi@KTUEY{@BEWZWn@GHIOQLKTR@e@RUMg@_@a@oA?", "~mE{iAVDp@Qg@G]BCN", "jeBkmAl@TZAHI]Qu@??F", "tuEwnAYFWCgAN`@Jj@Ob@BHCAO", "liBaqAEPUEoBb@CP]A[Jb@L|@ITQ~Ah@LWt@Ba@SQcA]B", "bQarAHXm@Xr@^tC`@bDQe@QtASeAG@KrAG[Y{@E}@X}@Uq@JaAUaAB", "x}A}rAl@@HSQUc@E_@JBTXJ", "~_FeuAiEdA@VYHF[kBDmAb@f@P`AB?f@NFd@A\\Mt@IFQf@El@BTMGMn@HQPTN_aM@r@Nr@Ac@RW`@QHEPHHjAGpC`@vBr@LPx@YfB\\PMd@Nt@CLXn@d@ANm@HDx@b@@P^OPdARLl@x@HJf@x@d@N[d@sCQu@a@WAS}@GkC{AgA_@_@w@n@BV^dBj@^o@fBJbBbAa@VvCLC[|@Ep@RxBGbCJxGjD}@DSVe@HYSk@@y@j@A`@^f@Bn@P~@z@x@LZdCrBr@VX?VSt@\\DLNCPLJLAZh@Zj@PDTe@Va@l@IX?l@LTb@F^Nb@BDUG]Pi@]EXa@RGNJ@GTISU@GIUBEh@Ov@JZRj@HUQFO]YRUnAh@XXd@@RPSZa@D?P_@Jk@[c@LY@ERv@JPTf@RRZk@TMd@s@bA?\\XHITWJN~@TBbBnClBdAl@DVPLMTRv@Rh@DLh@T@H[GOt@KfAf@^d@HZcA|Ac@VY^QhADfAnAr@^^p@d@LYKY\\W`@Eb@}@b@Q`@?E]b@?Bj@`@|AAZY@Qb@E`@UVWBu@n@QZ@j@Ed@MJO`@?L\\@rA{@DST[D_@LUC]FONOFSf@i@DVFUO_AB]K]JWAi@NURaBPa@fAp@l@MMq@Fc@^m@COTC\\_@R}@PUb@ACNLTNGDFXGDLjAFA\\TVx@Xj@n@dAr@?Pv@VP@L\\KtAPd@?bAR@P\\KLb@HLZNJd@e@`@_Bb@y@NiAb@w@\\_C?o@De@z@VZEr@o@SMJOl@a@\\IJ[^]`EJbDYPo@PG^Ff@Pn@Kf@_@f@Iv@{ARDXKNLTAGPBH[~@SHEL[N@\\[n@@]ISKCKJ?VFTGNEAAJ_@Gw@B}A{AEBHVE\\QZULu@L[b@MB?Hr@hAPAFHFRA^P?XNBPFFX?NH?NPJTChAXH^fBb@`@Z\\?VNbAJXVz@@JUAUXy@GAD}@JKBMROT_@Ha@ZYPGXe@Bs@Tk@f@WTs@JIz@wAR?Iy@\\bAHD\\]\\y@BBQh@u@dB_AvAFFAXs@j@Mf@HDEh@On@c@Va@rAmAv@sArA?NVH]PY`@S?qAMeAWa@Ag@ISKM?@t@~@xCbAfBn@t@fCdBj@n@P^ZNHNN@D\\JNFXNLPn@AVYLH`@?^]~@MFGPChCGRZv@XVpAb@fBvABZS\\Gb@EAFx@IDDNNNpA`@PNCNI@PrAHP`@Xr@dAhA~@\\R|@NBJXEPFj@Gh@@hATXNP?NML?PQ?DDK?UJ[KE@_@hAyB\\_@N[^aCDeAb@q@\\gA^g@Dw@Ea@[yAm@{@As@JORo@MWR_ARYAGNi@bBsBVi@[sAFESkAN[PEFQHE?Ih@LLANF^?TYJ[ZYbBBvCx@b@KfAEn@D`AXR?f@S`BmAf@QRUJk@^g@TKH[^UPCFOJGHg@EQP]POOE]q@BSKSCe@H{@CSHQRQCc@MIMUBKM[WYKEKW?UMWYMYi@UOc@Cs@e@a@a@Hq@Su@Y[eAa@e@aA]?WNe@A{@He@Ui@GYOe@KeCISDe@Ok@?OFYAk@O[B?Ta@OAFRR?PMHD`@XRGTS@IPODm@LQC_@Fu@PQ`@{AXk@Re@]H]MS[Q[Eu@FMPaAJILu@A_B\\o@Wc@C[BIRIK}@J_@WOs@i@gAB]IOLSMMVB`@IXV|@B^Uj@AFPZBd@Uj@@Vg@\\US_@XQm@e@{@AQ]kABo@Ym@IaAA_Cj@m@Ea@Bo@UEOH[TMVE~@m@l@M`@W[Ea@a@VO{@O@GbAHXJd@@`@NAVSHi@AFLj@Dt@VTGGSj@Km@SJI|@IBMb@Bl@r@AHRHJCJn@RNLZOf@c@JFHn@@p@`@JYl@En@H[VRDT?TUDHGVSPNHi@\\ATd@IKRVBMb@X?`@QTy@b@i@HUTMBSIe@XWrBo@^]GARQ?MXEJPJMAMIC^E^LB^MRe@RS`@k@^]?IFHF_AXg@\\FLTSb@ENX[LBTN@T`@NBGa@GGZk@NCJQXGNO\\A^Q~@q@Je@r@Q|An@nAIx@L@l@d@Xr@HBJVVN^OTTPHX\\FZ^vAAh@\\PCNKHWd@ENHTERDE_@BWPCHOCYOMKg@Jm@A[NQw@[qCLaB?SWGoAh@i@ZS|@OB]s@GcAHLm@e@P}A_@K_@aAOUIa@{@w@O_@?GGa@AEF[QHO?UPU?i@QUa@Ao@W@TJJCJUDHLJCZ\\IPANg@H?Lg@GUI_AZkCk@g@DCHe@?IOu@MFa@A]SWc@M_@\\_@AMu@NDVMBWcBOuABk@Uh@QfABfCTTUf@KIg@Rc@SWc@WuBs@BQv@QbAJf@XEXjC`A\\v@]Ze@Td@l@f@HN`ATd@p@CT^l@@Le@^m@\\w@ZWlAl@t@Fv@SLi@J{Ac@YiBa@oAi@gDcCqDoAwAQ_A@}@a@gA@gAG}B\\r@Hk@Xi@M_AVmBHwCj@]RCXl@T~@HrD]ZB_A\\Ez@qATESXQ[M_BXa@IZ]}Ag@c@Be@LW[`@WSW\\WoBJUTp@D?T_@L}@IIW}Eu@]@d@Vq@B[MiA?{@Qm@Vm@Yh@USMuBJgEx@[Sh@U?Gn@CKST]?MiAc@Yc@]GiBHGVd@^WJMZHv@k@VNXlAx@k@DOOk@IKSa@QVWSYj@AHW_@g@r@_@gAYH]S?UTNd@i@FP[cAOqAAiATb@a@Bi@eAGuDC^Sm@Ym@AmASiBCMKgBCa@HwAUiA?KOe@Q}AOcALt@FyAFKPc@GuB?yAR_@LHRtC`@\\JkBNc@GUXOI_AEaCDGRgDDA_@uCF_ARQXVNq@^_ANe@i@_APcAImAJ]K_ADZc@s@QiJXa@VgB\\aDGoAFa@ND\\q@Hu@GeA?kAFkAEeAb@o@K^YQQ_CJqACsBRf_MP", "k|@sr@S\\S?KJ`@@Jl@NHARKZe@H[Rw@D_AIAID[Ei@^MI[XAGa@e@Hc@K\\WJU^HBZLc@IOFMl@MPc@TI@Kg@B?]a@Ec@DEg@DWf@@`@IrAXPVd@Df@h@c@d@BX_AbA", "pvBkuAVLt@K`@Bt@Q_A]aAPc@V", "~_FkxA_aMXj@@DKl_MO", "~_FkxAg@Aw@J@Bh@Hr@@?Y", "dpB{uA?h@u@_@o@XJ\\e@Xi@[[c@Ck@sBHs@RCR\\R[TDRlAZv@Df@KJRp@p@n@Zv@@^P@Xn@Bn@`@j@j@N^@l@{@Dc@bAw@GiAPg@N]P{AZmBDF`@Kf@]l@{@d@]MUg@R_A\\S_ASm@[U[@YZa@n@]m@i@Nc@L}@[ImBL_@IuAb@MNeAB?`@Kp@e@D[Vy@Ue@k@YS_CfCNVu@Tc@V}@HYJO`@_@DONAj@x@\\`ALp@^`ADtAGdB@`@\\p@PfBxAa@G_As@sAa@{@Cc@Rd@ZYfAs@RaAEg@k@AZYNp@X~Bf@j@Z\\A@a@eAa@lBDGL|Bj@VXDZMTO?BMKH@HtBP^Hy@EKDv@JX?ACJJK?H\\Z\\BITKITGDANb@n@I]TMBa@FPGVVEYLAd@K@Gt@V\\h@JXTRBRLDLj@Xh@h@DZGZ]~@?NSl@Bj@HVJBPCFQLGl@qAGYJU\\a@NEf@PXSXInBBNBGJ@NIFFDNELF\\A\\U`@DZIXB`@Fb@\\f@PTPFP?n@GLT~@DfAYfAY\\IVOPi@JON_BUYGYOQcAeAS{@AIF@RTVFVEFNn@HIF??DG?HfAVXa@FGEg@Bc@IUBQCYDe@VIHDJCNJ\\Al@FBDn@OZo@n@?FSAIH}@SMKi@Fm@\\S?][QCEm@WSW?CG_@@m@[SSM@IJFTVDMP@RNVM^QCG[JM@]q@QDQMKMZ[?YTALmACWP]BUKAI_BA`@JMP_@B]PG^S?i@VWXARM@e@`@o@FCG_@Ck@Ji@Lk@`@ENMA_@zAUD?Z\\`@KJgAD?f@_@YsBd@SVFTo@KmARy@A{@`@s@j@]Ja@@MJSjAN`AjApAXj@Zb@H?J\\AhALvALNDt@h@r@Dh@^NHVj@?|@NZPj@Jn@^`@f@DZEVNx@ZTj@fA|@p@Pd@XTPXl@TZGTBd@OX?XU@Ts@`@DZWN@Rd@r@z@RnAHj@CITH\\GTVLf@Bf@MLHCf@[JUKKRd@J^XDf@FTd@?^RJ\\g@\\e@FLb@l@TXl@d@NNRMf@YVr@Av@VDd@P?j@K~As@JWIWRYBeAOe@i@]z@Ke@c@MaAk@LUqAZKJp@XCYcCS[Je@Bm@QAs@_CO{@F{@K_@Dq@Wo@_@yF@aAFw@h@W@OnAg@dBcANa@EI`@u@hBgEz@i@KQPe@K[_@YU]HQLRVQGKFc@MEWq@BOq@YDKOA@SGOSA_@m@LIGUHe@IIFa@Z_@HUIIb@[P@FLXJBFSTNJR@DWDDJAFOj@G@HXOFGAOf@U@KJGCJFHTODGEWJEIGlAgACEI@FKJCBHV?r@M^OXAf@Wj@i@t@WhATjD{@h@]~@ONQj@URYHSMCBIIK?K^u@|A_B`@QFIEWj@[H[TCh@g@?Kb@}@?MZOL@VKDNKp@w@v@CLGAGXm@l@Kb@Wb@ATS@]b@@DVNHYjAs@A[DUl@]DB`@SVUSAMMAQ^]TIn@sAVw@XUPEBKVALIb@CHEDUd@g@`@w@AIp@m@B_@TUGa@?a@L]Oe@IgAFu@Vu@EGy@LSd@IIRaAnBw@fAQTa@EYr@OD_@n@]@Sv@[Ja@r@a@Tc@dBCl@KpAi@jBUv@B|Bc@l@HIXdAJlATDWQg@i@KHIr@TZZv@Z[Rd@ZpA\\HN|@TLPl@PZClBd@dAJDE}Bu@q@CSO}Am@E_@SUl@JJGTNXUJNLSf@NV?BWGOXMr@F|@[?U\\QMWa@UMS_@A[D_@S[B_@KFQTG[O`AHJF^Gv@Bx@IPOp@UqCe@_@?DRsA?^Yn@MbAe@t@KUUeA?s@QGSi@SqBUe@B{@U}@F[PQGcA@@H{@Di@C_ETs@EsDZ}@Pi@Ba@Oq@My@D{@QaAI[N]GGS[BcAb@s@YE\\q@EMKq@@{@N}ANu@Dg@Au@Rv@RgAFkBCa@Gi@Vk@Sf@OYMoAE_@Hg@Tm@CeAPwBEBWc@G}@L@d@Y_@_@@Qg@h@Yl@OAk@o@[s@Dg@Pw@j@b@RiAF", "tmCkzARPwAKw@Rm@Sc@J_@f@SOZi@c@Eg@Dk@Pe@`AiCd@BP`ABYNLLjCQxBNjDHTQt@Kb@Dp@_@eEOlAIlC@TM}AO|@?dAI}@m@iBWi@F", "raCwzAb@X|@[MEu@A]H", "l~AkzACHtAAj@Dv@WAMSA{ABcAT", "dkBmzA_@Vc@_@eBOcAh@DXoAKe@OmCf@ENiAGi@X_BNc@Ne@b@hAR}AX_AFy@b@}@BJZdAl@p@Q|@e@r@DDTqBr@Yf@L\\vCk@aBx@GLlBOrAUp@SMKtBg@AJrBD`@KY]}CELMMSs@g@JQLK|@SnAMWIh@W`@C^KTJfABpCGtCQ^Mi@Qx@?Ji@]c@i@OeBIZX", "l|Bi{Ao@FeACKJd@P{@PDb@`ANd@CZObB]?MqADj@Yo@S", "orDozAtCEe@Oq@Cy@NCH", "nsB}yAh@\\l@AXc@ASSOg@KsA@kAHz@b@n@F", "puCgxAhBRRQ|ASoAiAd@WeCEy@FeB@qA\\rCd@p@Z?N", "m{D{|Al@N~@CjAMIMoDN", "~sBw|ATNx@An@KSQy@Ia@LOJ", "ktDm}A^\\rCA`AHlAYS[u@GgB@qCT", "bzB{~A]PARP\\`ABj@EAW`AB@_@i@@{@Mw@@CC", "ffCg~AOLa@Ei@@GPVRfCDbBP|@?BKqAQrDBv@Eu@g@e@KoBLgAVeABx@g@c@Mi@BMR", "}fAkwAxCAJQfAIDUi@I@UoAa@d@C_Bc@HQ{Em@eCGcAMmAE[NXJfGf@zBd@zBlAG^mA`@", "juBk_Bm@JmA?a@LFNeAPoBB_AGqC?k@LGPVHz@Fr@CbEDhDQRi@f@OpAEl@KMOqA@", "fpCa`BD\\\\LnDXt@GcA]qAYsBE", "htB{_BzAAJKqA@[DDD", "vhCc`BhAJz@M_@K{@Cw@DLJ", "{]i`BvANdAIYIVKsAGOLw@H", "`hCgaBp@F`A?AEg@KiAH", "xvBq`Bx@F^IPMBOkABo@LJL", "`|B}`BOP`AC`AMxAAg@Kn@GBO{DR]P", "kbC{`B`FNgAu@a@CaCXHN", "yUsbBcC\\bBNVZ`@FR`@n@@tAYc@Mz@IlAa@\\_@kBMULy@?MM{@Aq@L", "y^ocBmALx@TtBBrBEFKx@?j@Q{BKy@Hg@KeBH", "}~@ucBxAFDDl@Fj@IUKvAAiCGGJ}@Oy@FLD", "}{BsaBvADnBK`AO\\[t@GgB[uAGmAR{Ad@Hb@", "vkBqbBo@Jv@JhA\\dABrAEh@O?M_@KfA@l@MVQw@]g@CPG}AAq@TeCN_@X", "rtA{fB_EFiAH@JdF`@uA?|Cb@dA^pADXFvBDu@BXF_@Pd@L|@JPNv@JEFcA??FhBVfBItBDfCEBSiAIR[WAiBNt@Y~@E_@OeAIKMv@OPSmCD}@MdFAdAM`@Ol@KHMyDOy@Mq@@i@J_@U{BKoCBqBGmDD", "z`@kgByF\\hANnJDSFmCEwBLmAKa@Lj@VeBMaEOwBFUNbDZTH~BD{A@lAv@Aj@o@X~@@`AJiATI`@h@Bs@`@xABm@NJLnBDq@X?PnAORHu@Hs@XO^fAFnAg@MZl@R_DBvEbA`DLf@Lv@h@tAZhCT`@V@ZRX~@^O^f@fAv@@x@_@nA?f@UXg@dAq@RYDc@t@c@M]XMe@m@{@OOOI_@fBXp@K@[OSuBHfBg@f@D`@Im@e@hBsAp@O?OhBW`H@rBe@gBKqACjDIxAOEOiHe@OMjBMa@OiC[y@CNQyEQyB?k@JiBUkF^~AUEQeCWkC@s@MkCC_ID"], "fronteras": ["kq@zK^Vh@NVANJd@Dn@I\\@Hu@T]f@EnAc@Tq@VWFUCUDc@OAg@k@Je@KCAWNUME}BAwCtAAVy@f@", "fTwYyACU_@Kw@w@i@Qs@MAK_@aA@MIW??UE?@dA`CA?fBd@@FTEv@zC?FL", "dbDocAUS?WbAY`AiA~@a@RUnAb@~@k@d@Kf@??wJ", "|rAmw@XU?u@PKXDLI\\\\Xp@\\FBHdC?`Af@JLjA@PDGVtCn@NQe@y@NgAh@QEGPCHOP@JQjCw@`@J~@I^BjBSJGDUL??Nra@?", "lxBi_@N?x@SRo@x@iAZO`@@V^`@KRKVk@x@k@dA??NlB?vCm@CG`BD", "k|@_y@RECUXY\\@`@[W]JG_@k@i@TC[qAk@_A?eCj@k@Q}@?s@RKKw@@IQ`A[g@SFIe@KZYQMuCMQIcBMc@QgAHMf@i@Iq@LBTg@AcBe@NJs@^yAdBSUw@Vy@IUDQV[FQNs@ESX\\X`@B@f@TPlAM\\fAbBXc@bAXJATj@SjCAx@OTFDV`AMXDHPjA`@N\\N?HSr@?Fa@R?Cg@n@]rBHd@c@dBo@dBV?rCR@Z_@XIl@FPJ", "uwAys@KB`@X]L[Io@Tp@Zn@ADKGQr@F^n@`@AHP]HG\\Tf@t@GAW~Ae@dAm@Ri@LEj@@LID]r@UbAb@ETl@?", "ioDjJ@cG", "e{CbJER", "ahCoAGXYVYIYBWSQCe@J_@IUu@MMMm@qAD", "trArcAbAA?wA", "ttAj`AdCKPUA]X@NM@k@]OKYBSUa@Mu@BWQEDOPGMOPOHm@OGDo@SmAWMJe@?e@]Y@a@We@?e@HEReAYg@Bg@Mc@Ye@[WJOGK?cAi@QMi@BIa@c@s@HUZO_@m@@oAhA_@DyAj@EPd@z@sAP_@Ec@_@Ea@SGST?^z@f@`BzA`@rC", "|vA|USIISSXE\\SNJd@c@bB]C", "me@lIdA@HDJVGPJvAg@TIECh@\\?^g@\\CHUVL^ELQj@C@K^Cr@HAo@JOAo@Fg@p@?CMR?@DX@N`@TEf@FVa@Rs@tBAj@H", "gNfFICG[MGIBMOU?AJODw@w@@a@Qe@k@g@EMIuASm@Es@c@a@{@\\y@HQYQBk@S]DEGMCcA?Y`@QBq@KIPc@XBl@ODZVVf@HlAJHHp@IPAn@", "_s@bAVa@?qCm@y@W?c@[s@AqBwBm@y@?mA", "ki@d@?i@m@gATaAR[s@q@SD?TML[?q@`@y@FKQc@OOL[?", "_o@oURT\\FJJTtAENF`@Nd@VRRn@RHJh@Ab@JaARMB]C]PA@HX@IHCVh@r@RB`@WNFBJRF@Ff@?BG\\ALFHCZa@\\DRt@XJYLj@[Cm@TWB[NKFe@L@M]BQKKFI[u@c@B@oDm@??oAyM?", "q[}LVFTNZh@d@Rp@?CLd@\\p@NNIFH^BEKPk@PEVWGQs@?Tc@?s@NYCSX??YNMOu@s@e@As@WaB^c@H}@g@U_IvC", "rxAsW?b@HFIJ?H", "qY_dA{@L?RzBC", "obDws@D[SAEm@Ha@a@Mo@DYe@Mk@c@s@`AJ`@Nz@?Ne@n@[dAKLg@t@qA~AYdBF^RUH?TTJb@h@?Pv@Xn@On@Bl@Qx@ZxANvAE|@e@f@EvAJx@OF]pAOl@Of@h@OVf@X`BIXSh@?`@KhCt@x@H", "w{@gs@^XPAXYb@ILOb@GVD|@YzAMDB", "wn@{y@AQSKg@AEMHUQS@KpAKVS^Dp@MLW^A@KIGXWlAHRe@g@COGJIXGAEh@a@GK@Qf@ITDBIh@IPk@PGOMJc@]WDG", "ab@sjA{BiAMSx@[OYb@]Ya@l@m@e@]|@YE[cBS", "yh@mx@IIs@P", "wb@iuAO[p@O|@JR\\d@Pj@Ir@@j@Sn@JDXjAEHTf@?~B~BMLLNd@?Xb@At@YRLn@p@p@", "mSvb@QSOHGPi@HUCc@S?sCIDWd@BXIL[Cg@]ISQIc@Na@@WGK_@UCWg@c@]y@]eAD]rABz@^CLX?LWTUCGQ_@?", "gc@dc@PKRFh@h@]\\MCGKUGQ_@JK", "jmBcVF?LVFCBFhA??TP?g@`@?Lr@?R^EFDR", "~fAvd@WCi@^MAgAn@WZPPKT", "hcAd_@MeALE\\BN_AXIPFh@GCu@JUKIBUQq@HWTKBMEWjAANm@K?Hs@VKV?j@SNMj@Gj@c@AgAr@Fv@\\FJzA?A{@^Vb@ALUZAIOTYPc@KE?QWIBUK_@sAi@c@@S_CFUNM?]]AAOVC?WmA?KMSb@ECUT_@CGKm@OCO]K@G`@CBs@PIEC}@NKIiAUMMDKUAGHBNMFGPHLD`@Kd@WRS@o@[u@DA[a@?g@NKKOLQAOOc@aA", "tgAfX@Mb@SjBJP`@PdA", "~uA~TYk@Pa@IMFMOSA}@IMb@_A", "jcBfCCNHH?Na@?ORUOG[Wa@o@Ok@i@KYB]ICy@n@Wh@[DUKOFWC]PXh@K?ST", "d}ADd@UJD^EHQn@U", "j`B_HESK@GKFUCE", "dxAwMVFd@l@Nr@S@MZ?f@SNiA@[`@cAEMDNb@@ZSn@RRWTKf@", "tfBgII]HC?QOA", "bjB{LECYHIE]LIG", "blBgOUI?SQ?GKKFc@e@QFs@O", "vlBwOCODCX@`@UGK?Me@[", "roBeP]Y", "lnBgUBjAK?", "tiAmI^TBNML`@L?PHJY\\", "lfAmFDb@VHD\\QZK?EVW`@", "lbAeFT`@CZOVRr@", "cB}~@ELQ?o@b@SCiA^y@FRXD\\HDPC?HZT@RSGMP@JKLLJI^UBBP", "wBat@l@Bl@QLFhAQNM", "yc@rZXQ^EHg@PCl@k@b@}@gAFw@{@OACMUO]ECN_@AcA`@FnCN^h@l@", "{W|]?sBg@A?mC{AOOPWOi@E", "uMrTi@MY?WPgDC[RaBDiBYY@OJ", "pSeSMKSBg@Im@Ts@x@Gn@OHCNFLzCIl@H", "`TmOc@?_@Ma@FQGFKXDNITJh@?", "dNgQKGGWg@He@CEI_D?I[FEd@wI}@?kGlDIPk@P?Xk@C?zATX@XxAHNLp@@HGTDd@Nj@f@NFRCJFDZ\\`@?LHNAVXHDOP@FJn@AJKAKJ?GW\\c@f@Pb@MNB@M", "zIga@wC`B", "iAuFH[A{AFG@SXWEUMCGQSCUWM?]VGb@FNCJ^b@FX?xA", "cQaOJ@?JF@Zk@FA^Tr@Mb@BVPR?n@SPHT?LOf@Mj@BHFNf@Bb@", "uA}MA[n@G?STY@e@", "iD}Vy@QqBmAiCkA_ANUT[M", "wPsNONFT`@\\^rATNPr@ZLTON?VVH?\\bA", "cRgH\\l@@z@c@v@QLCp@~@SzDA", "i@mFRe@@SGc@HOB{@NSAKc@?", "pBgEAOPa@Im@Q_@NmBuBA", "vE}Ki@\\MISAYH", "rHmDEu@h@]GQBSAKE??WQKPo@AMGA", "pIsHH?HNH?FIAONW\\FBc@R_@^?TF^d@", "|QyLQSe@IA_@", "hMoGKWc@g@", "aVkCr@IVTTd@", "u]iIaAbAIV]NEJ", "gO~DNMZV", "{L~C]UL[g@MCQSRc@?KQEYD_@PWQm@HG\\BJUCO", "{Jg@gAA?o@", "}g@pJSPI`@Nh@G`@JLJb@SHvB`@AZ", "_\\zTr@w@A_CqA?BmA", "ej@jMH^Ir@MAMLQZAr@NFJZXWA_ANIHBVS", "ag@l`@Fc@", "ic@pBW@KUS@", "}j@kh@YGAPJPLEFZGBHD?HQE?NR~@XcA", "_l@ij@Q@ENTNHR", "mk@og@Db@", "kMmh@@^z@d@?`@PHPgAx@q@@]WUIa@Fe@GS", "xIqa@?o@_A]gAOOSm@OA]WAQOs@EEOHGNcALW", "{J{d@Mt@D^?`ANNW\\ANMTQE_@PQX", "sk@{g@m@NmAk@Op@vAXg@f@RR\\DZXj@E", "aeAq_@GL", "oeAe^R@BXGBPF?NTh@vBSNq@", "g_Ay]JBJG", "o{@ub@Z?HQb@C]e@[@", "oo@wh@wAg@Oq@B[UISYQEm@DMHQEYl@[JAVRLH^[d@q@TS\\DZK??TUR", "ey@kc@hACnBoAz@[n@I", "kaAySj@}AwBg@YoAP[", "g_CgNHo@Ya@s@Ec@Da@LQYc@LGXBn@bA^QVh@@`@N", "u~BwFLNXB@S`@QDF", "ezBmKi@mANc@Bi@b@q@MGMc@z@yAOGQi@[Am@YQJAV[@Hh@?b@i@WKDW?GM]@]^Cf@_@b@@`@LP", "c|BoXk@i@AHU@Dm@SEi@bAq@?M`@VJJLo@Vy@pA]ZIZDf@", "mrByX@a@MF?]SIBOIMAi@]HQ_@ASUa@?Uq@[]DBWMG@MUCMVQH@~@d@^Bn@i@EIb@YFJ`@m@T]KAN", "u~Ba[UIgACa@UQLc@FDVSNg@H", "m_Dgo@DHl@BLPR@", "izC}p@mAm@Y[SJa@@DU}@OOWYV", "{pCk}@n@dAINUCg@D]M_@Jc@ZBLxA@ZHZX|@Nf@T~@KRXSZx@b@l@Lz@?~@Ln@TPKn@?x@Wf@Et@D|BIVUPe@VCn@YdBKLOMo@X_@x@M`@UH[", "yrBqZR_AJ@DVTSKUQCSa@bBI@[RA^QLZ]RXNFLWHDVS~@", "gtAs\\YYwA?Fa@TSD_@XQk@i@o@BgB{B?[a@U^SZ}@SQ{@Hk@Eg@a@i@n@B^OR?R\\CKj@}Ar@VPNd@_Cx@u@BWRoBLA{@YGCf@c@NWGcA@AWNK_@EqAw@a@H[OSVLPk@D", "_nBca@[]SIq@HQJ", "kdBwd@OGa@Jg@XUDMP}@X{AJ", "{kAk^Om@w@S@QRG?a@f@Qb@m@cATg@EWBGG[Bs@QAa@UU]?CKm@?MK@WQWWILYe@?IM@OSOLc@WQcCY]RK\\aAN", "ysAmm@KD[MMFKQW?KUOMUHBJK@B`@OJw@]eABEH", "akAid@e@c@BY\\ENy@OUNEYmAi@N]EGQu@QG_@a@GEM]J", "wwAiq@LJj@EBTk@Aq@JkAEId@KCWFEf@", "icB}s@DH|@RLNr@DLVj@CXFf@PEHHF", "okAqk@Ba@ZAl@a@^Cj@UhABZTb@F", "}v@mm@T_@GMJm@[IY`@[BkAa@KJLRYTIA", "el@wk@UQAUKFk@Ku@Fo@OaAE", "ux@mo@N[P?`A_@CSDMu@EWPFHULJJc@P?Z", "yXkuAsBl@?|@MN", "wf@c`A`@@LH@RnEWfAJ@OJSWGJo@e@?k@OGUa@KBQcAU", "_d@sw@t@G[]BGo@@Xe@LEAMPIl@MhBZPIp@CPF@ITIQ[I@JQe@_@QEEIRc@", "e[k|@d@Mn@?VHRMNBRU\\ABKZCDHRGAK\\CRKNYCMXc@KIHS", "m[}bASDIJ", "k[{z@VHj@t@v@Dl@N^Gx@c@", "gTc{@BNT?GFT^`@@RFxAKHMf@DBF|@MCOKCSJEI_AE_@H@a@MCMS]Lc@S_@JQAQFARa@L_BWUIi@JIC", "ib@{w@FQCa@p@s@JC", "ub@su@r@SbARfBCRWIGHCJFVI@QXGBMTO", "iYaeAm@KiB?EFU@e@R", "k]ggAa@Es@Pa@@", "wQ{~@Z?pA`@IZk@X", "_Kkz@j@MFH`@?", "wFy|@F_BW?IOIc@FM", "uIucA]BWE", "_b@os@`@Eh@J?Rb@BZM^J\\A@YRKGWOKRQBMII", "s_@is@SJJVHD", "eXqp@QQAMME?ImAS", "}r@}r@i@Ag@R", "eWks@@KQSAFICQNCj@OH", "qVkx@UXNNPI|@EP@HFLIFPkAdAc@NBD", "cP{w@[@GG]F@KMCCO_@I", "aLsy@BNPFZEHNP@FETLR?NG", "cF}|@CUIA", "cCe_A]Bc@Go@X", "hJks@_@OIRu@CIRPJFv@P@OVHZKHRXCL", "lH}cAGTFTu@F", "gPcy@BRIN", "ew@qr@IEs@LEERSIE", "wmCuDQTGMS@Cm@", "eTw{@EG_@CIM[I", "{t@{NJHPCx@}@`@OZAHGVHVQJ\\l@G", "ot@mSOKBQKSOJw@E}@DILQE]i@c@QsBO", "oi@yj@p@C", "g^oZ?aHJ_@IWDQMQ", "ck@{EVk@PIDOTQVCMUSAGK", "}s@uNZb@CV_@AIDHNm@t@aCn@a@?", "}t@iMLR", "_e@l@VJFC", "qe@kCOKYH{@IWQ", "wVaw@M?HPSLDR\\LDT", "wXis@]Mi@C", "_Zys@EQd@UTPh@[", "iXot@FF"]};
 (() => {
 "use strict";
+const Geo = window.AstroGeo;
 const E = window.Efem, RAD = Math.PI/180, DEG = 180/Math.PI;
 const mod360 = x => ((x%360)+360)%360;
 const env180 = x => { const v = mod360(x); return v > 180 ? v - 360 : v; };
@@ -215,6 +229,7 @@ let carta = null;                       // {nombre, ms, lat, lon, lugarTexto}
 let astrosOn = new Set(ASTROS.map(a => a.id));
 let ejesOn = new Set(["AC","MC","DC","IC"]);
 let modo = "mundo";
+let consulta = null, datosCache = null, nombreEditor = "", lugarGuardado = null, usarManual = false;
 let marca = null;                       // {lat, lon} de lo que se tocó en el mapa
 
 /* ===================== Las líneas =====================
@@ -223,8 +238,9 @@ let marca = null;                       // {lat, lon} de lo que se tocó en el m
    vale menos el semiarco diurno. Despejando la longitud geográfica salen las
    cuatro líneas. */
 function datosAstros(){
+  if(datosCache) return datosCache;
   const T = E.sigTT(carta.ms), hs = E.horaSidereaGw(carta.ms);
-  return ASTROS.map(a => {
+  return datosCache = ASTROS.map(a => {
     const p = E.posGeo(a.id, T);
     const q = E.ecuatorial(p.lon, modo === "mundo" ? p.lat : 0, T);
     return {...a, lon:p.lon, lat:p.lat, ar:q.ar, dec:q.dec, hs,
@@ -233,35 +249,14 @@ function datosAstros(){
   });
 }
 /* longitud geográfica donde el astro sale (AC) o se pone (DC) a una latitud dada */
-function lonEnLatitud(a, eje, latGeo){
-  if(eje === "MC") return a.lonMC;
-  if(eje === "IC") return a.lonIC;
-  const co = -Math.tan(latGeo*RAD)*Math.tan(a.dec*RAD);
-  if(co < -1 || co > 1) return null;                 // ahí ni sale ni se pone
-  const H0 = Math.acos(co)*DEG;
-  return env180(a.ar + (eje === "AC" ? -H0 : H0) - a.hs);
-}
+function lonEnLatitud(a,eje,latGeo){ return Geo.longitud(a,eje,latGeo); }
 /* la curva completa de una línea, partida donde cruza el antimeridiano */
-function curva(a, eje){
-  if(eje === "MC" || eje === "IC"){
-    const L = eje === "MC" ? a.lonMC : a.lonIC;
-    return [[[L,-88],[L,88]]];
-  }
-  const tramos = []; let t = [];
-  for(let la = -85; la <= 85.001; la += 0.5){
-    const L = lonEnLatitud(a, eje, la);
-    if(L === null){ if(t.length > 1) tramos.push(t); t = []; continue; }
-    if(t.length && Math.abs(L - t[t.length-1][0]) > 180){ tramos.push(t); t = []; }
-    t.push([L, la]);
-  }
-  if(t.length > 1) tramos.push(t);
-  return tramos;
-}
+function curva(a,eje){ return Geo.curva(a,eje); }
 
 /* ===================== El mapa ===================== */
 const cv = document.getElementById("mapa"), g = cv.getContext("2d");
 const W = cv.width, H = cv.height;
-const px = lon => (env180(lon) + 180)/360 * W;
+const px = lon => (lon + 180)/360 * W;
 const py = lat => (90 - lat)/180 * H;
 const desdeX = x => x/W*360 - 180, desdeY = y => 90 - y/H*180;
 
@@ -362,7 +357,8 @@ function etiqueta(a, eje){
     if(L === null) return;
     X = px(L); y0 = py(0) + (eje === "AC" ? -24 : 24); dir = eje === "AC" ? -1 : 1;
   }
-  const w = 56, h = 34, Y = hueco(X, y0, w, h, dir);
+  const w = 56, h = 34; X = Math.max(w/2, Math.min(W-w/2,X));
+  const Y = hueco(X, y0, w, h, dir);
   if(Y === null) return;
   g.save();
   g.fillStyle = "#050b1aee"; g.strokeStyle = a.c; g.lineWidth = 1.5;
@@ -388,49 +384,40 @@ function punto(lon, lat, color, texto){
 function repinta(){ pintaMapa(); pintaLineas(); }
 
 /* ===================== Tablas ===================== */
-const kmPorGrado = lat => 111.32*Math.cos(lat*RAD);
-function lineasCerca(lat, lon, orbe){
-  const out = [];
-  for(const a of datosAstros()){
-    for(const eje of ["AC","MC","DC","IC"]){
-      const L = lonEnLatitud(a, eje, lat);
-      if(L === null) continue;
-      const d = Math.abs(env180(L - lon));
-      if(d <= orbe) out.push({a, eje, d, km: d*kmPorGrado(lat)});
+
+function lineasCerca(lat,lon,limiteKm){
+  const out=[];
+  for(const a of datosAstros()) if(astrosOn.has(a.id)){
+    for(const eje of ["AC","MC","DC","IC"]) if(ejesOn.has(eje)){
+      const distancia=Geo.distancia(a,eje,lat,lon);
+      if(distancia.km<=limiteKm) out.push({a,eje,d:distancia.grados,km:distancia.km});
     }
   }
-  return out.sort((x,y) => x.d - y.d);
+  return out.sort((x,y)=>x.km-y.km);
 }
 function pintaTablaLugar(nombre, lat, lon){
   const orbe = parseFloat(document.getElementById("orbe").value);
   const cuerpo = document.querySelector("#tablaLugar tbody");
   if(!carta){ cuerpo.innerHTML = `<tr><td>Primero dibuja un mapa.</td></tr>`; return; }
   const filas = lineasCerca(lat, lon, orbe);
-  cuerpo.innerHTML = `<tr><th colspan="4">${nombre} · ${lat.toFixed(2)}°, ${lon.toFixed(2)}°</th></tr>` + (filas.length
+  cuerpo.innerHTML = `<tr><th colspan="4">${E.escaparHTML(nombre)} · ${lat.toFixed(2)}°, ${lon.toFixed(2)}°</th></tr>` + (filas.length
     ? filas.map(f => `<tr>
         <td class="g" style="color:${f.a.c}">${gh(f.a)}</td>
         <td><strong>${f.a.n} ${f.eje}</strong> · ${f.a.n} ${SENTIDO[f.eje]}<br>
           <span style="color:#9993a4;font-size:.84rem">${f.a.n} en ${f.a.z.texto} ${f.a.z.signo.n}</span></td>
         <td class="m">${f.d.toFixed(2)}°</td>
         <td class="m">${Math.round(f.km)} km</td></tr>`).join("")
-    : `<tr><td colspan="4" style="color:#9993a4">Ninguna línea a menos de ${orbe}° de ahí. Es un lugar tranquilo en tu mapa.</td></tr>`);
+    : `<tr><td colspan="4" style="color:#9993a4">No hay líneas visibles a menos de ${orbe} km de este punto.</td></tr>`);
 }
 function pintaTablaLinea(){
-  const cuerpo = document.querySelector("#tablaLinea tbody");
-  if(!carta){ cuerpo.innerHTML = `<tr><td>Primero dibuja un mapa.</td></tr>`; return; }
-  const id = document.getElementById("lnAstro").value, eje = document.getElementById("lnEje").value;
-  const a = datosAstros().find(x => x.id === id);
-  const cerca = [];
-  for(const c of E.CIUDADES){
-    const L = lonEnLatitud(a, eje, c.lat);
-    if(L === null) continue;
-    const d = Math.abs(env180(L - c.lon));
-    cerca.push({c, d, km: d*kmPorGrado(c.lat)});
-  }
-  cerca.sort((x,y) => x.km - y.km);
-  cuerpo.innerHTML = `<tr><th colspan="3">${a.n} ${eje} · ${a.n} ${SENTIDO[eje]}</th></tr>` +
-    cerca.slice(0, 12).map(f => `<tr><td>${f.c.etiqueta}</td>
-      <td class="m">${f.d.toFixed(2)}°</td><td class="m">${Math.round(f.km)} km</td></tr>`).join("");
+  const cuerpo=document.querySelector("#tablaLinea tbody");
+  if(!carta){ cuerpo.innerHTML="<tr><td>Primero dibuja un mapa.</td></tr>"; return; }
+  const id=document.getElementById("lnAstro").value, eje=document.getElementById("lnEje").value;
+  const a=datosAstros().find(x=>x.id===id);
+  if(!astrosOn.has(id) || !ejesOn.has(eje)){ cuerpo.innerHTML="<tr><td>Esta línea está oculta. Actívala en los filtros para consultar sus ciudades.</td></tr>"; return; }
+  const cerca=E.CIUDADES.map(c=>({c,...Geo.distancia(a,eje,c.lat,c.lon)})).sort((a,b)=>a.km-b.km);
+  cuerpo.innerHTML='<tr><th colspan="3">'+a.n+' '+eje+' · Ciudades del catálogo más cercanas</th></tr>'+
+    cerca.slice(0,12).map(f=>'<tr><td>'+E.escaparHTML(f.c.etiqueta)+'</td><td class="m">'+f.grados.toFixed(2)+'°</td><td class="m">'+Math.round(f.km)+' km</td></tr>').join('');
 }
 
 /* ===================== Datos de entrada ===================== */
@@ -439,12 +426,16 @@ const dl = $("ciudades");
 dl.innerHTML = E.CIUDADES.map(c => `<option value="${c.etiqueta}"></option>`).join("");
 const buscaCiudad = t => {
   const s = (t || "").trim().toLowerCase();
-  return E.CIUDADES.find(c => c.etiqueta.toLowerCase() === s) || E.CIUDADES.find(c => c.n.toLowerCase() === s) || null;
+  const exacta=E.CIUDADES.find(c=>c.etiqueta.toLowerCase()===s);
+  if(exacta) return exacta;
+  const coincidencias=E.CIUDADES.filter(c=>c.n.toLowerCase()===s);
+  return coincidencias.length===1 ? coincidencias[0] : null;
 };
 
 function guardadas(){
-  try { return JSON.parse(localStorage.getItem("astroplanetario-cartas") || "[]"); }
-  catch(e){ return []; }
+  try { const a=JSON.parse(localStorage.getItem("astroplanetario-cartas")||"[]");
+    return Array.isArray(a) ? a.filter(r=>r && typeof r.id==="string" && E.cartaValida(r.datos)) : [];
+  } catch(e){ return []; }
 }
 const sel = $("guardada");
 for(const reg of guardadas()){
@@ -459,34 +450,45 @@ for(const reg of guardadas()){
 function avisa(t){ const a = $("aviso"); a.hidden = !t; a.textContent = t || ""; }
 
 function levanta(){
-  let d = null;
-  const reg = guardadas().find(r => r.id === sel.value);
-  if(reg) d = reg.datos;
-  else {
-    const f = $("fecha").value, h = $("hora").value || "12:00", c = buscaCiudad($("lugar").value);
-    if(!f)  return avisa("Falta la fecha.");
-    if(!c)  return avisa("Elige un lugar de la lista: hace falta su latitud, longitud y zona horaria.");
-    const [A,M,D] = f.split("-").map(Number), [hh,mm] = h.split(":").map(Number);
-    d = {nombre:"", anio:A, mes:M, dia:D, hora:hh, min:mm, horaConocida:true,
-         lat:c.lat, lon:c.lon, tz:c.tz, lugarTexto:c.etiqueta};
+  try {
+    const f=$("fecha").value, h=$("hora").value, c=usarManual?null:(lugarGuardado||buscaCiudad($("lugar").value));
+    if(!f) throw Error("Falta la fecha.");
+    if(!h) throw Error("La astrocartografía necesita la hora de nacimiento. No se puede sustituir por mediodía.");
+    const [anio,mes,dia]=f.split("-").map(Number), [hora,min]=h.split(":").map(Number);
+    const ambiguas=E.CIUDADES.filter(c=>c.n.toLowerCase()===$("lugar").value.trim().toLowerCase());
+    if(!c && !usarManual && ambiguas.length>1) throw Error("Hay varias ciudades con ese nombre. Elige la ciudad y país de la lista.");
+    if(!c && (!$("latManual").value || !$("lonManual").value || !$("zonaManual").value)) throw Error("Elige una ciudad de la lista o completa sus coordenadas y zona horaria.");
+    const d={nombre:nombreEditor,anio,mes,dia,hora,min,horaConocida:true,
+      lat:c?c.lat:Number($("latManual").value),lon:c?c.lon:Number($("lonManual").value),
+      tz:c?c.tz:$("zonaManual").value.trim(),lugarTexto:c?c.etiqueta:$("lugar").value.trim(),desambiguacion:$("ocurrencia").value};
+    E.validaCarta(d);
+    const ms=E.localAUTC(anio,mes,dia,hora,min,d.tz,d.desambiguacion);
+    carta={nombre:d.nombre||"Esta carta",ms,lat:d.lat,lon:d.lon,lugarTexto:d.lugarTexto}; datosCache=null;
+    avisa(""); $("resumen").hidden=false;
+    const z=E.posZod(E.lonGeo("sol",E.sigTT(ms)));
+    $("resumen").innerHTML=[["Carta",carta.nombre],["Nacimiento",f+" · "+h],["Lugar",d.lugarTexto||"Coordenadas manuales"],
+      ["Zona",d.tz+" · "+E.textoDesfase(d.tz,ms)],["Instante UTC",new Date(ms).toISOString().replace(".000Z","Z")],["Sol",z.texto+" "+z.signo.n]]
+      .map(([k,v])=>'<div class="stat"><span class="k">'+k+'</span><span class="v">'+E.escaparHTML(v)+'</span></div>').join('');
+    if(!consulta) consulta={nombre:d.lugarTexto||"Lugar de nacimiento",lat:d.lat,lon:d.lon,natal:true};
+    else if(consulta.natal) consulta={nombre:d.lugarTexto||"Lugar de nacimiento",lat:d.lat,lon:d.lon,natal:true};
+    marca=consulta.natal?null:{lat:consulta.lat,lon:consulta.lon};
+    actualiza();
+  } catch(e){
+    carta=null;datosCache=null;$("resumen").hidden=true;avisa(e.message);actualiza();
   }
-  avisa("");
-  const ms = E.localAUTC(d.anio, d.mes, d.dia, d.hora, d.min, d.tz);
-  carta = {nombre:d.nombre || "Esta carta", ms, lat:d.lat, lon:d.lon, lugarTexto:d.lugarTexto};
-  const T = E.sigTT(ms), z = E.posZod(E.lonGeo("sol", T));
-  $("resumen").hidden = false;
-  $("resumen").innerHTML = [
-    ["Carta", carta.nombre],
-    ["Nacimiento", `${String(d.dia).padStart(2,"0")}/${String(d.mes).padStart(2,"0")}/${d.anio} · ${String(d.hora).padStart(2,"0")}:${String(d.min).padStart(2,"0")}`],
-    ["Lugar", d.lugarTexto || "—"],
-    ["Sol", `${z.texto} ${z.signo.n}`]
-  ].map(([k,v]) => `<div class="stat"><span class="k">${k}</span><span class="v">${v}</span></div>`).join("");
-  marca = null;
-  repinta();
-  const c = buscaCiudad($("ciudad").value);
-  if(c) pintaTablaLugar(c.etiqueta, c.lat, c.lon);
-  else pintaTablaLugar(d.lugarTexto || "Lugar de nacimiento", d.lat, d.lon);
-  pintaTablaLinea();
+}
+function actualiza(){
+  repinta(); pintaTablaLinea();
+  const q=consulta||{nombre:"",lat:0,lon:0}; pintaTablaLugar(q.nombre,q.lat,q.lon);
+}
+function cargaGuardada(){
+  const r=guardadas().find(r=>r.id===sel.value); if(!r) return;
+  const d=r.datos; nombreEditor=d.nombre||""; usarManual=false; lugarGuardado={lat:d.lat,lon:d.lon,tz:d.tz,etiqueta:d.lugarTexto||"Coordenadas guardadas"};
+  $("fecha").value=d.anio+'-'+String(d.mes).padStart(2,'0')+'-'+String(d.dia).padStart(2,'0');
+  $("hora").value=String(d.hora).padStart(2,'0')+':'+String(d.min).padStart(2,'0');
+  $("lugar").value=d.lugarTexto||""; $("ocurrencia").value=d.desambiguacion||"reject";
+  $("latManual").value=d.lat; $("lonManual").value=d.lon; $("zonaManual").value=d.tz;
+  $("manualLugar").open=!buscaCiudad(d.lugarTexto); levanta();
 }
 
 /* ===================== Controles ===================== */
@@ -497,7 +499,7 @@ $("astros").addEventListener("click", ev => {
   const id = b.dataset.id;
   astrosOn.has(id) ? astrosOn.delete(id) : astrosOn.add(id);
   b.classList.toggle("on", astrosOn.has(id));
-  repinta();
+  actualiza();
 });
 $("ejes").innerHTML = EJES.map(e => `<button class="bot on" data-eje="${e.id}">${e.n}</button>`).join("");
 $("ejes").addEventListener("click", ev => {
@@ -505,39 +507,42 @@ $("ejes").addEventListener("click", ev => {
   const id = b.dataset.eje;
   ejesOn.has(id) ? ejesOn.delete(id) : ejesOn.add(id);
   b.classList.toggle("on", ejesOn.has(id));
-  repinta();
+  actualiza();
 });
 $("lnAstro").innerHTML = ASTROS.map(a => `<option value="${a.id}">${a.n}</option>`).join("");
-$("modo").addEventListener("change", ev => { modo = ev.target.value; repinta(); pintaTablaLinea();
-  const c = buscaCiudad($("ciudad").value);
-  if(carta) pintaTablaLugar(c ? c.etiqueta : (carta.lugarTexto || "Lugar de nacimiento"),
-                            c ? c.lat : carta.lat, c ? c.lon : carta.lon); });
-$("dibujar").addEventListener("click", levanta);
-sel.addEventListener("change", () => { if(sel.value) levanta(); });
-$("orbe").addEventListener("change", () => {
-  const c = buscaCiudad($("ciudad").value);
-  if(carta) pintaTablaLugar(c ? c.etiqueta : (carta.lugarTexto || "Lugar de nacimiento"),
-                            c ? c.lat : carta.lat, c ? c.lon : carta.lon);
+$("modo").addEventListener("change",ev=>{modo=ev.target.value;datosCache=null;actualiza();});
+$("dibujar").addEventListener("click",levanta);
+sel.addEventListener("change",()=>{if(sel.value)cargaGuardada();});
+for(const id of ["fecha","hora","lugar","ocurrencia","latManual","lonManual","zonaManual"]){
+  $(id).addEventListener("input",()=>{
+    if(id==="lugar"){
+      lugarGuardado=null;usarManual=false;
+      for(const campo of ["latManual","lonManual","zonaManual"]) $(campo).value="";
+    } else if(["latManual","lonManual","zonaManual"].includes(id)){lugarGuardado=null;usarManual=true;}
+    sel.value="";avisa("Datos modificados. Pulsa Dibujar para actualizar el mapa.");
+  });
+}
+$("orbe").addEventListener("change",actualiza);
+$("ciudad").addEventListener("change",ev=>{
+  const c=buscaCiudad(ev.target.value);
+  if(!c){avisa("Elige una ciudad con su país en la lista para consultarla.");return;}
+  consulta={nombre:c.etiqueta,lat:c.lat,lon:c.lon};marca={lat:c.lat,lon:c.lon};avisa("");actualiza();
 });
-$("ciudad").addEventListener("change", ev => {
-  const c = buscaCiudad(ev.target.value);
-  if(c && carta){ marca = {lat:c.lat, lon:c.lon}; repinta(); pintaTablaLugar(c.etiqueta, c.lat, c.lon); }
-});
-for(const id of ["lnAstro","lnEje"]) $(id).addEventListener("change", pintaTablaLinea);
-
-cv.addEventListener("click", ev => {
-  if(!carta) return;
-  const r = cv.getBoundingClientRect();
-  const lon = desdeX((ev.clientX - r.left)/r.width*W), lat = desdeY((ev.clientY - r.top)/r.height*H);
-  marca = {lat, lon};
-  repinta();
-  pintaTablaLugar("El punto que tocaste", lat, lon);
-  document.getElementById("tablaLugar").scrollIntoView({behavior:"smooth", block:"center"});
+for(const id of ["lnAstro","lnEje"]) $(id).addEventListener("change",pintaTablaLinea);
+cv.addEventListener("click",ev=>{
+  if(!carta)return;
+  const r=cv.getBoundingClientRect(), ancho=cv.clientWidth, alto=cv.clientHeight;
+  const x=(ev.clientX-r.left)*cv.offsetWidth/r.width-cv.clientLeft;
+  const y=(ev.clientY-r.top)*cv.offsetHeight/r.height-cv.clientTop;
+  if(x<0||x>ancho||y<0||y>alto)return;
+  const lon=desdeX(x/ancho*W),lat=desdeY(y/alto*H);
+  consulta={nombre:"El punto que tocaste",lat,lon};marca={lat,lon};$("ciudad").value="";
+  actualiza();$("tablaLugar").scrollIntoView({behavior:"smooth",block:"center"});
 });
 
 /* arranque: si hay cartas guardadas, la primera */
 pintaMapa();
-if(sel.options.length > 1){ sel.selectedIndex = 1; levanta(); }
+if(sel.options.length > 1){ sel.selectedIndex = 1; cargaGuardada(); }
 else { pintaTablaLugar("", 0, 0); pintaTablaLinea(); }
 })();
 </script>

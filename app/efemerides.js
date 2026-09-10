@@ -59,6 +59,8 @@ const siglos = jd => (jd - 2451545.0)/36525;
 function deltaT(ms){
   const f = new Date(ms), y = f.getUTCFullYear() + (f.getUTCMonth() + 0.5)/12;
   let t;
+  if(y >= 2150){ t=(y-1820)/100; return -20+32*t*t; }
+  if(y >= 2050){ t=(y-1820)/100; return -20+32*t*t-0.5628*(2150-y); }
   if(y >= 2005){ t = y - 2000; return 62.92 + 0.32217*t + 0.005589*t*t; }
   if(y >= 1986){ t = y - 2000; return 63.86 + 0.3345*t - 0.060374*t*t + 0.0017275*t*t*t
                                     + 0.000651814*Math.pow(t,4) + 0.00002373599*Math.pow(t,5); }
@@ -66,6 +68,11 @@ function deltaT(ms){
   if(y >= 1941){ t = y - 1950; return 29.07 + 0.407*t - t*t/233 + t*t*t/2547; }
   if(y >= 1920){ t = y - 1920; return 21.20 + 0.84493*t - 0.076100*t*t + 0.0020936*t*t*t; }
   if(y >= 1900){ t = y - 1900; return -2.79 + 1.494119*t - 0.0598939*t*t + 0.0061966*t*t*t - 0.000197*Math.pow(t,4); }
+  if(y < 1700) throw new RangeError('El modelo admite fechas de 1800 a 2050.');
+  // Margen para UTC de nacimientos al inicio de 1800 y diferencias centradas.
+  if(y < 1800){ t=y-1700; return 8.83+0.1603*t-0.0059285*t*t+0.00013336*t*t*t-t**4/1174000; }
+  if(y < 1860){ t=y-1800; return 13.72-0.332447*t+0.0068612*t*t+0.0041116*t**3
+    -0.00037436*t**4+0.0000121272*t**5-0.0000001699*t**6+0.000000000875*t**7; }
   t = y - 1860; return 7.62 + 0.5737*t - 0.251754*t*t + 0.01680668*t*t*t
                       - 0.0004473624*Math.pow(t,4) + Math.pow(t,5)/233174;
 }
@@ -74,6 +81,24 @@ const sigTT = ms => siglos(jdTT(ms));                // siglos julianos en TT
 
 /* Precesión general en longitud desde J2000 (grados). */
 const precesion = T => (5029.0966*T + 1.11113*T*T - 0.000006*T*T*T)/3600;
+
+
+function rotaX(v,a){ const c=Math.cos(a),s=Math.sin(a); return {x:v.x,y:c*v.y-s*v.z,z:s*v.y+c*v.z}; }
+function rotaY(v,a){ const c=Math.cos(a),s=Math.sin(a); return {x:c*v.x+s*v.z,y:v.y,z:-s*v.x+c*v.z}; }
+function rotaZ(v,a){ const c=Math.cos(a),s=Math.sin(a); return {x:c*v.x-s*v.y,y:s*v.x+c*v.y,z:v.z}; }
+function marcoEcliptico(v,T,inversa=false){
+  const zeta=(2306.2181*T+0.30188*T*T+0.017998*T*T*T)/3600*RAD;
+  const z=(2306.2181*T+1.09468*T*T+0.018203*T*T*T)/3600*RAD;
+  const theta=(2004.3109*T-0.42665*T*T-0.041833*T*T*T)/3600*RAD;
+  if(inversa){
+    v=rotaX(v,oblicuidad(T)*RAD);
+    v=rotaZ(rotaY(rotaZ(v,-z),theta),-zeta);
+    return rotaX(v,-oblicuidad(0)*RAD);
+  }
+  v=rotaX(v,oblicuidad(0)*RAD);
+  v=rotaZ(rotaY(rotaZ(v,zeta),-theta),z);
+  return rotaX(v,-oblicuidad(T)*RAD);
+}
 
 /* Nutación en longitud y en oblicuidad (grados), términos principales. */
 let _nutT = NaN, _nutV = null;
@@ -94,7 +119,7 @@ function nutacion(T){
 
 /* Longitud heliocéntrica de la Tierra por serie periódica (VSOP87D, sólo la
    longitud), ya referida a la eclíptica y el equinoccio de la fecha. Es lo que
-   sube la precisión del Sol de medio grado a un segundo de arco, y con ella la
+   mejora la longitud solar; la precisión final requiere validación externa, incluida la
    hora exacta de una revolución solar. Coeficientes en 1e-8 rad. */
 const VS_L0 = [
 [175347046,0,0],[3341656,4.6692568,6283.0758500],[34894,4.62610,12566.15170],
@@ -169,8 +194,9 @@ function centroTierra(T){
     const c = Math.cos;
     const km = 385000.56 - 20905.355*c(Mp) - 3699.111*c(2*D-Mp) - 2955.968*c(2*D)
              - 569.925*c(2*Mp) + 246.158*c(2*D-2*Mp) - 152.138*c(2*D-M-Mp);
-    const r = km/149597870.7, l = lunaLon(T)*RAD;
-    _ctV = {x: b.x + MU_LUNA*r*Math.cos(l), y: b.y + MU_LUNA*r*Math.sin(l), z: b.z};
+    const r = km/149597870.7, l = lunaLon(T)*RAD, lat = lunaLat(T)*RAD;
+    const m = marcoEcliptico({x:r*Math.cos(lat)*Math.cos(l),y:r*Math.cos(lat)*Math.sin(l),z:r*Math.sin(lat)},T,true);
+    _ctV = {x:b.x-MU_LUNA*m.x,y:b.y-MU_LUNA*m.y,z:b.z-MU_LUNA*m.z};
   }
   return _ctV;
 }
@@ -216,21 +242,7 @@ function tierraEn(T){
 }
 
 /* longitud eclíptica geocéntrica aparente, referida al equinoccio de la fecha */
-function lonGeo(clave, T){
-  const nut = nutacion(T).dpsi;
-  if(clave === "luna") return mod360(lunaLon(T) + nut);      // Meeus ya va en la fecha
-  const t = centroTierra(T);
-  if(clave === "sol"){
-    const R = Math.hypot(t.x, t.y, t.z);
-    return mod360(tierraLonFina(T) + 180 - 0.09033/3600 + nut - 20.4898/R/3600);
-  }
-  let p = helio(clave, T);                                   // corrección por tiempo-luz
-  for(let i = 0; i < 2; i++){
-    const d = Math.hypot(p.x-t.x, p.y-t.y, p.z-t.z);
-    p = helio(clave, T - (d/LUZ)/36525);
-  }
-  return mod360(Math.atan2(p.y - t.y, p.x - t.x)*DEG + precesion(T) + nut);
-}
+function lonGeo(clave,T){ return posGeo(clave,T).lon; }
 function distGeo(clave, T){
   if(clave === "luna") return 0.00257;
   const t = centroTierra(T);
@@ -519,12 +531,42 @@ function desfaseZona(tz, ms){
   const p = Object.fromEntries(dtf.formatToParts(new Date(ms)).map(o => [o.type, o.value]));
   return utcMs(+p.year, +p.month, +p.day, +p.hour, +p.minute) + (+p.second)*1000 - ms;
 }
-function localAUTC(y,mo,d,h,mi,tz){
-  const base = utcMs(y,mo,d,h,mi);
-  let t = base;
-  for(let i=0;i<4;i++) t = base - desfaseZona(tz, t);
-  return t;
+function localAUTC(y,mo,d,h,mi,tz,desambiguacion="reject"){
+  const base=utcMs(y,mo,d,h,mi), f=new Date(base);
+  if(![y,mo,d,h,mi].every(Number.isInteger) || f.getUTCFullYear()!==y || f.getUTCMonth()!==mo-1 || f.getUTCDate()!==d || h<0 || h>23 || mi<0 || mi>59)
+    throw new RangeError("La fecha o la hora no es válida.");
+  if(typeof tz!=="string" || !tz) throw new RangeError("Falta una zona horaria válida.");
+  if(!["reject","earlier","later"].includes(desambiguacion)) throw new RangeError("Elige una ocurrencia de la hora válida.");
+  const offsets=new Set();
+  for(let horas=-48;horas<=48;horas+=6) offsets.add(desfaseZona(tz,base+horas*3600000));
+  const candidatos=[...offsets].map(o=>base-o).filter(t=>t+desfaseZona(tz,t)===base).sort((a,b)=>a-b);
+  if(!candidatos.length) throw new RangeError("Esa hora local no existió por un cambio de horario. Revisa la hora de nacimiento.");
+  if(candidatos.length>1 && desambiguacion==="reject") throw new RangeError("Esa hora local ocurrió dos veces. Elige la primera o la segunda ocurrencia.");
+  return desambiguacion==="later" ? candidatos[candidatos.length-1] : candidatos[0];
 }
+
+// La validación de estructura no resuelve una hora ambigua: se pide al abrirla.
+function validaCarta(d){
+  if(!d || typeof d!=="object") throw new RangeError("La carta no contiene datos válidos.");
+  if(![d.anio,d.mes,d.dia,d.hora,d.min].every(Number.isInteger) || d.anio<1800 || d.anio>2050)
+    throw new RangeError("Introduce una fecha entre 1800 y 2050 y una hora válida.");
+  const f=new Date(utcMs(d.anio,d.mes,d.dia,d.hora,d.min));
+  if(f.getUTCFullYear()!==d.anio || f.getUTCMonth()!==d.mes-1 || f.getUTCDate()!==d.dia || d.hora<0 || d.hora>23 || d.min<0 || d.min>59)
+    throw new RangeError("La fecha o la hora no es válida.");
+  if(typeof d.horaConocida!=="boolean" || !Number.isFinite(d.lat) || Math.abs(d.lat)>90 || !Number.isFinite(d.lon) || Math.abs(d.lon)>180)
+    throw new RangeError("Revisa la hora conocida, latitud y longitud de la carta.");
+  if(typeof d.tz!=="string" || !d.tz) throw new RangeError("Falta la zona horaria.");
+  new Intl.DateTimeFormat("es",{timeZone:d.tz});
+  for(const k of ["nombre","lugarTexto","resumenFecha","husoTexto"])
+    if(d[k]!=null && (typeof d[k]!=="string" || d[k].length>500)) throw new RangeError("El texto de la carta no es válido.");
+  if(d.desambiguacion!=null && !["reject","earlier","later"].includes(d.desambiguacion)) throw new RangeError("Ocurrencia horaria inválida.");
+  if(d.sistema!=null && !["placidio","signos","igual","porfirio"].includes(d.sistema)) throw new RangeError("Sistema de casas inválido.");
+  if(d.factorOrbe!=null && (!Number.isFinite(d.factorOrbe) || d.factorOrbe<=0 || d.factorOrbe>3)) throw new RangeError("Orbe inválido.");
+  return d;
+}
+function cartaValida(d){ try { validaCarta(d); return true; } catch(e){ return false; } }
+const escaparHTML = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
 function textoDesfase(tz, ms){
   const min = Math.round(desfaseZona(tz, ms)/60000);
   const s = min < 0 ? "−" : "+", a = Math.abs(min);
@@ -557,24 +599,29 @@ function lunaLat(T){
        - 0.001794*s(M+F) - 0.001749*s(3*F) - 0.001565*s(M-Mp+F);
 }
 
-/* posición geocéntrica aparente completa: longitud y latitud eclípticas */
+/* posición geocéntrica aproximada: longitud y latitud en la eclíptica de fecha */
 function posGeo(clave, T){
   const nut = nutacion(T).dpsi;
-  if(clave === "luna") return {lon: mod360(lunaLon(T) + nut), lat: lunaLat(T)};
+  if(clave === "luna") return {lon:mod360(lunaLon(T)+nut),lat:lunaLat(T)};
   const t = centroTierra(T);
   if(clave === "sol"){
-    const R = Math.hypot(t.x, t.y, t.z);
-    return {lon: mod360(tierraLonFina(T) + 180 - 0.09033/3600 + nut - 20.4898/R/3600),
-            lat: -Math.asin(t.z/R)*DEG};
+    const R = Math.hypot(t.x,t.y,t.z);
+    // VSOP87D abreviado sólo en longitud; beta solar se aproxima a cero.
+    return {lon:mod360(tierraLonFina(T)+180-0.09033/3600+nut-20.4898/R/3600),lat:0};
   }
-  let p = helio(clave, T);
-  for(let i = 0; i < 2; i++){
-    const d = Math.hypot(p.x-t.x, p.y-t.y, p.z-t.z);
-    p = helio(clave, T - (d/LUZ)/36525);
+  let p = helio(clave,T);
+  for(let i=0;i<2;i++){
+    const d = Math.hypot(p.x-t.x,p.y-t.y,p.z-t.z);
+    p = helio(clave,T-(d/LUZ)/36525);
   }
-  const x = p.x-t.x, y = p.y-t.y, z = p.z-t.z;
-  return {lon: mod360(Math.atan2(y, x)*DEG + precesion(T) + nut),
-          lat: Math.atan2(z, Math.hypot(x, y))*DEG};
+  const v = {x:p.x-t.x,y:p.y-t.y,z:p.z-t.z}, r = Math.hypot(v.x,v.y,v.z);
+  // Aberración del observador a primer orden v/c, en el mismo marco J2000.
+  const dt=0.01, antes=centroTierra(T-dt/36525), despues=centroTierra(T+dt/36525);
+  const u={x:v.x/r,y:v.y/r,z:v.z/r};
+  const vel={x:(despues.x-antes.x)/(2*dt*LUZ),y:(despues.y-antes.y)/(2*dt*LUZ),z:(despues.z-antes.z)/(2*dt*LUZ)};
+  const uv=u.x*vel.x+u.y*vel.y+u.z*vel.z;
+  const q=marcoEcliptico({x:u.x+vel.x-uv*u.x,y:u.y+vel.y-uv*u.y,z:u.z+vel.z-uv*u.z},T);
+  return {lon:mod360(Math.atan2(q.y,q.x)*DEG+nut),lat:Math.atan2(q.z,Math.hypot(q.x,q.y))*DEG};
 }
 
 /* de eclíptica a ecuatorial: ascensión recta y declinación, en grados */
@@ -593,7 +640,7 @@ function gmst(jdUT){
   return mod360(280.46061837 + 360.98564736629*(jdUT - 2451545) + 0.000387933*T*T - T*T*T/38710000);
 }
 function horaSidereaGw(ms){
-  const jdUT = julian(ms), T = (jdUT - 2451545)/36525, n = nutacion(T);
+  const jdUT = julian(ms), T = sigTT(ms), n = nutacion(T);
   return mod360(gmst(jdUT) + n.dpsi*Math.cos((oblicuidad(T) + n.deps)*RAD));
 }
 
@@ -602,12 +649,12 @@ function lilithMedia(T){ return mod360(83.3532465 + 4069.0137287*T - 0.0103200*T
 
 const lon = (id, ms) => id === "nodoN" ? nodoNorte(sigTT(ms)) : lonGeo(id, sigTT(ms));
 window.Efem = {
-  RAD, DEG, mod360, julian, siglos, helio, lonGeo, distGeo, lunaLon,
+  RAD, DEG, mod360, julian, siglos, helio, lonGeo, distGeo, lunaLon, ELEM, marcoEcliptico,
   SIGNOS, posZod, CIUDADES,
   lon, velocidad, estaciones, cruce, nodoNorte,
   deltaT, jdTT, sigTT, precesion, nutacion, centroTierra,
   posGeo, lunaLat, ecuatorial, oblicuidad, gmst, horaSidereaGw,
-  utcMs, desfaseZona, localAUTC, textoDesfase,
+  utcMs, desfaseZona, localAUTC, textoDesfase, validaCarta, cartaValida, escaparHTML,
   ORDEN: ["sol","luna","mercurio","venus","marte","jupiter","saturno","urano","neptuno","pluton"]
 };
 })();
