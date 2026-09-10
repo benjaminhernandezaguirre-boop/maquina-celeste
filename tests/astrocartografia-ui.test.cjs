@@ -12,7 +12,7 @@ function app(saved=[]){
       Object.defineProperty(n,'selectedIndex',{set(i){this.value=this.options[i].value;}});nodes.set(id,n);
     }return nodes.get(id);
   }
-  const context={window:{},Date,Intl,document:{getElementById:node,querySelector:node,createElement:()=>({})},localStorage:{getItem:()=>JSON.stringify(saved)}};
+  const context={window:{addEventListener(){}},Date,Intl,document:{documentElement:{dataset:{studioTheme:'dark'}},getElementById:node,querySelector:node,createElement:()=>({})},localStorage:{getItem:()=>JSON.stringify(saved)}};
   vm.createContext(context);
   for(const file of ['app/efemerides.js','app/astrocartografia.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context);
   const html=fs.readFileSync(path.join(root,'astrocarto.html'),'utf8');

@@ -1,0 +1,57 @@
+/* Shared technical workspace. Geometry and chart data remain in their modules. */
+:root{--studio-bg:#0b1220;--studio-panel:#111c2c;--studio-soft:#172437;--studio-text:#e9edf3;--studio-muted:#a8b5c7;--studio-line:#304158;--studio-accent:#d5b779;--studio-b:#88c9ef}
+:root[data-studio-theme="light"]{--studio-bg:#f3f1eb;--studio-panel:#fffefa;--studio-soft:#eaece9;--studio-text:#202e3f;--studio-muted:#566679;--studio-line:#cbd1d4;--studio-accent:#806023;--studio-b:#176287}
+.studio-theme-toggle{border:1px solid var(--studio-line);border-radius:6px;background:var(--studio-soft);color:var(--studio-text);padding:.55rem .8rem;cursor:pointer;font:500 12px 'IBM Plex Mono',monospace;margin-left:auto;white-space:nowrap}
+.studio-theme-toggle:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--studio-b);outline-offset:3px}
+#app:not(.natal) .studio-theme-toggle{display:none}
+html[data-studio-theme] #app.natal{--natal-ivory:var(--studio-text);--natal-muted:var(--studio-muted);--natal-gold:var(--studio-accent);--natal-line:var(--studio-line);background:var(--studio-bg);color:var(--studio-text)}
+html[data-studio-theme] #app.natal #escena{background:var(--studio-bg)}
+html[data-studio-theme] #app.natal #escena::before{display:none}
+html[data-studio-theme] #app.natal :is(header,#barraNatal,#cartaPanel,.pest-fila,form#natalForm){background:var(--studio-panel)!important;color:var(--studio-text)!important;border-color:var(--studio-line)!important;box-shadow:none}
+html[data-studio-theme] #app.natal #cartaPanel{width:min(440px,94vw)}
+html[data-studio-theme] #app.natal :is(.hoja,.cuadro,.lista-cartas li){color:var(--studio-text)!important;background:transparent!important;border-color:var(--studio-line)!important}
+html[data-studio-theme] #app.natal :is(.rotulo,.cuadro .k,.campo label,.marcar,.pista,.aviso,th){color:var(--studio-muted)!important;text-shadow:none}
+html[data-studio-theme] #app.natal :is(.cuadro .v,.dato,.quien,h2,h3){color:var(--studio-text)!important}
+html[data-studio-theme] #app.natal :is(input,select,.secundario){background:var(--studio-soft)!important;color:var(--studio-text)!important;border-color:var(--studio-line)!important;color-scheme:dark}
+html[data-studio-theme="light"] #app.natal :is(input,select){color-scheme:light!important}
+html[data-studio-theme] #app.natal .pest{flex-wrap:wrap;overflow:visible}
+html[data-studio-theme] #app.natal .pest button{color:var(--studio-muted)!important;padding:.65rem .7rem}
+html[data-studio-theme] #app.natal .pest button[aria-selected="true"]{color:var(--studio-accent)!important;background:var(--studio-soft)!important;border-bottom-color:var(--studio-accent)!important}
+html[data-studio-theme] #app.natal :is(td,th){border-color:var(--studio-line)!important;font-variant-numeric:tabular-nums}
+html[data-studio-theme] #app.natal table.posiciones th{background:var(--studio-soft)!important;color:var(--studio-muted)!important}
+html[data-studio-theme] #app.natal :is(.cg,.astro-back){color:var(--studio-accent)!important}
+html[data-studio-theme] #app.natal :is(.ccasa,.nom,.orbe,tr.detalle td){color:var(--studio-muted)!important}
+html[data-studio-theme="light"] #app.natal :is(.a-azul,.d-dom){color:#356485!important}
+html[data-studio-theme="light"] #app.natal :is(.a-oro,.d-exa){color:#806023!important}
+html[data-studio-theme="light"] #app.natal :is(.a-rojo,.d-exi,.d-cai){color:#a44432!important}
+html[data-studio-theme="light"] #app.natal .a-lila{color:#69528e!important}
+html[data-studio-theme] #app.natal #velo{background:var(--studio-bg)!important}
+html[data-studio-theme] #app.natal .hoja{padding:.6rem 1.15rem 2rem}
+html[data-studio-theme] #app.natal .pista{font-size:.65rem}
+.studio-syn-legend{display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0;font:500 .7rem 'IBM Plex Mono',monospace}
+.studio-syn-legend span{padding:.4rem .6rem;border:1px solid currentColor;border-radius:4px;color:var(--studio-accent)}
+.studio-syn-legend span+span{color:var(--studio-b)}
+.studio-balance{padding:.7rem 0;border-bottom:1px solid var(--studio-line)}
+.studio-balance h3{font:500 .8rem 'IBM Plex Mono',monospace;letter-spacing:.08em}
+.studio-balance-row{margin:.9rem 0}
+.studio-balance-row>div{display:flex;justify-content:space-between;gap:.5rem;font-size:.9rem}
+.studio-balance-row strong{font:500 .7rem 'IBM Plex Mono',monospace}
+.studio-balance-row meter{display:block;width:100%;height:12px;margin:.3rem 0;accent-color:var(--studio-accent)}
+.studio-balance-row meter::-webkit-meter-bar{background:var(--studio-soft);border:0;border-radius:2px}
+.studio-balance-row meter::-webkit-meter-optimum-value{background:var(--studio-accent)}
+.studio-balance-row small{display:block;color:var(--studio-muted);font-size:.77rem;line-height:1.4}
+body.astro-studio{--bg:var(--studio-bg);--panel:var(--studio-panel);--panel2:var(--studio-soft);--ivory:var(--studio-text);--muted:var(--studio-muted);--gold:var(--studio-accent);--line:var(--studio-line);background:var(--studio-bg);color:var(--studio-text)}
+.astro-studio .stars{display:none}
+.astro-studio .shell{max-width:1500px}
+.astro-studio header{padding:.6rem 0 1.1rem;border-bottom:1px solid var(--studio-line)}
+.astro-studio .brand h1{font-size:clamp(1.2rem,3vw,1.9rem);letter-spacing:.06em}
+.astro-studio :is(.panel,.stat){border-radius:6px;backdrop-filter:none}
+.astro-studio :is(.lead,.pie,.aviso,.rot,.eyebrow){color:var(--studio-muted)}
+.astro-studio :is(.campo input,.campo select,.bot,.astro-bot){background:var(--studio-soft);color:var(--studio-text);border-color:var(--studio-line);border-radius:5px}
+.astro-studio .astro-bot{opacity:1;border-style:dashed;color:var(--studio-muted)}
+.astro-studio .astro-bot.on{background:var(--studio-panel);color:var(--studio-text);border-style:solid;box-shadow:inset 0 -2px var(--studio-accent)}
+.astro-studio .bot.on{background:var(--studio-accent);color:var(--studio-bg)}
+.astro-studio td{border-color:var(--studio-line)}
+.astro-studio input,.astro-studio select{color-scheme:dark}
+[data-studio-theme="light"] .astro-studio :is(input,select){color-scheme:light}
+@media(max-width:620px){html[data-studio-theme] #app.natal #cartaPanel{width:100%;height:52dvh}html[data-studio-theme] #app.natal #cartaPanel.plegado{height:2.9rem}.studio-theme-toggle{font-size:11px;padding:.45rem}.astro-studio .campo.ancho input{min-width:0;width:100%}.astro-studio .campo.ancho{width:100%}}

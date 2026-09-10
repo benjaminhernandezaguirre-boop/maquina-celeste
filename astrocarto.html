@@ -62,8 +62,10 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
 .leyenda span{display:inline-flex;align-items:center;gap:.4rem}
 .leyenda i{width:1.6rem;height:0;border-top-width:2px;border-top-color:#dfbd75;display:inline-block}
 </style>
+<link rel="stylesheet" href="app/studio-theme.css">
+<script src="app/studio-theme.js"></script>
 </head>
-<body>
+<body class="astro-studio">
 <div class="stars"></div>
 <div class="shell">
 <header>
@@ -291,23 +293,28 @@ function traza(linea, cerrar){
   if(cerrar){ g.closePath(); g.fill(); } else g.stroke();
 }
 
+function mapaClaro(){ return document.documentElement.dataset.studioTheme === "light"; }
+function tintaMapa(color){
+  if(!mapaClaro() || !/^#[0-9a-f]{6}$/i.test(color)) return color;
+  return '#'+color.slice(1).match(/../g).map(v=>Math.round(parseInt(v,16)*.58).toString(16).padStart(2,'0')).join('');
+}
 function pintaMapa(){
-  g.fillStyle = "#050b1a"; g.fillRect(0,0,W,H);            // océano
-  g.fillStyle = "#1a2440";                                  // tierra
+  g.fillStyle = mapaClaro() ? "#e7edf0" : "#050b1a"; g.fillRect(0,0,W,H);            // océano
+  g.fillStyle = mapaClaro() ? "#cbd5ce" : "#1a2440";                                  // tierra
   for(const anillo of TIERRA) traza(anillo, true);
-  g.strokeStyle = "#33415f"; g.lineWidth = 1.3; g.lineJoin = "round";
+  g.strokeStyle = mapaClaro() ? "#97a9ae" : "#33415f"; g.lineWidth = 1.3; g.lineJoin = "round";
   for(const linea of FRONTERAS) traza(linea, false);        // fronteras interiores
-  g.strokeStyle = "#5b7099"; g.lineWidth = 1.7;
+  g.strokeStyle = mapaClaro() ? "#758b94" : "#5b7099"; g.lineWidth = 1.7;
   for(const anillo of TIERRA) traza(anillo, false);         // costas, por encima
-  g.save(); g.strokeStyle = "#ffffff0e"; g.lineWidth = 1.2;
+  g.save(); g.strokeStyle = mapaClaro() ? "#20384a18" : "#ffffff0e"; g.lineWidth = 1.2;
   for(let l = -150; l <= 150; l += 30){ g.beginPath(); g.moveTo(px(l),0); g.lineTo(px(l),H); g.stroke(); }
   for(let l = -60; l <= 60; l += 30){ g.beginPath(); g.moveTo(0,py(l)); g.lineTo(W,py(l)); g.stroke(); }
-  g.setLineDash([5,9]); g.strokeStyle = "#ffffff12";
+  g.setLineDash([5,9]); g.strokeStyle = mapaClaro() ? "#20384a22" : "#ffffff12";
   for(const l of [23.44,-23.44,66.56,-66.56]){ g.beginPath(); g.moveTo(0,py(l)); g.lineTo(W,py(l)); g.stroke(); }
-  g.setLineDash([]); g.strokeStyle = "#ffffff20"; g.lineWidth = 1.6;
+  g.setLineDash([]); g.strokeStyle = mapaClaro() ? "#20384a44" : "#ffffff20"; g.lineWidth = 1.6;
   g.beginPath(); g.moveTo(0,py(0)); g.lineTo(W,py(0)); g.stroke();
   g.restore();
-  g.save(); g.font = "500 14px 'IBM Plex Mono', monospace"; g.fillStyle = "#ffffff33";
+  g.save(); g.font = "500 14px 'IBM Plex Mono', monospace"; g.fillStyle = mapaClaro() ? "#455b70" : "#ffffff33";
   g.textAlign = "center"; g.textBaseline = "bottom";
   for(let l = -150; l <= 150; l += 30) g.fillText(l < 0 ? Math.abs(l)+"O" : l > 0 ? l+"E" : "0", px(l), H-6);
   g.textAlign = "left"; g.textBaseline = "middle";
@@ -336,7 +343,7 @@ function pintaLineas(){
   for(const a of datos) for(const eje of ["AC","DC","MC","IC"]){
     if(!ejesOn.has(eje)) continue;
     const [guion, grosor] = TRAZO[eje];
-    g.save(); g.setLineDash(guion); g.strokeStyle = a.c; g.lineWidth = grosor;
+    g.save(); g.setLineDash(guion); g.strokeStyle = tintaMapa(a.c); g.lineWidth = grosor;
     g.globalAlpha = (eje === "MC" || eje === "IC") ? 0.95 : 0.82;
     for(const tramo of curva(a, eje)){
       g.beginPath();
@@ -361,9 +368,9 @@ function etiqueta(a, eje){
   const Y = hueco(X, y0, w, h, dir);
   if(Y === null) return;
   g.save();
-  g.fillStyle = "#050b1aee"; g.strokeStyle = a.c; g.lineWidth = 1.5;
+  g.fillStyle = mapaClaro() ? "#fffefaee" : "#050b1aee"; g.strokeStyle = tintaMapa(a.c); g.lineWidth = 1.5;
   g.beginPath(); g.roundRect(X-w/2, Y-h/2, w, h, 7); g.fill(); g.stroke();
-  g.fillStyle = a.c; g.textAlign = "center"; g.textBaseline = "middle";
+  g.fillStyle = tintaMapa(a.c); g.textAlign = "center"; g.textBaseline = "middle";
   if(a.id === "pluton") trazaPluton(g, X-12, Y, 19);
   else { g.font = "20px Spectral, serif"; g.fillText(a.g, X-12, Y); }
   g.font = "500 14px 'IBM Plex Mono', monospace"; g.fillText(eje, X+13, Y+1);
@@ -372,7 +379,7 @@ function etiqueta(a, eje){
 function punto(lon, lat, color, texto){
   const X = px(lon), Y = py(lat);
   g.save();
-  g.fillStyle = color; g.strokeStyle = "#050b1a"; g.lineWidth = 3.5;
+  g.fillStyle = tintaMapa(color); g.strokeStyle = mapaClaro() ? "#e7edf0" : "#050b1a"; g.lineWidth = 3.5;
   g.beginPath(); g.arc(X, Y, 8, 0, 7); g.fill(); g.stroke();
   if(texto){
     g.font = "500 15px 'IBM Plex Mono', monospace"; g.lineWidth = 4;
@@ -382,6 +389,7 @@ function punto(lon, lat, color, texto){
   g.restore();
 }
 function repinta(){ pintaMapa(); pintaLineas(); }
+window.addEventListener("astro-theme-change",repinta);
 
 /* ===================== Tablas ===================== */
 

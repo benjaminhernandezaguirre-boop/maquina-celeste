@@ -41,6 +41,8 @@
     border-radius:2px;transition:.18s}
   .carta-borrar:hover{opacity:1;color:#D2694A;background:rgba(210,105,74,.12)}
 </style>
+<link rel="stylesheet" href="app/studio-theme.css">
+<script src="app/studio-theme.js"></script>
 </head>
 <body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -772,7 +774,7 @@
               <path d="M15.6 22.5 41.5 48.5 48.5 22.5Z" stroke-width="1.3"/>
             </svg>
             <span class="op-nombre">Carta natal</span>
-            <span class="op-linea">Fecha, hora y lugar de nacimiento: Ascendente, Medio Cielo, casas, nodos y aspectos, sobre fondo de papel.</span>
+            <span class="op-linea">Fecha, hora y lugar de nacimiento: Ascendente, Medio Cielo, casas, nodos y aspectos, con vista clara u oscura.</span>
           </button>
         </div>
 
@@ -872,6 +874,7 @@
       <div class="pest-fila">
         <div class="pest" role="tablist">
           <button role="tab" id="tabPos" aria-selected="true" aria-controls="hojaPos">Posiciones</button>
+          <button role="tab" id="tabBalance" aria-selected="false" aria-controls="hojaBalance">Balance</button>
           <button role="tab" id="tabAsp" aria-selected="false" aria-controls="hojaAsp">Aspectos</button>
           <button role="tab" id="tabCasas" aria-selected="false" aria-controls="hojaCasas">Casas</button>
           <button role="tab" id="tabSent" aria-selected="false" aria-controls="hojaSent">Significados</button>
@@ -883,6 +886,7 @@
         <button id="plegar" aria-label="Plegar o desplegar el panel" title="Plegar">▾</button>
       </div>
       <div class="hoja" id="hojaPos" role="tabpanel"></div>
+      <div class="hoja" id="hojaBalance" role="tabpanel" hidden></div>
       <div class="hoja" id="hojaAsp" role="tabpanel" hidden></div>
       <div class="hoja" id="hojaCasas" role="tabpanel" hidden></div>
       <div class="hoja" id="hojaSent" role="tabpanel" hidden></div>
@@ -2434,12 +2438,21 @@ function cartaDeInstante(ms, d){
 }
 
 /* --- dibujo de la carta: tinta sobre papel --- */
-const PAPEL = {
+const PAPEL_CLARO = {
   fondo:"#F4F0E6", borde:"#CFC7B4", ticks:"#00000026", casa:"#00000018", eje:"#A8801F",
   tinta:"#22212B", suave:"#6B6A78", acento:"#8A6A22", caja:"#F4F0E6E6",
   el:{fuego:"#B14A26", tierra:"#6B733F", aire:"#5A6C8C", agua:"#3E5D8A"},
   asp:{"a-oro":"#9A7420AA","a-rojo":"#C0472AAA","a-azul":"#2F5F9EAA","a-lila":"#6B57A888"}
 };
+
+const PAPEL_OSCURO = {
+ fondo:"#0b1220",borde:"#40516a",ticks:"#d6e1ee55",casa:"#d6e1ee30",eje:"#d5b779",
+ tinta:"#e9edf3",suave:"#a8b5c7",acento:"#d5b779",caja:"#0b1220ee",
+ el:{fuego:"#edaa8b",tierra:"#b5c68e",aire:"#a4bddf",agua:"#8ec5dc"},
+ asp:{"a-oro":"#ddc28ccc","a-rojo":"#eb917ecc","a-azul":"#83baf0cc","a-lila":"#bdabdfaa"}
+};
+let PAPEL = document.documentElement.dataset.studioTheme === "light" ? PAPEL_CLARO : PAPEL_OSCURO;
+window.addEventListener("astro-theme-change",()=>{ PAPEL = document.documentElement.dataset.studioTheme === "light" ? PAPEL_CLARO : PAPEL_OSCURO; });
 
 /* Qué anillo exterior toca dibujar, según la pestaña abierta. La rueda se
    redibuja sesenta veces por segundo, así que la capa se guarda y sólo se
@@ -2571,7 +2584,7 @@ function pintaRueda(g, cx, cy, R, vivo, capa, ch){
     colocados.push({lon:c.lon, r:radio});
     const a = aPant(c.lon), x = cx+Math.cos(a)*radio, y = cy+Math.sin(a)*radio;
     const act = vivo && (seleccion === c.id || sobre === c.id);
-    const tinta = mezcla(c.color, "#000000", 0.52);
+    const tinta = sinastriaActivo && capa ? PAPEL.acento : PAPEL === PAPEL_OSCURO ? c.color : mezcla(c.color, "#000000", 0.52);
     g.strokeStyle = tinta + "44"; g.lineWidth = 1;
     g.beginPath();
     g.moveTo(cx+Math.cos(a)*(rInt-R*0.008), cy+Math.sin(a)*(rInt-R*0.008));
@@ -2607,7 +2620,7 @@ function pintaRueda(g, cx, cy, R, vivo, capa, ch){
       g.beginPath();
       g.moveTo(cx+Math.cos(a)*(rInt-R*0.008), cy+Math.sin(a)*(rInt-R*0.008));
       g.lineTo(x, y); g.stroke();
-      g.fillStyle = PAPEL.acento; g.textAlign = "center"; g.textBaseline = "middle";
+      g.fillStyle = sinastriaActivo ? (PAPEL === PAPEL_OSCURO ? "#88c9ef" : "#176287") : PAPEL.acento; g.textAlign = "center"; g.textBaseline = "middle";
       pintaGlifo(g, m.glifo, x, y, Math.max(12, Math.round(R*0.05)));
       if(R > 190){
         const z = posZod(m.lon);
@@ -2752,11 +2765,29 @@ function descargaHoja(modo){
 }
 
 /* --- panel de resultados --- */
+function pintaBalance(){
+  const bodies = carta.cuerpos.filter(c=>Number.isFinite(c.lon));
+  const groups = [
+    {title:"Elementos",labels:["Fuego","Tierra","Aire","Agua"],mod:4},
+    {title:"Modalidades",labels:["Cardinal","Fija","Mutable"],mod:3},
+    {title:"Polaridades",labels:["Positiva · fuego y aire","Negativa · tierra y agua"],mod:2}
+  ];
+  document.getElementById("hojaBalance").innerHTML = '<h3>Balance de la carta natal</h3><p class="aviso">Sol, Luna y ocho planetas; un punto por cuerpo. No incluye ángulos, nodos ni otros puntos. Es una distribución por signos, sin ponderaciones.</p>' + groups.map(group=>{
+    const counts=group.labels.map(()=>[]);
+    bodies.forEach(c=>counts[Math.floor(mod360(c.lon)/30)%group.mod].push(c.nombre));
+    return '<section class="studio-balance"><h3>'+group.title+'</h3>'+group.labels.map((label,i)=>{
+      const n=counts[i].length, percent=bodies.length ? Math.round(n/bodies.length*100) : 0;
+      return '<div class="studio-balance-row"><div><span>'+label+'</span><strong>'+n+' / '+bodies.length+' · '+percent+'%</strong></div><meter min="0" max="'+Math.max(1,bodies.length)+'" value="'+n+'" aria-label="'+label+'"></meter><small>'+ (counts[i].map(escaparHTML).join(' · ') || 'Sin cuerpos')+'</small></div>';
+    }).join('')+'</section>';
+  }).join('') + (!carta.datos.horaConocida ? '<p class="aviso">Sin hora conocida, un cuerpo cercano a un cambio de signo puede cambiar de grupo.</p>' : '');
+}
+
 let filaAbierta = null;
 function pintaCarta(){
   if(!carta) return;
   const {cuerpos, puntos, ang, cusp, aspectos, datos} = carta;
 
+  pintaBalance();
   // posiciones
   const filas = [];
   if(ang){
@@ -3711,6 +3742,7 @@ function pintaSinastria(){
   const B = cartaDeGuardada(estadoSin.idB);
   if(!B){ estadoSin.idB = null; return pintaSinastria(); }
   const nombreB = B.datos.nombre || "la otra carta";
+
   const puntosA = puntosMoviles(carta), puntosB = puntosMoviles(B);
   const cruces = aspectosEntre(puntosB, puntosA, estadoSin.factorOrbe);
   const mayores = cruces.filter(c => c.asp.mayor).length;
@@ -3747,6 +3779,7 @@ function pintaSinastria(){
     </div>
     <div id="bloqueCompuesta"></div>
     <div id="bloqueSinastria" ${compuestaActiva ? "hidden" : ""}>
+    <div class="studio-syn-legend"><span>A · ${escaparHTML(nombreA)} · interior</span><span>B · ${escaparHTML(nombreB)} · exterior</span></div>
     <div class="cuadro">
       <div><span class="k">Por dentro</span><span class="v">${nombreA.replace(/</g,"&lt;")}</span></div>
       <div><span class="k">Por fuera</span><span class="v">${nombreB.replace(/</g,"&lt;")}</span></div>
@@ -4176,7 +4209,7 @@ document.getElementById("plegar").addEventListener("click", () => {
 });
 
 /* pestañas del panel */
-const pestañas = [["tabPos","hojaPos"],["tabAsp","hojaAsp"],["tabCasas","hojaCasas"],["tabSent","hojaSent"],
+const pestañas = [["tabPos","hojaPos"],["tabBalance","hojaBalance"],["tabAsp","hojaAsp"],["tabCasas","hojaCasas"],["tabSent","hojaSent"],
                   ["tabAtacir","hojaAtacir"],["tabTransitos","hojaTransitos"],["tabRevolucion","hojaRevolucion"],
                   ["tabSinastria","hojaSinastria"]];
 for(const [b,h] of pestañas){
