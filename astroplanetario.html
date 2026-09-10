@@ -22,7 +22,25 @@
 <meta name="twitter:description" content="Planetario astrológico en vivo: órbitas del sistema solar en tiempo real, rueda zodiacal geocéntrica y cartas natales con casas, aspectos, significados y atacires.">
 <meta name="twitter:image" content="hero-cosmica.webp">
 
-<style>:root{color-scheme:dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>:root{color-scheme:dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+  /* ---------- cartas guardadas ---------- */
+  #guardadas[hidden]{display:none}
+  #guardadas{margin-top:.5rem;border-top:1px solid rgba(128,128,128,.28);padding-top:.2rem}
+  #gCuenta{opacity:.6;letter-spacing:.1em}
+  ul.lista-cartas{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;
+    max-height:11rem;overflow-y:auto;scrollbar-width:thin}
+  ul.lista-cartas li{display:flex;align-items:stretch;gap:.3rem;border-bottom:1px solid rgba(128,128,128,.2)}
+  ul.lista-cartas li:last-child{border-bottom:none}
+  .carta-abrir{flex:1;min-width:0;text-align:left;padding:.45rem .35rem;display:flex;
+    flex-direction:column;gap:.1rem;border-radius:2px;color:inherit;transition:background .18s}
+  .carta-abrir:hover{background:rgba(128,128,128,.14)}
+  .carta-abrir .cn{font-size:.95rem;color:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .carta-abrir .cd{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.04em;
+    opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .carta-borrar{flex:none;width:2rem;color:inherit;opacity:.5;font-size:1rem;line-height:1;
+    border-radius:2px;transition:.18s}
+  .carta-borrar:hover{opacity:1;color:#D2694A;background:rgba(210,105,74,.12)}
+</style>
 </head>
 <body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -314,6 +332,8 @@
   #app.natal.con-carta #barraNatal{display:flex}
   #app.natal .reloj,#app.natal .velocidad,#app.natal .hoy{display:none}
   #barraDatos{display:flex;gap:.55rem;flex-wrap:wrap;align-items:center}
+  #barraNatal{overflow-x:auto;scrollbar-width:none}
+  #barraNatal::-webkit-scrollbar{display:none}
   #barraDatos span+span::before{content:"·";color:var(--laton-hondo);margin-right:.55rem}
   #barraNatal .quien{color:var(--pergamino);letter-spacing:.06em}
   #app.natal footer{display:none}
@@ -607,12 +627,12 @@
   #app.natal .sent p{color:#4A4956}
   #app.natal .sent p b{color:#22212B}
   #app.natal .pie-sent{color:#6B6A78!important}
-  #cartaPanel .pest button{padding:.7rem .25rem;font-size:.63rem;letter-spacing:.08em}
+  #cartaPanel .pest button{padding:.5rem .55rem;font-size:.62rem;letter-spacing:.07em}
 
   .pest-fila{display:flex;align-items:stretch;border-bottom:1px solid var(--linea-suave);flex:none}
-  .pest{flex:1;min-width:0;display:flex;overflow-x:auto;scrollbar-width:none;border-bottom:none}
-  .pest::-webkit-scrollbar{display:none}
+  .pest{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-content:flex-start;border-bottom:none}
   .pest button{flex:0 0 auto;white-space:nowrap}
+  #plegar{align-self:flex-start}
   #plegar{flex:none;border-left:1px solid var(--linea-suave)}
   #app.natal .pest-fila,#app.natal #plegar{border-color:#D5CEBF}
   .mandos{display:grid;gap:.65rem;margin:.95rem 0 .3rem}
@@ -832,6 +852,17 @@
           <button type="button" class="secundario" id="nEjemplo">Usar un ejemplo</button>
           <button type="button" class="secundario" id="nCancelar" hidden>Cancelar</button>
         </div>
+
+        <div id="guardadas" hidden>
+          <div class="rotulo">Cartas guardadas <span id="gCuenta"></span></div>
+          <ul class="lista-cartas" id="listaCartas"></ul>
+          <div class="acciones" style="margin:.35rem 0 0">
+            <button type="button" class="secundario" id="gExportar">Exportar todas</button>
+            <button type="button" class="secundario" id="gImportar">Importar…</button>
+            <input type="file" id="gArchivo" accept="application/json,.json" hidden>
+          </div>
+          <p class="aviso" id="gAviso" hidden></p>
+        </div>
       </form>
     </div>
 
@@ -843,6 +874,8 @@
           <button role="tab" id="tabCasas" aria-selected="false" aria-controls="hojaCasas">Casas</button>
           <button role="tab" id="tabSent" aria-selected="false" aria-controls="hojaSent">Significados</button>
           <button role="tab" id="tabAtacir" aria-selected="false" aria-controls="hojaAtacir">Atacir</button>
+          <button role="tab" id="tabTransitos" aria-selected="false" aria-controls="hojaTransitos">Tránsitos</button>
+          <button role="tab" id="tabSinastria" aria-selected="false" aria-controls="hojaSinastria">Sinastría</button>
         </div>
         <button id="plegar" aria-label="Plegar o desplegar el panel" title="Plegar">▾</button>
       </div>
@@ -851,6 +884,8 @@
       <div class="hoja" id="hojaCasas" role="tabpanel" hidden></div>
       <div class="hoja" id="hojaSent" role="tabpanel" hidden></div>
       <div class="hoja" id="hojaAtacir" role="tabpanel" hidden></div>
+      <div class="hoja" id="hojaTransitos" role="tabpanel" hidden></div>
+      <div class="hoja" id="hojaSinastria" role="tabpanel" hidden></div>
     </aside>
   </div>
 
@@ -925,17 +960,24 @@ function lunaLon(T){                             // longitud eclíptica geocént
   return mod360(Lp + dl);
 }
 
+/* la Tierra es la misma para todos los astros de un mismo instante: se memoriza */
+let _tierraT = NaN, _tierraV = null;
+function tierraEn(T){
+  if(T !== _tierraT){ _tierraT = T; _tierraV = helio("tierra", T); }
+  return _tierraV;
+}
+
 /* longitud eclíptica geocéntrica de cualquier astro del catálogo */
 function lonGeo(clave, T){
   if(clave === "luna") return lunaLon(T);
-  const t = helio("tierra", T);
+  const t = tierraEn(T);
   if(clave === "sol") return mod360(Math.atan2(-t.y, -t.x)*DEG);
   const p = helio(clave, T);
   return mod360(Math.atan2(p.y - t.y, p.x - t.x)*DEG);
 }
 function distGeo(clave, T){
   if(clave === "luna") return 0.00257;
-  const t = helio("tierra", T);
+  const t = tierraEn(T);
   if(clave === "sol") return Math.hypot(t.x,t.y,t.z);
   const p = helio(clave, T);
   return Math.hypot(p.x-t.x, p.y-t.y, p.z-t.z);
@@ -2438,7 +2480,7 @@ function textoDesfase(tz, ms){
 
 /* --- levantar la carta --- */
 let carta = null;
-function levantarCarta(d){
+function levantarCarta(d, asignar){
   const ms = localAUTC(d.anio, d.mes, d.dia, d.hora, d.min, d.tz);
   const jd = julian(ms), T = siglos(jd);
 
@@ -2475,8 +2517,9 @@ function levantarCarta(d){
   }
   const aspectos = calculaAspectos(paraAspectos, d.factorOrbe);
 
-  carta = {datos:d, ms, jd, cuerpos, puntos, ang, cusp, aspectos, aviso, diurna};
-  return carta;
+  const res = {datos:d, ms, jd, cuerpos, puntos, ang, cusp, aspectos, aviso, diurna};
+  if(asignar !== false) carta = res;
+  return res;
 }
 
 /* --- dibujo de la carta: tinta sobre papel --- */
@@ -2487,6 +2530,18 @@ const PAPEL = {
   asp:{"a-oro":"#9A7420AA","a-rojo":"#C0472AAA","a-azul":"#2F5F9EAA","a-lila":"#6B57A888"}
 };
 
+/* qué anillo exterior toca dibujar, según la pestaña abierta */
+function cartaEnRueda(){
+  if(sinastriaActivo && compuestaActiva){ const C = laCompuesta(); if(C) return C; }
+  return carta;
+}
+function capaExterior(){
+  if(sinastriaActivo && compuestaActiva) return null;
+  if(atacirActivo) return capaAtacir();
+  if(transitosActivo) return capaTransitos();
+  if(sinastriaActivo) return capaSinastria();
+  return null;
+}
 function dibujaNatal(){
   if(!carta){ return; }
   const panelEl = document.getElementById("cartaPanel");
@@ -2496,11 +2551,12 @@ function dibujaNatal(){
   const anchoLibre = abajo ? W : Math.max(260, W - (puesto ? puesto.width : 0));
   const [cx, cy] = [anchoLibre/2 + natalPan.x, altoLibre/2 + natalPan.y];
   const R = Math.min(anchoLibre, altoLibre)/2 * (abajo ? 0.9 : 0.94) * zoom;
-  pintaRueda(ctx, cx, cy, R, true, atacirActivo ? capaAtacir() : null);
+  pintaRueda(ctx, cx, cy, R, true, capaExterior(), cartaEnRueda());
 }
 
-function pintaRueda(g, cx, cy, R, vivo, capa){
-  const {ang, cusp, cuerpos, puntos, aspectos} = carta;
+function pintaRueda(g, cx, cy, R, vivo, capa, ch){
+  ch = ch || carta;
+  const {ang, cusp, cuerpos, puntos, aspectos} = ch;
   const giro = ang ? ang.asc : 0;
   const aPant = lon => (180 - mod360(lon - giro)) * RAD;
   const rExt = R, rInt = R*0.845, rCasa = R*0.30, rAsp = R*0.285;
@@ -2638,10 +2694,10 @@ function pintaRueda(g, cx, cy, R, vivo, capa){
   // encabezado dentro de la rueda
   g.textAlign="center"; g.textBaseline="middle";
   g.fillStyle = PAPEL.tinta; g.font = `${Math.max(11,Math.round(R*0.05))}px Cinzel, serif`;
-  g.fillText(carta.datos.nombre || "Carta natal", cx, cy - R*0.055);
+  g.fillText(ch.datos.nombre || "Carta natal", cx, cy - R*0.055);
   g.fillStyle = PAPEL.suave; g.font = `${Math.max(8,Math.round(R*0.026))}px "IBM Plex Mono", monospace`;
-  g.fillText(carta.datos.resumenFecha, cx, cy + R*0.02);
-  g.fillText(carta.datos.lugarTexto, cx, cy + R*0.065);
+  g.fillText(ch.datos.resumenFecha, cx, cy + R*0.02);
+  g.fillText(ch.datos.lugarTexto, cx, cy + R*0.065);
   if(capa){
     g.fillStyle = PAPEL.acento;
     g.font = `${Math.max(8,Math.round(R*0.024))}px "IBM Plex Mono", monospace`;
@@ -2683,7 +2739,7 @@ async function fabricaHoja(modo){
     c.width = L; c.height = L;
     const g = c.getContext("2d");
     g.fillStyle = PAPEL.fondo; g.fillRect(0, 0, L, L);
-    pintaRueda(g, L/2, L/2, L*0.452, false, atacirActivo ? capaAtacir() : null);
+    pintaRueda(g, L/2, L/2, L*0.452, false, capaExterior(), cartaEnRueda());
     return c;
   }
 
@@ -2711,7 +2767,7 @@ async function fabricaHoja(modo){
   g.strokeStyle = PAPEL.borde; g.lineWidth = 1;
   g.beginPath(); g.moveTo(margen, 200); g.lineTo(ancho - margen, 200); g.stroke();
 
-  pintaRueda(g, margen + lado/2, 230 + lado/2, lado*0.465, false, atacirActivo ? capaAtacir() : null);
+  pintaRueda(g, margen + lado/2, 230 + lado/2, lado*0.465, false, capaExterior(), cartaEnRueda());
 
   // columna de datos
   let y = 250;
@@ -2820,6 +2876,8 @@ function pintaCarta(){
 
   pintaSignificados();
   if(atacirActivo) pintaAtacir();
+  if(transitosActivo) pintaTransitos();
+  if(sinastriaActivo) pintaSinastria();
   enlazaFilas();
   const cb = document.getElementById("soloMayores");
   if(cb) cb.addEventListener("change", () => {
@@ -2974,12 +3032,13 @@ function claveActual(){
 /* grados que avanza la clave en un año, y años que tarda la vuelta completa */
 const porAnio = clave => clave.solar ? 0.98565 : 365.2422/clave.dias;
 const vueltaAnios = clave => 360/porAnio(clave);
-function puntosMoviles(){
-  const l = carta.cuerpos.concat(carta.puntos)
+function puntosMoviles(ch){
+  ch = ch || carta;
+  const l = ch.cuerpos.concat(ch.puntos)
     .map(c => ({id:c.id, nombre:c.nombre, glifo:c.glifo, color:c.color, lon:c.lon}));
-  if(carta.ang){
-    l.push({id:"asc", nombre:"Ascendente", glifo:PUNTOS.asc.glifo, color:PUNTOS.asc.color, lon:carta.ang.asc});
-    l.push({id:"mc",  nombre:"Medio Cielo", glifo:PUNTOS.mc.glifo,  color:PUNTOS.mc.color,  lon:carta.ang.mc});
+  if(ch.ang){
+    l.push({id:"asc", nombre:"Ascendente", glifo:PUNTOS.asc.glifo, color:PUNTOS.asc.color, lon:ch.ang.asc});
+    l.push({id:"mc",  nombre:"Medio Cielo", glifo:PUNTOS.mc.glifo,  color:PUNTOS.mc.color,  lon:ch.ang.mc});
   }
   return l;
 }
@@ -3139,6 +3198,504 @@ function pintaAtacir(){
   document.getElementById("atMas").addEventListener("click", () => { estadoAtacir.fecha = (estadoAtacir.fecha || Date.now()) + 365.2422*86400000; pintaAtacir(); });
 }
 
+/* ===================== Tránsitos =====================
+   El cielo real de una fecha puesto por fuera de la carta natal.
+   A diferencia del atacir, cada planeta va a su propia velocidad, así que las
+   fechas exactas se buscan numéricamente: se recorre el periodo en pasos de un
+   día y donde el aspecto cambia de signo se afina por bisección. */
+let transitosActivo = false;
+const estadoTransitos = {fecha:null, orbe:2, conLuna:false};
+const ORBES_TRANSITO = [{v:1, n:"Estrecho · 1°"}, {v:2, n:"Estándar · 2°"}, {v:3, n:"Amplio · 3°"}];
+
+const lonTransito = (id, ms) => lonGeo(id, siglos(julian(ms)));
+const velocidadDe = (id, ms) => {
+  let d = lonTransito(id, ms + 43200000) - lonTransito(id, ms - 43200000);
+  if(d > 180) d -= 360; if(d < -180) d += 360;
+  return d;                                    // grados por día, negativo si va retrógrado
+};
+function difA(id, ms, objetivo){
+  let d = mod360(lonTransito(id, ms) - objetivo);
+  return d > 180 ? d - 360 : d;
+}
+function exactaEntre(id, objetivo, t0, t1){
+  let a = t0, b = t1, fa = difA(id, a, objetivo);
+  for(let i = 0; i < 48; i++){
+    if(b - a < 30000) break;                   // medio minuto basta
+    const m = (a + b)/2, fm = difA(id, m, objetivo);
+    if(fm === 0) return m;
+    if((fa < 0) !== (fm < 0)) b = m; else { a = m; fa = fm; }
+  }
+  return (a + b)/2;
+}
+/* la fecha exacta más cercana a una dada, para un contacto que ya está dentro de orbe */
+function exactaCerca(id, objetivo, ms){
+  const v = Math.abs(velocidadDe(id, ms)) || 0.02;
+  const media = Math.min(420, Math.max(2, 12/v)) * 86400000;
+  const pasos = 40, paso = (2*media)/pasos;
+  let mejor = null;
+  let tPrev = ms - media, fPrev = difA(id, tPrev, objetivo);
+  for(let i = 1; i <= pasos; i++){
+    const t = ms - media + i*paso, f = difA(id, t, objetivo);
+    if(Math.abs(fPrev) < 40 && Math.abs(f) < 40 && (fPrev < 0) !== (f < 0)){
+      const e = exactaEntre(id, objetivo, tPrev, t);
+      if(mejor === null || Math.abs(e - ms) < Math.abs(mejor - ms)) mejor = e;
+    }
+    tPrev = t; fPrev = f;
+  }
+  return mejor;
+}
+
+function puntosNatales(){ return puntosMoviles(); }          // los mismos que usa el atacir
+
+/* --- lo que está dentro de orbe en la fecha elegida --- */
+function transitosActivos(ms, orbe){
+  const nat = puntosNatales(), fuera = [];
+  for(const id of ORDEN_EFEM){
+    const lon = lonTransito(id, ms), vel = velocidadDe(id, ms);
+    for(const N of nat) for(const asp of ANG_ATACIR){
+      const desvios = (asp.a === 0 || asp.a === 180) ? [asp.a] : [asp.a, -asp.a];
+      for(const dv of desvios){
+        const objetivo = mod360(N.lon + dv);
+        let d = mod360(lon - objetivo); if(d > 180) d -= 360;
+        if(Math.abs(d) > orbe) continue;
+        const manana = difA(id, ms + 86400000, objetivo);
+        fuera.push({
+          id, P:{id, nombre:porId[id].nombre, glifo:porId[id].glifo, color:porId[id].color, lon},
+          N, asp, orbe:Math.abs(d), retro: vel < 0,
+          aplicativo: Math.abs(manana) < Math.abs(d),
+          exacta: exactaCerca(id, objetivo, ms)
+        });
+      }
+    }
+  }
+  return fuera.sort((a, b) => a.orbe - b.orbe);
+}
+
+/* --- calendario: todos los contactos exactos de un periodo --- */
+function calendarioTransitos(msIni, msFin, conLuna){
+  const nat = puntosNatales(), paso = 86400000, eventos = [];
+  const n = Math.min(1200, Math.ceil((msFin - msIni)/paso) + 1);
+  const ids = ORDEN_EFEM.filter(id => conLuna || id !== "luna");
+  const rejilla = {};
+  for(const id of ids) rejilla[id] = new Array(n);
+  for(let i = 0; i < n; i++){
+    const T = siglos(julian(msIni + i*paso));
+    for(const id of ids) rejilla[id][i] = lonGeo(id, T);
+  }
+  for(const id of ids){
+    const lons = rejilla[id];
+    for(const N of nat) for(const asp of ANG_ATACIR){
+      const desvios = (asp.a === 0 || asp.a === 180) ? [asp.a] : [asp.a, -asp.a];
+      for(const dv of desvios){
+        const objetivo = mod360(N.lon + dv);
+        let fPrev = null;
+        for(let i = 0; i < n; i++){
+          let f = mod360(lons[i] - objetivo); if(f > 180) f -= 360;
+          if(fPrev !== null && Math.abs(fPrev) < 30 && Math.abs(f) < 30 && (fPrev < 0) !== (f < 0)){
+            const ms = exactaEntre(id, objetivo, msIni + (i-1)*paso, msIni + i*paso);
+            let dv2 = lons[i] - lons[i-1]; if(dv2 > 180) dv2 -= 360; if(dv2 < -180) dv2 += 360;
+            eventos.push({id, P:porId[id], N, asp, ms, retro: dv2 < 0});
+          }
+          fPrev = f;
+        }
+      }
+    }
+  }
+  return eventos.sort((a, b) => a.ms - b.ms);
+}
+
+function capaTransitos(){
+  if(!carta) return null;
+  const fecha = estadoTransitos.fecha == null ? Date.now() : estadoTransitos.fecha;
+  const Tf = siglos(julian(fecha));
+  const movidos = ORDEN_EFEM.map(id => ({
+    id, nombre:porId[id].nombre, glifo:porId[id].glifo, color:porId[id].color,
+    lon: lonGeo(id, Tf), vel: velocidadDe(id, fecha)
+  }));
+  const cerca = transitosActivos(fecha, estadoTransitos.orbe);
+  return {clave:{n:"Tránsitos"}, fecha, arco:0, movidos, cerca};
+}
+
+function pintaTransitos(){
+  if(!carta) return;
+  const capa = capaTransitos();
+  if(!capa) return;
+  const {fecha, movidos, cerca} = capa;
+  const fechaISO = new Date(fecha - new Date(fecha).getTimezoneOffset()*60000).toISOString().slice(0,10);
+  const cal = calendarioTransitos(fecha, fecha + 365.2422*86400000, estadoTransitos.conLuna).slice(0, 60);
+
+  const filaActivo = c => `<li>
+      <span class="cg">${gh(c.P.glifo)}</span>
+      <span class="as ${c.asp.cl}">${c.asp.g}</span>
+      <span class="cg">${gh(c.N.glifo)}</span>
+      <span class="nom">${c.P.nombre}${c.retro ? " ℞" : ""} ${c.asp.n.toLowerCase()} a ${c.N.nombre} natal
+        · <em>${c.aplicativo ? "aplicativo" : "separativo"}</em>${c.exacta ? ` · exacto el ${fmtDia.format(new Date(c.exacta))}` : ""}</span>
+      <span class="orbe">${gradoMin(c.orbe)}</span>
+    </li>`;
+  const filaCal = c => `<li>
+      <span class="cg">${gh(c.P.glifo)}</span>
+      <span class="as ${c.asp.cl}">${c.asp.g}</span>
+      <span class="cg">${gh(c.N.glifo)}</span>
+      <span class="nom">${c.P.nombre}${c.retro ? " ℞" : ""} ${c.asp.n.toLowerCase()} a ${c.N.nombre} natal</span>
+      <span class="orbe">${fmtDia.format(new Date(c.ms))}</span>
+    </li>`;
+
+  document.getElementById("hojaTransitos").innerHTML = `
+    <div class="mandos">
+      <div class="campo">
+        <label for="trFecha">Fecha del cielo</label>
+        <input id="trFecha" type="date" value="${fechaISO}">
+      </div>
+      <div class="acciones" style="margin:0">
+        <button class="secundario" id="trHoy">Hoy</button>
+        <button class="secundario" id="trDiaMenos">− día</button>
+        <button class="secundario" id="trDiaMas">+ día</button>
+        <button class="secundario" id="trMesMenos">− mes</button>
+        <button class="secundario" id="trMesMas">+ mes</button>
+      </div>
+      <div class="campo">
+        <label for="trOrbe">Orbe de tránsito</label>
+        <select id="trOrbe">
+          ${ORBES_TRANSITO.map(o => `<option value="${o.v}" ${o.v === estadoTransitos.orbe ? "selected" : ""}>${o.n}</option>`).join("")}
+        </select>
+      </div>
+      <label class="marcar"><input type="checkbox" id="trLuna" ${estadoTransitos.conLuna ? "checked" : ""}> Incluir la Luna en el calendario</label>
+    </div>
+
+    <div class="cuadro">
+      <div><span class="k">Cielo del</span><span class="v">${fmtDia.format(new Date(fecha))}</span></div>
+      <div><span class="k">Dentro de orbe</span><span class="v">${cerca.length}</span></div>
+      <div><span class="k">Orbe</span><span class="v">${estadoTransitos.orbe}°</span></div>
+    </div>
+
+    <div class="rotulo">Tránsitos activos</div>
+    ${cerca.length
+      ? `<ul class="aspectos">${cerca.map(filaActivo).join("")}</ul>
+         <p class="aviso" style="margin-top:.9rem">Aplicativo quiere decir que el aspecto se está cerrando; separativo, que ya pasó por lo exacto y se abre.</p>`
+      : `<p class="aviso">Nada dentro del orbe en esa fecha. Prueba con un orbe más amplio o mira el calendario.</p>`}
+
+    <div class="rotulo">Los próximos doce meses</div>
+    ${cal.length
+      ? `<ul class="aspectos">${cal.map(filaCal).join("")}</ul>
+         <p class="aviso" style="margin-top:.9rem">Fechas exactas. Un planeta retrógrado puede pasar tres veces por el mismo aspecto: aquí aparecen los tres pases.
+         ${estadoTransitos.conLuna ? "" : "La Luna queda fuera porque aspecta todo cada dos días; enciéndela arriba si la quieres."}</p>`
+      : `<p class="aviso">Sin contactos exactos en el periodo.</p>`}
+
+    <div class="rotulo">El cielo de esa fecha</div>
+    <table class="posiciones"><thead><tr>
+      <th></th><th>Astro</th><th>Posición</th><th style="text-align:right">Casa natal</th>
+    </tr></thead><tbody>
+      ${movidos.map(m => {
+        const z = posZod(m.lon), casa = carta.cusp ? ROMANOS[casaDe(m.lon, carta.cusp)] : "—";
+        const retro = m.vel < 0;
+        return `<tr><td class="cg">${gh(m.glifo)}</td><td>${m.nombre}</td>
+          <td><span class="cgrado">${z.corto}</span> <span class="csigno">${z.signo.g} ${z.signo.n}</span>${retro ? ' <span class="crx">℞</span>' : ""}</td>
+          <td class="ccasa">${casa}</td></tr>`;
+      }).join("")}
+    </tbody></table>
+    <p class="aviso" style="margin-top:.9rem">La rueda muestra tu carta natal por dentro y el cielo de esa fecha por fuera. Las líneas del centro son los tránsitos activos.</p>`;
+
+  const f = document.getElementById("trFecha");
+  f.addEventListener("change", ev => {
+    const [a, m, d] = ev.target.value.split("-").map(Number);
+    if(a){ estadoTransitos.fecha = new Date(a, m-1, d, 12).getTime(); pintaTransitos(); }
+  });
+  const mueve = dias => { estadoTransitos.fecha = (estadoTransitos.fecha || Date.now()) + dias*86400000; pintaTransitos(); };
+  document.getElementById("trHoy").addEventListener("click", () => { estadoTransitos.fecha = Date.now(); pintaTransitos(); });
+  document.getElementById("trDiaMenos").addEventListener("click", () => mueve(-1));
+  document.getElementById("trDiaMas").addEventListener("click", () => mueve(1));
+  document.getElementById("trMesMenos").addEventListener("click", () => mueve(-30.44));
+  document.getElementById("trMesMas").addEventListener("click", () => mueve(30.44));
+  document.getElementById("trOrbe").addEventListener("change", ev => { estadoTransitos.orbe = parseFloat(ev.target.value); pintaTransitos(); });
+  document.getElementById("trLuna").addEventListener("change", ev => { estadoTransitos.conLuna = ev.target.checked; pintaTransitos(); });
+}
+
+/* ===================== Sinastría =====================
+   Dos cartas comparadas: la de la pantalla por dentro y la elegida por fuera.
+   Los aspectos se buscan cruzados, cada punto de una contra cada punto de la otra. */
+let sinastriaActivo = false;
+const estadoSin = {idB:null, factorOrbe:1};
+const cacheB = {};
+
+function cartaDeGuardada(id){
+  if(cacheB[id]) return cacheB[id];
+  const reg = leerCartas().find(c => c.id === id);
+  if(!reg) return null;
+  const ch = levantarCarta(reg.datos, false);       // se calcula sin tocar la carta en pantalla
+  cacheB[id] = ch;
+  return ch;
+}
+const PARA_REJA = new Set(ORDEN_EFEM.concat(["asc","mc","nodoN"]));
+function aspectosEntre(listaA, listaB, factor){
+  const res = [];
+  const a1 = listaA.filter(p => PARA_REJA.has(p.id)), b1 = listaB.filter(p => PARA_REJA.has(p.id));
+  for(const A of a1) for(const B of b1){
+    let d = Math.abs(mod360(A.lon - B.lon)); if(d > 180) d = 360 - d;
+    for(const asp of ASPECTOS){
+      const luminaria = ["sol","luna"].includes(A.id) || ["sol","luna"].includes(B.id);
+      const orbe = (asp.orbe + (luminaria && asp.mayor ? 2 : 0)) * factor;
+      const dif = Math.abs(d - asp.a);
+      if(dif <= orbe){ res.push({A, B, asp, dif}); break; }
+    }
+  }
+  return res.sort((x, y) => x.dif - y.dif);
+}
+function capaSinastria(){
+  if(!carta || !estadoSin.idB) return null;
+  const B = cartaDeGuardada(estadoSin.idB);
+  if(!B) return null;
+  const puntosA = puntosMoviles(carta), puntosB = puntosMoviles(B);
+  const cruces = aspectosEntre(puntosB, puntosA, estadoSin.factorOrbe);
+  return {
+    clave:{n:`Sinastría · ${B.datos.nombre || "otra carta"}`},
+    fecha: B.ms, arco: 0,
+    movidos: puntosB,
+    cerca: cruces.filter(c => c.asp.mayor && c.dif <= 4)
+                 .map(c => ({P:c.A, N:c.B, asp:{cl:c.asp.cl, mayor:true}}))
+  };
+}
+
+function pintaSinastria(){
+  if(!carta) return;
+  const guardadas = leerCartas();
+  const nombreA = carta.datos.nombre || "Carta en pantalla";
+  const hoja = document.getElementById("hojaSinastria");
+
+  if(!guardadas.length || guardadas.every(c => huellaCarta(c.datos) === huellaCarta(carta.datos))){
+    hoja.innerHTML = `<p class="aviso" style="margin-top:.9rem">Para comparar dos cartas necesitas otra guardada además de esta.
+      Levanta la otra carta desde «Editar datos» y vuelve aquí: se guarda sola.</p>`;
+    return;
+  }
+  const propia = huellaCarta(carta.datos);
+  const otras = guardadas.filter(c => huellaCarta(c.datos) !== propia);
+  const opciones = otras.map(c =>
+    `<option value="${c.id}" ${c.id === estadoSin.idB ? "selected" : ""}>${(c.datos.nombre || "Carta sin nombre").replace(/</g,"&lt;")} · ${c.datos.resumenFecha}</option>`).join("");
+
+  if(!estadoSin.idB){
+    hoja.innerHTML = `
+      <div class="mandos">
+        <div class="campo">
+          <label for="sinB">Comparar «${nombreA.replace(/</g,"&lt;")}» con</label>
+          <select id="sinB"><option value="">Elige una carta guardada…</option>${opciones}</select>
+        </div>
+      </div>
+      <p class="aviso">La carta que tengas en pantalla va por dentro; la que elijas, por fuera.</p>`;
+    document.getElementById("sinB").addEventListener("change", ev => {
+      estadoSin.idB = ev.target.value || null; pintaSinastria();
+    });
+    return;
+  }
+
+  const B = cartaDeGuardada(estadoSin.idB);
+  if(!B){ estadoSin.idB = null; return pintaSinastria(); }
+  const nombreB = B.datos.nombre || "la otra carta";
+  const puntosA = puntosMoviles(carta), puntosB = puntosMoviles(B);
+  const cruces = aspectosEntre(puntosB, puntosA, estadoSin.factorOrbe);
+  const mayores = cruces.filter(c => c.asp.mayor).length;
+
+  const enCasas = (deQuien, puntos, cusp) => !cusp ? "" : `
+    <table class="posiciones"><thead><tr><th></th><th>${deQuien}</th><th>Posición</th><th style="text-align:right">Casa</th></tr></thead><tbody>
+      ${puntos.map(p => {
+        const z = posZod(p.lon), casa = casaDe(p.lon, cusp);
+        return `<tr><td class="cg">${gh(p.glifo)}</td><td>${p.nombre}</td>
+          <td><span class="cgrado">${z.corto}</span> <span class="csigno">${z.signo.g}</span></td>
+          <td class="ccasa">${ROMANOS[casa]}</td></tr>`;
+      }).join("")}
+    </tbody></table>`;
+
+  hoja.innerHTML = `
+    <div class="mandos">
+      <div class="campo">
+        <label for="sinB">Comparar «${nombreA.replace(/</g,"&lt;")}» con</label>
+        <select id="sinB"><option value="">Elige una carta guardada…</option>${opciones}</select>
+      </div>
+      <div class="campo">
+        <label for="sinOrbe">Orbes</label>
+        <select id="sinOrbe">
+          <option value="0.7" ${estadoSin.factorOrbe===0.7?"selected":""}>Estrechos</option>
+          <option value="1" ${estadoSin.factorOrbe===1?"selected":""}>Estándar</option>
+          <option value="1.35" ${estadoSin.factorOrbe===1.35?"selected":""}>Amplios</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="conmutador" style="margin:.9rem 0 .2rem;width:100%">
+      <button type="button" id="modoSin" aria-pressed="${!compuestaActiva}" style="flex:1">Sinastría</button>
+      <button type="button" id="modoComp" aria-pressed="${compuestaActiva}" style="flex:1">Compuesta</button>
+    </div>
+    <div id="bloqueCompuesta"></div>
+    <div id="bloqueSinastria" ${compuestaActiva ? "hidden" : ""}>
+    <div class="cuadro">
+      <div><span class="k">Por dentro</span><span class="v">${nombreA.replace(/</g,"&lt;")}</span></div>
+      <div><span class="k">Por fuera</span><span class="v">${nombreB.replace(/</g,"&lt;")}</span></div>
+      <div><span class="k">Contactos</span><span class="v">${cruces.length} · ${mayores} mayores</span></div>
+    </div>
+
+    <div class="rotulo">Aspectos entre las dos cartas</div>
+    ${cruces.length ? `<label class="marcar" style="margin:.7rem 0 .4rem"><input type="checkbox" id="sinSoloMayores"> Ocultar aspectos menores</label>
+      <ul class="aspectos con-menores" id="listaSinastria">${cruces.map(c => `
+      <li class="${c.asp.mayor ? "mayor" : "menor"}">
+        <span class="cg">${gh(c.A.glifo)}</span>
+        <span class="as ${c.asp.cl}">${c.asp.g}</span>
+        <span class="cg">${gh(c.B.glifo)}</span>
+        <span class="nom">${c.A.nombre} de ${nombreB.replace(/</g,"&lt;")} · ${c.asp.n.toLowerCase()} · ${c.B.nombre} de ${nombreA.replace(/</g,"&lt;")}</span>
+        <span class="orbe">${gradoMin(c.dif)}</span>
+      </li>`).join("")}</ul>
+      <p class="aviso" style="margin-top:.9rem">Se leen de fuera hacia dentro: primero el astro de ${nombreB.replace(/</g,"&lt;")}, luego el de ${nombreA.replace(/</g,"&lt;")}.</p>`
+      : `<p class="aviso">No hay contactos con esos orbes.</p>`}
+
+    <div class="rotulo">Los astros de ${nombreB.replace(/</g,"&lt;")} en las casas de ${nombreA.replace(/</g,"&lt;")}</div>
+    ${carta.cusp ? enCasas(nombreB.replace(/</g,"&lt;"), puntosB, carta.cusp)
+      : `<p class="aviso">La carta de dentro no tiene casas: le falta la hora de nacimiento.</p>`}
+
+    <div class="rotulo">Los astros de ${nombreA.replace(/</g,"&lt;")} en las casas de ${nombreB.replace(/</g,"&lt;")}</div>
+    ${B.cusp ? enCasas(nombreA.replace(/</g,"&lt;"), puntosA, B.cusp)
+      : `<p class="aviso">La carta de fuera no tiene casas: le falta la hora de nacimiento.</p>`}
+
+    <p class="aviso" style="margin-top:1rem">En qué casa cae el astro del otro dice en qué terreno de la vida se siente su presencia; el aspecto dice de qué manera.
+      En la rueda solo se cruzan los aspectos mayores con menos de 4° de orbe, para que se pueda leer; la lista de arriba los trae todos.</p>
+    </div>`;
+  document.getElementById("modoSin").addEventListener("click", () => { compuestaActiva = false; pintaSinastria(); });
+  document.getElementById("modoComp").addEventListener("click", () => { compuestaActiva = true; pintaSinastria(); });
+  if(compuestaActiva) pintaCompuesta(); else document.getElementById("bloqueCompuesta").innerHTML = "";
+
+  document.getElementById("sinB").addEventListener("change", ev => {
+    estadoSin.idB = ev.target.value || null; pintaSinastria();
+  });
+  document.getElementById("sinOrbe").addEventListener("change", ev => {
+    estadoSin.factorOrbe = parseFloat(ev.target.value); pintaSinastria();
+  });
+  const cbSin = document.getElementById("sinSoloMayores");
+  if(cbSin) cbSin.addEventListener("change", () => {
+    document.getElementById("listaSinastria").classList.toggle("con-menores", !cbSin.checked);
+  });
+}
+
+/* ===================== Carta compuesta =====================
+   Los puntos medios de dos cartas. Los planetas no tienen discusión: se toma el
+   punto medio por el arco corto. Las casas sí, así que van los dos métodos que
+   se enseñan, a elegir. */
+const puntoMedio = (a, b) => { let d = mod360(b - a); if(d > 180) d -= 360; return mod360(a + d/2); };
+const METODOS_COMPUESTA = [
+  {id:"mc",  n:"Punto medio de los Medios Cielo (con casas derivadas)"},
+  {id:"asc", n:"Punto medio de los Ascendentes (casas iguales)"}
+];
+let compuestaActiva = false;
+const estadoComp = {metodo:"mc"};
+
+function construyeCompuesta(A, B, metodo){
+  const lat = (A.datos.lat + B.datos.lat)/2, lonMedia = (A.datos.lon + B.datos.lon)/2;
+  const cuerpos = A.cuerpos.map((c, i) => Object.assign({}, c, {
+    lon: puntoMedio(c.lon, B.cuerpos[i].lon), retro:false
+  }));
+  const puntos = [];
+  for(const p of A.puntos){
+    const q = B.puntos.find(x => x.id === p.id);
+    if(!q || p.id === "fortuna") continue;              // la Fortuna no se promedia: se recalcula
+    puntos.push(Object.assign({}, p, {lon: puntoMedio(p.lon, q.lon)}));
+  }
+  const nn = puntos.find(p => p.id === "nodoN");
+  const ns = puntos.find(p => p.id === "nodoS");
+  if(nn && ns) ns.lon = mod360(nn.lon + 180);           // los nodos siempre opuestos
+
+  let ang = null, cusp = null, aviso = null;
+  if(A.ang && B.ang){
+    const T = siglos((A.jd + B.jd)/2), eps = oblicuidad(T);
+    const mc = puntoMedio(A.ang.mc, B.ang.mc);
+    if(metodo === "mc"){
+      const ramc = mod360(Math.atan2(Math.sin(mc*RAD)*Math.cos(eps*RAD), Math.cos(mc*RAD))*DEG);
+      let asc = mod360(Math.atan2(Math.cos(ramc*RAD),
+        -(Math.sin(ramc*RAD)*Math.cos(eps*RAD) + Math.tan(lat*RAD)*Math.sin(eps*RAD)))*DEG);
+      if(mod360(asc - mc) > 180) asc = mod360(asc + 180);
+      ang = {mc, asc, ramc, eps, lat, lon:lonMedia};
+      const r = cuspides(A.datos.sistema || "placidio", ang);
+      cusp = r.c; aviso = r.aviso || null;
+    } else {
+      const asc = puntoMedio(A.ang.asc, B.ang.asc);
+      ang = {mc, asc, ramc:0, eps, lat, lon:lonMedia};
+      cusp = new Array(13);
+      for(let i = 1; i <= 12; i++) cusp[i] = mod360(asc + (i-1)*30);
+    }
+    const sol = cuerpos[0], luna = cuerpos[1];
+    const casaSol = casaDe(sol.lon, cusp), diurna = casaSol >= 7 && casaSol <= 12;
+    puntos.push({id:"fortuna", nombre:PUNTOS.fortuna.nombre, glifo:PUNTOS.fortuna.glifo,
+      color:PUNTOS.fortuna.color, tipo:"punto", retro:false,
+      lon: diurna ? mod360(ang.asc + luna.lon - sol.lon) : mod360(ang.asc + sol.lon - luna.lon)});
+  }
+  const paraAspectos = cuerpos.concat(puntos.filter(p => p.id === "nodoN"));
+  if(ang){
+    paraAspectos.push({id:"asc", nombre:"Ascendente", glifo:PUNTOS.asc.glifo, color:PUNTOS.asc.color, lon:ang.asc, tipo:"angulo"});
+    paraAspectos.push({id:"mc",  nombre:"Medio Cielo", glifo:PUNTOS.mc.glifo,  color:PUNTOS.mc.color,  lon:ang.mc,  tipo:"angulo"});
+  }
+  const nombre = `${A.datos.nombre || "Carta A"} + ${B.datos.nombre || "Carta B"}`;
+  return {
+    datos:{nombre, resumenFecha:"Carta compuesta",
+           lugarTexto: metodo === "mc" ? "puntos medios · casas derivadas del MC" : "puntos medios · casas iguales desde el AC",
+           lat, lon:lonMedia, sistema:A.datos.sistema},
+    ms:(A.ms + B.ms)/2, jd:(A.jd + B.jd)/2,
+    cuerpos, puntos, ang, cusp, aviso,
+    aspectos: calculaAspectos(paraAspectos, A.datos.factorOrbe || 1),
+    diurna: null, compuesta:true
+  };
+}
+function laCompuesta(){
+  if(!carta || !estadoSin.idB) return null;
+  const B = cartaDeGuardada(estadoSin.idB);
+  if(!B) return null;
+  return construyeCompuesta(carta, B, estadoComp.metodo);
+}
+
+function pintaCompuesta(){
+  const C = laCompuesta();
+  const caja = document.getElementById("bloqueCompuesta");
+  if(!caja) return;
+  if(!C){ caja.innerHTML = ""; return; }
+  const filas = [];
+  if(C.ang){
+    for(const [gl, nom, lon] of [[PUNTOS.asc.glifo,"Ascendente",C.ang.asc],[PUNTOS.mc.glifo,"Medio Cielo",C.ang.mc]]){
+      const z = posZod(lon);
+      filas.push(`<tr><td class="cg">${gh(gl)}</td><td>${nom}</td>
+        <td><span class="cgrado">${z.texto}</span> <span class="csigno">${z.signo.g} ${z.signo.n}</span></td>
+        <td class="ccasa">—</td></tr>`);
+    }
+  }
+  for(const c of C.cuerpos.concat(C.puntos)){
+    const z = posZod(c.lon), casa = C.cusp ? ROMANOS[casaDe(c.lon, C.cusp)] : "—";
+    filas.push(`<tr><td class="cg">${gh(c.glifo)}</td><td>${c.nombre}</td>
+      <td><span class="cgrado">${z.texto}</span> <span class="csigno">${z.signo.g} ${z.signo.n}</span></td>
+      <td class="ccasa">${casa}</td></tr>`);
+  }
+  caja.innerHTML = `
+    <div class="campo" style="margin:.8rem 0 .2rem">
+      <label for="compMetodo">Método de casas</label>
+      <select id="compMetodo">
+        ${METODOS_COMPUESTA.map(m => `<option value="${m.id}" ${m.id === estadoComp.metodo ? "selected" : ""}>${m.n}</option>`).join("")}
+      </select>
+    </div>
+    ${C.aviso ? `<p class="aviso">${C.aviso}</p>` : ""}
+    ${!C.ang ? `<p class="aviso">Alguna de las dos cartas no tiene hora, así que la compuesta se queda sin Ascendente ni casas.</p>` : ""}
+
+    <div class="rotulo">Posiciones de la compuesta</div>
+    <table class="posiciones"><thead><tr><th></th><th>Astro</th><th>Posición</th><th style="text-align:right">Casa</th></tr></thead>
+      <tbody>${filas.join("")}</tbody></table>
+
+    <div class="rotulo">Aspectos de la compuesta</div>
+    ${C.aspectos.length ? `<ul class="aspectos">${C.aspectos.map(({A,B,asp,dif}) => `
+      <li class="${asp.mayor ? "mayor" : "menor"}">
+        <span class="cg">${gh(A.glifo)}</span>
+        <span class="as ${asp.cl}">${asp.g}</span>
+        <span class="cg">${gh(B.glifo)}</span>
+        <span class="nom">${asp.n} · ${A.nombre} y ${B.nombre}</span>
+        <span class="orbe">${gradoMin(dif)}</span>
+      </li>`).join("")}</ul>` : `<p class="aviso">Sin aspectos dentro de los orbes.</p>`}
+
+    <p class="aviso" style="margin-top:1rem">La compuesta no es la carta de nadie: es el punto medio de las dos, y se lee como el retrato de la relación misma.
+      Los planetas se promedian por el arco corto, que es el único método sin discusión; las casas dependen del método elegido arriba.</p>`;
+  document.getElementById("compMetodo").addEventListener("change", ev => {
+    estadoComp.metodo = ev.target.value; pintaSinastria();
+  });
+}
+
 /* --- formulario --- */
 const velo = document.getElementById("velo");
 const formulario = document.getElementById("natalForm");
@@ -3209,20 +3766,138 @@ formulario.addEventListener("submit", ev => {
   const msPrueba = localAUTC(anio, mes, dia, hora, min, tz);
   datos.husoTexto = `${tz} (${textoDesfase(tz, msPrueba)})`;
 
+  aplicaCarta(datos);
+});
+
+function guardaUltima(d){
+  try { localStorage.setItem("maquina-celeste-carta", JSON.stringify(d)); } catch(e){}
+}
+
+/* ---------- cartas guardadas: varias, no solo la última ---------- */
+const LLAVE_CARTAS = "astroplanetario-cartas", TOPE_CARTAS = 200;
+function leerCartas(){
+  try {
+    const s = localStorage.getItem(LLAVE_CARTAS);
+    const a = s ? JSON.parse(s) : [];
+    return Array.isArray(a) ? a.filter(c => c && c.datos && c.datos.anio) : [];
+  } catch(e){ return []; }
+}
+function escribirCartas(a){
+  try { localStorage.setItem(LLAVE_CARTAS, JSON.stringify(a.slice(0, TOPE_CARTAS))); } catch(e){}
+}
+const huellaCarta = d => [d.nombre||"", d.anio, d.mes, d.dia, d.hora, d.min,
+                          d.horaConocida?1:0, d.lugarTexto||"", d.lat, d.lon].join("|");
+function nuevaId(){ return "c" + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function guardaEnLista(d){
+  const a = leerCartas(), h = huellaCarta(d);
+  const i = a.findIndex(c => huellaCarta(c.datos) === h);
+  const id = i >= 0 ? a[i].id : nuevaId();
+  if(i >= 0) a.splice(i, 1);
+  a.unshift({id, datos:d, guardada: Date.now()});
+  escribirCartas(a);
+  return id;
+}
+function borraDeLista(id){ escribirCartas(leerCartas().filter(c => c.id !== id)); }
+
+function pintaGuardadas(){
+  const caja = document.getElementById("guardadas");
+  if(!caja) return;
+  const a = leerCartas();
+  caja.hidden = a.length === 0;
+  document.getElementById("gCuenta").textContent = a.length ? `· ${a.length}` : "";
+  document.getElementById("listaCartas").innerHTML = a.map(c => {
+    const d = c.datos;
+    return `<li data-id="${c.id}">
+      <button type="button" class="carta-abrir" data-id="${c.id}">
+        <span class="cn">${(d.nombre || "Carta sin nombre").replace(/</g,"&lt;")}</span>
+        <span class="cd">${d.resumenFecha} · ${(d.lugarTexto||"").replace(/</g,"&lt;")}</span>
+      </button>
+      <button type="button" class="carta-borrar" data-borrar="${c.id}" aria-label="Borrar esta carta" title="Borrar">✕</button>
+    </li>`;
+  }).join("");
+}
+function avisoGuardadas(texto){
+  const p = document.getElementById("gAviso");
+  if(!p) return;
+  p.textContent = texto; p.hidden = !texto;
+  if(texto) setTimeout(() => { p.hidden = true; }, 4000);
+}
+
+/* levanta una carta y deja todo en su sitio: lo usan el formulario y la lista */
+function aplicaCarta(datos){
   estadoAtacir.fecha = null;
+  estadoTransitos.fecha = null;
   levantarCarta(datos);
   guardaUltima(datos);
+  guardaEnLista(datos);
   velo.classList.remove("visible");
   document.getElementById("cartaPanel").classList.add("abierto");
   document.getElementById("nCancelar").hidden = false;
   pintaCarta();
   pintaBarra();
+  pintaGuardadas();
   zoom = 1;
-  natalPan.x=0; natalPan.y=0;
-});
+  if(typeof natalPan === "object"){ natalPan.x = 0; natalPan.y = 0; }
+}
+function llenaFormulario(d){
+  document.getElementById("nNombre").value = d.nombre || "";
+  document.getElementById("nFecha").value =
+    `${d.anio}-${String(d.mes).padStart(2,"0")}-${String(d.dia).padStart(2,"0")}`;
+  document.getElementById("nHora").value = `${String(d.hora).padStart(2,"0")}:${String(d.min).padStart(2,"0")}`;
+  document.getElementById("nLugar").value = d.lugarTexto || "";
+  document.getElementById("nCasas").value = d.sistema || "placidio";
+  if(d.factorOrbe) document.getElementById("nOrbe").value = String(d.factorOrbe);
+  const sh = document.getElementById("nSinHora");
+  if(sh.checked !== !d.horaConocida){ sh.checked = !d.horaConocida; sh.dispatchEvent(new Event("change")); }
+  const enLista = CIUDADES.some(c => c.etiqueta === d.lugarTexto);
+  document.getElementById("manual").classList.toggle("visible", !enLista);
+  if(!enLista){
+    document.getElementById("nLat").value = d.lat;
+    document.getElementById("nLon").value = d.lon;
+    if(d.tz) zonaSel.value = d.tz;
+  }
+}
 
-function guardaUltima(d){
-  try { localStorage.setItem("maquina-celeste-carta", JSON.stringify(d)); } catch(e){}
+/* exportar e importar, para pasar cartas entre computadoras o alumnos */
+function exportarCartas(){
+  const a = leerCartas();
+  if(!a.length) return avisoGuardadas("No hay cartas guardadas todavía.");
+  const paquete = {tipo:"astroplanetario-cartas", version:1, exportado:new Date().toISOString(), cartas:a};
+  const b = new Blob([JSON.stringify(paquete, null, 2)], {type:"application/json"});
+  const u = URL.createObjectURL(b), el = document.createElement("a");
+  el.href = u; el.download = `cartas-astroplanetario-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(el); el.click(); el.remove();
+  setTimeout(() => URL.revokeObjectURL(u), 4000);
+  avisoGuardadas(`Exportadas ${a.length} carta${a.length === 1 ? "" : "s"}.`);
+}
+function importarCartas(archivo){
+  const lector = new FileReader();
+  lector.onload = () => {
+    let entrantes = [];
+    try {
+      const j = JSON.parse(lector.result);
+      if(Array.isArray(j)) entrantes = j;
+      else if(j && Array.isArray(j.cartas)) entrantes = j.cartas;
+      else if(j && j.anio) entrantes = [{id:nuevaId(), datos:j, guardada:Date.now()}];
+    } catch(e){ return avisoGuardadas("Ese archivo no se pudo leer. ¿Es el .json que exportó Astroplanetario?"); }
+    entrantes = entrantes
+      .map(c => (c && c.datos) ? c : (c && c.anio ? {id:nuevaId(), datos:c, guardada:Date.now()} : null))
+      .filter(c => c && c.datos && c.datos.anio);
+    if(!entrantes.length) return avisoGuardadas("El archivo no traía ninguna carta.");
+    const a = leerCartas(), vistas = new Set(a.map(c => huellaCarta(c.datos)));
+    let nuevas = 0;
+    for(const c of entrantes){
+      const h = huellaCarta(c.datos);
+      if(vistas.has(h)) continue;
+      vistas.add(h);
+      a.unshift({id: nuevaId(), datos: c.datos, guardada: c.guardada || Date.now()});
+      nuevas++;
+    }
+    escribirCartas(a); pintaGuardadas();
+    avisoGuardadas(nuevas ? `Importadas ${nuevas} carta${nuevas === 1 ? "" : "s"}.`
+                          : "Esas cartas ya estaban guardadas.");
+  };
+  lector.readAsText(archivo);
 }
 function recuperaUltima(){
   try {
@@ -3253,7 +3928,7 @@ document.getElementById("plegar").addEventListener("click", () => {
 });
 
 /* pestañas del panel */
-const pestañas = [["tabPos","hojaPos"],["tabAsp","hojaAsp"],["tabCasas","hojaCasas"],["tabSent","hojaSent"],["tabAtacir","hojaAtacir"]];
+const pestañas = [["tabPos","hojaPos"],["tabAsp","hojaAsp"],["tabCasas","hojaCasas"],["tabSent","hojaSent"],["tabAtacir","hojaAtacir"],["tabTransitos","hojaTransitos"],["tabSinastria","hojaSinastria"]];
 for(const [b,h] of pestañas){
   document.getElementById(b).addEventListener("click", () => {
     for(const [bb,hh] of pestañas){
@@ -3261,7 +3936,12 @@ for(const [b,h] of pestañas){
       document.getElementById(hh).hidden = hh !== h;
     }
     atacirActivo = (h === "hojaAtacir");
+    transitosActivo = (h === "hojaTransitos");
+    sinastriaActivo = (h === "hojaSinastria");
+    if(!sinastriaActivo) compuestaActiva = false;
     if(atacirActivo) pintaAtacir();
+    if(transitosActivo) pintaTransitos();
+    if(sinastriaActivo) pintaSinastria();
   });
 }
 
@@ -3291,6 +3971,29 @@ document.getElementById("btnEditar").addEventListener("click", () => {
 });
 document.getElementById("btnPngRueda").addEventListener("click", () => descargaHoja("rueda"));
 document.getElementById("btnPngHoja").addEventListener("click", () => descargaHoja("completa"));
+document.getElementById("listaCartas").addEventListener("click", ev => {
+  const borrar = ev.target.closest("[data-borrar]");
+  if(borrar){ borraDeLista(borrar.dataset.borrar); pintaGuardadas(); return; }
+  const abrir = ev.target.closest(".carta-abrir");
+  if(!abrir) return;
+  const reg = leerCartas().find(c => c.id === abrir.dataset.id);
+  if(!reg) return;
+  llenaFormulario(reg.datos);
+  aplicaCarta(reg.datos);
+});
+document.getElementById("gExportar").addEventListener("click", exportarCartas);
+document.getElementById("gImportar").addEventListener("click", () => document.getElementById("gArchivo").click());
+document.getElementById("gArchivo").addEventListener("change", ev => {
+  const f = ev.target.files && ev.target.files[0];
+  if(f) importarCartas(f);
+  ev.target.value = "";
+});
+(() => {                                   // la carta que ya estaba guardada de antes pasa a la lista
+  const vieja = recuperaUltima();
+  if(vieja && !leerCartas().length) guardaEnLista(vieja);
+  pintaGuardadas();
+})();
+
 (() => {                                   // recupera los últimos datos escritos en este navegador
   const d = recuperaUltima(); if(!d) return;
   document.getElementById("nNombre").value = d.nombre || "";
@@ -3320,6 +4023,13 @@ abrirFicha("marte");     // deja la ficha lista detrás de la portada, para quie
     var tarjeta = document.querySelector('.opcion[data-vista="' + v + '"]');
     if(!tarjeta){ if(++intentos < 40) setTimeout(abrir, 60); return; }
     tarjeta.click();
+    var pestana = q.get('tab');
+    if(v === 'natal' && pestana){
+      var mapa = {posiciones:'tabPos', aspectos:'tabAsp', casas:'tabCasas', significados:'tabSent',
+                  atacir:'tabAtacir', transitos:'tabTransitos', sinastria:'tabSinastria'};
+      var bot = document.getElementById(mapa[pestana]);
+      if(bot) setTimeout(function(){ bot.click(); }, 220);
+    }
     if(v === 'natal' && q.get('auto') === '1'){
       setTimeout(function(){ var f = document.getElementById('natalForm'); if(f) f.requestSubmit(); }, 320);
     }

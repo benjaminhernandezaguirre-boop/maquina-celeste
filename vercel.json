@@ -1,6 +1,15 @@
 {
   "headers": [
     {
+      "source": "/venus.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
       "source": "/saturno.html",
       "headers": [
         {
@@ -11,6 +20,15 @@
     },
     {
       "source": "/app/efemerides.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/mercurio.html",
       "headers": [
         {
           "key": "Cache-Control",
