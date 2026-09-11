@@ -2696,7 +2696,8 @@ async function fabricaHoja(modo){
   const conAngulos = carta.ang ? 2 : 0;
   const nFilas = carta.cuerpos.length + carta.puntos.length + conAngulos;
   const altoCol = 60 + nFilas*46 + 60 + 60 + carta.aspectos.length*36;
-  const alto = Math.max(230 + lado + margen, 230 + altoCol + margen);
+  const balanceY = 230 + lado + 50;
+  const alto = Math.max(balanceY + 650 + margen, 230 + altoCol + margen);
   const c = document.createElement("canvas");
   c.width = ancho; c.height = alto;
   const g = c.getContext("2d");
@@ -2716,6 +2717,7 @@ async function fabricaHoja(modo){
   g.beginPath(); g.moveTo(margen, 200); g.lineTo(ancho - margen, 200); g.stroke();
 
   pintaRueda(g, margen + lado/2, 230 + lado/2, lado*0.465, false, capaExterior(), cartaEnRueda());
+  pintaBalanceHoja(g, margen, balanceY, lado);
 
   // columna de datos
   let y = 250;
@@ -2765,16 +2767,47 @@ function descargaHoja(modo){
 }
 
 /* --- panel de resultados --- */
-function pintaBalance(){
+function datosBalance(){
   const bodies = carta.cuerpos.filter(c=>Number.isFinite(c.lon));
   const groups = [
     {title:"Elementos",labels:["Fuego","Tierra","Aire","Agua"],mod:4},
     {title:"Modalidades",labels:["Cardinal","Fija","Mutable"],mod:3},
     {title:"Polaridades",labels:["Positiva · fuego y aire","Negativa · tierra y agua"],mod:2}
   ];
-  document.getElementById("hojaBalance").innerHTML = '<h3>Balance de la carta natal</h3><p class="aviso">Sol, Luna y ocho planetas; un punto por cuerpo. No incluye ángulos, nodos ni otros puntos. Es una distribución por signos, sin ponderaciones.</p>' + groups.map(group=>{
+  return {bodies, groups:groups.map(group=>{
     const counts=group.labels.map(()=>[]);
     bodies.forEach(c=>counts[Math.floor(mod360(c.lon)/30)%group.mod].push(c.nombre));
+    return {...group,counts};
+  })};
+}
+function pintaBalanceHoja(g,x,y,ancho){
+  const {bodies,groups}=datosBalance();
+  rotuloHoja(g,y,"BALANCE DE LA CARTA NATAL",x,ancho);
+  g.fillStyle=PAPEL.suave; g.font='21px Spectral, Georgia, serif';
+  g.fillText('Sol, Luna y ocho planetas · un punto por cuerpo · sin ángulos ni puntos auxiliares',x,y+52);
+  const gap=36, w=(ancho-2*gap)/3;
+  groups.forEach((group,col)=>{
+    const left=x+col*(w+gap);
+    rotuloHoja(g,y+105,group.title.toUpperCase(),left,w);
+    group.labels.forEach((label,i)=>{
+      const top=y+155+i*105, n=group.counts[i].length;
+      const fraction=bodies.length?n/bodies.length:0;
+      g.textAlign='left';g.fillStyle=PAPEL.tinta;g.font='25px Spectral, Georgia, serif';
+      g.fillText(label,left,top);
+      g.textAlign='right';g.font='20px "IBM Plex Mono", monospace';
+      g.fillText(`${n}/${bodies.length} · ${Math.round(fraction*100)}%`,left+w,top+30);
+      g.fillStyle=PAPEL.borde;g.fillRect(left,top+48,w,8);
+      g.fillStyle=PAPEL.acento;g.fillRect(left,top+48,w*fraction,8);
+    });
+  });
+  g.textAlign='left';g.fillStyle=PAPEL.suave;g.font='21px Spectral, Georgia, serif';
+  g.fillText('Distribución por signos, sin ponderaciones. Corresponde a la carta natal principal.',x,y+595);
+  if(!carta.datos.horaConocida)g.fillText('Sin hora conocida: un cuerpo cerca de un cambio de signo puede cambiar de grupo.',x,y+626);
+}
+function pintaBalance(){
+  const {bodies,groups}=datosBalance();
+  document.getElementById("hojaBalance").innerHTML = '<h3>Balance de la carta natal</h3><p class="aviso">Sol, Luna y ocho planetas; un punto por cuerpo. No incluye ángulos, nodos ni otros puntos. Es una distribución por signos, sin ponderaciones.</p>' + groups.map(group=>{
+    const counts=group.counts;
     return '<section class="studio-balance"><h3>'+group.title+'</h3>'+group.labels.map((label,i)=>{
       const n=counts[i].length, percent=bodies.length ? Math.round(n/bodies.length*100) : 0;
       return '<div class="studio-balance-row"><div><span>'+label+'</span><strong>'+n+' / '+bodies.length+' · '+percent+'%</strong></div><meter min="0" max="'+Math.max(1,bodies.length)+'" value="'+n+'" aria-label="'+label+'"></meter><small>'+ (counts[i].map(escaparHTML).join(' · ') || 'Sin cuerpos')+'</small></div>';
