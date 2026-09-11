@@ -1,8 +1,11 @@
 (() => {
   'use strict';
   const root = document.documentElement;
-  let theme = 'dark';
-  try { theme = localStorage.getItem('astro-studio-theme') === 'light' ? 'light' : 'dark'; } catch {}
+  let theme = 'light';
+  try {
+    const saved = localStorage.getItem('astro-studio-theme');
+    if(saved === 'light' || saved === 'dark') theme = saved;
+  } catch {}
   root.dataset.studioTheme = theme;
   function boot(){
     const host = document.querySelector('header');
@@ -24,3 +27,4 @@
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded',boot,{once:true}); else boot();
 })();
+
