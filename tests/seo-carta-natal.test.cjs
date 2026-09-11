@@ -37,3 +37,19 @@ test('carta natal landing and calculator default to light with a shared theme ch
   assert.match(studioTheme, /saved === 'light' \|\| saved === 'dark'/);
 });
 
+test('carta natal includes a seasonal zodiac and live lunar module', () => {
+  const html = read('carta-natal.html');
+  assert.match(html, /id="temporadaTitulo">Feliz cumpleaños, Virgo/);
+  assert.match(html, /id="temporadaElemento">Tierra/);
+  assert.match(html, /id="temporadaModalidad">Mutable/);
+  assert.match(html, /id="temporadaRegente">Mercurio/);
+  assert.match(html, /src="\/app\/efemerides\.js"/);
+  assert.match(html, /Efem\.lon\("luna",ms\)/);
+  assert.match(html, /assets\/zodiaco\/virgo-celestial\.webp/);
+  assert.match(html, /Virgo entre griegos y romanos/);
+  assert.match(html, /Diké o Astrea/);
+  assert.match(html, /Spica/);
+  assert.match(html, /Justitia/);
+  assert.match(html, /Ceres/);
+});
+
