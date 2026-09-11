@@ -83,19 +83,19 @@ Está en `PENDIENTES.md`, que ahora viene dentro del repo y está al día.
 
 De la astrocartografía quedan los paranes, las líneas de espacio local, reubicar la carta entera para
 otra ciudad y el zoom por continente. De lo pequeño queda: el sprite del zodiaco no es una imagen válida y el título de Luna se encima con
-la tarjeta del signo. `luna.html` ya no duplica la astronomía; `astroplanetario.html` sí sigue con su
-copia, pero a propósito: así se abre con doble clic sin servidor. Las dos copias son idénticas y se
-parchan juntas.
+la tarjeta del signo. `luna.html` y `astroplanetario.html` utilizan ahora el mismo motor `app/efemerides.js`.
+Se puede seguir abriendo el sitio localmente conservando la carpeta `app`.
 
-### Sobre la precisión, para que puedas responder a un alumno
+### Precisión y correcciones de Astrocartografía
 
-| | |
-|---|---|
-| Sol | mejor que 2″ de arco (medio minuto de tiempo en un ingreso) |
-| Luna | alrededor de 1′ |
-| Mercurio a Marte | unos pocos minutos de arco |
-| Júpiter a Plutón | unos minutos de arco; Saturno es el peor por la resonancia con Júpiter |
-| Ascendente y casas | limitados por la hora de nacimiento, no por el cálculo |
+Las garantías de precisión anteriores quedan sustituidas por las mediciones y
+limitaciones de [ASTROCARTOGRAFIA-VALIDACION.md](ASTROCARTOGRAFIA-VALIDACION.md).
+El motor sigue siendo aproximado: la muestra contra JPL Horizons incluye errores
+de hasta 10,30 minutos de arco para Saturno. No se garantiza precisión de segundos
+de arco para todos los astros ni todas las fechas.
 
-Quirón sigue fuera a propósito: su órbita cruza la de Saturno y la de Urano y el modelo de elementos
-aproximados no la sostiene con honestidad.
+Se corrigieron ΔT histórico, horas inexistentes/repetidas, vector Tierra–Luna,
+precesión tridimensional, distancias esféricas, continuidad de curvas y selección
+de datos. Los resultados antiguos deben recalcularse con la versión corregida.
+
+Quirón sigue fuera del modelo.

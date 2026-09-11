@@ -41,6 +41,8 @@
     border-radius:2px;transition:.18s}
   .carta-borrar:hover{opacity:1;color:#D2694A;background:rgba(210,105,74,.12)}
 </style>
+<link rel="stylesheet" href="app/studio-theme.css">
+<script src="app/studio-theme.js"></script>
 </head>
 <body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -772,7 +774,7 @@
               <path d="M15.6 22.5 41.5 48.5 48.5 22.5Z" stroke-width="1.3"/>
             </svg>
             <span class="op-nombre">Carta natal</span>
-            <span class="op-linea">Fecha, hora y lugar de nacimiento: Ascendente, Medio Cielo, casas, nodos y aspectos, sobre fondo de papel.</span>
+            <span class="op-linea">Fecha, hora y lugar de nacimiento: Ascendente, Medio Cielo, casas, nodos y aspectos, con vista clara u oscura.</span>
           </button>
         </div>
 
@@ -805,7 +807,7 @@
           </div>
           <div class="campo">
             <label for="nFecha">Fecha de nacimiento</label>
-            <input id="nFecha" type="date" required>
+            <input id="nFecha" type="date" min="1800-01-01" max="2050-12-31" required>
           </div>
           <div class="campo">
             <label for="nHora">Hora de nacimiento</label>
@@ -835,6 +837,8 @@
           </div>
         </div>
 
+        <div class="campo"><label for="nOcurrencia">Si la hora ocurrió dos veces</label>
+          <select id="nOcurrencia"><option value="reject">Pedir aclaración</option><option value="earlier">Primera ocurrencia</option><option value="later">Segunda ocurrencia</option></select></div>
         <label class="marcar"><input type="checkbox" id="nSinHora"> No sé la hora exacta</label>
         <p class="aviso" id="nAvisoHora" hidden>Sin hora no hay Ascendente ni casas: la carta se levanta al mediodía y solo muestra los signos. La Luna puede moverse hasta 6° en el día.</p>
 
@@ -870,6 +874,7 @@
       <div class="pest-fila">
         <div class="pest" role="tablist">
           <button role="tab" id="tabPos" aria-selected="true" aria-controls="hojaPos">Posiciones</button>
+          <button role="tab" id="tabBalance" aria-selected="false" aria-controls="hojaBalance">Balance</button>
           <button role="tab" id="tabAsp" aria-selected="false" aria-controls="hojaAsp">Aspectos</button>
           <button role="tab" id="tabCasas" aria-selected="false" aria-controls="hojaCasas">Casas</button>
           <button role="tab" id="tabSent" aria-selected="false" aria-controls="hojaSent">Significados</button>
@@ -881,6 +886,7 @@
         <button id="plegar" aria-label="Plegar o desplegar el panel" title="Plegar">▾</button>
       </div>
       <div class="hoja" id="hojaPos" role="tabpanel"></div>
+      <div class="hoja" id="hojaBalance" role="tabpanel" hidden></div>
       <div class="hoja" id="hojaAsp" role="tabpanel" hidden></div>
       <div class="hoja" id="hojaCasas" role="tabpanel" hidden></div>
       <div class="hoja" id="hojaSent" role="tabpanel" hidden></div>
@@ -896,6 +902,7 @@
   </footer>
 </div>
 
+<script src="app/efemerides.js"></script>
 <script>
 (() => {
 "use strict";
@@ -906,234 +913,10 @@ const mod360 = x => ((x%360)+360)%360;
    Elementos keplerianos aproximados (J2000, válidos ~1800-2050).
    a[UA], e, I[°], L[°] longitud media, w[°] longitud del perihelio,
    N[°] longitud del nodo ascendente; cada uno con su variación por siglo. */
-const ELEM = {
-  mercurio:[0.38709927,0.20563593,7.00497902,252.25032350,77.45779628,48.33076593,
-            0.00000037,0.00001906,-0.00594749,149472.67411175,0.16047689,-0.12534081],
-  venus:   [0.72333566,0.00677672,3.39467605,181.97909950,131.60246718,76.67984255,
-            0.00000390,-0.00004107,-0.00078890,58517.81538729,0.00268329,-0.27769418],
-  tierra:  [1.00000261,0.01671123,-0.00001531,100.46457166,102.93768193,0.0,
-            0.00000562,-0.00004392,-0.01294668,35999.37244981,0.32327364,0.0],
-  marte:   [1.52371034,0.09339410,1.84969142,-4.55343205,-23.94362959,49.55953891,
-            0.00001847,0.00007882,-0.00813131,19140.30268499,0.44441088,-0.29257343],
-  jupiter: [5.20288700,0.04838624,1.30439695,34.39644051,14.72847983,100.47390909,
-            -0.00011607,-0.00013253,-0.00183714,3034.74612775,0.21252668,0.20469106],
-  saturno: [9.53667594,0.05386179,2.48599187,49.95424423,92.59887831,113.66242448,
-            -0.00125060,-0.00050991,0.00193609,1222.49362201,-0.41897216,-0.28867794],
-  urano:   [19.18916464,0.04725744,0.77263783,313.23810451,170.95427630,74.01692503,
-            -0.00196176,-0.00004397,-0.00242939,428.48202785,0.40805281,0.04240589],
-  neptuno: [30.06992276,0.00859048,1.77004347,-55.12002969,44.96476227,131.78422574,
-            0.00026291,0.00005105,0.00035372,218.45945325,-0.32241464,-0.00508664],
-  pluton:  [39.48211675,0.24882730,17.14001206,238.92903833,224.06891629,110.30393684,
-            -0.00031596,0.00005170,0.00004818,145.20780515,-0.04062942,-0.01183482]
-};
+const {ELEM,julian,siglos,jdTT,sigTT,deltaT,precesion,nutacion,helio,lunaLon,
+  centroTierra,lonGeo,distGeo,utcMs,desfaseZona,localAUTC,textoDesfase,
+  validaCarta,cartaValida,escaparHTML} = window.Efem;
 
-const julian = ms => ms/86400000 + 2440587.5;
-const siglos = jd => (jd - 2451545.0)/36525;
-
-/* ===================== Marco de referencia y escala de tiempo =====================
-   Dos correcciones que cambian todas las posiciones y que conviene entender:
-
-   1. Precesión. Los elementos orbitales de arriba están referidos al equinoccio
-      de J2000, pero el zodiaco tropical se mide desde el punto vernal del día
-      que se calcula. Entre uno y otro hay la precesión de los equinoccios: hoy
-      pasa de los veintidós minutos de arco y crece unos 50″ al año. Sin ella un
-      planeta lento entra en signo con días o semanas de retraso.
-      La Luna, los nodos y Lilith salen de las fórmulas de Meeus, que ya vienen
-      referidas al equinoccio de la fecha: a ésas no se les suma nada.
-
-   2. ΔT. Los astros se calculan en tiempo terrestre (TT) y la hora sidérea —y
-      con ella el Ascendente y las casas— en tiempo universal (UT). La
-      diferencia ronda hoy los 69 segundos; en la Luna son casi 40″ de arco.
-
-   Encima van la nutación, la aberración de la luz y el tiempo que tarda la luz
-   en llegar, que es lo que hace falta para dar posiciones aparentes, que son
-   las que publican las efemérides. */
-
-/* ΔT = TT − UT en segundos (polinomios de Espenak y Meeus). */
-function deltaT(ms){
-  const f = new Date(ms), y = f.getUTCFullYear() + (f.getUTCMonth() + 0.5)/12;
-  let t;
-  if(y >= 2005){ t = y - 2000; return 62.92 + 0.32217*t + 0.005589*t*t; }
-  if(y >= 1986){ t = y - 2000; return 63.86 + 0.3345*t - 0.060374*t*t + 0.0017275*t*t*t
-                                    + 0.000651814*Math.pow(t,4) + 0.00002373599*Math.pow(t,5); }
-  if(y >= 1961){ t = y - 1975; return 45.45 + 1.067*t - t*t/260 - t*t*t/718; }
-  if(y >= 1941){ t = y - 1950; return 29.07 + 0.407*t - t*t/233 + t*t*t/2547; }
-  if(y >= 1920){ t = y - 1920; return 21.20 + 0.84493*t - 0.076100*t*t + 0.0020936*t*t*t; }
-  if(y >= 1900){ t = y - 1900; return -2.79 + 1.494119*t - 0.0598939*t*t + 0.0061966*t*t*t - 0.000197*Math.pow(t,4); }
-  t = y - 1860; return 7.62 + 0.5737*t - 0.251754*t*t + 0.01680668*t*t*t
-                      - 0.0004473624*Math.pow(t,4) + Math.pow(t,5)/233174;
-}
-const jdTT  = ms => julian(ms) + deltaT(ms)/86400;   // día juliano en tiempo terrestre
-const sigTT = ms => siglos(jdTT(ms));                // siglos julianos en TT
-
-/* Precesión general en longitud desde J2000 (grados). */
-const precesion = T => (5029.0966*T + 1.11113*T*T - 0.000006*T*T*T)/3600;
-
-/* Nutación en longitud y en oblicuidad (grados), términos principales. */
-let _nutT = NaN, _nutV = null;
-function nutacion(T){
-  if(T !== _nutT){
-    _nutT = T;
-    const O  = (125.04452 - 1934.136261*T)*RAD;
-    const L  = (280.46650 + 36000.7698*T)*RAD;
-    const Lp = (218.31650 + 481267.8813*T)*RAD;
-    const s = Math.sin, c = Math.cos;
-    _nutV = {
-      dpsi: (-17.20*s(O) - 1.32*s(2*L) - 0.23*s(2*Lp) + 0.21*s(2*O))/3600,
-      deps: (  9.20*c(O) + 0.57*c(2*L) + 0.10*c(2*Lp) - 0.09*c(2*O))/3600
-    };
-  }
-  return _nutV;
-}
-
-/* Longitud heliocéntrica de la Tierra por serie periódica (VSOP87D, sólo la
-   longitud), ya referida a la eclíptica y el equinoccio de la fecha. Es lo que
-   sube la precisión del Sol de medio grado a un segundo de arco, y con ella la
-   hora exacta de una revolución solar. Coeficientes en 1e-8 rad. */
-const VS_L0 = [
-[175347046,0,0],[3341656,4.6692568,6283.0758500],[34894,4.62610,12566.15170],
-[3497,2.7441,5753.3849],[3418,2.8289,3.5231],[3136,3.6277,77713.7715],
-[2676,4.4181,7860.4194],[2343,6.1352,3930.2097],[1324,0.7425,11506.7698],
-[1273,2.0371,529.6910],[1199,1.1096,1577.3435],[990,5.233,5884.927],
-[902,2.045,26.298],[857,3.508,398.149],[780,1.179,5223.694],
-[753,2.533,5507.553],[505,4.583,18849.228],[492,4.205,775.523],
-[357,2.920,0.067],[317,5.849,11790.629],[284,1.899,796.298],
-[271,0.315,10977.079],[243,0.345,5486.778],[206,4.806,2544.314],
-[205,1.869,5573.143],[202,2.458,6069.777],[156,0.833,213.299],
-[132,3.411,2942.463],[126,1.083,20.775],[115,0.645,0.980],
-[103,0.636,4694.003],[102,0.976,15720.839],[102,4.267,7.114],
-[99,6.21,2146.17],[98,0.68,155.42],[86,5.98,161000.69],
-[85,1.30,6275.96],[85,3.67,71430.70],[80,1.81,17260.15],
-[79,3.04,12036.46],[75,1.76,5088.63],[74,3.50,3154.69],
-[74,4.68,801.82],[70,0.83,9437.76],[62,3.98,8827.39],
-[61,1.82,7084.90],[57,2.78,6286.60],[56,4.39,14143.50],
-[56,3.47,6279.55],[52,0.19,12139.55],[52,1.33,1748.02],
-[51,0.28,5856.48],[49,0.49,1194.45],[41,5.37,8429.24],
-[41,2.40,19651.05],[39,6.17,10447.39],[37,6.04,10213.29],
-[37,2.57,1059.38],[36,1.71,2352.87],[36,1.78,6812.77],
-[33,0.59,17789.85],[30,0.44,83996.85],[30,2.74,1349.87],[25,3.16,4690.48]];
-const VS_L1 = [
-[628331966747,0,0],[206059,2.678235,6283.075850],[4303,2.6351,12566.1517],
-[425,1.590,3.523],[119,5.796,26.298],[109,2.966,1577.344],
-[93,2.59,18849.23],[72,1.14,529.69],[68,1.87,398.15],
-[67,4.41,5507.55],[59,2.89,5223.69],[56,2.17,155.42],
-[45,0.40,796.30],[36,0.47,775.52],[29,2.65,7.11],
-[21,5.34,0.98],[19,1.85,5486.78],[19,4.97,213.30],
-[17,2.99,6275.96],[16,0.03,2544.31],[16,1.43,2146.17],
-[15,1.21,10977.08],[12,2.83,1748.02],[12,3.26,5088.63],
-[12,5.27,1194.45],[12,2.08,4694.00],[11,0.77,553.57],
-[10,1.30,6286.60],[10,4.24,1349.87],[9,2.70,242.73],
-[9,5.64,951.72],[8,5.30,2352.87],[6,2.65,9437.76],[6,4.67,4690.48]];
-const VS_L2 = [
-[52919,0,0],[8720,1.0721,6283.0758],[309,0.867,12566.152],
-[27,0.05,3.52],[16,5.19,26.30],[16,3.68,155.42],
-[10,0.76,18849.23],[9,2.06,77713.77],[7,0.83,775.52],
-[5,4.66,1577.34],[4,1.03,7.11],[4,3.44,5573.14],
-[3,5.14,796.30],[3,6.05,5507.55],[3,1.19,242.73],
-[3,6.12,529.69],[3,0.31,398.15],[3,2.28,553.57],
-[2,4.38,5223.69],[2,3.75,0.98]];
-const VS_L3 = [[289,5.844,6283.076],[35,0,0],[17,5.49,12566.15],
-[3,5.20,155.42],[1,4.72,3.52],[1,5.30,18849.23],[1,5.97,242.73]];
-const VS_L4 = [[114,3.142,0],[8,4.13,6283.08],[1,3.84,12566.15]];
-const VS_L5 = [[1,3.14,0]];
-function serieVS(tabla, tau){
-  let s = 0;
-  for(let i = 0; i < tabla.length; i++) s += tabla[i][0]*Math.cos(tabla[i][1] + tabla[i][2]*tau);
-  return s;
-}
-function tierraLonFina(T){                       // grados, equinoccio de la fecha
-  const tau = T/10;                              // milenios julianos
-  const L = (serieVS(VS_L0,tau) + serieVS(VS_L1,tau)*tau + serieVS(VS_L2,tau)*tau*tau
-           + serieVS(VS_L3,tau)*tau*tau*tau + serieVS(VS_L4,tau)*Math.pow(tau,4)
-           + serieVS(VS_L5,tau)*Math.pow(tau,5))/1e8;
-  return L*DEG;
-}
-
-/* La Tierra no está en el baricentro Tierra-Luna: se aparta hasta 4700 km, que
-   son seis segundos de arco en la posición del Sol. */
-const MU_LUNA = 0.0121505, LUZ = 173.144632674;   // masa relativa · UA por día
-let _ctT = NaN, _ctV = null;
-function centroTierra(T){
-  if(T !== _ctT){
-    _ctT = T;
-    const b = tierraEn(T);
-    const D  = (297.8501921 + 445267.1114034*T - 0.0018819*T*T)*RAD;
-    const M  = (357.5291092 + 35999.0502909*T)*RAD;
-    const Mp = (134.9633964 + 477198.8675055*T + 0.0087414*T*T)*RAD;
-    const c = Math.cos;
-    const km = 385000.56 - 20905.355*c(Mp) - 3699.111*c(2*D-Mp) - 2955.968*c(2*D)
-             - 569.925*c(2*Mp) + 246.158*c(2*D-2*Mp) - 152.138*c(2*D-M-Mp);
-    const r = km/149597870.7, l = lunaLon(T)*RAD;
-    _ctV = {x: b.x + MU_LUNA*r*Math.cos(l), y: b.y + MU_LUNA*r*Math.sin(l), z: b.z};
-  }
-  return _ctV;
-}
-
-
-function helio(clave, T){                       // vector heliocéntrico eclíptico [UA]
-  const e0 = ELEM[clave];
-  const a = e0[0]+e0[6]*T, e = e0[1]+e0[7]*T, I = (e0[2]+e0[8]*T)*RAD;
-  const L = e0[3]+e0[9]*T, wb = e0[4]+e0[10]*T, N = (e0[5]+e0[11]*T)*RAD;
-  const w = wb*RAD - N;
-  let M = mod360(L - wb); if(M > 180) M -= 360;
-  M *= RAD;
-  let E = M + e*Math.sin(M);
-  for(let i=0;i<8;i++){ const d = (E - e*Math.sin(E) - M)/(1 - e*Math.cos(E)); E -= d; if(Math.abs(d)<1e-10) break; }
-  const xp = a*(Math.cos(E)-e), yp = a*Math.sqrt(1-e*e)*Math.sin(E);
-  const cw=Math.cos(w), sw=Math.sin(w), cN=Math.cos(N), sN=Math.sin(N), cI=Math.cos(I), sI=Math.sin(I);
-  return {
-    x:(cw*cN - sw*sN*cI)*xp + (-sw*cN - cw*sN*cI)*yp,
-    y:(cw*sN + sw*cN*cI)*xp + (-sw*sN + cw*cN*cI)*yp,
-    z:(sw*sI)*xp + (cw*sI)*yp
-  };
-}
-
-function lunaLon(T){                             // longitud eclíptica geocéntrica de la Luna
-  const Lp = 218.3164477 + 481267.88123421*T - 0.0015786*T*T;
-  const D  = (297.8501921 + 445267.1114034*T - 0.0018819*T*T)*RAD;
-  const M  = (357.5291092 + 35999.0502909*T)*RAD;
-  const Mp = (134.9633964 + 477198.8675055*T + 0.0087414*T*T)*RAD;
-  const F  = (93.2720950 + 483202.0175233*T - 0.0036539*T*T)*RAD;
-  const s = Math.sin;
-  const dl = 6.288774*s(Mp) + 1.274027*s(2*D-Mp) + 0.658314*s(2*D) + 0.213618*s(2*Mp)
-           - 0.185116*s(M) - 0.114332*s(2*F) + 0.058793*s(2*D-2*Mp) + 0.057066*s(2*D-M-Mp)
-           + 0.053322*s(2*D+Mp) + 0.045758*s(2*D-M) - 0.040923*s(M-Mp) - 0.034720*s(D)
-           - 0.030383*s(M+Mp) + 0.015327*s(2*D-2*F) - 0.012528*s(Mp+2*F) + 0.010980*s(Mp-2*F);
-  return mod360(Lp + dl);
-}
-
-/* la Tierra es la misma para todos los astros de un mismo instante: se memoriza */
-let _tierraT = NaN, _tierraV = null;
-function tierraEn(T){
-  if(T !== _tierraT){ _tierraT = T; _tierraV = helio("tierra", T); }
-  return _tierraV;
-}
-
-/* longitud eclíptica geocéntrica aparente, referida al equinoccio de la fecha */
-function lonGeo(clave, T){
-  const nut = nutacion(T).dpsi;
-  if(clave === "luna") return mod360(lunaLon(T) + nut);      // Meeus ya va en la fecha
-  const t = centroTierra(T);
-  if(clave === "sol"){
-    const R = Math.hypot(t.x, t.y, t.z);
-    return mod360(tierraLonFina(T) + 180 - 0.09033/3600 + nut - 20.4898/R/3600);
-  }
-  let p = helio(clave, T);                                   // corrección por tiempo-luz
-  for(let i = 0; i < 2; i++){
-    const d = Math.hypot(p.x-t.x, p.y-t.y, p.z-t.z);
-    p = helio(clave, T - (d/LUZ)/36525);
-  }
-  return mod360(Math.atan2(p.y - t.y, p.x - t.x)*DEG + precesion(T) + nut);
-}
-function distGeo(clave, T){
-  if(clave === "luna") return 0.00257;
-  const t = centroTierra(T);
-  if(clave === "sol") return Math.hypot(t.x,t.y,t.z);
-  const p = helio(clave, T);
-  return Math.hypot(p.x-t.x, p.y-t.y, p.z-t.z);
-}
-
-/* ===================== Zodiaco ===================== */
 const SIGNOS = [
   {n:"Aries",g:"♈\uFE0E",el:"fuego"},{n:"Tauro",g:"♉\uFE0E",el:"tierra"},{n:"Géminis",g:"♊\uFE0E",el:"aire"},
   {n:"Cáncer",g:"♋\uFE0E",el:"agua"},{n:"Leo",g:"♌\uFE0E",el:"fuego"},{n:"Virgo",g:"♍\uFE0E",el:"tierra"},
@@ -2304,7 +2087,7 @@ function gmst(jd){
 
 /* --- ángulos y casas --- */
 function angulos(jd, lat, lon){
-  const T = siglos(jd), nut = nutacion(T);
+  const T = sigTT((jd-2440587.5)*86400000), nut = nutacion(T);
   const eps = (oblicuidad(T) + nut.deps)*RAD, phi = lat*RAD;
   const ramcDeg = mod360(gmst(jd) + nut.dpsi*Math.cos(eps) + lon), ramc = ramcDeg*RAD;
   const mc = mod360(Math.atan2(Math.sin(ramc), Math.cos(ramc)*Math.cos(eps))*DEG);
@@ -2606,33 +2389,11 @@ Auckland|Nueva Zelanda|-36.8485|174.7633|Pacific/Auckland
 });
 
 /* --- zona horaria: el navegador trae la base histórica (incluye horarios de verano) --- */
-function utcMs(y,mo,d,h,mi){
-  const t = Date.UTC(y, mo-1, d, h, mi, 0);
-  if(y >= 0 && y < 100){ const f = new Date(t); f.setUTCFullYear(y); return f.getTime(); }
-  return t;
-}
-function desfaseZona(tz, ms){
-  const dtf = new Intl.DateTimeFormat("en-US",{timeZone:tz, hourCycle:"h23",
-    year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit", second:"2-digit"});
-  const p = Object.fromEntries(dtf.formatToParts(new Date(ms)).map(o => [o.type, o.value]));
-  return utcMs(+p.year, +p.month, +p.day, +p.hour, +p.minute) + (+p.second)*1000 - ms;
-}
-function localAUTC(y,mo,d,h,mi,tz){
-  const base = utcMs(y,mo,d,h,mi);
-  let t = base;
-  for(let i=0;i<4;i++) t = base - desfaseZona(tz, t);
-  return t;
-}
-function textoDesfase(tz, ms){
-  const min = Math.round(desfaseZona(tz, ms)/60000);
-  const s = min < 0 ? "−" : "+", a = Math.abs(min);
-  return `UTC${s}${String(Math.floor(a/60)).padStart(2,"0")}:${String(a%60).padStart(2,"0")}`;
-}
-
 /* --- levantar la carta --- */
 let carta = null;
 function levantarCarta(d, asignar){
-  const res = cartaDeInstante(localAUTC(d.anio, d.mes, d.dia, d.hora, d.min, d.tz), d);
+  validaCarta(d);
+  const res = cartaDeInstante(localAUTC(d.anio, d.mes, d.dia, d.hora, d.min, d.tz, d.desambiguacion), d);
   if(asignar !== false) carta = res;
   return res;
 }
@@ -2677,12 +2438,21 @@ function cartaDeInstante(ms, d){
 }
 
 /* --- dibujo de la carta: tinta sobre papel --- */
-const PAPEL = {
+const PAPEL_CLARO = {
   fondo:"#F4F0E6", borde:"#CFC7B4", ticks:"#00000026", casa:"#00000018", eje:"#A8801F",
   tinta:"#22212B", suave:"#6B6A78", acento:"#8A6A22", caja:"#F4F0E6E6",
   el:{fuego:"#B14A26", tierra:"#6B733F", aire:"#5A6C8C", agua:"#3E5D8A"},
   asp:{"a-oro":"#9A7420AA","a-rojo":"#C0472AAA","a-azul":"#2F5F9EAA","a-lila":"#6B57A888"}
 };
+
+const PAPEL_OSCURO = {
+ fondo:"#0b1220",borde:"#40516a",ticks:"#d6e1ee55",casa:"#d6e1ee30",eje:"#d5b779",
+ tinta:"#e9edf3",suave:"#a8b5c7",acento:"#d5b779",caja:"#0b1220ee",
+ el:{fuego:"#edaa8b",tierra:"#b5c68e",aire:"#a4bddf",agua:"#8ec5dc"},
+ asp:{"a-oro":"#ddc28ccc","a-rojo":"#eb917ecc","a-azul":"#83baf0cc","a-lila":"#bdabdfaa"}
+};
+let PAPEL = document.documentElement.dataset.studioTheme === "light" ? PAPEL_CLARO : PAPEL_OSCURO;
+window.addEventListener("astro-theme-change",()=>{ PAPEL = document.documentElement.dataset.studioTheme === "light" ? PAPEL_CLARO : PAPEL_OSCURO; });
 
 /* Qué anillo exterior toca dibujar, según la pestaña abierta. La rueda se
    redibuja sesenta veces por segundo, así que la capa se guarda y sólo se
@@ -2814,7 +2584,7 @@ function pintaRueda(g, cx, cy, R, vivo, capa, ch){
     colocados.push({lon:c.lon, r:radio});
     const a = aPant(c.lon), x = cx+Math.cos(a)*radio, y = cy+Math.sin(a)*radio;
     const act = vivo && (seleccion === c.id || sobre === c.id);
-    const tinta = mezcla(c.color, "#000000", 0.52);
+    const tinta = sinastriaActivo && capa ? PAPEL.acento : PAPEL === PAPEL_OSCURO ? c.color : mezcla(c.color, "#000000", 0.52);
     g.strokeStyle = tinta + "44"; g.lineWidth = 1;
     g.beginPath();
     g.moveTo(cx+Math.cos(a)*(rInt-R*0.008), cy+Math.sin(a)*(rInt-R*0.008));
@@ -2850,7 +2620,7 @@ function pintaRueda(g, cx, cy, R, vivo, capa, ch){
       g.beginPath();
       g.moveTo(cx+Math.cos(a)*(rInt-R*0.008), cy+Math.sin(a)*(rInt-R*0.008));
       g.lineTo(x, y); g.stroke();
-      g.fillStyle = PAPEL.acento; g.textAlign = "center"; g.textBaseline = "middle";
+      g.fillStyle = sinastriaActivo ? (PAPEL === PAPEL_OSCURO ? "#88c9ef" : "#176287") : PAPEL.acento; g.textAlign = "center"; g.textBaseline = "middle";
       pintaGlifo(g, m.glifo, x, y, Math.max(12, Math.round(R*0.05)));
       if(R > 190){
         const z = posZod(m.lon);
@@ -2995,11 +2765,29 @@ function descargaHoja(modo){
 }
 
 /* --- panel de resultados --- */
+function pintaBalance(){
+  const bodies = carta.cuerpos.filter(c=>Number.isFinite(c.lon));
+  const groups = [
+    {title:"Elementos",labels:["Fuego","Tierra","Aire","Agua"],mod:4},
+    {title:"Modalidades",labels:["Cardinal","Fija","Mutable"],mod:3},
+    {title:"Polaridades",labels:["Positiva · fuego y aire","Negativa · tierra y agua"],mod:2}
+  ];
+  document.getElementById("hojaBalance").innerHTML = '<h3>Balance de la carta natal</h3><p class="aviso">Sol, Luna y ocho planetas; un punto por cuerpo. No incluye ángulos, nodos ni otros puntos. Es una distribución por signos, sin ponderaciones.</p>' + groups.map(group=>{
+    const counts=group.labels.map(()=>[]);
+    bodies.forEach(c=>counts[Math.floor(mod360(c.lon)/30)%group.mod].push(c.nombre));
+    return '<section class="studio-balance"><h3>'+group.title+'</h3>'+group.labels.map((label,i)=>{
+      const n=counts[i].length, percent=bodies.length ? Math.round(n/bodies.length*100) : 0;
+      return '<div class="studio-balance-row"><div><span>'+label+'</span><strong>'+n+' / '+bodies.length+' · '+percent+'%</strong></div><meter min="0" max="'+Math.max(1,bodies.length)+'" value="'+n+'" aria-label="'+label+'"></meter><small>'+ (counts[i].map(escaparHTML).join(' · ') || 'Sin cuerpos')+'</small></div>';
+    }).join('')+'</section>';
+  }).join('') + (!carta.datos.horaConocida ? '<p class="aviso">Sin hora conocida, un cuerpo cercano a un cambio de signo puede cambiar de grupo.</p>' : '');
+}
+
 let filaAbierta = null;
 function pintaCarta(){
   if(!carta) return;
   const {cuerpos, puntos, ang, cusp, aspectos, datos} = carta;
 
+  pintaBalance();
   // posiciones
   const filas = [];
   if(ang){
@@ -3037,7 +2825,7 @@ function pintaCarta(){
       <div><span class="k">Carta</span><span class="v">${carta.diurna ? "Diurna" : "Nocturna"}</span></div>
       <div><span class="k">Latitud</span><span class="v">${datos.lat.toFixed(4)}°</span></div>
       <div><span class="k">Longitud</span><span class="v">${datos.lon.toFixed(4)}°</span></div>
-      <div><span class="k">Huso aplicado</span><span class="v">${datos.husoTexto}</span></div>
+      <div><span class="k">Huso aplicado</span><span class="v">${escaparHTML(datos.husoTexto)}</span></div>
     </div>
     <table class="posiciones"><thead><tr><th>Casa</th><th>Cúspide</th><th>Regente</th><th></th></tr></thead><tbody>
       ${Array.from({length:12},(_,k)=>{
@@ -3863,14 +3651,16 @@ function pintaRevolucion(){
    Dos cartas comparadas: la de la pantalla por dentro y la elegida por fuera.
    Los aspectos se buscan cruzados, cada punto de una contra cada punto de la otra. */
 let sinastriaActivo = false, volverASinastria = false;
-const estadoSin = {idB:null, factorOrbe:1};
+const estadoSin = {idB:null, factorOrbe:1, error:null};
 const cacheB = {};
 
 function cartaDeGuardada(id){
   if(cacheB[id]) return cacheB[id];
   const reg = leerCartas().find(c => c.id === id);
   if(!reg) return null;
-  const ch = levantarCarta(reg.datos, false);       // se calcula sin tocar la carta en pantalla
+  let ch;
+  try { ch = levantarCarta(reg.datos, false); estadoSin.error=null; }
+  catch(e){ estadoSin.error=e.message+" Abre y corrige esa carta antes de compararla."; return null; }
   cacheB[id] = ch;
   return ch;
 }
@@ -3932,7 +3722,7 @@ function pintaSinastria(){
   const propia = huellaCarta(carta.datos);
   const otras = guardadas.filter(c => huellaCarta(c.datos) !== propia);
   const opciones = otras.map(c =>
-    `<option value="${c.id}" ${c.id === estadoSin.idB ? "selected" : ""}>${(c.datos.nombre || "Carta sin nombre").replace(/</g,"&lt;")} · ${c.datos.resumenFecha}</option>`).join("");
+    `<option value="${c.id}" ${c.id === estadoSin.idB ? "selected" : ""}>${(c.datos.nombre || "Carta sin nombre").replace(/</g,"&lt;")} · ${escaparHTML(c.datos.resumenFecha)}</option>`).join("");
 
   if(!estadoSin.idB){
     hoja.innerHTML = `
@@ -3942,7 +3732,7 @@ function pintaSinastria(){
           <select id="sinB"><option value="">Elige una carta guardada…</option>${opciones}</select>
         </div>
       </div>
-      <p class="aviso">La carta que tengas en pantalla va por dentro; la que elijas, por fuera.</p>`;
+      <p class="aviso">${estadoSin.error ? escaparHTML(estadoSin.error) : "La carta que tengas en pantalla va por dentro; la que elijas, por fuera."}</p>`;
     document.getElementById("sinB").addEventListener("change", ev => {
       estadoSin.idB = ev.target.value || null; pintaSinastria();
     });
@@ -3952,6 +3742,7 @@ function pintaSinastria(){
   const B = cartaDeGuardada(estadoSin.idB);
   if(!B){ estadoSin.idB = null; return pintaSinastria(); }
   const nombreB = B.datos.nombre || "la otra carta";
+
   const puntosA = puntosMoviles(carta), puntosB = puntosMoviles(B);
   const cruces = aspectosEntre(puntosB, puntosA, estadoSin.factorOrbe);
   const mayores = cruces.filter(c => c.asp.mayor).length;
@@ -3988,6 +3779,7 @@ function pintaSinastria(){
     </div>
     <div id="bloqueCompuesta"></div>
     <div id="bloqueSinastria" ${compuestaActiva ? "hidden" : ""}>
+    <div class="studio-syn-legend"><span>A · ${escaparHTML(nombreA)} · interior</span><span>B · ${escaparHTML(nombreB)} · exterior</span></div>
     <div class="cuadro">
       <div><span class="k">Por dentro</span><span class="v">${nombreA.replace(/</g,"&lt;")}</span></div>
       <div><span class="k">Por fuera</span><span class="v">${nombreB.replace(/</g,"&lt;")}</span></div>
@@ -4200,11 +3992,13 @@ formulario.addEventListener("submit", ev => {
   if(!f){ err.textContent = "Falta la fecha de nacimiento."; err.hidden = false; return; }
   const [anio, mes, dia] = f.split("-").map(Number);
   const horaConocida = !sinHora.checked;
-  const [hora, min] = (horaConocida ? document.getElementById("nHora").value || "12:00" : "12:00").split(":").map(Number);
+  if(horaConocida && !document.getElementById("nHora").value){err.textContent="Falta la hora. Escríbela o marca que no la conoces.";err.hidden=false;return;}
+  const [hora, min] = (horaConocida ? document.getElementById("nHora").value : "12:00").split(":").map(Number);
 
   const escrito = document.getElementById("nLugar").value.trim();
-  let ciudad = CIUDADES.find(c => c.etiqueta.toLowerCase() === escrito.toLowerCase())
-            || CIUDADES.find(c => c.n.toLowerCase() === escrito.toLowerCase());
+  const coincidencias=CIUDADES.filter(c=>c.n.toLowerCase()===escrito.toLowerCase());
+  let ciudad=CIUDADES.find(c=>c.etiqueta.toLowerCase()===escrito.toLowerCase()) || (coincidencias.length===1?coincidencias[0]:null);
+  if(!ciudad && coincidencias.length>1){err.textContent="Hay varias ciudades con ese nombre. Elige la ciudad y país de la lista.";err.hidden=false;return;}
   let lat, lon, tz, lugarTexto;
   if(ciudad){ lat = ciudad.lat; lon = ciudad.lon; tz = ciudad.tz; lugarTexto = ciudad.etiqueta; }
   else {
@@ -4226,8 +4020,12 @@ formulario.addEventListener("submit", ev => {
     factorOrbe: parseFloat(document.getElementById("nOrbe").value),
     resumenFecha: `${dia} de ${mesesEs[mes-1]} de ${anio}${horaConocida ? ` · ${String(hora).padStart(2,"0")}:${String(min).padStart(2,"0")}` : " · hora desconocida"}`
   };
-  const msPrueba = localAUTC(anio, mes, dia, hora, min, tz);
-  datos.husoTexto = `${tz} (${textoDesfase(tz, msPrueba)})`;
+  datos.desambiguacion=document.getElementById("nOcurrencia").value;
+  try {
+    validaCarta(datos);
+    const msPrueba=localAUTC(anio,mes,dia,hora,min,tz,datos.desambiguacion);
+    datos.husoTexto=tz+" ("+textoDesfase(tz,msPrueba)+")";
+  } catch(e){err.textContent=e.message;err.hidden=false;return;}
 
   aplicaCarta(datos);
 });
@@ -4242,14 +4040,19 @@ function leerCartas(){
   try {
     const s = localStorage.getItem(LLAVE_CARTAS);
     const a = s ? JSON.parse(s) : [];
-    return Array.isArray(a) ? a.filter(c => c && c.datos && c.datos.anio) : [];
+    return Array.isArray(a) ? a.filter(c => c && typeof c.id === "string" && /^[a-zA-Z0-9_-]{1,100}$/.test(c.id) && cartaValida(c.datos)) : [];
   } catch(e){ return []; }
 }
 function escribirCartas(a){
-  try { localStorage.setItem(LLAVE_CARTAS, JSON.stringify(a.slice(0, TOPE_CARTAS))); } catch(e){}
+  try {
+    // No borrar registros antiguos incompatibles al guardar una carta nueva.
+    const raw=JSON.parse(localStorage.getItem(LLAVE_CARTAS)||"[]");
+    const conservadas=Array.isArray(raw) ? raw.filter(c=>!(c && typeof c.id==="string" && /^[a-zA-Z0-9_-]{1,100}$/.test(c.id) && cartaValida(c.datos))) : [];
+    localStorage.setItem(LLAVE_CARTAS,JSON.stringify(a.slice(0,TOPE_CARTAS).concat(conservadas)));
+  } catch(e){}
 }
 const huellaCarta = d => [d.nombre||"", d.anio, d.mes, d.dia, d.hora, d.min,
-                          d.horaConocida?1:0, d.lugarTexto||"", d.lat, d.lon].join("|");
+                          d.horaConocida?1:0, d.lugarTexto||"", d.lat, d.lon, d.tz, d.desambiguacion||"reject"].join("|");
 function nuevaId(){ return "c" + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 function guardaEnLista(d){
   const a = leerCartas(), h = huellaCarta(d);
@@ -4273,7 +4076,7 @@ function pintaGuardadas(){
     return `<li data-id="${c.id}">
       <button type="button" class="carta-abrir" data-id="${c.id}">
         <span class="cn">${(d.nombre || "Carta sin nombre").replace(/</g,"&lt;")}</span>
-        <span class="cd">${d.resumenFecha} · ${(d.lugarTexto||"").replace(/</g,"&lt;")}</span>
+        <span class="cd">${escaparHTML(d.resumenFecha)} · ${(d.lugarTexto||"").replace(/</g,"&lt;")}</span>
       </button>
       <button type="button" class="carta-borrar" data-borrar="${c.id}" aria-label="Borrar esta carta" title="Borrar">✕</button>
     </li>`;
@@ -4288,6 +4091,13 @@ function avisoGuardadas(texto){
 
 /* levanta una carta y deja todo en su sitio: lo usan el formulario y la lista */
 function aplicaCarta(datos){
+  try {
+    validaCarta(datos);
+    const ms=localAUTC(datos.anio,datos.mes,datos.dia,datos.hora,datos.min,datos.tz,datos.desambiguacion);
+    datos.husoTexto=datos.tz+" ("+textoDesfase(datos.tz,ms)+")";
+  } catch(e){
+    const err=document.getElementById("nError");err.textContent=e.message;err.hidden=false;velo.classList.add("visible");return;
+  }
   estadoAtacir.fecha = null;
   estadoRS.anio = null; estadoRS.donde = "natal";
   estadoTransitos.fecha = null;
@@ -4309,6 +4119,7 @@ function aplicaCarta(datos){
   }
 }
 function llenaFormulario(d){
+  document.getElementById("nOcurrencia").value=d.desambiguacion||"reject";
   document.getElementById("nNombre").value = d.nombre || "";
   document.getElementById("nFecha").value =
     `${d.anio}-${String(d.mes).padStart(2,"0")}-${String(d.dia).padStart(2,"0")}`;
@@ -4350,8 +4161,9 @@ function importarCartas(archivo){
       else if(j && j.anio) entrantes = [{id:nuevaId(), datos:j, guardada:Date.now()}];
     } catch(e){ return avisoGuardadas("Ese archivo no se pudo leer. ¿Es el .json que exportó Astroplanetario?"); }
     entrantes = entrantes
-      .map(c => (c && c.datos) ? c : (c && c.anio ? {id:nuevaId(), datos:c, guardada:Date.now()} : null))
-      .filter(c => c && c.datos && c.datos.anio);
+      .map(c => (c && c.datos) ? c : (c && c.anio ? {id:nuevaId(), datos:c, guardada:Date.now()} : null));
+    const invalida=entrantes.findIndex(c=>!c || !cartaValida(c.datos));
+    if(invalida>=0) return avisoGuardadas("No se importó el archivo: revisa fecha, hora, coordenadas y zona de la carta "+(invalida+1)+".");
     if(!entrantes.length) return avisoGuardadas("El archivo no traía ninguna carta.");
     const a = leerCartas(), vistas = new Set(a.map(c => huellaCarta(c.datos)));
     let nuevas = 0;
@@ -4373,7 +4185,7 @@ function recuperaUltima(){
     const s = localStorage.getItem("maquina-celeste-carta");
     if(!s) return null;
     const d = JSON.parse(s);
-    return (d && d.anio) ? d : null;
+    return cartaValida(d) ? d : null;
   } catch(e){ return null; }
 }
 
@@ -4384,10 +4196,10 @@ function pintaBarra(){
   document.getElementById("btnPngRueda").hidden = false;
   document.getElementById("btnPngHoja").hidden = false;
   document.getElementById("barraDatos").innerHTML =
-    `<span class="quien">${d.nombre || "Carta sin nombre"}</span>
-     <span class="dato">${d.resumenFecha}</span>
-     <span>${d.lugarTexto}</span>
-     <span>${d.husoTexto}</span>`;
+    `<span class="quien">${escaparHTML(d.nombre || "Carta sin nombre")}</span>
+     <span class="dato">${escaparHTML(d.resumenFecha)}</span>
+     <span>${escaparHTML(d.lugarTexto)}</span>
+     <span>${escaparHTML(d.husoTexto)}</span>`;
 }
 
 document.getElementById("plegar").addEventListener("click", () => {
@@ -4397,7 +4209,7 @@ document.getElementById("plegar").addEventListener("click", () => {
 });
 
 /* pestañas del panel */
-const pestañas = [["tabPos","hojaPos"],["tabAsp","hojaAsp"],["tabCasas","hojaCasas"],["tabSent","hojaSent"],
+const pestañas = [["tabPos","hojaPos"],["tabBalance","hojaBalance"],["tabAsp","hojaAsp"],["tabCasas","hojaCasas"],["tabSent","hojaSent"],
                   ["tabAtacir","hojaAtacir"],["tabTransitos","hojaTransitos"],["tabRevolucion","hojaRevolucion"],
                   ["tabSinastria","hojaSinastria"]];
 for(const [b,h] of pestañas){
@@ -4469,6 +4281,7 @@ document.getElementById("gArchivo").addEventListener("change", ev => {
 
 (() => {                                   // recupera los últimos datos escritos en este navegador
   const d = recuperaUltima(); if(!d) return;
+  document.getElementById("nOcurrencia").value=d.desambiguacion||"reject";
   document.getElementById("nNombre").value = d.nombre || "";
   document.getElementById("nFecha").value =
     `${d.anio}-${String(d.mes).padStart(2,"0")}-${String(d.dia).padStart(2,"0")}`;
