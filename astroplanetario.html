@@ -426,6 +426,17 @@
   #app.natal #barraNatal .quien{color:#22212B}
   #app.natal #barraNatal .dato{color:#8A6A22}
   #app.natal #barraDatos span+span::before{color:#BBAB80}
+
+  #app.natal #avanzado{border-top-color:#D5CEBF}
+  #app.natal #avanzado > summary{color:#6B6A78}
+  #app.natal #avanzado > summary:hover,#app.natal #avanzado[open] > summary{color:#8A6A22}
+  #app.natal .pgrupo-rot{color:#6B6A78}
+  #app.natal .pgrupo + .pgrupo{border-top-color:#D5CEBF}
+  #app.natal #menuBarra{background:#F4F0E6;border-color:#D5CEBF;box-shadow:0 14px 34px #0000002e}
+  #app.natal #menuBarra .mb-dato{color:#6B6A78}
+  #app.natal #menuBarra .mb-dato b{color:#22212B}
+  #app.natal #pestMovil{background:#F4F0E6;color:#22212B;border-color:#D5CEBF}
+
   #app.natal .secundario{border-color:#CFC7B4;color:#5C5B68}
   #app.natal .secundario:hover{color:#8A6A22;border-color:#8A6A22}
   #app.natal .pista{color:#9A947F}
@@ -611,6 +622,7 @@
     .opcion{padding:.82rem .9rem}.op-linea{font-size:.78rem}.portada-pie{font-size:.56rem}
   }
 
+
   .sent{padding:.85rem 0 .1rem;border-bottom:1px solid var(--linea-suave)}
   .sent:last-child{border-bottom:none}
   .sent h3{
@@ -634,6 +646,62 @@
   .pest-fila{display:flex;align-items:stretch;border-bottom:1px solid var(--linea-suave);flex:none}
   .pest{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-content:flex-start;border-bottom:none}
   .pest button{flex:0 0 auto;white-space:nowrap}
+
+  /* ═══════════ Menos carga a la vista ═══════════
+     Tres cambios de estructura: el formulario esconde lo de experto, las nueve
+     pestañas van agrupadas (y en teléfono son una lista nativa de una línea), y
+     la barra de datos deja de esconder media pantalla a la derecha. */
+
+  /* --- formulario: opciones avanzadas plegadas --- */
+  #avanzado{margin:.35rem 0 .2rem;border-top:1px solid var(--linea-suave);padding-top:.7rem}
+  #avanzado > summary{cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:.45rem;
+    font:500 .58rem "IBM Plex Mono",monospace;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--tenue);padding:.3rem 0;transition:color .18s}
+  #avanzado > summary::-webkit-details-marker{display:none}
+  #avanzado > summary::before{content:"▸";font-size:.8em;transition:transform .18s;display:inline-block}
+  #avanzado[open] > summary::before{transform:rotate(90deg)}
+  #avanzado > summary:hover,#avanzado[open] > summary{color:var(--laton)}
+  #avanzado > .campos{margin-top:.6rem}
+
+  /* --- pestañas en dos grupos --- */
+  /* el panel es estrecho, así que los dos grupos van uno debajo del otro siempre:
+     así la etiqueta manda sobre su fila y no hay que adivinar dónde empieza cada una */
+  .pest{flex-direction:column;align-items:stretch;gap:.1rem}
+  .pgrupo{display:flex;flex-direction:column;align-items:stretch;min-width:0}
+  .pgrupo + .pgrupo{border-top:1px solid var(--linea-suave);margin-top:.2rem;padding-top:.1rem}
+  .pgrupo-rot{font:500 .47rem "IBM Plex Mono",monospace;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--tenue);opacity:.6;padding:.28rem .6rem .02rem;text-align:left}
+  .pgrupo-bot{display:flex;flex-wrap:wrap;justify-content:flex-start;min-width:0}
+  .pest button{padding:.55rem .6rem}
+  #pestMovil{display:none}
+
+  /* --- barra de datos: el botón de "más" y su menú --- */
+  #barraNatal{position:relative}
+  #masBarra{display:none;flex:none;align-self:center;font-size:.8rem;line-height:1;letter-spacing:.1em;padding:.34rem .62rem}
+  #menuBarra{position:absolute;top:calc(100% + 4px);right:.6rem;z-index:60;min-width:min(17rem,calc(100vw - 1.4rem));
+    background:#0A0E1C;border:1px solid var(--linea-suave);border-radius:10px;padding:.7rem;
+    box-shadow:0 14px 34px #000a;display:flex;flex-direction:column;gap:.5rem}
+  #menuBarra .mb-dato{font:500 .62rem "IBM Plex Mono",monospace;letter-spacing:.05em;color:var(--tenue);line-height:1.5}
+  #menuBarra .mb-dato b{display:block;color:var(--pergamino);font-weight:500;letter-spacing:.06em}
+  #menuBarra .acciones{margin:0;flex-wrap:wrap;gap:.4rem}
+  #menuBarra button{flex:1 1 auto}
+
+  @media (max-width:620px){
+    /* una sola línea: nombre y fecha. El resto, dentro del botón "···" */
+    #barraNatal{flex-wrap:nowrap;overflow:visible;align-items:center}
+    #barraDatos{flex-wrap:nowrap;overflow:hidden;min-width:0;flex:1}
+    #barraDatos span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #barraNatal .lugar,#barraNatal .huso{display:none}
+    #barraNatal .lugar::before,#barraNatal .huso::before{content:none}
+    #accionesBarra{display:none}
+    #masBarra{display:inline-flex;align-items:center;justify-content:center;min-width:2.4rem;min-height:2.1rem}
+    /* las nueve pestañas no caben: lista nativa agrupada, una línea, nada escondido */
+    .pest{display:none}
+    #pestMovil{display:block;flex:1;min-width:0;align-self:center;margin:.3rem .5rem;padding:.62rem .7rem;
+      background:#0B0E1D;color:var(--pergamino);border:1px solid var(--linea-suave);border-radius:8px;
+      font:500 .72rem "IBM Plex Mono",monospace;letter-spacing:.08em}
+  }
+
   #plegar{align-self:flex-start}
   #plegar{flex:none;border-left:1px solid var(--linea-suave)}
   #app.natal .pest-fila,#app.natal #plegar{border-color:#D5CEBF}
@@ -711,11 +779,14 @@
 
   <div id="barraNatal">
     <div id="barraDatos"></div>
-    <div class="acciones" style="margin:0">
+    <div class="acciones" id="accionesBarra" style="margin:0">
       <button class="secundario" id="btnEditar">Editar datos</button>
       <button class="secundario" id="btnPngRueda" hidden><span class="ancho-solo">Descargar </span>rueda</button>
       <button class="secundario" id="btnPngHoja" hidden>Hoja<span class="ancho-solo"> completa</span></button>
     </div>
+    <button class="secundario" id="masBarra" aria-haspopup="true" aria-expanded="false"
+            aria-label="Más datos y descargas">···</button>
+    <div id="menuBarra" hidden></div>
   </div>
 
   <div id="escena">
@@ -818,28 +889,15 @@
             <input id="nLugar" list="ciudades" placeholder="Escribe y elige de la lista">
             <datalist id="ciudades"></datalist>
           </div>
-          <div class="campo">
-            <label for="nCasas">Sistema de casas</label>
-            <select id="nCasas">
-              <option value="placidio">Placidio</option>
-              <option value="signos">Signos enteros</option>
-              <option value="igual">Casas iguales</option>
-              <option value="porfirio">Porfirio</option>
-            </select>
-          </div>
-          <div class="campo">
-            <label for="nOrbe">Orbes de aspecto</label>
-            <select id="nOrbe">
-              <option value="1">Estándar</option>
-              <option value="0.7">Estrechos</option>
-              <option value="1.35">Amplios</option>
-            </select>
-          </div>
         </div>
 
-        <div class="campo"><label for="nOcurrencia">Si la hora ocurrió dos veces</label>
-          <select id="nOcurrencia"><option value="reject">Pedir aclaración</option><option value="earlier">Primera ocurrencia</option><option value="later">Segunda ocurrencia</option></select></div>
         <label class="marcar"><input type="checkbox" id="nSinHora"> No sé la hora exacta</label>
+
+        <!-- Sólo aparece si esa hora local de verdad ocurrió dos veces por un cambio de horario. -->
+        <div class="campo ancho" id="campoOcurrencia" hidden>
+          <label for="nOcurrencia">Esa hora ocurrió dos veces aquel día</label>
+          <select id="nOcurrencia"><option value="reject">Elige una</option><option value="earlier">La primera vez (antes del cambio)</option><option value="later">La segunda vez (después del cambio)</option></select>
+        </div>
         <p class="aviso" id="nAvisoHora" hidden>Sin hora no hay Ascendente ni casas: la carta se levanta al mediodía y solo muestra los signos. La Luna puede moverse hasta 6° en el día.</p>
 
         <div class="campos" id="manual">
@@ -848,6 +906,30 @@
           <div class="campo"><label for="nZona">Zona horaria</label><select id="nZona"></select></div>
           <p class="aviso ancho">Latitud positiva al norte, longitud negativa al oeste. Toma las coordenadas de un mapa si el pueblo no aparece en la lista.</p>
         </div>
+
+        <details id="avanzado">
+          <summary>Opciones avanzadas</summary>
+          <div class="campos">
+            <div class="campo">
+              <label for="nCasas">Sistema de casas</label>
+              <select id="nCasas">
+                <option value="placidio">Placidio</option>
+                <option value="signos">Signos enteros</option>
+                <option value="igual">Casas iguales</option>
+                <option value="porfirio">Porfirio</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label for="nOrbe">Orbes de aspecto</label>
+              <select id="nOrbe">
+                <option value="1">Estándar</option>
+                <option value="0.7">Estrechos</option>
+                <option value="1.35">Amplios</option>
+              </select>
+            </div>
+          </div>
+          <p class="aviso">Si no tocas nada, la carta sale en Placidio con orbes estándar, que es lo que se enseña por defecto.</p>
+        </details>
 
         <p class="aviso error" id="nError" hidden></p>
 
@@ -873,16 +955,43 @@
     <aside id="cartaPanel" aria-label="Carta natal">
       <div class="pest-fila">
         <div class="pest" role="tablist">
-          <button role="tab" id="tabPos" aria-selected="true" aria-controls="hojaPos">Posiciones</button>
-          <button role="tab" id="tabBalance" aria-selected="false" aria-controls="hojaBalance">Balance</button>
-          <button role="tab" id="tabAsp" aria-selected="false" aria-controls="hojaAsp">Aspectos</button>
-          <button role="tab" id="tabCasas" aria-selected="false" aria-controls="hojaCasas">Casas</button>
-          <button role="tab" id="tabSent" aria-selected="false" aria-controls="hojaSent">Significados</button>
-          <button role="tab" id="tabAtacir" aria-selected="false" aria-controls="hojaAtacir">Atacir</button>
-          <button role="tab" id="tabTransitos" aria-selected="false" aria-controls="hojaTransitos">Tránsitos</button>
-          <button role="tab" id="tabRevolucion" aria-selected="false" aria-controls="hojaRevolucion">Revolución</button>
-          <button role="tab" id="tabSinastria" aria-selected="false" aria-controls="hojaSinastria">Sinastría</button>
+          <span class="pgrupo" role="presentation">
+            <span class="pgrupo-rot">La carta</span>
+            <span class="pgrupo-bot" role="presentation">
+              <button role="tab" id="tabPos" aria-selected="true" aria-controls="hojaPos">Posiciones</button>
+              <button role="tab" id="tabBalance" aria-selected="false" aria-controls="hojaBalance">Balance</button>
+              <button role="tab" id="tabAsp" aria-selected="false" aria-controls="hojaAsp">Aspectos</button>
+              <button role="tab" id="tabCasas" aria-selected="false" aria-controls="hojaCasas">Casas</button>
+              <button role="tab" id="tabSent" aria-selected="false" aria-controls="hojaSent">Significados</button>
+            </span>
+          </span>
+          <span class="pgrupo" role="presentation">
+            <span class="pgrupo-rot">Comparar</span>
+            <span class="pgrupo-bot" role="presentation">
+              <button role="tab" id="tabAtacir" aria-selected="false" aria-controls="hojaAtacir">Atacir</button>
+              <button role="tab" id="tabTransitos" aria-selected="false" aria-controls="hojaTransitos">Tránsitos</button>
+              <button role="tab" id="tabRevolucion" aria-selected="false" aria-controls="hojaRevolucion">Revolución</button>
+              <button role="tab" id="tabSinastria" aria-selected="false" aria-controls="hojaSinastria">Sinastría</button>
+            </span>
+          </span>
         </div>
+        <!-- En teléfono las nueve no caben sin partirse en tres filas: ahí va una lista
+             nativa con los dos grupos, que ocupa una línea y no esconde ninguna. -->
+        <select id="pestMovil" aria-label="Sección de la carta">
+          <optgroup label="La carta">
+            <option value="tabPos">Posiciones</option>
+            <option value="tabBalance">Balance</option>
+            <option value="tabAsp">Aspectos</option>
+            <option value="tabCasas">Casas</option>
+            <option value="tabSent">Significados</option>
+          </optgroup>
+          <optgroup label="Comparar con otra cosa">
+            <option value="tabAtacir">Atacir</option>
+            <option value="tabTransitos">Tránsitos</option>
+            <option value="tabRevolucion">Revolución</option>
+            <option value="tabSinastria">Sinastría</option>
+          </optgroup>
+        </select>
         <button id="plegar" aria-label="Plegar o desplegar el panel" title="Plegar">▾</button>
       </div>
       <div class="hoja" id="hojaPos" role="tabpanel"></div>
@@ -2642,14 +2751,22 @@ function pintaRueda(g, cx, cy, R, vivo, capa, ch){
   // encabezado dentro de la rueda
   g.textAlign="center"; g.textBaseline="middle";
   g.fillStyle = PAPEL.tinta; g.font = `${Math.max(11,Math.round(R*0.05))}px Cinzel, serif`;
-  g.fillText(ch.datos.nombre || "Carta natal", cx, cy - R*0.055);
-  g.fillStyle = PAPEL.suave; g.font = `${Math.max(8,Math.round(R*0.026))}px "IBM Plex Mono", monospace`;
-  g.fillText(ch.datos.resumenFecha, cx, cy + R*0.02);
-  g.fillText(ch.datos.lugarTexto, cx, cy + R*0.065);
+  /* Cuando la rueda es pequeña —teléfono— el rótulo del centro se encabalga con
+     las líneas y no se lee ninguno de los dos. Ahí se queda solo el nombre, que
+     es lo único que hace falta para saber de quién es la carta; la fecha y el
+     lugar ya están en la barra de arriba. */
+  const apretada = R < 190;
+  g.fillText(ch.datos.nombre || "Carta natal", cx, apretada ? cy : cy - R*0.055);
+  if(!apretada){
+    g.fillStyle = PAPEL.suave; g.font = `${Math.max(8,Math.round(R*0.026))}px "IBM Plex Mono", monospace`;
+    g.fillText(ch.datos.resumenFecha, cx, cy + R*0.02);
+    g.fillText(ch.datos.lugarTexto, cx, cy + R*0.065);
+  }
   if(capa){
     g.fillStyle = PAPEL.acento;
     g.font = `${Math.max(8,Math.round(R*0.024))}px "IBM Plex Mono", monospace`;
-    g.fillText(`${capa.clave.n.split(" · ")[0]} · ${fmtCorta.format(new Date(capa.fecha))}`, cx, cy + R*0.115);
+    const t = `${capa.clave.n.split(" · ")[0]} · ${fmtCorta.format(new Date(capa.fecha))}`;
+    g.fillText(apretada ? capa.clave.n.split(" · ")[0] : t, cx, cy + (apretada ? R*0.075 : R*0.115));
   }
 }
 
@@ -4007,6 +4124,10 @@ document.getElementById("nLugar").addEventListener("input", e => {
   const hay = CIUDADES.some(c => c.etiqueta.toLowerCase() === e.target.value.trim().toLowerCase());
   document.getElementById("manual").classList.toggle("visible", !hay && e.target.value.trim().length > 2);
 });
+for(const id of ["nFecha","nHora","nLugar"]){
+  const e=document.getElementById(id);
+  if(e) e.addEventListener("input",()=>{ document.getElementById("campoOcurrencia").hidden=true; });
+}
 document.getElementById("nEjemplo").addEventListener("click", () => {
   document.getElementById("nNombre").value = "Ejemplo de clase";
   document.getElementById("nFecha").value = "1990-03-21";
@@ -4053,12 +4174,26 @@ formulario.addEventListener("submit", ev => {
     factorOrbe: parseFloat(document.getElementById("nOrbe").value),
     resumenFecha: `${dia} de ${mesesEs[mes-1]} de ${anio}${horaConocida ? ` · ${String(hora).padStart(2,"0")}:${String(min).padStart(2,"0")}` : " · hora desconocida"}`
   };
-  datos.desambiguacion=document.getElementById("nOcurrencia").value;
+  const campoOc=document.getElementById("campoOcurrencia");
+  datos.desambiguacion=campoOc.hidden ? "reject" : document.getElementById("nOcurrencia").value;
   try {
     validaCarta(datos);
     const msPrueba=localAUTC(anio,mes,dia,hora,min,tz,datos.desambiguacion);
     datos.husoTexto=tz+" ("+textoDesfase(tz,msPrueba)+")";
-  } catch(e){err.textContent=e.message;err.hidden=false;return;}
+  } catch(e){
+    // la hora ambigua no se pregunta por adelantado: se pregunta cuando ocurre
+    if(/dos veces/.test(e.message)){
+      campoOc.hidden=false;
+      document.getElementById("nOcurrencia").value="reject";
+      err.textContent="Esa hora existió dos veces aquel día porque se movió el reloj. Elige abajo cuál de las dos fue.";
+      err.hidden=false;
+      campoOc.scrollIntoView({block:"nearest"});
+      document.getElementById("nOcurrencia").focus();
+      return;
+    }
+    err.textContent=e.message;err.hidden=false;return;
+  }
+  campoOc.hidden=true;
 
   aplicaCarta(datos);
 });
@@ -4153,6 +4288,7 @@ function aplicaCarta(datos){
 }
 function llenaFormulario(d){
   document.getElementById("nOcurrencia").value=d.desambiguacion||"reject";
+  document.getElementById("campoOcurrencia").hidden = !d.desambiguacion || d.desambiguacion==="reject";
   document.getElementById("nNombre").value = d.nombre || "";
   document.getElementById("nFecha").value =
     `${d.anio}-${String(d.mes).padStart(2,"0")}-${String(d.dia).padStart(2,"0")}`;
@@ -4231,8 +4367,9 @@ function pintaBarra(){
   document.getElementById("barraDatos").innerHTML =
     `<span class="quien">${escaparHTML(d.nombre || "Carta sin nombre")}</span>
      <span class="dato">${escaparHTML(d.resumenFecha)}</span>
-     <span>${escaparHTML(d.lugarTexto)}</span>
-     <span>${escaparHTML(d.husoTexto)}</span>`;
+     <span class="lugar">${escaparHTML(d.lugarTexto)}</span>
+     <span class="huso">${escaparHTML(d.husoTexto)}</span>`;
+  pintaMenuBarra();
 }
 
 document.getElementById("plegar").addEventListener("click", () => {
@@ -4240,6 +4377,47 @@ document.getElementById("plegar").addEventListener("click", () => {
   panel.classList.toggle("plegado");
   document.getElementById("plegar").textContent = panel.classList.contains("plegado") ? "▴" : "▾";
 });
+
+
+/* ---------- la lista de pestañas de teléfono y el menú de la barra ---------- */
+const pestMovil = document.getElementById("pestMovil");
+if(pestMovil) pestMovil.addEventListener("change", ev => {
+  const b = document.getElementById(ev.target.value);
+  if(b) b.click();
+});
+function sincronizaPestMovil(id){ if(pestMovil && pestMovil.value !== id) pestMovil.value = id; }
+
+const masBarra = document.getElementById("masBarra"), menuBarra = document.getElementById("menuBarra");
+function pintaMenuBarra(){
+  if(!menuBarra || !carta) return;
+  const d = carta.datos;
+  menuBarra.innerHTML = `
+    <div class="mb-dato"><b>${escaparHTML(d.lugarTexto || "")}</b>${escaparHTML(d.husoTexto || "")}</div>
+    <div class="acciones">
+      <button type="button" class="secundario" data-eco="btnEditar">Editar datos</button>
+      <button type="button" class="secundario" data-eco="btnPngRueda">Descargar rueda</button>
+      <button type="button" class="secundario" data-eco="btnPngHoja">Hoja completa</button>
+    </div>`;
+  for(const b of menuBarra.querySelectorAll("[data-eco]"))
+    b.addEventListener("click", () => { cierraMenuBarra(); document.getElementById(b.dataset.eco).click(); });
+}
+function cierraMenuBarra(){
+  if(!menuBarra) return;
+  menuBarra.hidden = true;
+  masBarra.setAttribute("aria-expanded", "false");
+}
+if(masBarra) masBarra.addEventListener("click", ev => {
+  ev.stopPropagation();
+  const abierto = !menuBarra.hidden;
+  if(abierto) return cierraMenuBarra();
+  pintaMenuBarra();
+  menuBarra.hidden = false;
+  masBarra.setAttribute("aria-expanded", "true");
+});
+document.addEventListener("click", ev => {
+  if(menuBarra && !menuBarra.hidden && !menuBarra.contains(ev.target) && ev.target !== masBarra) cierraMenuBarra();
+});
+document.addEventListener("keydown", ev => { if(ev.key === "Escape") cierraMenuBarra(); });
 
 /* pestañas del panel */
 const pestañas = [["tabPos","hojaPos"],["tabBalance","hojaBalance"],["tabAsp","hojaAsp"],["tabCasas","hojaCasas"],["tabSent","hojaSent"],
@@ -4254,6 +4432,7 @@ for(const [b,h] of pestañas){
     atacirActivo = (h === "hojaAtacir");
     transitosActivo = (h === "hojaTransitos");
     revolucionActivo = (h === "hojaRevolucion");
+    sincronizaPestMovil(b);
     sinastriaActivo = (h === "hojaSinastria");
     if(!sinastriaActivo) compuestaActiva = false;
     if(atacirActivo) pintaAtacir();
@@ -4315,6 +4494,7 @@ document.getElementById("gArchivo").addEventListener("change", ev => {
 (() => {                                   // recupera los últimos datos escritos en este navegador
   const d = recuperaUltima(); if(!d) return;
   document.getElementById("nOcurrencia").value=d.desambiguacion||"reject";
+  document.getElementById("campoOcurrencia").hidden = !d.desambiguacion || d.desambiguacion==="reject";
   document.getElementById("nNombre").value = d.nombre || "";
   document.getElementById("nFecha").value =
     `${d.anio}-${String(d.mes).padStart(2,"0")}-${String(d.dia).padStart(2,"0")}`;
