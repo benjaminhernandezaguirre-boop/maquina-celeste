@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://astroplanetario.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://astroplanetario.com/carta-natal</loc><changefreq>monthly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://astroplanetario.com/astroplanetario.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://astroplanetario.com/astrocarto.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://astroplanetario.com/luna.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://astroplanetario.com/mercurio.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://astroplanetario.com/venus.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://astroplanetario.com/saturno.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+</urlset>
+
