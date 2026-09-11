@@ -27,3 +27,13 @@ test('homepage, clean route and discovery files point to carta natal', () => {
   assert.match(read('sitemap.xml'), /<loc>https:\/\/astroplanetario\.com\/carta-natal<\/loc>/);
 });
 
+test('carta natal landing and calculator default to light with a shared theme choice', () => {
+  const landing = read('carta-natal.html');
+  const studioTheme = read('app/studio-theme.js');
+  assert.match(landing, /<html[^>]+data-studio-theme="light"/i);
+  assert.match(landing, /id="themeToggle"/);
+  assert.match(landing, /astro-studio-theme/);
+  assert.match(studioTheme, /let theme = 'light'/);
+  assert.match(studioTheme, /saved === 'light' \|\| saved === 'dark'/);
+});
+
