@@ -1,4 +1,14 @@
 {
+  "rewrites": [
+    {
+      "source": "/carta-natal",
+      "destination": "/carta-natal.html"
+    },
+    {
+      "source": "/carta-natal/",
+      "destination": "/carta-natal.html"
+    }
+  ],
   "headers": [
     {
       "source": "/app/planetas.js",
@@ -101,3 +111,4 @@
     }
   ]
 }
+
