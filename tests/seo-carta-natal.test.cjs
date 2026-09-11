@@ -1,0 +1,29 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const root = path.join(__dirname, '..');
+const read = file => fs.readFileSync(path.join(root, file), 'utf8');
+
+test('carta natal has one focused, indexable landing page', () => {
+  const html = read('carta-natal.html');
+  assert.match(html, /<title>[^<]*Carta natal gratis[^<]*Astroplanetario<\/title>/i);
+  assert.match(html, /<meta name="description" content="[^"]*Calcula tu carta natal gratis/i);
+  assert.match(html, /<link rel="canonical" href="https:\/\/astroplanetario\.com\/carta-natal">/);
+  assert.equal((html.match(/<h1\b/gi) || []).length, 1);
+  assert.match(html, /href="\/astroplanetario\.html\?view=natal"/);
+  assert.match(html, /application\/ld\+json/);
+});
+
+test('homepage, clean route and discovery files point to carta natal', () => {
+  const home = read('index.html');
+  assert.match(home, /<a class="planet earth nav"[^>]+href="\/carta-natal"/);
+
+  const vercel = JSON.parse(read('vercel.json'));
+  assert.ok(vercel.rewrites.some(r => r.source === '/carta-natal' && r.destination === '/carta-natal.html'));
+
+  assert.match(read('robots.txt'), /Sitemap: https:\/\/astroplanetario\.com\/sitemap\.xml/);
+  assert.match(read('sitemap.xml'), /<loc>https:\/\/astroplanetario\.com\/carta-natal<\/loc>/);
+});
+
