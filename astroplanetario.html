@@ -41,7 +41,7 @@
     border-radius:2px;transition:.18s}
   .carta-borrar:hover{opacity:1;color:#D2694A;background:rgba(210,105,74,.12)}
 </style>
-<link rel="stylesheet" href="app/studio-theme.css">
+<link rel="stylesheet" href="app/studio-theme.css?v=20260911">
 <script src="app/studio-theme.js"></script>
 </head>
 <body>
@@ -714,6 +714,51 @@
   .mandos .acciones{flex-wrap:wrap}
   #app.natal .mandos .secundario{border-color:#CFC7B4;color:#5C5B68}
   #app.natal .mandos .secundario:hover{color:#8A6A22;border-color:#8A6A22}
+
+  /* lectura guiada de la carta */
+  .resumen-hero{padding:.9rem 0 .35rem}
+  .resumen-hero h2{font:400 1.35rem Cinzel,Georgia,serif;margin:0 0 .35rem;color:var(--tinta,#22212B)}
+  .resumen-hero p{margin:0;color:#5C5B68;line-height:1.5;font-size:.9rem}
+  .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:.7rem 0 1rem}
+  .trio-card,.destacado{border:1px solid #D5CEBF;background:#F7F2E8;border-radius:10px;padding:.65rem;text-align:left;color:#22212B}
+  .trio-card{cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s;min-height:7.2rem}
+  .trio-card:hover,.trio-card:focus-visible,.destacado.activo{transform:translateY(-2px);border-color:#A8801F;box-shadow:0 7px 18px #342a1514;outline:none}
+  .trio-card .tipo{display:block;font:500 .56rem "IBM Plex Mono",monospace;letter-spacing:.15em;text-transform:uppercase;color:#6B6A78}
+  .trio-card .simbolo{display:block;font:1.8rem Spectral,Georgia,serif;color:#8A6A22;margin:.2rem 0}
+  .trio-card strong{display:block;font:500 .92rem Spectral,Georgia,serif}
+  .trio-card small{display:block;color:#6B6A78;font:.66rem "IBM Plex Mono",monospace;margin-top:.2rem}
+  .resumen-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:.6rem 0}
+  .resumen-bloque{border-top:1px solid #D5CEBF;padding-top:.65rem}
+  .resumen-bloque h3{margin:0 0 .45rem;font:500 .62rem "IBM Plex Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:#8A6A22}
+  .resumen-bloque p{margin:.25rem 0;font-size:.86rem;line-height:1.45;color:#4A4956}
+  .chips{display:flex;flex-wrap:wrap;gap:.35rem}
+  .chip{display:inline-flex;align-items:center;gap:.25rem;border:1px solid #D5CEBF;border-radius:999px;padding:.23rem .52rem;font-size:.72rem;color:#4A4956;background:#FBF8F1}
+  .chip b{color:#8A6A22;font-family:"IBM Plex Mono",monospace}
+  .balance-dominante{border-left:3px solid var(--tono,#8A6A22);padding-left:.55rem}
+  .studio-balance-row meter{width:100%;height:.65rem;accent-color:var(--tono,#8A6A22)}
+  .studio-balance-row{margin:.55rem 0 .85rem}.studio-balance-row>div{display:flex;justify-content:space-between;gap:.5rem}.studio-balance-row small{display:block;color:#6B6A78;line-height:1.35}
+  .filtros-lista{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin:.65rem 0}
+  .filtros-lista label{font:500 .57rem "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:#6B6A78}
+  .filtros-lista select{display:block;width:100%;margin-top:.25rem;border:1px solid #CFC7B4;background:#FBF8F1;color:#22212B;border-radius:7px;padding:.48rem}
+  .tabla-eventos{width:100%;border-collapse:collapse;font-size:.8rem}
+  .tabla-eventos th{position:sticky;top:0;background:#FBF8F1;text-align:left;font:500 .56rem "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase;color:#6B6A78;padding:.45rem .3rem;border-bottom:1px solid #CFC7B4}
+  .tabla-eventos td{padding:.46rem .3rem;border-bottom:1px solid #E7E1D3;vertical-align:middle}.tabla-eventos .fecha{white-space:nowrap;font-family:"IBM Plex Mono",monospace}.tabla-eventos .casa{font-family:"IBM Plex Mono",monospace;color:#8A6A22;text-align:center}
+  #controlesRueda{display:none;position:absolute;left:.7rem;bottom:.7rem;z-index:4;gap:.35rem;align-items:center;padding:.35rem;background:#FBF8F1E8;border:1px solid #D5CEBF;border-radius:999px;box-shadow:0 6px 18px #0002;backdrop-filter:blur(8px)}
+  #app.natal.con-carta #controlesRueda{display:flex}
+  #controlesRueda button{min-width:2.25rem;min-height:2.25rem;border:1px solid #CFC7B4;border-radius:999px;color:#5C5B68;font:600 .7rem "IBM Plex Mono",monospace;padding:.35rem .55rem}
+  #controlesRueda button:hover,#controlesRueda button[aria-pressed="true"]{color:#8A6A22;border-color:#8A6A22;background:#F7EDD3}
+  .confianza{display:flex;gap:.3rem;flex-wrap:wrap;margin:.55rem 0 .2rem}.confianza .chip{font-size:.62rem}
+  .panel-acciones{display:flex;gap:.45rem;flex-wrap:wrap;margin:.8rem 0}.panel-acciones button{min-height:2.35rem}
+  @media(max-width:620px){
+    .trio{grid-template-columns:1fr 1fr}.trio-card:last-child{grid-column:1/-1;min-height:auto}.resumen-grid{grid-template-columns:1fr}
+    #cartaPanel{height:58%;border-radius:14px 14px 0 0}.hoja{padding:.25rem .9rem 2rem}
+    #cartaPanel.expandido{height:82%}#cartaPanel.plegado{height:3.35rem}
+    #plegar,.secundario,.primario,.pest button,.campo input,.campo select{min-height:44px}
+    #controlesRueda{bottom:calc(58% + .6rem);left:.45rem;z-index:6}#ruedaAspectos{display:none}
+    #escena:has(#cartaPanel.expandido) #controlesRueda{bottom:calc(82% + .6rem)}#escena:has(#cartaPanel.plegado) #controlesRueda{bottom:4rem}
+    .tabla-eventos thead{display:none}.tabla-eventos,.tabla-eventos tbody,.tabla-eventos tr,.tabla-eventos td{display:block;width:100%}
+    .tabla-eventos tr{display:grid;grid-template-columns:1fr auto;gap:.2rem .5rem;padding:.55rem 0;border-bottom:1px solid #D5CEBF}.tabla-eventos td{border:0;padding:.05rem 0}.tabla-eventos td:nth-child(1){grid-column:1/-1}.tabla-eventos .casa{text-align:left}.tabla-eventos .fecha{grid-column:2;grid-row:2}
+  }
 </style>
 
 <div id="app">
@@ -786,6 +831,7 @@
     <div class="acciones" id="accionesBarra" style="margin:0">
       <button class="secundario" id="btnEditar">Editar datos</button>
       <button class="secundario" id="btnPngRueda" hidden><span class="ancho-solo">Descargar </span>rueda</button>
+      <button class="secundario" id="btnPngResumen" hidden>Resumen</button>
       <button class="secundario" id="btnPngHoja" hidden>Hoja<span class="ancho-solo"> completa</span></button>
     </div>
     <button class="secundario" id="masBarra" aria-haspopup="true" aria-expanded="false"
@@ -795,6 +841,12 @@
 
   <div id="escena">
     <canvas id="lienzo"></canvas>
+    <div id="controlesRueda" aria-label="Controles de la rueda">
+      <button type="button" id="ruedaMenos" aria-label="Alejar">−</button>
+      <button type="button" id="ruedaAjustar" aria-label="Ajustar y centrar">Ajustar</button>
+      <button type="button" id="ruedaMas" aria-label="Acercar">+</button>
+      <button type="button" id="ruedaAspectos" aria-pressed="false" title="Mostrar también aspectos menores">Aspectos mayores</button>
+    </div>
     <div id="portada">
       <div class="portada-caja">
         <div class="portada-hero">
@@ -962,7 +1014,8 @@
           <span class="pgrupo" role="presentation">
             <span class="pgrupo-rot">La carta</span>
             <span class="pgrupo-bot" role="presentation">
-              <button role="tab" id="tabPos" aria-selected="true" aria-controls="hojaPos">Posiciones</button>
+              <button role="tab" id="tabResumen" aria-selected="true" aria-controls="hojaResumen">Resumen</button>
+              <button role="tab" id="tabPos" aria-selected="false" aria-controls="hojaPos">Posiciones</button>
               <button role="tab" id="tabBalance" aria-selected="false" aria-controls="hojaBalance">Balance</button>
               <button role="tab" id="tabAsp" aria-selected="false" aria-controls="hojaAsp">Aspectos</button>
               <button role="tab" id="tabCasas" aria-selected="false" aria-controls="hojaCasas">Casas</button>
@@ -970,12 +1023,17 @@
             </span>
           </span>
           <span class="pgrupo" role="presentation">
-            <span class="pgrupo-rot">Comparar</span>
+            <span class="pgrupo-rot">Técnicas</span>
             <span class="pgrupo-bot" role="presentation">
               <button role="tab" id="tabAtacir" aria-selected="false" aria-controls="hojaAtacir">Atacir</button>
               <button role="tab" id="tabTransitos" aria-selected="false" aria-controls="hojaTransitos">Tránsitos</button>
               <button role="tab" id="tabRevolucion" aria-selected="false" aria-controls="hojaRevolucion">Revolución</button>
               <button role="tab" id="tabProgres" aria-selected="false" aria-controls="hojaProgres">Progresiones</button>
+            </span>
+          </span>
+          <span class="pgrupo" role="presentation">
+            <span class="pgrupo-rot">Relaciones</span>
+            <span class="pgrupo-bot" role="presentation">
               <button role="tab" id="tabSinastria" aria-selected="false" aria-controls="hojaSinastria">Sinastría</button>
             </span>
           </span>
@@ -984,23 +1042,27 @@
              nativa con los dos grupos, que ocupa una línea y no esconde ninguna. -->
         <select id="pestMovil" aria-label="Sección de la carta">
           <optgroup label="La carta">
+            <option value="tabResumen">Resumen</option>
             <option value="tabPos">Posiciones</option>
             <option value="tabBalance">Balance</option>
             <option value="tabAsp">Aspectos</option>
             <option value="tabCasas">Casas</option>
             <option value="tabSent">Significados</option>
           </optgroup>
-          <optgroup label="Comparar con otra cosa">
+          <optgroup label="Técnicas de tiempo">
             <option value="tabAtacir">Atacir</option>
             <option value="tabTransitos">Tránsitos</option>
             <option value="tabRevolucion">Revolución</option>
             <option value="tabProgres">Progresiones</option>
+          </optgroup>
+          <optgroup label="Relaciones">
             <option value="tabSinastria">Sinastría</option>
           </optgroup>
         </select>
         <button id="plegar" aria-label="Plegar o desplegar el panel" title="Plegar">▾</button>
       </div>
-      <div class="hoja" id="hojaPos" role="tabpanel"></div>
+      <div class="hoja" id="hojaResumen" role="tabpanel"></div>
+      <div class="hoja" id="hojaPos" role="tabpanel" hidden></div>
       <div class="hoja" id="hojaBalance" role="tabpanel" hidden></div>
       <div class="hoja" id="hojaAsp" role="tabpanel" hidden></div>
       <div class="hoja" id="hojaCasas" role="tabpanel" hidden></div>
@@ -1332,6 +1394,7 @@ const ctx = lienzo.getContext("2d");
 let W=0, H=0, dpr=1, estrellas=[], nebulosa=null;
 let vista = "orbitas", zoom = 1;
 let natalPan = {x:0,y:0};
+let mostrarMenoresRueda = false;
 let arrastreNatal = null, suprimirClickNatal = false;
 const blancos = [];                  // zonas sensibles del último fotograma
 let seleccion = null, sobre = null;
@@ -1397,6 +1460,14 @@ lienzo.addEventListener("wheel", e => {
     natalPan.y = my - baseY - (my-baseY-natalPan.y)*factorZoom;
   }
 }, {passive:false});
+function zoomNatal(factor){zoom=Math.min(2.85,Math.max(.55,zoom*factor));}
+document.getElementById("ruedaMenos").addEventListener("click",()=>zoomNatal(.85));
+document.getElementById("ruedaMas").addEventListener("click",()=>zoomNatal(1.18));
+document.getElementById("ruedaAjustar").addEventListener("click",()=>{zoom=1;natalPan.x=0;natalPan.y=0;});
+document.getElementById("ruedaAspectos").addEventListener("click",ev=>{
+  mostrarMenoresRueda=!mostrarMenoresRueda;ev.currentTarget.setAttribute("aria-pressed",String(mostrarMenoresRueda));
+  ev.currentTarget.textContent=mostrarMenoresRueda?"Todos los aspectos":"Aspectos mayores";
+});
 
 /* ---- fondo ---- */
 function fondo(ms){
@@ -2730,6 +2801,7 @@ function pintaRueda(g, cx, cy, R, vivo, capa, ch){
   // aspectos
   for(const {A,B,asp} of (capa ? [] : aspectos)){
     if(A.tipo === "angulo" || B.tipo === "angulo") continue;
+    if(!asp.mayor && !mostrarMenoresRueda) continue;
     const a1 = aPant(A.lon), a2 = aPant(B.lon);
     g.strokeStyle = PAPEL.asp[asp.cl];
     g.lineWidth = asp.mayor ? 1.2 : 0.8;
@@ -2811,12 +2883,15 @@ function pintaRueda(g, cx, cy, R, vivo, capa, ch){
 
   // encabezado dentro de la rueda
   g.textAlign="center"; g.textBaseline="middle";
+  const apretada = R < 190;
+  const cajaW=R*(apretada?.52:.62), cajaH=R*(capa?.24:.19);
+  g.fillStyle=PAPEL.caja;g.beginPath();g.roundRect(cx-cajaW/2,cy-cajaH/2,cajaW,cajaH,Math.max(8,R*.025));g.fill();
+  g.strokeStyle=PAPEL.borde;g.lineWidth=1;g.stroke();
   g.fillStyle = PAPEL.tinta; g.font = `${Math.max(11,Math.round(R*0.05))}px Cinzel, serif`;
   /* Cuando la rueda es pequeña —teléfono— el rótulo del centro se encabalga con
      las líneas y no se lee ninguno de los dos. Ahí se queda solo el nombre, que
      es lo único que hace falta para saber de quién es la carta; la fecha y el
      lugar ya están en la barra de arriba. */
-  const apretada = R < 190;
   g.fillText(ch.datos.nombre || "Carta natal", cx, apretada ? cy : cy - R*0.055);
   if(!apretada){
     g.fillStyle = PAPEL.suave; g.font = `${Math.max(8,Math.round(R*0.026))}px "IBM Plex Mono", monospace`;
@@ -2866,6 +2941,25 @@ async function fabricaHoja(modo){
     const g = c.getContext("2d");
     g.fillStyle = PAPEL.fondo; g.fillRect(0, 0, L, L);
     pintaRueda(g, L/2, L/2, L*0.452, false, capaExterior(), cartaEnRueda());
+    return c;
+  }
+
+  if(modo === "resumen"){
+    const ancho=1400,alto=1650,m=70,c=document.createElement("canvas");c.width=ancho;c.height=alto;
+    const g=c.getContext("2d");g.fillStyle=PAPEL.fondo;g.fillRect(0,0,ancho,alto);
+    const d=carta.datos,r=resumenCarta();
+    g.fillStyle=PAPEL.tinta;g.textAlign="left";g.font="52px Cinzel, Georgia, serif";g.fillText(d.nombre||"Carta natal",m,82);
+    g.fillStyle=PAPEL.suave;g.font='22px "IBM Plex Mono", monospace';g.fillText(`${d.resumenFecha} · ${d.lugarTexto}`,m,122);
+    pintaRueda(g,ancho/2,570,410,false,null,carta);
+    let y=1040;rotuloHoja(g,y,"RESUMEN DE LA CARTA",m,ancho-2*m);y+=60;
+    const trio=[r.sol&&`Sol en ${posZod(r.sol.lon).signo.n}`,r.luna&&`Luna en ${posZod(r.luna.lon).signo.n}`,r.asc&&`Ascendente en ${posZod(r.asc.lon).signo.n}`].filter(Boolean).join(" · ");
+    g.fillStyle=PAPEL.tinta;g.font="31px Spectral, Georgia, serif";g.fillText(trio,m,y);y+=65;
+    g.font="27px Spectral, Georgia, serif";g.fillText(`Elemento: ${r.elemento} · Modalidad: ${r.modalidad} · Polaridad: ${r.polaridad}`,m,y);y+=60;
+    g.fillText(`Planetas destacados: ${r.destacados.map(x=>x.nombre).join(" · ")}`,m,y);y+=60;
+    if(r.casasTop.length){g.fillText(`Casas con más cuerpos: ${r.casasTop.map(x=>`${ROMANOS[x.n]} (${x.v})`).join(" · ")}`,m,y);y+=60;}
+    rotuloHoja(g,y,"ASPECTOS CLAVE",m,ancho-2*m);y+=55;
+    g.font="25px Spectral, Georgia, serif";for(const x of r.claves){g.fillStyle=PAPEL.tinta;g.fillText(`${x.A.glifo} ${x.asp.g} ${x.B.glifo}  ${x.asp.n} · ${x.A.nombre} y ${x.B.nombre} · ${gradoMin(x.dif)}`,m,y);y+=43;}
+    g.fillStyle=PAPEL.suave;g.font='18px "IBM Plex Mono", monospace';g.fillText("Resumen orientativo · consulta la hoja completa para posiciones, casas y todos los aspectos",m,alto-38);
     return c;
   }
 
@@ -2937,7 +3031,7 @@ function descargaHoja(modo){
       if(!b) return;
       const u = URL.createObjectURL(b), a = document.createElement("a");
       const base = ((carta && carta.datos.nombre) || "carta-natal").replace(/[^\wÁÉÍÓÚÑáéíóúñ -]/g, "").trim() || "carta-natal";
-      a.href = u; a.download = `${base}${modo === "rueda" ? " - rueda" : " - hoja completa"}.png`;
+       a.href = u; a.download = `${base}${modo === "rueda" ? " - rueda" : modo === "resumen" ? " - resumen" : " - hoja completa"}.png`;
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(u), 4000);
     });
@@ -2986,11 +3080,56 @@ function pintaBalance(){
   const {bodies,groups}=datosBalance();
   document.getElementById("hojaBalance").innerHTML = '<h3>Balance de la carta natal</h3><p class="aviso">Sol, Luna y ocho planetas; un punto por cuerpo. No incluye ángulos, nodos ni otros puntos. Es una distribución por signos, sin ponderaciones.</p>' + groups.map(group=>{
     const counts=group.counts;
+    const max=Math.max(...counts.map(x=>x.length));
+    const tonos=group.title==='Elementos' ? ['#C4653F','#7A8248','#6C7FA2','#48769C'] : group.title==='Modalidades' ? ['#A65B3E','#8A6A22','#6B57A8'] : ['#A65B3E','#48769C'];
     return '<section class="studio-balance"><h3>'+group.title+'</h3>'+group.labels.map((label,i)=>{
       const n=counts[i].length, percent=bodies.length ? Math.round(n/bodies.length*100) : 0;
-      return '<div class="studio-balance-row"><div><span>'+label+'</span><strong>'+n+' / '+bodies.length+' · '+percent+'%</strong></div><meter min="0" max="'+Math.max(1,bodies.length)+'" value="'+n+'" aria-label="'+label+'"></meter><small>'+ (counts[i].map(escaparHTML).join(' · ') || 'Sin cuerpos')+'</small></div>';
+      return '<div class="studio-balance-row '+(n===max&&n>0?'balance-dominante':'')+'" style="--tono:'+tonos[i]+'"><div><span>'+label+'</span><strong>'+n+' / '+bodies.length+' · '+percent+'%</strong></div><meter min="0" max="'+Math.max(1,bodies.length)+'" value="'+n+'" aria-label="'+label+'"></meter><small>'+ (counts[i].map(escaparHTML).join(' · ') || 'Sin cuerpos')+'</small></div>';
     }).join('')+'</section>';
-  }).join('') + (!carta.datos.horaConocida ? '<p class="aviso">Sin hora conocida, un cuerpo cercano a un cambio de signo puede cambiar de grupo.</p>' : '');
+  }).join('') + '<p class="aviso">Método: conteo simple de las diez luminarias y planetas por signo. Un empate significa que no hay un único grupo dominante.</p>' + (!carta.datos.horaConocida ? '<p class="aviso">Sin hora conocida, un cuerpo cercano a un cambio de signo puede cambiar de grupo.</p>' : '');
+}
+
+function resumenCarta(){
+  const sol=carta.cuerpos.find(x=>x.id==="sol"), luna=carta.cuerpos.find(x=>x.id==="luna");
+  const asc=carta.ang ? {id:"asc",nombre:"Ascendente",glifo:PUNTOS.asc.glifo,lon:carta.ang.asc,tipo:"angulo"} : null;
+  const {groups}=datosBalance();
+  const domina=g=>{
+    const ns=g.counts.map(x=>x.length), m=Math.max(...ns);
+    return g.labels.filter((_,i)=>ns[i]===m).join(" y ");
+  };
+  const casas=[];
+  if(carta.cusp) carta.cuerpos.forEach(c=>casas[casaDe(c.lon,carta.cusp)]=(casas[casaDe(c.lon,carta.cusp)]||0)+1);
+  const casasTop=carta.cusp ? Array.from({length:12},(_,i)=>({n:i+1,v:casas[i+1]||0})).sort((a,b)=>b.v-a.v).slice(0,3).filter(x=>x.v) : [];
+  const fuerza=new Map(carta.cuerpos.map(c=>[c.id,0]));
+  carta.aspectos.filter(x=>x.asp.mayor).forEach(x=>{ if(fuerza.has(x.A.id)) fuerza.set(x.A.id,fuerza.get(x.A.id)+Math.max(.25,3-x.dif)); if(fuerza.has(x.B.id)) fuerza.set(x.B.id,fuerza.get(x.B.id)+Math.max(.25,3-x.dif)); });
+  if(carta.cusp) carta.cuerpos.forEach(c=>{const h=casaDe(c.lon,carta.cusp);if([1,4,7,10].includes(h)) fuerza.set(c.id,fuerza.get(c.id)+2)});
+  const destacados=[...fuerza].sort((a,b)=>b[1]-a[1]).slice(0,3).map(([id])=>carta.cuerpos.find(c=>c.id===id));
+  const claves=carta.aspectos.filter(x=>x.asp.mayor).slice().sort((a,b)=>a.dif-b.dif).slice(0,4);
+  return {sol,luna,asc,elemento:domina(groups[0]),modalidad:domina(groups[1]),polaridad:domina(groups[2]),casasTop,destacados,claves};
+}
+function pintaResumen(){
+  const r=resumenCarta(), tarjeta=(tipo,c)=>{
+    if(!c) return `<div class="trio-card"><span class="tipo">${tipo}</span><span class="simbolo">—</span><strong>Hora desconocida</strong><small>No se calculan ángulos ni casas</small></div>`;
+    const z=posZod(c.lon), casa=carta.cusp&&c.id!=="asc" ? ` · casa ${ROMANOS[casaDe(c.lon,carta.cusp)]}` : "";
+    return `<button class="trio-card" type="button" data-astro="${c.id}"><span class="tipo">${tipo}</span><span class="simbolo">${gh(c.glifo)} ${z.signo.g}</span><strong>${z.signo.n}</strong><small>${z.texto}${casa}</small></button>`;
+  };
+  const lectura=`Predominan ${r.elemento.toLowerCase()} y la modalidad ${r.modalidad.toLowerCase()}. Esta frase resume la distribución de los diez cuerpos; sirve como puerta de entrada y no sustituye la lectura de posiciones, casas y aspectos.`;
+  document.getElementById("hojaResumen").innerHTML=`
+    <div class="resumen-hero"><h2>${escaparHTML(carta.datos.nombre||"Carta natal")}</h2><p>Una lectura rápida antes de entrar al detalle.</p></div>
+    <div class="trio">${tarjeta("Sol",r.sol)}${tarjeta("Luna",r.luna)}${tarjeta("Ascendente",r.asc)}</div>
+    <div class="resumen-grid">
+      <section class="resumen-bloque"><h3>Balance dominante</h3><div class="chips"><span class="chip"><b>Elemento</b> ${r.elemento}</span><span class="chip"><b>Modalidad</b> ${r.modalidad}</span><span class="chip"><b>Polaridad</b> ${r.polaridad}</span></div></section>
+      <section class="resumen-bloque"><h3>Casas con más cuerpos</h3><div class="chips">${r.casasTop.length?r.casasTop.map(x=>`<span class="chip"><b>${ROMANOS[x.n]}</b> ${x.v} ${x.v===1?'cuerpo':'cuerpos'}</span>`).join(""):'<span class="chip">Requiere hora natal</span>'}</div></section>
+      <section class="resumen-bloque"><h3>Planetas destacados</h3><div class="chips">${r.destacados.map(c=>`<button type="button" class="chip destacado" data-astro="${c.id}">${gh(c.glifo)} ${c.nombre}</button>`).join("")}</div><p>Se destacan por aspectos mayores estrechos y cercanía a casas angulares.</p></section>
+      <section class="resumen-bloque"><h3>Aspectos clave</h3>${r.claves.map(x=>`<p>${gh(x.A.glifo)} <b class="${x.asp.cl}">${x.asp.g}</b> ${gh(x.B.glifo)} · ${x.asp.n} · ${gradoMin(x.dif)}</p>`).join("")||'<p>Sin aspectos mayores dentro del orbe elegido.</p>'}</section>
+    </div>
+    <section class="resumen-bloque"><h3>Lectura de conjunto</h3><p>${lectura}</p></section>
+    <div class="confianza"><span class="chip">${zodiacoDe().n}</span><span class="chip">${carta.cusp?`Casas ${NOMBRE_SISTEMA[carta.datos.sistemaReal||carta.datos.sistema]}`:'Sin casas'}</span><span class="chip">Orbes ${carta.datos.factorOrbe===.7?'estrechos':carta.datos.factorOrbe===1.35?'amplios':'estándar'}</span><span class="chip">${carta.datos.horaConocida?'Hora conocida':'Hora desconocida'}</span></div>
+    <div class="panel-acciones"><button type="button" class="secundario" id="resVerPos">Ver posiciones</button><button type="button" class="secundario" id="resVerAsp">Ver aspectos</button><button type="button" class="secundario" id="resDescarga">Descargar resumen</button></div>`;
+  document.getElementById("hojaResumen").querySelectorAll("[data-astro]").forEach(b=>b.addEventListener("click",()=>marcaFila(b.dataset.astro,false)));
+  document.getElementById("resVerPos").addEventListener("click",()=>document.getElementById("tabPos").click());
+  document.getElementById("resVerAsp").addEventListener("click",()=>document.getElementById("tabAsp").click());
+  document.getElementById("resDescarga").addEventListener("click",()=>descargaHoja("resumen"));
 }
 
 let filaAbierta = null;
@@ -3031,9 +3170,10 @@ function pintaCarta(){
 
   // aspectos
   document.getElementById("hojaAsp").innerHTML = aspectos.length ? `
+    <div class="filtros-lista"><label>Astro<select id="filtroAspAstro"><option value="">Todos</option>${cuerpos.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join("")}</select></label><label>Aspecto<select id="filtroAspTipo"><option value="">Todos</option>${[...new Map(aspectos.map(x=>[x.asp.n,x.asp])).values()].map(a=>`<option value="${a.n}">${a.n}</option>`).join("")}</select></label></div>
     <label class="marcar" style="margin:.8rem 0 .4rem"><input type="checkbox" id="soloMayores"> Ocultar aspectos menores</label>
     <ul class="aspectos con-menores" id="listaAspectos">${aspectos.map(({A,B,asp,dif}) => `
-      <li class="${asp.mayor ? "mayor" : "menor"}">
+      <li class="${asp.mayor ? "mayor" : "menor"}" data-a="${A.id}" data-b="${B.id}" data-tipo="${asp.n}">
         <span class="cg">${gh(A.glifo)}</span>
         <span class="as ${asp.cl}">${asp.g}</span>
         <span class="cg">${gh(B.glifo)}</span>
@@ -3069,6 +3209,7 @@ function pintaCarta(){
       pero los ángulos cambian: lo que aquí salía, allá culminaba.
       <a href="astrocarto.html" style="color:inherit">Míralo en el mapa del mundo →</a></p>`;
 
+  pintaResumen();
   pintaSignificados();
   if(atacirActivo) pintaAtacir();
   if(transitosActivo) pintaTransitos();
@@ -3085,6 +3226,9 @@ function pintaCarta(){
   if(cb) cb.addEventListener("change", () => {
     document.getElementById("listaAspectos").classList.toggle("con-menores", !cb.checked);
   });
+  const filtraAspectos=()=>{const a=document.getElementById("filtroAspAstro")?.value||"",t=document.getElementById("filtroAspTipo")?.value||"";document.querySelectorAll("#listaAspectos li").forEach(li=>li.hidden=!!((a&&li.dataset.a!==a&&li.dataset.b!==a)||(t&&li.dataset.tipo!==t)));};
+  document.getElementById("filtroAspAstro")?.addEventListener("change",filtraAspectos);
+  document.getElementById("filtroAspTipo")?.addEventListener("change",filtraAspectos);
 }
 const REGENTE_TRAD = {
   Aries:"marte", Tauro:"venus", "Géminis":"mercurio", "Cáncer":"luna", Leo:"sol", Virgo:"mercurio",
@@ -3127,6 +3271,7 @@ function marcaFila(id, alterna){
   });
   filaAbierta = (alterna && filaAbierta === id) ? null : id;
   seleccion = id;
+  document.querySelectorAll("[data-astro]").forEach(t=>t.classList.toggle("activo",t.dataset.astro===id));
   const fila = hoja.querySelector(`tr.astro-fila[data-id="${id}"]`);
   if(fila) fila.scrollIntoView({block:"nearest", behavior:"smooth"});
 }
@@ -3406,7 +3551,7 @@ function pintaAtacir(){
    fechas exactas se buscan numéricamente: se recorre el periodo en pasos de un
    día y donde el aspecto cambia de signo se afina por bisección. */
 let transitosActivo = false;
-const estadoTransitos = {fecha:null, orbe:2, conLuna:false};
+const estadoTransitos = {fecha:null, orbe:2, conLuna:false, planeta:"", aspecto:"", mostrar:10};
 const ORBES_TRANSITO = [{v:1, n:"Estrecho · 1°"}, {v:2, n:"Estándar · 2°"}, {v:3, n:"Amplio · 3°"}];
 
 const lonTransito = (id, ms) => lonGeo(id, sigTT(ms));
@@ -3496,7 +3641,9 @@ function calendarioTransitos(msIni, msFin, conLuna){
           if(fPrev !== null && Math.abs(fPrev) < 30 && Math.abs(f) < 30 && (fPrev < 0) !== (f < 0)){
             const ms = exactaEntre(id, objetivo, msIni + (i-1)*paso, msIni + i*paso);
             let dv2 = lons[i] - lons[i-1]; if(dv2 > 180) dv2 -= 360; if(dv2 < -180) dv2 += 360;
-            eventos.push({id, P:porId[id], N, asp, ms, retro: dv2 < 0});
+            const lonExacta=lonTransito(id,ms);
+            eventos.push({id, P:porId[id], N, asp, ms, lon:lonExacta,
+              casaNatal:carta.cusp?casaDe(lonExacta,carta.cusp):null, retro: dv2 < 0});
           }
           fPrev = f;
         }
@@ -3524,23 +3671,24 @@ function pintaTransitos(){
   if(!capa) return;
   const {fecha, movidos, cerca} = capa;
   const fechaISO = new Date(fecha - new Date(fecha).getTimezoneOffset()*60000).toISOString().slice(0,10);
-  const cal = calendarioTransitos(fecha, fecha + 365.2422*86400000, estadoTransitos.conLuna).slice(0, 60);
+  const calCompleto = calendarioTransitos(fecha, fecha + 365.2422*86400000, estadoTransitos.conLuna)
+    .filter(c=>(!estadoTransitos.planeta||c.id===estadoTransitos.planeta)&&(!estadoTransitos.aspecto||c.asp.n===estadoTransitos.aspecto));
+  const cal = calCompleto.slice(0, estadoTransitos.mostrar);
 
   const filaActivo = c => `<li>
       <span class="cg">${gh(c.P.glifo)}</span>
       <span class="as ${c.asp.cl}">${c.asp.g}</span>
       <span class="cg">${gh(c.N.glifo)}</span>
       <span class="nom">${c.P.nombre}${c.retro ? " ℞" : ""} ${c.asp.n.toLowerCase()} a ${c.N.nombre} natal
-        · <em>${c.aplicativo ? "aplicativo" : "separativo"}</em>${c.exacta ? ` · exacto el ${fmtDia.format(new Date(c.exacta))}` : ""}</span>
+        · <em>${c.aplicativo ? "aplicativo" : "separativo"}</em>${carta.cusp?` · casa natal ${ROMANOS[casaDe(c.P.lon,carta.cusp)]}`:""}${c.exacta ? ` · exacto el ${fmtDia.format(new Date(c.exacta))}` : ""}</span>
       <span class="orbe">${gradoMin(c.orbe)}</span>
     </li>`;
-  const filaCal = c => `<li>
-      <span class="cg">${gh(c.P.glifo)}</span>
-      <span class="as ${c.asp.cl}">${c.asp.g}</span>
-      <span class="cg">${gh(c.N.glifo)}</span>
-      <span class="nom">${c.P.nombre}${c.retro ? " ℞" : ""} ${c.asp.n.toLowerCase()} a ${c.N.nombre} natal</span>
-      <span class="orbe">${fmtDia.format(new Date(c.ms))}</span>
-    </li>`;
+  const filaCal = c => `<tr>
+      <td><span class="cg">${gh(c.P.glifo)}</span> ${c.P.nombre}${c.retro ? ' <span class="crx">℞</span>' : ""}</td>
+      <td><span class="as ${c.asp.cl}">${c.asp.g}</span> ${c.asp.n} a ${gh(c.N.glifo)} ${c.N.nombre}</td>
+      <td class="casa">${c.casaNatal?ROMANOS[c.casaNatal]:"—"}</td>
+      <td class="fecha">${fmtDia.format(new Date(c.ms))}</td>
+    </tr>`;
 
   document.getElementById("hojaTransitos").innerHTML = `
     <div class="mandos">
@@ -3577,9 +3725,11 @@ function pintaTransitos(){
       : `<p class="aviso">Nada dentro del orbe en esa fecha. Prueba con un orbe más amplio o mira el calendario.</p>`}
 
     <div class="rotulo">Los próximos doce meses</div>
+    <div class="filtros-lista"><label>Planeta<select id="trPlaneta"><option value="">Todos</option>${ORDEN_EFEM.filter(id=>estadoTransitos.conLuna||id!=="luna").map(id=>`<option value="${id}" ${estadoTransitos.planeta===id?'selected':''}>${porId[id].nombre}</option>`).join("")}</select></label><label>Aspecto<select id="trAspecto"><option value="">Todos</option>${ANG_ATACIR.map(a=>`<option value="${a.n}" ${estadoTransitos.aspecto===a.n?'selected':''}>${a.n}</option>`).join("")}</select></label></div>
     ${cal.length
-      ? `<ul class="aspectos">${cal.map(filaCal).join("")}</ul>
-         <p class="aviso" style="margin-top:.9rem">Fechas exactas. Un planeta retrógrado puede pasar tres veces por el mismo aspecto: aquí aparecen los tres pases.
+      ? `<table class="tabla-eventos"><thead><tr><th>Planeta</th><th>Contacto natal</th><th>Casa</th><th>Fecha exacta</th></tr></thead><tbody>${cal.map(filaCal).join("")}</tbody></table>
+         ${calCompleto.length>cal.length?`<div class="panel-acciones"><button type="button" class="secundario" id="trMostrarMas">Mostrar 10 más · ${calCompleto.length} en total</button></div>`:''}
+         <p class="aviso" style="margin-top:.9rem">La casa es la casa natal que recorre el planeta en la fecha exacta. Un planeta retrógrado puede pasar tres veces por el mismo aspecto: aquí aparecen los tres pases.
          ${estadoTransitos.conLuna ? "" : "La Luna queda fuera porque aspecta todo cada dos días; enciéndela arriba si la quieres."}</p>`
       : `<p class="aviso">Sin contactos exactos en el periodo.</p>`}
 
@@ -3609,7 +3759,10 @@ function pintaTransitos(){
   document.getElementById("trMesMenos").addEventListener("click", () => mueve(-30.44));
   document.getElementById("trMesMas").addEventListener("click", () => mueve(30.44));
   document.getElementById("trOrbe").addEventListener("change", ev => { estadoTransitos.orbe = parseFloat(ev.target.value); pintaTransitos(); });
-  document.getElementById("trLuna").addEventListener("change", ev => { estadoTransitos.conLuna = ev.target.checked; pintaTransitos(); });
+  document.getElementById("trLuna").addEventListener("change", ev => { estadoTransitos.conLuna = ev.target.checked; estadoTransitos.mostrar=10; pintaTransitos(); });
+  document.getElementById("trPlaneta").addEventListener("change",ev=>{estadoTransitos.planeta=ev.target.value;estadoTransitos.mostrar=10;pintaTransitos();});
+  document.getElementById("trAspecto").addEventListener("change",ev=>{estadoTransitos.aspecto=ev.target.value;estadoTransitos.mostrar=10;pintaTransitos();});
+  document.getElementById("trMostrarMas")?.addEventListener("click",()=>{estadoTransitos.mostrar=Math.min(calCompleto.length,estadoTransitos.mostrar+10);pintaTransitos();});
 }
 
 /* ===================== Revolución solar =====================
@@ -4681,20 +4834,25 @@ function pintaBarra(){
   const d = carta.datos;
   document.getElementById("app").classList.add("con-carta");
   document.getElementById("btnPngRueda").hidden = false;
+  document.getElementById("btnPngResumen").hidden = false;
   document.getElementById("btnPngHoja").hidden = false;
   document.getElementById("barraDatos").innerHTML =
     `<span class="quien">${escaparHTML(d.nombre || "Carta sin nombre")}</span>
      <span class="dato">${escaparHTML(d.resumenFecha)}</span>
      <span class="lugar">${escaparHTML(d.lugarTexto)}</span>
      <span class="huso">${escaparHTML(d.husoTexto)}</span>
-     ${zodiacoActivo !== "trop" ? `<span class="zodmarca">${escaparHTML(zodiacoDe().corto)}</span>` : ""}`;
+     <span class="zodmarca">${escaparHTML(zodiacoDe().corto)}</span>
+     <span class="zodmarca">${carta.cusp?escaparHTML(NOMBRE_SISTEMA[d.sistemaReal||d.sistema]):"sin casas"}</span>`;
   pintaMenuBarra();
 }
 
 document.getElementById("plegar").addEventListener("click", () => {
   const panel = document.getElementById("cartaPanel");
-  panel.classList.toggle("plegado");
-  document.getElementById("plegar").textContent = panel.classList.contains("plegado") ? "▴" : "▾";
+  if(panel.classList.contains("plegado")){panel.classList.remove("plegado");panel.classList.add("expandido");}
+  else if(panel.classList.contains("expandido")){panel.classList.remove("expandido");}
+  else panel.classList.add("plegado");
+  const b=document.getElementById("plegar");b.textContent=panel.classList.contains("plegado")?"▴":panel.classList.contains("expandido")?"▾":"↕";
+  b.title=panel.classList.contains("plegado")?"Abrir panel":panel.classList.contains("expandido")?"Reducir panel":"Plegar panel";
 });
 
 
@@ -4713,9 +4871,10 @@ function pintaMenuBarra(){
   menuBarra.innerHTML = `
     <div class="mb-dato"><b>${escaparHTML(d.lugarTexto || "")}</b>${escaparHTML(d.husoTexto || "")}</div>
     <div class="acciones">
-      <button type="button" class="secundario" data-eco="btnEditar">Editar datos</button>
-      <button type="button" class="secundario" data-eco="btnPngRueda">Descargar rueda</button>
-      <button type="button" class="secundario" data-eco="btnPngHoja">Hoja completa</button>
+       <button type="button" class="secundario" data-eco="btnEditar">Editar datos</button>
+       <button type="button" class="secundario" data-eco="btnPngRueda">Descargar rueda</button>
+       <button type="button" class="secundario" data-eco="btnPngResumen">Resumen</button>
+       <button type="button" class="secundario" data-eco="btnPngHoja">Hoja completa</button>
     </div>`;
   for(const b of menuBarra.querySelectorAll("[data-eco]"))
     b.addEventListener("click", () => { cierraMenuBarra(); document.getElementById(b.dataset.eco).click(); });
@@ -4739,7 +4898,7 @@ document.addEventListener("click", ev => {
 document.addEventListener("keydown", ev => { if(ev.key === "Escape") cierraMenuBarra(); });
 
 /* pestañas del panel */
-const pestañas = [["tabPos","hojaPos"],["tabBalance","hojaBalance"],["tabAsp","hojaAsp"],["tabCasas","hojaCasas"],["tabSent","hojaSent"],
+const pestañas = [["tabResumen","hojaResumen"],["tabPos","hojaPos"],["tabBalance","hojaBalance"],["tabAsp","hojaAsp"],["tabCasas","hojaCasas"],["tabSent","hojaSent"],
                   ["tabAtacir","hojaAtacir"],["tabTransitos","hojaTransitos"],["tabRevolucion","hojaRevolucion"],["tabProgres","hojaProgres"],
                   ["tabSinastria","hojaSinastria"]];
 for(const [b,h] of pestañas){
@@ -4788,6 +4947,7 @@ document.getElementById("btnEditar").addEventListener("click", () => {
   document.getElementById("nCancelar").hidden = !carta;
 });
 document.getElementById("btnPngRueda").addEventListener("click", () => descargaHoja("rueda"));
+document.getElementById("btnPngResumen").addEventListener("click", () => descargaHoja("resumen"));
 document.getElementById("btnPngHoja").addEventListener("click", () => descargaHoja("completa"));
 document.getElementById("listaCartas").addEventListener("click", ev => {
   const borrar = ev.target.closest("[data-borrar]");
@@ -4845,7 +5005,7 @@ abrirFicha("marte");     // deja la ficha lista detrás de la portada, para quie
     tarjeta.click();
     var pestana = q.get('tab');
     if(v === 'natal' && pestana){
-      var mapa = {posiciones:'tabPos', aspectos:'tabAsp', casas:'tabCasas', significados:'tabSent',
+      var mapa = {resumen:'tabResumen', posiciones:'tabPos', aspectos:'tabAsp', casas:'tabCasas', significados:'tabSent',
                   atacir:'tabAtacir', transitos:'tabTransitos', revolucion:'tabRevolucion', progresiones:'tabProgres',
                   sinastria:'tabSinastria'};
       var bot = document.getElementById(mapa[pestana]);
@@ -4861,3 +5021,4 @@ abrirFicha("marte");     // deja la ficha lista detrás de la portada, para quie
 </script>
 </body>
 </html>
+

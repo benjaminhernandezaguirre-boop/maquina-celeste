@@ -55,3 +55,20 @@ body.astro-studio{--bg:var(--studio-bg);--panel:var(--studio-panel);--panel2:var
 .astro-studio input,.astro-studio select{color-scheme:dark}
 [data-studio-theme="light"] .astro-studio :is(input,select){color-scheme:light}
 @media(max-width:620px){html[data-studio-theme] #app.natal #cartaPanel{width:100%;height:52dvh}html[data-studio-theme] #app.natal #cartaPanel.plegado{height:2.9rem}.studio-theme-toggle{font-size:11px;padding:.45rem}.astro-studio .campo.ancho input{min-width:0;width:100%}.astro-studio .campo.ancho{width:100%}}
+
+/* Resumen, filtros y calendario de la carta natal */
+html[data-studio-theme] #app.natal :is(.resumen-hero p,.resumen-bloque p,.studio-balance-row small){color:var(--studio-muted)}
+html[data-studio-theme] #app.natal :is(.trio-card,.destacado,.chip){background:var(--studio-soft);color:var(--studio-text);border-color:var(--studio-line)}
+html[data-studio-theme] #app.natal :is(.trio-card .tipo,.trio-card small){color:var(--studio-muted)}
+html[data-studio-theme] #app.natal :is(.trio-card .simbolo,.chip b,.tabla-eventos .casa){color:var(--studio-accent)}
+html[data-studio-theme] #app.natal :is(.resumen-bloque,.tabla-eventos td,.tabla-eventos th){border-color:var(--studio-line)}
+html[data-studio-theme] #app.natal .tabla-eventos th{background:var(--studio-soft);color:var(--studio-muted)}
+html[data-studio-theme] #app.natal .filtros-lista :is(label,select){color:var(--studio-muted)}
+html[data-studio-theme] #app.natal #controlesRueda{background:color-mix(in srgb,var(--studio-panel) 88%,transparent);border-color:var(--studio-line)}
+html[data-studio-theme] #app.natal #controlesRueda button{color:var(--studio-text);border-color:var(--studio-line)}
+@media(max-width:620px){
+  html[data-studio-theme] #app.natal #cartaPanel{height:58dvh}
+  html[data-studio-theme] #app.natal #cartaPanel.expandido{height:82dvh}
+  html[data-studio-theme] #app.natal #cartaPanel.plegado{height:3.35rem}
+}
+
