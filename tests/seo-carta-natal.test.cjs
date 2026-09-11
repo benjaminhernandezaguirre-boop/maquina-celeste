@@ -51,5 +51,14 @@ test('carta natal includes a seasonal zodiac and live lunar module', () => {
   assert.match(html, /Spica/);
   assert.match(html, /Justitia/);
   assert.match(html, /Ceres/);
+  assert.match(html, /const temporada=signos\.find/);
+  assert.match(html, /temporadaImagen/);
+  const signs = ['aries', 'tauro', 'geminis', 'cancer', 'leo', 'virgo', 'libra', 'escorpio', 'sagitario', 'capricornio', 'acuario', 'piscis'];
+  for (const sign of signs) {
+    assert.match(html, new RegExp(`imagen:\"${sign}\"`));
+    const image = path.join(root, 'assets', 'zodiaco', `${sign}-celestial.webp`);
+    assert.ok(fs.existsSync(image), `missing seasonal image for ${sign}`);
+    assert.ok(fs.statSync(image).size > 10000, `seasonal image for ${sign} is unexpectedly small`);
+  }
 });
 
