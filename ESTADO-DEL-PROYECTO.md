@@ -27,6 +27,8 @@ Si algún archivo no aparece como cambiado, es que ya lo tenías igual: no pasa 
 | `luna.html` | El tuyo, ya sin astronomía propia: la pide toda al motor compartido. |
 | `app/efemerides.js` | El motor de cálculo compartido (`window.Efem`), las 195 ciudades y las correcciones de marco y tiempo. |
 | `app/natal-theme.js`, `app/orbit-theme.js`, `app/zodiac-theme.js` | Los tuyos, con el botón «← Planetario» arreglado. |
+| `app/planetas.js` | **Nuevo.** Envuelve el mapa de cada planeta sobre una esfera que gira, con la inclinación de su eje y el periodo de rotación reales. |
+| `assets/planetas/` | **Nuevo.** Trece texturas en WebP, 143 KB en total. |
 | `vercel.json` | Cabeceras `no-cache` para las páginas nuevas. |
 | `scripts/partir.py` | Opcional: vuelve a partir la app en ocho trozos si alguna herramienta te los pide. |
 
@@ -84,6 +86,14 @@ Si algún archivo no aparece como cambiado, es que ya lo tenías igual: no pasa 
   contactos con la natal. *Arco solar*, con el arco recorrido, los contactos activos, el calendario de los
   próximos diez grados y la tabla de posiciones dirigidas. Los ángulos progresados van por arco solar, que es
   la convención corriente; el método queda escrito en pantalla porque hay escuelas que usan otro.
+- **Planetas con textura**: el carrusel de la portada y la vista de Órbitas ya no dibujan bolas de degradado,
+  sino el mapa real de cada astro envuelto sobre una esfera que gira, con los anillos de Saturno y la Tierra
+  con sus luces de ciudad en el lado de noche. Cada uno gira a su periodo real y con la inclinación de su eje,
+  así que Venus va al revés y Urano rueda de lado: eso se explica solo en clase.
+  Las texturas se leen píxel a píxel para envolverlas, y por seguridad el navegador sólo deja hacer eso cuando
+  la página viene de un servidor. Abriendo los archivos con doble clic no aparecen y se vuelve a los degradados
+  de antes, sin ningún error: en el sitio publicado se ven bien.
+  Crédito obligatorio por licencia (CC BY 4.0) puesto en la portada, debajo de la línea de ayuda.
 - **Enlaces directos a pestaña**: `astroplanetario.html?view=natal&tab=sinastria`
   (sirven `posiciones`, `aspectos`, `casas`, `significados`, `atacir`, `transitos`, `revolucion`, `progresiones`, `sinastria`).
 
