@@ -74,8 +74,18 @@ Si algún archivo no aparece como cambiado, es que ya lo tenías igual: no pasa 
   eclíptica), que para Plutón cambia el trazo miles de kilómetros y da para una clase entera. Tocando el
   mapa dice qué líneas pasan por ahí, hay una tabla de qué cruza una ciudad y otra de por dónde pasa una
   línea concreta, sobre las 195 ciudades del motor. Se entra desde la portada y desde la pestaña Casas.
+- **Zodiaco sideral y dracónico**: un selector encima de las posiciones cambia el zodiaco de toda la carta
+  —tropical, sideral con cuatro ayanamsas (Lahiri, Fagan-Bradley, Krishnamurti y Raman) o dracónica, que gira
+  la carta hasta poner el Nodo Norte en 0° de Aries—. Como se resta lo mismo a planetas, ángulos y cúspides,
+  los aspectos y las casas no cambian: sólo el signo de cada astro. Mientras no sea tropical, la barra de
+  arriba lleva una marca para que nadie lea una carta sideral creyendo que es tropical.
+- **Progresiones**: pestaña propia con dos modos. *Secundarias* (un día por un año) con la Luna y el Sol
+  progresados y sus próximos cambios de signo, la tabla de posiciones con cuánto avanzó cada astro, y los
+  contactos con la natal. *Arco solar*, con el arco recorrido, los contactos activos, el calendario de los
+  próximos diez grados y la tabla de posiciones dirigidas. Los ángulos progresados van por arco solar, que es
+  la convención corriente; el método queda escrito en pantalla porque hay escuelas que usan otro.
 - **Enlaces directos a pestaña**: `astroplanetario.html?view=natal&tab=sinastria`
-  (sirven `posiciones`, `aspectos`, `casas`, `significados`, `atacir`, `transitos`, `revolucion`, `sinastria`).
+  (sirven `posiciones`, `aspectos`, `casas`, `significados`, `atacir`, `transitos`, `revolucion`, `progresiones`, `sinastria`).
 
 ## Lo que sigue pendiente
 

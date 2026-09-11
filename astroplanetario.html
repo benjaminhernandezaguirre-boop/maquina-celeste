@@ -342,6 +342,10 @@
   ul.aspectos li.menor{display:none}
   ul.aspectos.con-menores li.menor{display:grid}
   #barraNatal .dato{color:var(--laton)}
+  .zodmarca{border:1px solid var(--laton);border-radius:999px;padding:.05rem .5rem;color:var(--laton);
+    font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+  #app.natal .zodmarca{border-color:#8A6A22;color:#8A6A22}
+  @media (max-width:620px){ #barraNatal .zodmarca{display:inline-block} }
 
   #cartaPanel{
     position:absolute;top:0;right:0;height:100%;width:min(410px,94vw);
@@ -971,6 +975,7 @@
               <button role="tab" id="tabAtacir" aria-selected="false" aria-controls="hojaAtacir">Atacir</button>
               <button role="tab" id="tabTransitos" aria-selected="false" aria-controls="hojaTransitos">Tránsitos</button>
               <button role="tab" id="tabRevolucion" aria-selected="false" aria-controls="hojaRevolucion">Revolución</button>
+              <button role="tab" id="tabProgres" aria-selected="false" aria-controls="hojaProgres">Progresiones</button>
               <button role="tab" id="tabSinastria" aria-selected="false" aria-controls="hojaSinastria">Sinastría</button>
             </span>
           </span>
@@ -989,6 +994,7 @@
             <option value="tabAtacir">Atacir</option>
             <option value="tabTransitos">Tránsitos</option>
             <option value="tabRevolucion">Revolución</option>
+            <option value="tabProgres">Progresiones</option>
             <option value="tabSinastria">Sinastría</option>
           </optgroup>
         </select>
@@ -1002,6 +1008,7 @@
       <div class="hoja" id="hojaAtacir" role="tabpanel" hidden></div>
       <div class="hoja" id="hojaTransitos" role="tabpanel" hidden></div>
       <div class="hoja" id="hojaRevolucion" role="tabpanel" hidden></div>
+      <div class="hoja" id="hojaProgres" role="tabpanel" hidden></div>
       <div class="hoja" id="hojaSinastria" role="tabpanel" hidden></div>
     </aside>
   </div>
@@ -1034,7 +1041,37 @@ const SIGNOS = [
 ];
 const COLOR_EL = {fuego:"#C4653F",tierra:"#8E9463",aire:"#9AA7C4",agua:"#5F7EA8"};
 
+/* ===================== Zodiaco: tropical, sideral y dracónica =====================
+   Los tres son el mismo cielo medido desde un punto de partida distinto, así que
+   la diferencia es restar una constante a todas las longitudes. Como se resta a
+   todo por igual —planetas, ángulos y cúspides—, los aspectos no cambian y las
+   casas tampoco: lo único que cambia es en qué signo cae cada cosa.
+   El ayanamsa es la distancia entre el punto vernal y el inicio del zodiaco
+   sideral: crece con la precesión, unos 50″ al año. */
+const ZODIACOS = [
+  {id:"trop",   n:"Tropical",                   corto:"Tropical"},
+  {id:"lahiri", n:"Sideral · Lahiri",           corto:"Lahiri",        aya:23.85306},
+  {id:"fagan",  n:"Sideral · Fagan-Bradley",    corto:"Fagan-Bradley", aya:24.74000},
+  {id:"kp",     n:"Sideral · Krishnamurti (KP)",corto:"Krishnamurti",  aya:23.78583},
+  {id:"raman",  n:"Sideral · Raman",            corto:"Raman",         aya:22.46389},
+  {id:"draco",  n:"Dracónica · Nodo Norte en 0° de Aries", corto:"Dracónica"}
+];
+let zodiacoActivo = "trop";
+const zodiacoDe = () => ZODIACOS.find(z => z.id === zodiacoActivo) || ZODIACOS[0];
+/* grados que hay que restar a la longitud tropical */
+function desfaseZodiaco(){
+  if(zodiacoActivo === "trop" || !carta || vista !== "natal") return 0;
+  if(zodiacoActivo === "draco"){
+    const nn = carta.puntos.find(x => x.id === "nodoN");
+    return nn ? nn.lon : 0;
+  }
+  const z = zodiacoDe();
+  return z.aya == null ? 0 : z.aya + precesion(siglos(carta.jd));
+}
+const gradoMinDe = d => `${Math.floor(d)}° ${String(Math.floor((d-Math.floor(d))*60)).padStart(2,"0")}′`;
+
 function posZod(lon){
+  lon = mod360(lon - desfaseZodiaco());
   const i = Math.floor(mod360(lon)/30);
   const dentro = mod360(lon) - i*30;
   const gr = Math.floor(dentro);
@@ -2575,6 +2612,7 @@ function firmaCapa(){
   if(transitosActivo) return ["tran", b, estadoTransitos.fecha == null ? Math.floor(Date.now()/60000)
                                        : estadoTransitos.fecha, estadoTransitos.orbe].join("|");
   if(revolucionActivo)return ["rs", b, estadoRS.anio, estadoRS.donde, estadoRS.lat, estadoRS.lon].join("|");
+  if(progresActivo)   return ["prog", b, estadoProg.modo, estadoProg.fecha == null ? Math.floor(Date.now()/3600000) : estadoProg.fecha].join("|");
   if(sinastriaActivo) return ["sin", b, estadoSin.idB, estadoSin.factorOrbe].join("|");
   return "nada";
 }
@@ -2583,6 +2621,7 @@ function construyeCapa(){
   if(atacirActivo)     return capaAtacir();
   if(transitosActivo)  return capaTransitos();
   if(revolucionActivo) return capaRevolucion();
+  if(progresActivo)    return capaProgres();
   if(sinastriaActivo)  return capaSinastria();
   return null;
 }
@@ -2620,11 +2659,12 @@ function pintaRueda(g, cx, cy, R, vivo, capa, ch){
 
   // anillo de signos
   for(let i=0;i<12;i++){
-    const a0 = aPant(i*30), a1 = aPant(i*30+30), col = PAPEL.el[SIGNOS[i].el];
+    const dz = desfaseZodiaco();            // el anillo gira; lo demás se queda donde está
+    const a0 = aPant(i*30 + dz), a1 = aPant(i*30 + 30 + dz), col = PAPEL.el[SIGNOS[i].el];
     g.beginPath(); g.arc(cx,cy,rExt,a1,a0); g.arc(cx,cy,rInt,a0,a1,true); g.closePath();
     g.fillStyle = col+"26"; g.fill();
     g.strokeStyle = PAPEL.borde; g.lineWidth = 1; g.stroke();
-    const am = aPant(i*30+15), rm = (rExt+rInt)/2;
+    const am = aPant(i*30 + 15 + dz), rm = (rExt+rInt)/2;
     g.fillStyle = col; g.textAlign="center"; g.textBaseline="middle";
     g.font = `${Math.round(R*0.062)}px Spectral, serif`;
     g.fillText(SIGNOS[i].g, cx+Math.cos(am)*rm, cy+Math.sin(am)*rm);
@@ -2947,7 +2987,21 @@ function pintaCarta(){
   for(const c of cuerpos) filas.push(filaAstro(c, cusp));
   for(const p of puntos)  filas.push(filaSimple(p.glifo, p.nombre, p.lon, cusp ? casaDe(p.lon,cusp) : null, false, p.id));
 
+  const zAct = zodiacoDe();
   document.getElementById("hojaPos").innerHTML = `
+    <div class="mandos" style="margin-top:.2rem">
+      <div class="campo ancho">
+        <label for="selZodiaco">Zodiaco</label>
+        <select id="selZodiaco">
+          ${ZODIACOS.map(z => `<option value="${z.id}" ${z.id === zodiacoActivo ? "selected" : ""}>${z.n}</option>`).join("")}
+        </select>
+      </div>
+    </div>
+    ${zodiacoActivo !== "trop" ? `<p class="aviso" style="margin:.6rem 0 0">
+      ${zodiacoActivo === "draco"
+        ? `Carta dracónica: toda la carta girada hasta poner el Nodo Norte en 0° de Aries (${gradoMinDe(desfaseZodiaco())} de giro).`
+        : `Zodiaco sideral ${zAct.corto}. Ayanamsa para esta fecha: <strong>${gradoMinDe(desfaseZodiaco())}</strong>.`}
+      Los aspectos y las casas no cambian —se resta lo mismo a todo—: lo que cambia es el signo de cada astro.</p>` : ""}
     ${carta.aviso ? `<p class="aviso" style="margin:.8rem 0 0">${carta.aviso}</p>` : ""}
     ${!datos.horaConocida ? `<p class="aviso" style="margin:.8rem 0 0">Carta sin hora: no hay Ascendente ni casas. Los grados de la Luna son aproximados.</p>` : ""}
     <table class="posiciones"><thead><tr>
@@ -2998,8 +3052,14 @@ function pintaCarta(){
   if(atacirActivo) pintaAtacir();
   if(transitosActivo) pintaTransitos();
   if(revolucionActivo) pintaRevolucion();
+  if(progresActivo) pintaProgres();
   if(sinastriaActivo) pintaSinastria();
   enlazaFilas();
+  const sz = document.getElementById("selZodiaco");
+  if(sz) sz.addEventListener("change", ev => {
+    zodiacoActivo = ev.target.value;
+    pintaCarta(); pintaBarra(); dibujaNatal();
+  });
   const cb = document.getElementById("soloMayores");
   if(cb) cb.addEventListener("change", () => {
     document.getElementById("listaAspectos").classList.toggle("con-menores", !cb.checked);
@@ -3797,6 +3857,242 @@ function pintaRevolucion(){
   });
 }
 
+
+/* ===================== Progresiones =====================
+   Dos técnicas que comparten una misma idea —el tiempo del cielo condensado— y
+   que por eso van juntas en una pestaña:
+
+   · Secundarias: un día después de nacer vale por un año de vida. La carta de
+     tus treinta y seis años es, literalmente, el cielo del día treinta y seis de
+     tu vida. La Luna progresada es la aguja fina: avanza un grado por mes y
+     cambia de signo cada dos años y medio.
+   · Arco solar: el mapa entero avanza en bloque el mismo arco que ha recorrido
+     el Sol progresado, así que las distancias entre planetas no cambian; lo que
+     cambia es sobre qué caen. */
+let progresActivo = false;
+const estadoProg = {modo:"secundarias", fecha:null};
+const CLAVE_SOL = {id:"solreal", n:"Arco solar", solar:true};
+const fechaProg = () => estadoProg.fecha == null ? Date.now() : estadoProg.fecha;
+
+/* el instante del cielo que corresponde a una fecha de la vida */
+function instanteProgresado(ms){
+  const anios = (ms - carta.ms)/(365.2422*86400000);
+  return carta.ms + anios*86400000;
+}
+let _progFirma = null, _progVal = null;
+function laProgresion(){
+  if(!carta || !carta.datos.horaConocida) return null;
+  const firma = huellaCarta(carta.datos) + "|" + Math.round(fechaProg()/3600000);
+  if(firma === _progFirma) return _progVal;
+  _progFirma = firma;
+  const d = carta.datos;
+  const P = cartaDeInstante(instanteProgresado(fechaProg()), {
+    nombre:"Progresada", lat:d.lat, lon:d.lon, tz:d.tz, horaConocida:true,
+    sistema:d.sistema, factorOrbe:d.factorOrbe, lugarTexto:d.lugarTexto});
+
+  /* Los ángulos no se toman de la hora sidérea de ese día. Si se tomaran, al
+     mover la fecha de la vida un solo día el Ascendente daría la vuelta entera
+     al zodiaco, porque un día de cielo son veinticuatro horas de rotación.
+     Se usa la convención corriente: el Medio Cielo avanza el mismo arco que el
+     Sol progresado, y el Ascendente se deduce de ese Medio Cielo con la latitud
+     del nacimiento, que es como se mueve de verdad —no a ritmo constante—. */
+  if(carta.ang && P.ang){
+    const arco = mod360(P.cuerpos[0].lon - carta.cuerpos[0].lon);
+    const eps = P.ang.eps, lat = carta.datos.lat;
+    const mc = mod360(carta.ang.mc + arco);
+    const ramc = mod360(Math.atan2(Math.sin(mc*RAD)*Math.cos(eps*RAD), Math.cos(mc*RAD))*DEG);
+    let asc = mod360(Math.atan2(Math.cos(ramc*RAD),
+      -(Math.sin(ramc*RAD)*Math.cos(eps*RAD) + Math.tan(lat*RAD)*Math.sin(eps*RAD)))*DEG);
+    if(mod360(asc - mc) > 180) asc = mod360(asc + 180);
+    P.ang = {mc, asc, ramc, eps, lat, lon:carta.datos.lon};
+    const r = cuspides(carta.datos.sistema || "placidio", P.ang);
+    P.cusp = r.c; P.aviso = r.aviso || null;
+    P.arcoAngulos = arco;
+  }
+  _progVal = P;
+  return _progVal;
+}
+
+function capaProgres(){
+  if(!carta) return null;
+  const fecha = fechaProg();
+  if(estadoProg.modo === "arco"){
+    const arco = arcoSolar(fecha);
+    return {clave:{n:"Arco solar"}, fecha, arco,
+            movidos: puntosMoviles().map(p => Object.assign({}, p, {lon: mod360(p.lon + arco)})),
+            cerca: contactosAtacir(CLAVE_SOL, arco - ORBE_ATACIR, arco + ORBE_ATACIR)};
+  }
+  const P = laProgresion();
+  if(!P) return null;
+  const movidos = puntosMoviles(P);
+  const cruces = aspectosEntre(movidos, puntosMoviles(carta), carta.datos.factorOrbe || 1);
+  return {clave:{n:"Progresada"}, fecha:P.ms, arco:0, movidos,
+          cerca: cruces.filter(c => c.asp.mayor && c.dif <= 2)
+                       .map(c => ({P:c.A, N:c.B, asp:{cl:c.asp.cl, mayor:true}}))};
+}
+
+/* cuándo cambia de signo un astro progresado, mirando hacia delante */
+function proximoSignoProg(id, desde, anios){
+  const paso = 15*86400000;
+  const signoEn = ms => posZod(lonGeo(id, sigTT(instanteProgresado(ms)))).signo.n;
+  const s0 = signoEn(desde);
+  for(let t = desde + paso; t <= desde + anios*365.2422*86400000; t += paso){
+    if(signoEn(t) !== s0){
+      let a = t - paso, b = t;
+      for(let i = 0; i < 30 && b - a > 3600000; i++){
+        const m = (a + b)/2;
+        if(signoEn(m) === s0) a = m; else b = m;
+      }
+      return {ms:(a+b)/2, signo:signoEn(b)};
+    }
+  }
+  return null;
+}
+
+function pintaProgres(){
+  if(!carta) return;
+  const hoja = document.getElementById("hojaProgres");
+  if(!carta.datos.horaConocida){
+    hoja.innerHTML = `<p class="aviso" style="margin-top:1rem">Las progresiones se levantan sobre el instante exacto del
+      nacimiento: un día entero de vida cabe en cuatro minutos de reloj del día del parto, así que sin hora conocida
+      cualquier progresión sería inventada.</p>`;
+    return;
+  }
+  const fecha = fechaProg(), edad = (fecha - carta.ms)/(365.2422*86400000);
+  const fechaISO = new Date(fecha - new Date(fecha).getTimezoneOffset()*60000).toISOString().slice(0,10);
+  const casaNat = l => carta.cusp ? ROMANOS[casaDe(l, carta.cusp)] : "—";
+
+  const mandos = `
+    <div class="conmutador" style="margin:.9rem 0 .2rem;width:100%">
+      <button type="button" id="modoSec" aria-pressed="${estadoProg.modo === "secundarias"}" style="flex:1">Secundarias</button>
+      <button type="button" id="modoArco" aria-pressed="${estadoProg.modo === "arco"}" style="flex:1">Arco solar</button>
+    </div>
+    <div class="mandos">
+      <div class="campo"><label for="pgFecha">Fecha de la vida</label>
+        <input id="pgFecha" type="date" value="${fechaISO}"></div>
+      <div class="acciones" style="margin:0">
+        <button class="secundario" id="pgHoy">Hoy</button>
+        <button class="secundario" id="pgMenos">− año</button>
+        <button class="secundario" id="pgMas">+ año</button>
+      </div>
+    </div>`;
+
+  let cuerpo = "";
+  if(estadoProg.modo === "secundarias"){
+    const P = laProgresion();
+    const cruces = aspectosEntre(puntosMoviles(P), puntosMoviles(carta), carta.datos.factorOrbe || 1)
+                     .filter(c => c.asp.mayor);
+    const luna = proximoSignoProg("luna", fecha, 4);
+    const sol  = proximoSignoProg("sol", fecha, 40);
+    const avance = c => {
+      const n = carta.cuerpos.find(x => x.id === c.id) || carta.puntos.find(x => x.id === c.id);
+      if(!n) return "—";
+      let d = mod360(c.lon - n.lon); if(d > 180) d -= 360;
+      return (d < 0 ? "−" : "") + gradoMinDe(Math.abs(d));
+    };
+    cuerpo = `
+      <div class="cuadro">
+        <div><span class="k">Edad</span><span class="v">${edad.toFixed(1)} años</span></div>
+        <div><span class="k">El cielo de</span><span class="v">${fmtDia.format(new Date(P.ms))}</span></div>
+        <div><span class="k">Día de vida</span><span class="v">${Math.round((P.ms - carta.ms)/86400000)}</span></div>
+      </div>
+      <p class="aviso">Un día por un año: la carta de esta edad es el cielo que hubo ${Math.round((P.ms - carta.ms)/86400000)} días
+        después de nacer, levantado sobre el mismo lugar.</p>
+
+      <div class="rotulo">Las dos agujas del reloj</div>
+      <table class="posiciones"><tbody>
+        <tr><td class="cg">${gh(porId.luna.glifo)}</td><td>Luna progresada</td>
+          <td><span class="cgrado">${posZod(P.cuerpos[1].lon).texto}</span> <span class="csigno">${posZod(P.cuerpos[1].lon).signo.g} ${posZod(P.cuerpos[1].lon).signo.n}</span></td>
+          <td class="ccasa" style="white-space:normal;text-align:right">${luna ? `pasa a ${luna.signo} el ${fmtDia.format(new Date(luna.ms))}` : "—"}</td></tr>
+        <tr><td class="cg">${gh(porId.sol.glifo)}</td><td>Sol progresado</td>
+          <td><span class="cgrado">${posZod(P.cuerpos[0].lon).texto}</span> <span class="csigno">${posZod(P.cuerpos[0].lon).signo.g} ${posZod(P.cuerpos[0].lon).signo.n}</span></td>
+          <td class="ccasa" style="white-space:normal;text-align:right">${sol ? `pasa a ${sol.signo} el ${fmtDia.format(new Date(sol.ms))}` : "—"}</td></tr>
+      </tbody></table>
+      <p class="aviso">La Luna progresada es la que marca el compás del año: cambia de signo cada dos años y medio y de casa
+        con ella. El Sol progresado cambia de signo una o dos veces en toda una vida, y cuando lo hace se nota.</p>
+
+      <div class="rotulo">Posiciones progresadas</div>
+      <p class="aviso" style="margin:0 0 .7rem">Ascendente y Medio Cielo avanzan por arco solar: el Medio Cielo suma el mismo
+        arco que el Sol progresado y el Ascendente se deduce de él con la latitud del nacimiento. Hay escuelas que los mueven
+        de otra manera —Naibod, cuotidiano—, y dan grados distintos.</p>
+      <table class="posiciones"><thead><tr>
+        <th></th><th>Astro</th><th>Posición</th><th style="text-align:right">Avanzó</th><th style="text-align:right">Casa natal</th>
+      </tr></thead><tbody>
+        ${[{glifo:PUNTOS.asc.glifo, nombre:"Ascendente", lon:P.ang.asc, id:"asc"},
+           {glifo:PUNTOS.mc.glifo, nombre:"Medio Cielo", lon:P.ang.mc, id:"mc"}]
+          .concat(P.cuerpos).map(c => {
+          const z = posZod(c.lon);
+          const nat = c.id === "asc" ? carta.ang.asc : c.id === "mc" ? carta.ang.mc : null;
+          let av = "—";
+          if(nat != null){ let d = mod360(c.lon - nat); if(d > 180) d -= 360; av = gradoMinDe(Math.abs(d)); }
+          else av = avance(c);
+          return `<tr><td class="cg">${gh(c.glifo)}</td><td>${c.nombre}</td>
+            <td><span class="cgrado">${z.texto}</span> <span class="csigno">${z.signo.g} ${z.signo.n}</span>${c.retro ? ' <span class="crx">℞</span>' : ""}</td>
+            <td class="ccasa">${av}</td><td class="ccasa">${casaNat(c.lon)}</td></tr>`;
+        }).join("")}
+      </tbody></table>
+
+      <div class="rotulo">La progresada sobre la natal</div>
+      ${cruces.length
+        ? `<ul class="aspectos">${cruces.slice(0, 30).map(({A,B,asp,dif}) => `<li class="mayor">
+              <span class="cg">${gh(A.glifo)}</span><span class="as ${asp.cl}">${asp.g}</span><span class="cg">${gh(B.glifo)}</span>
+              <span class="nom">${A.nombre} progresado ${asp.n.toLowerCase()} a ${B.nombre} natal</span>
+              <span class="orbe">${gradoMin(dif)}</span></li>`).join("")}</ul>`
+        : `<p class="aviso">Sin contactos mayores dentro de orbe en esta fecha.</p>`}`;
+  } else {
+    const arco = arcoSolar(fecha);
+    const activos = contactosAtacir(CLAVE_SOL, arco - ORBE_ATACIR, arco + ORBE_ATACIR);
+    const proximos = contactosAtacir(CLAVE_SOL, arco, arco + 10).slice(0, 40);
+    const fila = c => `<li class="mayor">
+        <span class="cg">${gh(c.P.glifo)}</span><span class="as ${c.asp.cl}">${c.asp.g}</span><span class="cg">${gh(c.N.glifo)}</span>
+        <span class="nom">${c.P.nombre} dirigido ${c.asp.n.toLowerCase()} a ${c.N.nombre} natal</span>
+        <span class="orbe">${fmtCorta.format(new Date(c.ms))}</span></li>`;
+    cuerpo = `
+      <div class="cuadro">
+        <div><span class="k">Edad</span><span class="v">${edad.toFixed(1)} años</span></div>
+        <div><span class="k">Arco recorrido</span><span class="v">${gradoMinDe(arco)}</span></div>
+        <div><span class="k">Contactos activos</span><span class="v">${activos.length}</span></div>
+      </div>
+      <p class="aviso">Todo el mapa natal avanza este mismo arco, que es lo que ha recorrido el Sol progresado —cerca de un
+        grado por año—. Como avanza todo por igual, los aspectos entre planetas no cambian: lo que cambia es sobre qué caen.</p>
+
+      <div class="rotulo">Contactos activos${activos.length ? ` · orbe de ${ORBE_ATACIR}°` : ""}</div>
+      ${activos.length ? `<ul class="aspectos">${activos.map(fila).join("")}</ul>`
+        : `<p class="aviso">Nada dentro del orbe en esta fecha. Mira el calendario de abajo.</p>`}
+
+      <div class="rotulo">Los próximos diez grados · unos diez años</div>
+      ${proximos.length ? `<ul class="aspectos">${proximos.map(fila).join("")}</ul>`
+        : `<p class="aviso">Sin contactos en el tramo.</p>`}
+
+      <div class="rotulo">Posiciones dirigidas</div>
+      <table class="posiciones"><thead><tr>
+        <th></th><th>Astro</th><th>Natal</th><th>Dirigida</th><th style="text-align:right">Casa natal</th>
+      </tr></thead><tbody>
+        ${puntosMoviles().map(pt => {
+          const d = mod360(pt.lon + arco), zn = posZod(pt.lon), zd = posZod(d);
+          return `<tr><td class="cg">${gh(pt.glifo)}</td><td>${pt.nombre}</td>
+            <td><span class="cgrado">${zn.corto}</span> <span class="csigno">${zn.signo.g}</span></td>
+            <td><span class="cgrado">${zd.corto}</span> <span class="csigno">${zd.signo.g} ${zd.signo.n}</span></td>
+            <td class="ccasa">${casaNat(d)}</td></tr>`;
+        }).join("")}
+      </tbody></table>`;
+  }
+
+  hoja.innerHTML = mandos + cuerpo +
+    `<p class="aviso" style="margin-top:1rem">La rueda muestra tu natal por dentro y la progresión por fuera.</p>`;
+
+  const rep = () => { pintaProgres(); dibujaNatal(); };
+  document.getElementById("modoSec").addEventListener("click", () => { estadoProg.modo = "secundarias"; rep(); });
+  document.getElementById("modoArco").addEventListener("click", () => { estadoProg.modo = "arco"; rep(); });
+  document.getElementById("pgFecha").addEventListener("change", ev => {
+    const [a,m,d] = ev.target.value.split("-").map(Number);
+    if(a){ estadoProg.fecha = new Date(a, m-1, d, 12).getTime(); rep(); }
+  });
+  document.getElementById("pgHoy").addEventListener("click", () => { estadoProg.fecha = null; rep(); });
+  document.getElementById("pgMenos").addEventListener("click", () => { estadoProg.fecha = fechaProg() - 365.2422*86400000; rep(); });
+  document.getElementById("pgMas").addEventListener("click", () => { estadoProg.fecha = fechaProg() + 365.2422*86400000; rep(); });
+}
+
 /* ===================== Sinastría =====================
    Dos cartas comparadas: la de la pantalla por dentro y la elegida por fuera.
    Los aspectos se buscan cruzados, cada punto de una contra cada punto de la otra. */
@@ -4268,6 +4564,7 @@ function aplicaCarta(datos){
   }
   estadoAtacir.fecha = null;
   estadoRS.anio = null; estadoRS.donde = "natal";
+  estadoProg.fecha = null;
   estadoTransitos.fecha = null;
   levantarCarta(datos);
   guardaUltima(datos);
@@ -4368,7 +4665,8 @@ function pintaBarra(){
     `<span class="quien">${escaparHTML(d.nombre || "Carta sin nombre")}</span>
      <span class="dato">${escaparHTML(d.resumenFecha)}</span>
      <span class="lugar">${escaparHTML(d.lugarTexto)}</span>
-     <span class="huso">${escaparHTML(d.husoTexto)}</span>`;
+     <span class="huso">${escaparHTML(d.husoTexto)}</span>
+     ${zodiacoActivo !== "trop" ? `<span class="zodmarca">${escaparHTML(zodiacoDe().corto)}</span>` : ""}`;
   pintaMenuBarra();
 }
 
@@ -4421,7 +4719,7 @@ document.addEventListener("keydown", ev => { if(ev.key === "Escape") cierraMenuB
 
 /* pestañas del panel */
 const pestañas = [["tabPos","hojaPos"],["tabBalance","hojaBalance"],["tabAsp","hojaAsp"],["tabCasas","hojaCasas"],["tabSent","hojaSent"],
-                  ["tabAtacir","hojaAtacir"],["tabTransitos","hojaTransitos"],["tabRevolucion","hojaRevolucion"],
+                  ["tabAtacir","hojaAtacir"],["tabTransitos","hojaTransitos"],["tabRevolucion","hojaRevolucion"],["tabProgres","hojaProgres"],
                   ["tabSinastria","hojaSinastria"]];
 for(const [b,h] of pestañas){
   document.getElementById(b).addEventListener("click", () => {
@@ -4432,12 +4730,14 @@ for(const [b,h] of pestañas){
     atacirActivo = (h === "hojaAtacir");
     transitosActivo = (h === "hojaTransitos");
     revolucionActivo = (h === "hojaRevolucion");
+    progresActivo = (h === "hojaProgres");
     sincronizaPestMovil(b);
     sinastriaActivo = (h === "hojaSinastria");
     if(!sinastriaActivo) compuestaActiva = false;
     if(atacirActivo) pintaAtacir();
     if(transitosActivo) pintaTransitos();
     if(revolucionActivo) pintaRevolucion();
+    if(progresActivo) pintaProgres();
     if(sinastriaActivo) pintaSinastria();
   });
 }
@@ -4525,7 +4825,7 @@ abrirFicha("marte");     // deja la ficha lista detrás de la portada, para quie
     var pestana = q.get('tab');
     if(v === 'natal' && pestana){
       var mapa = {posiciones:'tabPos', aspectos:'tabAsp', casas:'tabCasas', significados:'tabSent',
-                  atacir:'tabAtacir', transitos:'tabTransitos', revolucion:'tabRevolucion',
+                  atacir:'tabAtacir', transitos:'tabTransitos', revolucion:'tabRevolucion', progresiones:'tabProgres',
                   sinastria:'tabSinastria'};
       var bot = document.getElementById(mapa[pestana]);
       if(bot) setTimeout(function(){ bot.click(); }, 220);

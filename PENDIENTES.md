@@ -33,10 +33,14 @@ Siete astros dicen «Próximamente». Este es el orden que yo seguiría:
 
 ## 4. Técnicas de cálculo que faltan
 
-- [ ] **Zodiaco sideral**, con selector de ayanamsa (Lahiri, Fagan-Bradley, Krishnamurti, Raman) y un botón para alternar con el tropical sobre la misma carta. Es restar un valor a todas las longitudes. *(chico)*
-- [ ] **Carta dracónica.** Rotar la carta hasta poner el Nodo Norte en 0° de Aries. *(chico)*
-- [ ] **Progresiones secundarias**, un día igual a un año. *(chico)*
-- [ ] **Direcciones de arco solar** como vista propia. El cálculo ya está dentro del atacir; falta presentarlo aparte. *(chico)*
+- [x] **Zodiaco sideral**, con selector de ayanamsa (Lahiri, Fagan-Bradley, Krishnamurti, Raman) y un botón para alternar con el tropical sobre la misma carta. Es restar un valor a todas las longitudes. *(chico)*  
+  → hecho el 11 sep 2026, con las cuatro ayanamsas y el selector junto a las posiciones.
+- [x] **Carta dracónica.** Rotar la carta hasta poner el Nodo Norte en 0° de Aries. *(chico)*  
+  → hecha el 11 sep 2026, en el mismo selector de zodiaco.
+- [x] **Progresiones secundarias**, un día igual a un año. *(chico)*  
+  → hechas el 11 sep 2026, en la pestaña «Progresiones».
+- [x] **Direcciones de arco solar** como vista propia. El cálculo ya está dentro del atacir; falta presentarlo aparte. *(chico)*  
+  → hecho el 11 sep 2026, como segundo modo de la pestaña «Progresiones».
 - [x] **Revolución solar y revolución lunar.** La lunar ya está en el módulo de Luna; falta la solar, con su propio selector de lugar, porque la persona no siempre cumple años donde nació. *(mediano, depende de la precisión del Sol)*  
   → la solar ya está, con selector de lugar.
 
