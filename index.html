@@ -130,11 +130,8 @@ const soonTitle=document.getElementById('soonTitle'),soonText=document.getElemen
       const giro = quieto ? 0.18 : window.Planetas.giroDe(b.id, ms, ACEL);
       if(conAnillo) window.Planetas.pintaAnillo(g, px/2, px/2, r, {incl:.36, alfa:.95});
       const ok = window.Planetas.pintaEsfera(g, b.id, px/2, px/2, r, {giro});
-      if(ok && conAnillo){                     // la media vuelta del anillo que pasa por delante
-        g.save(); g.beginPath(); g.rect(0, px/2, px, px/2); g.clip();
-        window.Planetas.pintaAnillo(g, px/2, px/2, r, {incl:.36, alfa:.95});
-        g.restore();
-      }
+      if(ok && conAnillo)                      // la media vuelta del anillo que pasa por delante
+        window.Planetas.pintaAnillo(g, px/2, px/2, r, {incl:.36, alfa:.95, frente:true});
       if(ok !== b.el.classList.contains('con-tex')) b.el.classList.toggle('con-tex', ok);
     }
   }

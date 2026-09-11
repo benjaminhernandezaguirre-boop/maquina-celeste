@@ -64,7 +64,7 @@ function mapaDe(r){
   const lado = clave*2, n = lado*lado;
   const col = new Float32Array(n), fila = new Float32Array(n);
   const nx = new Float32Array(n), ny = new Float32Array(n), nz = new Float32Array(n);
-  const dentro = new Uint8Array(n);
+  const dentro = new Uint8Array(n), borde = new Uint8Array(n);   // borde = cuánto cubre el píxel
   for(let py = 0; py < lado; py++){
     const y = (py + 0.5)/clave - 1;
     for(let px = 0; px < lado; px++){
@@ -73,11 +73,13 @@ function mapaDe(r){
       if(q >= 1) continue;
       const z = Math.sqrt(1 - q);
       dentro[i] = 1; nx[i] = x; ny[i] = y; nz[i] = z;
+      const cob = (1 - Math.sqrt(q))*clave + 0.5;   // suaviza el filo del disco
+      borde[i] = cob >= 1 ? 255 : (cob <= 0 ? 0 : (cob*255)|0);
       col[i] = Math.atan2(x, z)/(2*Math.PI);          // longitud, en vueltas
       fila[i] = (Math.asin(-y) + Math.PI/2)/Math.PI;  // latitud, de 0 (norte) a 1 (sur)
     }
   }
-  const m = {lado, col, fila, nx, ny, nz, dentro, img:null};
+  const m = {lado, col, fila, nx, ny, nz, dentro, borde, img:null};
   if(mapas.size > 40) mapas.clear();                  // no acumular radios viejos
   mapas.set(clave, m);
   return m;
@@ -127,7 +129,7 @@ function pintaEsfera(g, id, cx, cy, r, op){
       s[j+1] = td[k+1]*dia;
       s[j+2] = td[k+2]*dia;
     }
-    s[j+3] = 255;
+    s[j+3] = m.borde[i];
   }
 
   g.save();
@@ -158,21 +160,37 @@ function pintaAnillo(g, cx, cy, r, op){
   if(!t.lista) return false;
   op = op || {};
   const incl = op.incl == null ? 0.34 : op.incl;      // cuánto se ve el plano de canto
+  const gir  = op.giroPlano == null ? -0.34 : op.giroPlano;
   const rInt = r*1.24, rExt = r*2.27;
-  const pasos = 96, td = t.datos, tw = t.ancho;
+  const pasos = 110, td = t.datos, tw = t.ancho;
+  const alfa = op.alfa == null ? 0.92 : op.alfa;
+
   g.save();
+  if(op.frente){
+    /* La parte del anillo que tapa al planeta es la mitad cercana, y sólo donde
+       cae sobre el disco. Recortar por una raya horizontal dejaba un corte recto
+       en las asas, y repintar lo de fuera acumulaba transparencias y dejaba la
+       mitad de abajo más clara que la de arriba. Se recorta por las dos cosas. */
+    g.beginPath(); g.arc(cx, cy, r*1.005, 0, Math.PI*2); g.clip();
+    g.save(); g.translate(cx, cy); g.rotate(gir);
+    g.beginPath(); g.rect(-rExt*1.2, 0, rExt*2.4, rExt*1.4);
+    g.restore();
+    g.clip();
+  }
   g.translate(cx, cy);
-  g.rotate((op.giroPlano == null ? -0.34 : op.giroPlano));
+  g.rotate(gir);
   g.scale(1, Math.max(0.04, incl));
   for(let i = 0; i < pasos; i++){
     const f0 = i/pasos, f1 = (i+1)/pasos;
-    const k = (((f0*tw)|0)*4);
+    const k = (((f0*(tw-1))|0)*4);
     const a = td[k+3]/255;
     if(a < 0.02) continue;
+    const R0 = rInt + (rExt-rInt)*f0, R1 = rInt + (rExt-rInt)*f1;
     g.beginPath();
-    g.arc(0, 0, rInt + (rExt-rInt)*f1, 0, 7);
-    g.arc(0, 0, rInt + (rExt-rInt)*f0, 0, 7, true);
-    g.fillStyle = `rgba(${td[k]},${td[k+1]},${td[k+2]},${a*(op.alfa == null ? 0.92 : op.alfa)})`;
+    g.arc(0, 0, R1, 0, Math.PI*2);
+    g.moveTo(R0, 0);                                  // sin esto queda una raya radial
+    g.arc(0, 0, R0, 0, Math.PI*2, true);
+    g.fillStyle = `rgba(${td[k]},${td[k+1]},${td[k+2]},${a*alfa})`;
     g.fill();
   }
   g.restore();
