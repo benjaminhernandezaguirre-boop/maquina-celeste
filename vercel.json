@@ -7,9 +7,26 @@
     {
       "source": "/carta-natal/",
       "destination": "/carta-natal.html"
+    },
+    {
+      "source": "/cartas-celebres",
+      "destination": "/cartas-celebres.html"
+    },
+    {
+      "source": "/cartas-celebres/",
+      "destination": "/cartas-celebres.html"
     }
   ],
   "headers": [
+    {
+      "source": "/cartas-celebres.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, must-revalidate"
+        }
+      ]
+    },
     {
       "source": "/app/planetas.js",
       "headers": [
