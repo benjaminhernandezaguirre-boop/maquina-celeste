@@ -53,6 +53,16 @@ test('carta natal includes a seasonal zodiac and live lunar module', () => {
   assert.match(html, /Ceres/);
   assert.match(html, /const temporada=signos\.find/);
   assert.match(html, /temporadaImagen/);
+  assert.match(html, /id="temporadaCaja"/);
+  assert.match(html, /elemento-tierra/);
+  assert.match(html, /elemento-agua/);
+  assert.match(html, /elemento-fuego/);
+  assert.match(html, /elemento-aire/);
+  assert.match(html, /estacion-primavera/);
+  assert.match(html, /estacion-verano/);
+  assert.match(html, /estacion-otono/);
+  assert.match(html, /estacion-invierno/);
+  assert.match(html, /Verano · transición al otoño/);
   const signs = ['aries', 'tauro', 'geminis', 'cancer', 'leo', 'virgo', 'libra', 'escorpio', 'sagitario', 'capricornio', 'acuario', 'piscis'];
   for (const sign of signs) {
     assert.match(html, new RegExp(`imagen:\"${sign}\"`));
