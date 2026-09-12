@@ -4983,6 +4983,13 @@ document.getElementById("gArchivo").addEventListener("change", ev => {
   document.getElementById("nHora").value = `${String(d.hora).padStart(2,"0")}:${String(d.min).padStart(2,"0")}`;
   document.getElementById("nLugar").value = d.lugarTexto || "";
   document.getElementById("nCasas").value = d.sistema || "placidio";
+  const lugarEnLista = CIUDADES.some(c => c.etiqueta.toLowerCase() === (d.lugarTexto || "").toLowerCase());
+  if(!lugarEnLista && Number.isFinite(d.lat) && Number.isFinite(d.lon)){
+    document.getElementById("manual").classList.add("visible");
+    document.getElementById("nLat").value = d.lat;
+    document.getElementById("nLon").value = d.lon;
+    if([...zonaSel.options].some(o => o.value === d.tz)) zonaSel.value = d.tz;
+  }
   if(!d.horaConocida){ sinHora.checked = true; sinHora.dispatchEvent(new Event("change")); }
 })();
 
