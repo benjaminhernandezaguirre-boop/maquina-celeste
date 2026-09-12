@@ -24,3 +24,15 @@ test('Earth switches from day to night using the visitor local time', () => {
   assert.equal(context.window.Planetas.tierraDeNoche(at(19)), true);
 });
 
+test('feature pages use the shared rotating planetary texture', () => {
+  const cases = [
+    ['cartas-celebres.html', 'jupiter'],
+    ['mercurio.html', 'mercurio'],
+    ['venus.html', 'venus']
+  ];
+  for (const [file, planet] of cases) {
+    const html = fs.readFileSync(path.join(root, file), 'utf8');
+    assert.match(html, new RegExp(`data-planeta-textura=["']${planet}["']`));
+    assert.match(html, /app\/planeta-decorativo\.js/);
+  }
+});
