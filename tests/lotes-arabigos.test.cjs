@@ -37,11 +37,11 @@ test('la calculadora incluye los siete lotes y no evalúa fórmulas', () => {
   assert.equal((avanzados[1].match(/\{id:/g) || []).length, 20);
 });
 
-test('una carta válida genera 7 lotes herméticos y permite recorrer dos grupos de 20 tradicionales', () => {
+test('una carta válida genera 7 lotes herméticos, dos grupos de 20 y una selección de 16', () => {
   const ids = ['themeToggle','cartaSelect','calcular','estado','salida','resumen','resultados','personalizados','nombreFormula','baseFormula','sumaFormula','restaFormula','invertirFormula','agregarFormula','sinCartas','ruedaLotes','leyendaLotes','detalleLote','tituloResultados','textoResultados','selectorLote'];
   const elemento = id => ({id,innerHTML:'',textContent:'',hidden:false,value:id==='cartaSelect'?'c1':'',checked:true,disabled:false,className:'',dataset:{},style:{},classList:{toggle(){}},listeners:{},addEventListener(t,f){this.listeners[t]=f},setAttribute(){},focus(){},closest(){return null},getBoundingClientRect(){return{left:0,top:0,width:500,height:500}}});
   const els = Object.fromEntries(ids.map(id => [id, elemento(id)]));
-  const botones = ['hermeticos','avanzados','expansion'].map(g => { const b=elemento(g); b.dataset.grupo=g; return b; });
+  const botones = ['hermeticos','avanzados','expansion','seleccion'].map(g => { const b=elemento(g); b.dataset.grupo=g; return b; });
   const carta={id:'c1',datos:{nombre:'Prueba',anio:1990,mes:6,dia:15,hora:12,min:0,horaConocida:true,lugarTexto:'Ciudad de México',lat:19.4326,lon:-99.1332,tz:'America/Mexico_City',desambiguacion:'reject',sistema:'placidio',factorOrbe:1,resumenFecha:'15 de junio de 1990',husoTexto:''}};
   const storage={'astroplanetario-cartas':JSON.stringify([carta])};
   const ctx={console,Intl,Date,Math,JSON,setTimeout,clearTimeout,matchMedia:()=>({matches:false}),localStorage:{getItem:k=>storage[k]||null,setItem:(k,v)=>storage[k]=v},document:{documentElement:{dataset:{}},body:{textContent:''},getElementById:id=>els[id],querySelectorAll:q=>q==='[data-grupo]'?botones:[]},window:null};ctx.window=ctx;
@@ -62,7 +62,15 @@ test('una carta válida genera 7 lotes herméticos y permite recorrer dos grupos
   els.selectorLote.value='viajes';
   els.selectorLote.listeners.change();
   assert.match(els.resultados.innerHTML,/Viajes/);
-  assert.match(els.estado.textContent,/47 lotes disponibles/);
+  botones[3].listeners.click();
+  assert.equal((els.ruedaLotes.innerHTML.match(/class="lote-marca/g)||[]).length,16);
+  assert.equal((els.selectorLote.innerHTML.match(/<option/g)||[]).length,16);
+  assert.match(els.resultados.innerHTML,/Pilar de la carta/);
+  els.selectorLote.value='rivalidadHermes';
+  els.selectorLote.listeners.change();
+  assert.match(els.resultados.innerHTML,/Cúspide de casa 12/);
+  assert.match(els.resultados.innerHTML,/Regente de casa 12/);
+  assert.match(els.estado.textContent,/63 lotes disponibles/);
 });
 
 test('el segundo paquete contiene 20 fórmulas y calcula cúspides y regentes tradicionales', () => {
@@ -75,6 +83,19 @@ test('el segundo paquete contiene 20 fórmulas y calcula cúspides y regentes tr
   assert.match(js, /p\.cusp9=casas\.c\[9\]/);
   assert.match(js, /SIGN_RULER_IDS\[Math\.floor/);
   assert.match(js, /p\.cancer15=105/);
+});
+
+test('la selección depurada contiene 16 lotes y evita fórmulas ambiguas', () => {
+  const js = read('app/lotes-arabigos.js');
+  const seleccion = js.match(/const SELECCION=\[([\s\S]*?)\];/);
+  assert.ok(seleccion);
+  assert.equal((seleccion[1].match(/\{id:/g) || []).length, 16);
+  assert.match(seleccion[1], /id:"hijos"/);
+  assert.match(seleccion[1], /id:"parejaHermes"/);
+  assert.match(seleccion[1], /id:"rivalidadHermes"/);
+  assert.doesNotMatch(seleccion[1], /syzy|lunación previa|lordAsc/);
+  assert.match(js, /p\.cusp12=casas\.c\[12\]/);
+  assert.match(js, /p\.senor12=regente\(p\.cusp12\)/);
 });
 
 test('Neptuno y las rutas públicas enlazan el nuevo módulo', () => {
