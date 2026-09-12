@@ -33,13 +33,15 @@ main{width:min(1180px,92vw);margin:auto;padding:2rem 0 5rem}.hero{display:grid;g
 <main>
   <section class="hero">
     <div><p class="eyebrow">Júpiter · archivo de vidas extraordinarias</p><h1>Cartas célebres</h1><p class="intro">Explora las cartas natales de personas que dejaron una huella en la historia, la ciencia, el arte y la cultura. Cada ficha identifica de dónde procede su hora de nacimiento.</p></div>
-    <div class="jupiter-art" aria-hidden="true"></div>
+    <div class="jupiter-art" data-planeta-textura="jupiter" aria-hidden="true"></div>
   </section>
   <aside class="criterio"><div class="sello">AA</div><div><h2>Datos documentados</h2><p>Esta primera colección utiliza registros clasificados como <strong>Rodden AA</strong>: actas, registros civiles o documentos familiares. Es la evidencia de nacimiento más sólida disponible, aunque una fuente histórica siempre puede actualizarse. <a href="https://www.astro.com/astro-databank/Help%3ARR" target="_blank" rel="noopener">Conoce la clasificación</a>.</p></div></aside>
   <nav class="controles" aria-label="Filtrar las cartas"><button class="filtro on" data-filter="todas">Todas</button><button class="filtro" data-filter="mexico">México</button><button class="filtro" data-filter="historia">Historia</button><button class="filtro" data-filter="ciencia">Ciencia</button><button class="filtro" data-filter="arte">Arte</button><button class="filtro" data-filter="musica">Música</button><button class="filtro" data-filter="cine">Cine</button><button class="filtro" data-filter="politica">Política</button><button class="filtro" data-filter="tecnologia">Tecnología</button><button class="filtro" data-filter="deporte">Deporte</button></nav>
   <section class="grid" id="grid" aria-live="polite"></section><p class="vacio" id="vacio">No hay fichas en esta categoría todavía.</p>
   <p class="nota-final"><strong>Lectura responsable:</strong> las cartas con horas contradictorias o desconocidas se incorporarán después en un archivo separado de casos en investigación. No se mostrará un Ascendente ni casas como si fueran datos confirmados.</p>
 </main>
+<script src="app/planetas.js?v=planet-textures-2-20260912"></script>
+<script src="app/planeta-decorativo.js?v=1-20260912"></script>
 <script>
 const PERSONAS=[
  {id:'vangogh',nombre:'Vincent van Gogh',area:'Pintura',cat:['historia','arte'],fecha:[1853,3,30,11,0],lugar:'Zundert, Países Bajos',lat:51.4719,lon:4.6631,tz:'Europe/Amsterdam',fuente:'Registro de nacimiento en mano',url:'https://www.astro.com/astro-databank/Van%20Gogh%2C_Vincent'},
@@ -114,4 +116,3 @@ pintaTema();pintar();
 </script>
 </body>
 </html>
-
