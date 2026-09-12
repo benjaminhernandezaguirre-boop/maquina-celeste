@@ -18,6 +18,7 @@ test('la guía ofrece metadatos, contenido y datos estructurados', () => {
 });
 
 test('la calculadora incluye los siete lotes y no evalúa fórmulas', () => {
+  const html = read('lotes-arabigos-calculadora.html');
   const js = read('app/lotes-arabigos.js');
   for (const id of ['fortuna', 'espiritu', 'eros', 'necesidad', 'coraje', 'victoria', 'nemesis']) {
     assert.match(js, new RegExp(`id:\"${id}\"`));
@@ -26,6 +27,10 @@ test('la calculadora incluye los siete lotes y no evalúa fórmulas', () => {
   assert.match(js, /horaSidereaGw/);
   assert.match(js, /Sol bajo el horizonte/);
   assert.match(js, /astroplanetario-formulas-lotes/);
+  assert.match(html, /id="ruedaLotes"/);
+  assert.match(html, /Carta natal de lotes arábigos/);
+  assert.match(js, /function dibujarRueda/);
+  assert.match(js, /cuspide[\s\S]{0,80}angular/);
 });
 
 test('Neptuno y las rutas públicas enlazan el nuevo módulo', () => {
