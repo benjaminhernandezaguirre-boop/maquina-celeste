@@ -15,9 +15,34 @@
     {
       "source": "/cartas-celebres/",
       "destination": "/cartas-celebres.html"
+    },
+    {
+      "source": "/lotes-arabigos",
+      "destination": "/lotes-arabigos.html"
+    },
+    {
+      "source": "/lotes-arabigos/",
+      "destination": "/lotes-arabigos.html"
+    },
+    {
+      "source": "/calculadora-lotes-arabigos",
+      "destination": "/lotes-arabigos-calculadora.html"
+    },
+    {
+      "source": "/calculadora-lotes-arabigos/",
+      "destination": "/lotes-arabigos-calculadora.html"
     }
   ],
   "headers": [
+    {
+      "source": "/app/lotes-arabigos.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
     {
       "source": "/cartas-celebres.html",
       "headers": [
