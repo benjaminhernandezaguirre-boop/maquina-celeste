@@ -46,14 +46,15 @@ test('una carta válida genera 7 lotes herméticos, dos grupos de 20 y una selec
   const storage={'astroplanetario-cartas':JSON.stringify([carta])};
   const ctx={console,Intl,Date,Math,JSON,setTimeout,clearTimeout,matchMedia:()=>({matches:false}),localStorage:{getItem:k=>storage[k]||null,setItem:(k,v)=>storage[k]=v},document:{documentElement:{dataset:{}},body:{textContent:''},getElementById:id=>els[id],querySelectorAll:q=>q==='[data-grupo]'?botones:[]},window:null};ctx.window=ctx;
   vm.createContext(ctx);vm.runInContext(read('app/efemerides.js'),ctx);vm.runInContext(read('app/lotes-arabigos.js'),ctx);
-  assert.equal((els.ruedaLotes.innerHTML.match(/class="lote-marca/g)||[]).length,7);
+  assert.equal((els.ruedaLotes.innerHTML.match(/class="lote-marca/g)||[]).length,1);
   assert.equal((els.resultados.innerHTML.match(/<article/g)||[]).length,1);
+  assert.match(els.resultados.innerHTML,/Aspectos cercanos que recibe/);
   botones[1].listeners.click();
-  assert.equal((els.ruedaLotes.innerHTML.match(/class="lote-marca/g)||[]).length,20);
+  assert.equal((els.ruedaLotes.innerHTML.match(/class="lote-marca/g)||[]).length,1);
   assert.equal((els.resultados.innerHTML.match(/<article/g)||[]).length,1);
   assert.equal((els.selectorLote.innerHTML.match(/<option/g)||[]).length,20);
   botones[2].listeners.click();
-  assert.equal((els.ruedaLotes.innerHTML.match(/class="lote-marca/g)||[]).length,20);
+  assert.equal((els.ruedaLotes.innerHTML.match(/class="lote-marca/g)||[]).length,1);
   assert.equal((els.resultados.innerHTML.match(/<article/g)||[]).length,1);
   assert.equal((els.selectorLote.innerHTML.match(/<option/g)||[]).length,20);
   assert.match(els.resultados.innerHTML,/Patrimonio/);
@@ -63,7 +64,7 @@ test('una carta válida genera 7 lotes herméticos, dos grupos de 20 y una selec
   els.selectorLote.listeners.change();
   assert.match(els.resultados.innerHTML,/Viajes/);
   botones[3].listeners.click();
-  assert.equal((els.ruedaLotes.innerHTML.match(/class="lote-marca/g)||[]).length,16);
+  assert.equal((els.ruedaLotes.innerHTML.match(/class="lote-marca/g)||[]).length,1);
   assert.equal((els.selectorLote.innerHTML.match(/<option/g)||[]).length,16);
   assert.match(els.resultados.innerHTML,/Pilar de la carta/);
   els.selectorLote.value='rivalidadHermes';
@@ -96,6 +97,20 @@ test('la selección depurada contiene 16 lotes y evita fórmulas ambiguas', () =
   assert.doesNotMatch(seleccion[1], /syzy|lunación previa|lordAsc/);
   assert.match(js, /p\.cusp12=casas\.c\[12\]/);
   assert.match(js, /p\.senor12=regente\(p\.cusp12\)/);
+});
+
+test('la rueda muestra un solo lote y la ficha explica aspectos con orbes reducidos', () => {
+  const html = read('lotes-arabigos-calculadora.html');
+  const js = read('app/lotes-arabigos.js');
+  assert.match(html, /un solo lote arábigo seleccionado/);
+  assert.match(html, /aspectos cercanos que recibe/);
+  assert.match(js, /const ASPECTOS=\[/);
+  assert.match(js, /nombre:"Trígono"[\s\S]{0,80}angulo:120[\s\S]{0,80}orbe:2/);
+  assert.match(js, /nombre:"Conjunción"[\s\S]{0,80}orbe:3/);
+  assert.match(js, /nombre:"Oposición"[\s\S]{0,80}orbe:3/);
+  assert.match(js, /function relevanciaAspecto/);
+  assert.match(js, /El lote no emite el aspecto: lo recibe del planeta/);
+  assert.doesNotMatch(js, /for\(const def of \[\.\.\.defs\]/);
 });
 
 test('Neptuno y las rutas públicas enlazan el nuevo módulo', () => {
