@@ -67,7 +67,7 @@
 </section>
 <section class="soon" id="soon"><div class="soon-card"><div class="glyph" id="soonGlyph">✦</div><h2 id="soonTitle">Próximamente</h2><p id="soonText">Este astro tendrá su propia herramienta dentro de Astroplanetario.</p><button id="closeSoon">Volver al planetario</button></div></section>
 <section class="load" id="load"><div class="loader"><div class="mini">Astroplanetario</div><div class="wheel"></div><p>Abriendo el módulo…</p></div></section>
-<script src="app/planetas.js"></script>
+<script src="app/planetas.js?v=planet-textures-2-20260912"></script>
 <script>
 const hero=document.getElementById('hero'),stage=document.getElementById('stage'),load=document.getElementById('load'),soon=document.getElementById('soon');let loading=false,selectedView='orbitas';
 const canvas=document.getElementById('space'),ctx=canvas.getContext('2d');let W=0,H=0,DPR=1,mx=.5,my=.5,stars=[];
@@ -130,8 +130,10 @@ const soonTitle=document.getElementById('soonTitle'),soonText=document.getElemen
       if(conAnillo && !b.el.classList.contains('anillos')) b.el.classList.add('anillos');
       const r = px/2/(conAnillo ? 2.6 : 1);        // el globo mide lo mismo que el de los demás
       const giro = quieto ? 0.18 : window.Planetas.giroDe(b.id, ms, ACEL);
+      const modoNoche = b.id === 'tierra' && window.Planetas.tierraDeNoche(ms);
+      if(b.id === 'tierra') b.el.dataset.fase = modoNoche ? 'noche' : 'día';
       if(conAnillo) window.Planetas.pintaAnillo(g, px/2, px/2, r, {incl:.36, alfa:.95});
-      const ok = window.Planetas.pintaEsfera(g, b.id, px/2, px/2, r, {giro});
+      const ok = window.Planetas.pintaEsfera(g, b.id, px/2, px/2, r, {giro, modoNoche});
       if(ok && conAnillo)                      // la media vuelta del anillo que pasa por delante
         window.Planetas.pintaAnillo(g, px/2, px/2, r, {incl:.36, alfa:.95, frente:true});
       if(ok !== b.el.classList.contains('con-tex')) b.el.classList.toggle('con-tex', ok);

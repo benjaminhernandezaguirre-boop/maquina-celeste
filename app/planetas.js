@@ -86,14 +86,16 @@ function mapaDe(r){
 }
 
 /* --- dibuja una esfera con textura --- */
-/* op: {giro (vueltas), luz:[x,y,z] normalizada, ambiente, noche:true} */
+/* op: {giro (vueltas), luz:[x,y,z] normalizada, ambiente, noche:true,
+        modoNoche:true para mostrar el mapa nocturno completo de la Tierra} */
 function pintaEsfera(g, id, cx, cy, r, op){
   const c = CUERPOS[id];
   if(!c || r < 2) return false;
-  const tex = cargaTextura(c.t);
-  if(!tex.lista) return false;
   op = op || {};
-  const noche = (c.noche && op.noche !== false) ? cargaTextura(c.noche) : null;
+  const modoNoche = Boolean(c.noche && op.modoNoche);
+  const tex = cargaTextura(modoNoche ? c.noche : c.t);
+  if(!tex.lista) return false;
+  const noche = (!modoNoche && c.noche && op.noche !== false) ? cargaTextura(c.noche) : null;
   const usaNoche = noche && noche.lista;
 
   const m = mapaDe(r), lado = m.lado;
@@ -104,7 +106,8 @@ function pintaEsfera(g, id, cx, cy, r, op){
   const nw = usaNoche ? noche.ancho : 0, nh = usaNoche ? noche.alto : 0;
   const giro = op.giro || 0;
   const lx = op.luz ? op.luz[0] : -0.45, ly = op.luz ? op.luz[1] : -0.42, lz = op.luz ? op.luz[2] : 0.79;
-  const amb = op.ambiente == null ? 0.13 : op.ambiente;
+  const amb = op.ambiente == null ? (modoNoche ? 0.72 : 0.13) : op.ambiente;
+  const exposicion = modoNoche ? 2.2 : 1;
   const propio = id === "sol";                        // el Sol no lo ilumina nadie
 
   for(let i = 0; i < lado*lado; i++){
@@ -125,9 +128,9 @@ function pintaEsfera(g, id, cx, cy, r, op){
       s[j+1] = td[k+1]*dia + nd[k2+1]*bn;
       s[j+2] = td[k+2]*dia + nd[k2+2]*bn;
     } else {
-      s[j]   = td[k]  *dia;
-      s[j+1] = td[k+1]*dia;
-      s[j+2] = td[k+2]*dia;
+      s[j]   = Math.min(255, td[k]  *dia*exposicion);
+      s[j+1] = Math.min(255, td[k+1]*dia*exposicion);
+      s[j+2] = Math.min(255, td[k+2]*dia*exposicion);
     }
     s[j+3] = m.borde[i];
   }
@@ -205,6 +208,14 @@ function giroDe(id, ms, aceleracion){
   return dias / c.rot;
 }
 
+/* La portada cambia de aspecto según el reloj local del visitante. */
+function tierraDeNoche(ms){
+  const hora = new Date(ms == null ? Date.now() : ms).getHours();
+  return hora >= 19 || hora < 7;
+}
+
 window.Planetas = {CUERPOS, pintaEsfera, pintaAnillo, giroDe, cargaTextura,
+                   tierraDeNoche,
                    listo: id => CUERPOS[id] && cargaTextura(CUERPOS[id].t).lista};
 })();
+

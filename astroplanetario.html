@@ -1082,7 +1082,7 @@
 </div>
 
 <script src="app/efemerides.js"></script>
-<script src="app/planetas.js"></script>
+<script src="app/planetas.js?v=planet-textures-2-20260912"></script>
 <script>
 (() => {
 "use strict";
@@ -1500,8 +1500,10 @@ function planetaCinematico(x,y,r,color,sunX,sunY,activo=false,id=null){
     const lx=dx0/len0, ly=dy0/len0, lz=.34, nl=Math.hypot(lx,ly,lz);
     const anillo = id==="saturno";
     if(anillo) Planetas.pintaAnillo(ctx,x,y,r,{incl:.3,alfa:.85});
+    const modoNoche=id==="tierra" && Planetas.tierraDeNoche();
     const ok = Planetas.pintaEsfera(ctx,id,x,y,r,
-      {giro:Planetas.giroDe(id,ahoraSim(),1), luz:[lx/nl,ly/nl,lz/nl], ambiente:.1});
+      {giro:Planetas.giroDe(id,ahoraSim(),1), luz:[lx/nl,ly/nl,lz/nl],
+       ambiente:modoNoche?.72:.1, modoNoche});
     if(ok){
       if(anillo) Planetas.pintaAnillo(ctx,x,y,r,{incl:.3,alfa:.85,frente:true});
       if(activo){ ctx.save(); ctx.globalCompositeOperation="lighter";
