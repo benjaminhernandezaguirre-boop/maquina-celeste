@@ -13,19 +13,22 @@ const profesional={PLANETAS:Object.fromEntries(ids.slice(0,7).map(id=>[id,planet
 const regencias={PLANETAS:profesional.PLANETAS,analizar:()=>({regenteCarta:{...planeta('marte'),signo:'Aries'},almuten:{...planeta('sol')},autoridad:[{...planeta('mercurio'),alcance:['sol','luna'],directos:['sol']},{...planeta('venus'),alcance:[],directos:[]} ]})};
 const estructura={analizar:c=>({conHora:c.datos.horaConocida,resumen:{horizonte:'Sobre el horizonte',lateral:'Oriental',cuadrante:'Cuadrante IV'},angularidad:[{id:'angular',cuerpos:c.datos.horaConocida?[{...planeta('marte'),casa:1}]:[]}],temperamento:{dominante:'Colérico',empate:['Colérico'],testigos:[1,2,3,4]}})};
 const patrones={analizar:()=>({cuerpos,patrones:[{nombre:'Cuadratura T'}],focales:[{cuerpo:planeta('marte'),rol:'Ápice de Cuadratura T'}],aislados:[planeta('urano')],forma:{nombre:'Locomotora',arco:210,hueco:150},concentraciones:{elementos:[{nombre:'Fuego',cuerpos:cuerpos.slice(0,4)},{nombre:'Tierra',cuerpos:cuerpos.slice(4,7)},{nombre:'Aire',cuerpos:cuerpos.slice(7,9)},{nombre:'Agua',cuerpos:cuerpos.slice(9)}]}})};
+const relaciones={analizar:()=>({resumen:{aplicativos:3,separativos:4,exactos:0,partiles:1,paralelos:2,fueraLimites:1,limitrofes:1,antiscios:2,puntosMedios:3}})};
 
-const r=S.analizar(carta,{profesional,regencias,estructura,patrones});
+const r=S.analizar(carta,{profesional,regencias,estructura,patrones,relaciones});
 assert.equal(r.prioridades[0].id,'marte');
 assert.equal(r.prioridades[0].peso,8,'suma regente, angularidad y foco sin mezclarlo con dignidad');
 assert.equal(r.masSostenidos[0].id,'sol');
 assert.equal(r.masSostenidos[0].total,10);
 assert.equal(r.masExigidos[0].id,'saturno');
 assert.ok(r.revisar.some(x=>x.cuerpo.id==='urano'&&x.total===null));
-assert.equal(r.lecturas.length,5);
+assert.equal(r.lecturas.length,6);
+assert.equal(r.avanzadas.resumen.aplicativos,3);
 assert.ok(r.criterio.includes('regente y almutén 4'));
 
-const parcial=S.analizar({datos:{horaConocida:false},cuerpos},{profesional,regencias,estructura,patrones});
+const parcial=S.analizar({datos:{horaConocida:false},cuerpos},{profesional,regencias,estructura,patrones,relaciones});
 assert.equal(parcial.estructura.conHora,false);
 assert.ok(parcial.pasos.some(x=>x.includes('Completar la hora natal')));
 
 console.log('natal-sintesis: pruebas correctas');
+

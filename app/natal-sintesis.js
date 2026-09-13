@@ -9,10 +9,10 @@ function agregaRol(mapa,cuerpo,rol,peso,detalle){
   if(!cuerpo)return;const actual=mapa.get(cuerpo.id)||{id:cuerpo.id,nombre:cuerpo.nombre,glifo:cuerpo.glifo,roles:[],peso:0};
   if(!actual.roles.some(x=>x.rol===rol)){actual.roles.push({rol,peso,detalle});actual.peso+=peso}mapa.set(cuerpo.id,actual);
 }
-function analizar(carta,{profesional=root.NatalProfesional,regencias=root.NatalRegencias,estructura=root.NatalEstructura,patrones=root.NatalPatrones,D=root.Dignidades,E=root.Efem}={}){
+function analizar(carta,{profesional=root.NatalProfesional,regencias=root.NatalRegencias,estructura=root.NatalEstructura,patrones=root.NatalPatrones,relaciones=root.NatalRelaciones,D=root.Dignidades,E=root.Efem}={}){
   if(!carta||!Array.isArray(carta.cuerpos))throw new TypeError("Falta una carta natal calculada.");
-  if(!profesional||!regencias||!estructura||!patrones)throw new TypeError("Faltan módulos profesionales para construir la síntesis.");
-  const condicion=profesional.analizar(carta,E),gobierno=regencias.analizar(carta,{D,E}),forma=estructura.analizar(carta),geometria=patrones.analizar(carta);
+  if(!profesional||!regencias||!estructura||!patrones||!relaciones)throw new TypeError("Faltan módulos profesionales para construir la síntesis.");
+  const condicion=profesional.analizar(carta,E),gobierno=regencias.analizar(carta,{D,E}),forma=estructura.analizar(carta),geometria=patrones.analizar(carta),avanzadas=relaciones.analizar(carta,E);
   const porId=Object.fromEntries(carta.cuerpos.map(c=>[c.id,c])),roles=new Map();
   const cuerpo=id=>{const c=porId[id],p=profesional.PLANETAS?.[id]||regencias.PLANETAS?.[id];return c&&{id,nombre:c.nombre||p?.nombre||id,glifo:c.glifo||p?.glifo||""}};
   agregaRol(roles,cuerpo(gobierno.regenteCarta?.id),"Regente de la carta",4,"Gobierna el signo del Ascendente.");
@@ -37,6 +37,7 @@ function analizar(carta,{profesional=root.NatalProfesional,regencias=root.NatalR
     ?`La carta se orienta hacia ${forma.resumen.horizonte?.toLowerCase()||"un equilibrio del horizonte"} y ${forma.resumen.lateral?.toLowerCase()||"un equilibrio lateral"}. ${forma.resumen.cuadrante?`${forma.resumen.cuadrante} reúne la mayor concentración.`:"Los cuadrantes quedan equilibrados."}`
     :"La estructura por casas, cuadrantes, hemisferios y angularidad permanece abierta porque falta una hora natal fiable.";
   const geometriaTexto=`La distribución adopta una forma ${geometria.forma.nombre.toLowerCase()} aproximada, con ${geometria.forma.arco.toFixed(1)}° ocupados. ${patronesTexto}.${geometria.aislados.length?` ${nombres(geometria.aislados)} queda sin aspectos mayores dentro de estos orbes.`:" Todos los cuerpos participan en al menos un aspecto mayor."}`;
+  const relacionesTexto=`Se registran ${avanzadas.resumen.aplicativos} aspectos aplicativos, ${avanzadas.resumen.separativos} separativos y ${avanzadas.resumen.partiles} partiles. La declinación aporta ${avanzadas.resumen.paralelos} contactos y ${avanzadas.resumen.fueraLimites} cuerpos fuera de límites; además aparecen ${avanzadas.resumen.antiscios} contactos por antiscio y ${avanzadas.resumen.puntosMedios} cuadros de puntos medios dentro de los orbes declarados.`;
   const balanceTexto=`${elementoDominante?`${elementoDominante.nombre} concentra ${elementoDominante.cuerpos.length} de ${geometria.cuerpos.length} cuerpos.`:`No existe un único elemento dominante.`} La síntesis temperamental indica ${temperamento.toLowerCase()} con ${temp.testigos.length} de cuatro testigos disponibles.`;
   const fortalezas=totales.filter(x=>x.total>0).sort((a,b)=>b.total-a.total).map(x=>({cuerpo:cuerpo(x.id),total:x.total,detalle:`Esencial ${x.esencial.puntos>=0?"+":""}${x.esencial.puntos} · accidental ${x.accidental.puntos>=0?"+":""}${x.accidental.puntos}`}));
   const revisar=totales.filter(x=>x.total<0).sort((a,b)=>a.total-b.total).map(x=>({cuerpo:cuerpo(x.id),total:x.total,detalle:`Esencial ${x.esencial.puntos>=0?"+":""}${x.esencial.puntos} · accidental ${x.accidental.puntos>=0?"+":""}${x.accidental.puntos}`}));
@@ -46,15 +47,18 @@ function analizar(carta,{profesional=root.NatalProfesional,regencias=root.NatalR
   if(gobierno.almuten)pasos.push(`Contrastar al regente con ${gobierno.almuten.nombre}, almutén figuris.`);
   if(prioridades[0])pasos.push(`Seguir los testimonios reunidos por ${prioridades[0].nombre}: ${prioridades[0].roles.map(x=>x.rol).join(", ")}.`);
   if(geometria.patrones.length)pasos.push(`Leer las configuraciones desde sus planetas focales y después el patrón completo.`);
+  pasos.push("Contrastar los aspectos aplicativos y separativos con declinación, antiscios y puntos medios relevantes.");
   if(forma.conHora)pasos.push("Integrar casas, cuadrantes y angularidad al juicio final.");else pasos.push("Completar la hora natal antes de formular conclusiones sobre casas y angularidad.");
-  return{horaConocida:!!carta.datos?.horaConocida,condicion,gobierno,estructura:forma,geometria,prioridades,masSostenidos,masExigidos,fortalezas,revisar,pasos,lecturas:[
+  return{horaConocida:!!carta.datos?.horaConocida,condicion,gobierno,estructura:forma,geometria,avanzadas,prioridades,masSostenidos,masExigidos,fortalezas,revisar,pasos,lecturas:[
     {id:"gobierno",titulo:"Gobierno de la carta",texto:gobiernoTexto},
     {id:"condicion",titulo:"Condición planetaria",texto:condicionTexto},
     {id:"estructura",titulo:"Estructura",texto:estructuraTexto},
     {id:"geometria",titulo:"Geometría y aspectos",texto:geometriaTexto},
+    {id:"relaciones",titulo:"Relaciones avanzadas",texto:relacionesTexto},
     {id:"balance",titulo:"Balance y temperamento",texto:balanceTexto}
-  ],criterio:"La síntesis cruza testimonios independientes ya calculados y conserva sus límites. Las ponderaciones de prioridad organizan la lectura: regente y almutén 4, autoridad dispositora 3, angularidad y foco geométrico 2. No añaden dignidad ni sustituyen la interpretación del astrólogo."};
+  ],criterio:"La síntesis cruza testimonios independientes ya calculados y conserva sus límites. Las ponderaciones de prioridad organizan la lectura: regente y almutén 4, autoridad dispositora 3, angularidad y foco geométrico 2. Las relaciones avanzadas aportan geometría y dinámica sin sumar dignidad. No sustituyen la interpretación del astrólogo."};
 }
 
 root.NatalSintesis={ORDEN,unico,maximos,analizar};
 })(typeof window!=="undefined"?window:globalThis);
+
