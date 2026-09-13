@@ -30,7 +30,6 @@ Si algún archivo no aparece como cambiado, es que ya lo tenías igual: no pasa 
 | `app/planetas.js` | **Nuevo.** Envuelve el mapa de cada planeta sobre una esfera que gira, con la inclinación de su eje y el periodo de rotación reales. |
 | `assets/planetas/` | **Nuevo.** Trece texturas en WebP, 143 KB en total. |
 | `vercel.json` | Cabeceras `no-cache` para las páginas nuevas. |
-| `scripts/partir.py` | Opcional: vuelve a partir la app en ocho trozos si alguna herramienta te los pide. |
 
 ## Lo que se arregló por el camino
 
@@ -102,8 +101,8 @@ Si algún archivo no aparece como cambiado, es que ya lo tenías igual: no pasa 
 Está en `PENDIENTES.md`, que ahora viene dentro del repo y está al día.
 
 De la astrocartografía quedan los paranes, las líneas de espacio local, reubicar la carta entera para
-otra ciudad y el zoom por continente. De lo pequeño queda: el sprite del zodiaco no es una imagen válida y el título de Luna se encima con
-la tarjeta del signo. `luna.html` y `astroplanetario.html` utilizan ahora el mismo motor `app/efemerides.js`.
+otra ciudad y el zoom por continente. `luna.html` y `astroplanetario.html` utilizan el mismo motor
+`app/efemerides.js`; Luna reutiliza además las doce ilustraciones reales de `assets/zodiaco/`.
 Se puede seguir abriendo el sitio localmente conservando la carpeta `app`.
 
 ### Precisión y correcciones de Astrocartografía
@@ -119,3 +118,4 @@ precesión tridimensional, distancias esféricas, continuidad de curvas y selecc
 de datos. Los resultados antiguos deben recalcularse con la versión corregida.
 
 Quirón sigue fuera del modelo.
+
