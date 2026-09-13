@@ -769,6 +769,32 @@
     .tabla-eventos thead{display:none}.tabla-eventos,.tabla-eventos tbody,.tabla-eventos tr,.tabla-eventos td{display:block;width:100%}
     .tabla-eventos tr{display:grid;grid-template-columns:1fr auto;gap:.2rem .5rem;padding:.55rem 0;border-bottom:1px solid #D5CEBF}.tabla-eventos td{border:0;padding:.05rem 0}.tabla-eventos td:nth-child(1){grid-column:1/-1}.tabla-eventos .casa{text-align:left}.tabla-eventos .fecha{grid-column:2;grid-row:2}
   }
+  /* selector general: conserva las herramientas existentes y separa los análisis nuevos */
+  .modo-carta{display:flex;align-items:center;justify-content:space-between;gap:.7rem;padding:.48rem .65rem;border-bottom:1px solid #D5CEBF;background:#F4F0E6;flex:none}
+  .modo-carta>span{color:#6B6A78;font:500 .5rem "IBM Plex Mono",monospace;letter-spacing:.14em;text-transform:uppercase}
+  .modo-selector{display:grid;grid-template-columns:1fr 1fr;gap:3px;border:1px solid #CFC7B4;border-radius:9px;padding:3px;background:#FBF8F1}
+  .modo-selector button{min-height:2rem;border-radius:6px;padding:.38rem .75rem;color:#6B6A78;font:500 .58rem "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase}
+  .modo-selector button[aria-pressed="true"]{background:#DAB86A;color:#22212B;box-shadow:0 2px 8px #70551424}
+  .avanzado-cabecera{display:none;flex:1;align-items:center;justify-content:space-between;gap:.5rem;padding:.42rem .6rem}
+  .avanzado-cabecera span{font:500 .58rem "IBM Plex Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:#8A6A22}
+  #cartaPanel.modo-avanzado .avanzado-cabecera{display:flex}
+  #cartaPanel.modo-avanzado .pest,#cartaPanel.modo-avanzado #pestMovil{display:none}
+  #app.modo-avanzado-global #btnPngRueda,#app.modo-avanzado-global #btnPngResumen,#app.modo-avanzado-global #btnPngHoja,#app.modo-avanzado-global [data-eco="btnPngRueda"],#app.modo-avanzado-global [data-eco="btnPngResumen"],#app.modo-avanzado-global [data-eco="btnPngHoja"]{display:none}
+  #tabProfesional{display:none}
+  .pro-portada{margin:.35rem 0 1rem;padding:.9rem;border:1px solid #C9B477;border-radius:14px;background:linear-gradient(135deg,#F7F0DC,#FBF8F1 62%);box-shadow:0 10px 28px #563E1210}
+  .pro-portada h2{margin:.15rem 0 .3rem;font:500 1.3rem Cinzel,Georgia,serif;color:#22212B}.pro-portada>p{margin:.2rem 0 .75rem;color:#5C5B68;font-size:.82rem;line-height:1.45}
+  .pro-navegacion{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem}.pro-navegacion button{border:1px solid #D5CEBF;border-radius:9px;background:#FBF8F1;padding:.6rem .45rem;color:#4A4956;font:500 .58rem "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase}.pro-navegacion button:hover{border-color:#A8801F;color:#8A6A22}
+  .estructura-panel{margin:1.25rem 0 1.7rem;border-top:1px solid #CFC7B4;padding-top:1.1rem;color:#22212B}.estructura-panel>header,.reg-panel>header{position:static;display:block;height:auto;min-height:0;background:transparent;border:0;padding:0;color:#22212B;box-shadow:none}.estructura-panel>header h2{margin:0;font:500 1.25rem Cinzel,Georgia,serif}.estructura-panel>header p{margin:.3rem 0 .85rem;color:#5C5B68;font-size:.82rem;line-height:1.45}
+  .estructura-resumen{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;margin:.7rem 0 1rem}.estructura-tarjeta{border:1px solid #D5CEBF;border-radius:10px;background:#F7F2E8;padding:.7rem}.estructura-tarjeta small{display:block;color:#6B6A78;font:500 .52rem "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase}.estructura-tarjeta b{display:block;margin:.2rem 0;color:#8A6A22;font:500 .95rem Cinzel,Georgia,serif}.estructura-tarjeta span{font-size:.7rem;color:#5C5B68;line-height:1.35}
+  .estructura-subtitulo{margin:1rem 0 .5rem;color:#8A6A22;font:500 .58rem "IBM Plex Mono",monospace;letter-spacing:.13em;text-transform:uppercase}
+  .cuadrantes-diagrama{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;aspect-ratio:1.55/1;max-height:22rem}.cuadrante{position:relative;border:1px solid #D5CEBF;border-radius:10px;background:#FBF8F1;padding:.7rem;text-align:left;color:#4A4956;overflow:hidden}.cuadrante::after{content:"";position:absolute;width:5rem;height:5rem;border:1px solid #D8C899;border-radius:50%;opacity:.35}.cuadrante:nth-child(1)::after{right:-2.5rem;bottom:-2.5rem}.cuadrante:nth-child(2)::after{left:-2.5rem;bottom:-2.5rem}.cuadrante:nth-child(3)::after{left:-2.5rem;top:-2.5rem}.cuadrante:nth-child(4)::after{right:-2.5rem;top:-2.5rem}.cuadrante:hover,.cuadrante[aria-pressed="true"]{border-color:#A8801F;background:#F7EDD3;box-shadow:inset 0 0 0 1px #A8801F33}.cuadrante b,.cuadrante span,.cuadrante small{display:block;position:relative;z-index:1}.cuadrante b{font:500 .85rem Cinzel,Georgia,serif;color:#22212B}.cuadrante span{margin:.2rem 0;color:#8A6A22;font:600 .66rem "IBM Plex Mono",monospace}.cuadrante small{font-size:.64rem;line-height:1.35;color:#6B6A78}
+  .estructura-barras{display:grid;gap:.65rem}.estructura-barra>div{display:flex;justify-content:space-between;gap:.5rem;font-size:.72rem;color:#4A4956}.estructura-barra strong{color:#22212B}.estructura-barra meter{width:100%;height:.72rem;accent-color:#A8801F}.estructura-barra small{display:block;color:#6B6A78;font-size:.63rem;line-height:1.3}
+  .temperamento-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem}.temperamento-item{border:1px solid #D5CEBF;border-radius:9px;padding:.55rem;background:#FBF8F1}.temperamento-item b,.temperamento-item small{display:block}.temperamento-item b{font:500 .76rem Cinzel,Georgia,serif}.temperamento-item small{font-size:.61rem;color:#6B6A78;margin:.14rem 0}.temperamento-item meter{width:100%;height:.55rem;accent-color:var(--temp,#A8801F)}
+  .temp-testigos{margin-top:.65rem;border:1px solid #D5CEBF;border-radius:10px;background:#FBF8F1}.temp-testigos summary{cursor:pointer;padding:.65rem .75rem;color:#5C5B68;font:500 .6rem "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase}.temp-testigos-lista{padding:0 .75rem .65rem}.temp-testigo{display:flex;justify-content:space-between;gap:.7rem;padding:.45rem 0;border-top:1px solid #E7E1D3;font-size:.7rem;color:#5C5B68}.temp-testigo b{color:#22212B}.temp-testigo span:last-child{text-align:right}
+  .sin-hora-panel{border:1px dashed #B7923C;border-radius:12px;background:#FFF8E8;padding:.85rem;margin:.8rem 0}.sin-hora-panel h3{margin:0 0 .3rem;font:500 1rem Cinzel,Georgia,serif}.sin-hora-panel p{margin:.25rem 0;color:#5C5B68;font-size:.76rem;line-height:1.45}.sin-hora-panel ul{margin:.55rem 0;padding-left:1.1rem;color:#4A4956;font-size:.72rem;line-height:1.55}
+  .reporte-aviso{font-size:.63rem;color:#6B6A78;margin:.4rem 0 0}
+  @media(max-width:620px){.modo-carta{padding:.35rem .45rem}.modo-carta>span{display:none}.modo-selector{width:100%}.modo-selector button{min-height:2.5rem}.avanzado-cabecera span{font-size:.5rem}.avanzado-cabecera button{font-size:.54rem;padding:.42rem}.pro-navegacion{grid-template-columns:1fr}.estructura-resumen{grid-template-columns:1fr 1fr}.temperamento-grid{grid-template-columns:1fr 1fr}.cuadrantes-diagrama{aspect-ratio:auto;min-height:18rem}}
+
   /* paquete profesional 1: dignidades tradicionales y secta */
   .pro-cabecera{display:grid;grid-template-columns:1fr;gap:.65rem;margin:.45rem 0 1rem}
   .pro-intro,.pro-secta,.pro-criterios{border:1px solid #D5CEBF;border-radius:12px;background:#F7F2E8;padding:.85rem;color:#22212B}
@@ -1050,7 +1076,12 @@ Actual value was -49794."
     </div>
 
     <aside id="cartaPanel" aria-label="Carta natal">
+      <div class="modo-carta" role="group" aria-label="Nivel de análisis">
+        <span>Nivel de lectura</span>
+        <div class="modo-selector"><button type="button" id="modoNormal" aria-pressed="true">Modo normal</button><button type="button" id="modoAvanzado" aria-pressed="false">Modo avanzado</button></div>
+      </div>
       <div class="pest-fila">
+        <div class="avanzado-cabecera" id="avanzadoCabecera"><span>Análisis profesional</span><button type="button" class="secundario" id="descargaAvanzada">Descargar informe · 4 hojas</button></div>
         <div class="pest" role="tablist">
           <span class="pgrupo" role="presentation">
             <span class="pgrupo-rot">La carta</span>
@@ -1058,7 +1089,7 @@ Actual value was -49794."
               <button role="tab" id="tabResumen" aria-selected="true" aria-controls="hojaResumen">Resumen</button>
               <button role="tab" id="tabPos" aria-selected="false" aria-controls="hojaPos">Posiciones</button>
               <button role="tab" id="tabBalance" aria-selected="false" aria-controls="hojaBalance">Balance</button>
-              <button role="tab" id="tabProfesional" aria-selected="false" aria-controls="hojaProfesional">Profesional</button>
+              <button role="tab" id="tabProfesional" aria-selected="false" aria-controls="hojaProfesional" hidden>Profesional</button>
               <button role="tab" id="tabAsp" aria-selected="false" aria-controls="hojaAsp">Aspectos</button>
               <button role="tab" id="tabCasas" aria-selected="false" aria-controls="hojaCasas">Casas</button>
               <button role="tab" id="tabSent" aria-selected="false" aria-controls="hojaSent">Significados</button>
@@ -1087,7 +1118,6 @@ Actual value was -49794."
             <option value="tabResumen">Resumen</option>
             <option value="tabPos">Posiciones</option>
             <option value="tabBalance">Balance</option>
-            <option value="tabProfesional">Profesional</option>
             <option value="tabAsp">Aspectos</option>
             <option value="tabCasas">Casas</option>
             <option value="tabSent">Significados</option>
@@ -1129,6 +1159,7 @@ Actual value was -49794."
 <script src="app/dignidades.js"></script>
 <script src="app/natal-profesional.js?v=profesional-1-20260913-2"></script>
 <script src="app/natal-regencias.js?v=profesional-2-20260913"></script>
+<script src="app/natal-estructura.js?v=profesional-3-20260913"></script>
 <script src="app/planetas.js?v=planet-textures-2-20260912"></script>
 <script>
 (() => {
@@ -1442,6 +1473,7 @@ const ctx = lienzo.getContext("2d");
 let W=0, H=0, dpr=1, estrellas=[], nebulosa=null;
 let vista = "orbitas", zoom = 1;
 let natalPan = {x:0,y:0};
+let cuadranteResaltado = null;
 let mostrarMenoresRueda = false;
 let arrastreNatal = null, suprimirClickNatal = false;
 const blancos = [];                  // zonas sensibles del último fotograma
@@ -2848,6 +2880,13 @@ function pintaRueda(g, cx, cy, R, vivo, capa, ch){
     }
   }
 
+  // resalte solicitado desde el diagrama de cuadrantes del modo avanzado
+  if(cusp && cuadranteResaltado && !capa){
+    const inicio=[1,4,7,10][cuadranteResaltado-1],fin=inicio===10?1:inicio+3;
+    const ai=aPant(cusp[inicio]),af=aPant(cusp[fin]);
+    g.save();g.beginPath();g.moveTo(cx,cy);g.lineTo(cx+Math.cos(af)*rInt,cy+Math.sin(af)*rInt);g.arc(cx,cy,rInt,af,ai);g.closePath();g.fillStyle="rgba(168,128,31,.12)";g.fill();g.restore();
+  }
+
   // aspectos
   for(const {A,B,asp} of (capa ? [] : aspectos)){
     if(A.tipo === "angulo" || B.tipo === "angulo") continue;
@@ -3206,6 +3245,42 @@ function pintaRegenciasProfesionales(destino){
     </section>`);
   destino.querySelectorAll("[data-reg-planeta]").forEach(b=>b.addEventListener("click",()=>marcaFila(b.dataset.regPlaneta,false)));
 }
+function listaCuerpos(items){return items.length?items.map(x=>x.glifo+' '+x.nombre).join(' · '):'Sin cuerpos'}
+function pintaEstructuraProfesional(destino){
+  const motor=window.NatalEstructura;if(!motor)return;
+  const a=motor.analizar(carta),temp=a.temperamento,maxTemp=Math.max(1,...Object.values(temp.conteo));
+  const dominanteTemp=temp.dominante||('Equilibrio: '+temp.empate.join(' · '));
+  const tarjeta=(rotulo,valor,detalle)=>'<article class="estructura-tarjeta"><small>'+rotulo+'</small><b>'+valor+'</b><span>'+detalle+'</span></article>';
+  const barra=(nombre,valor,total,cuerpos)=>'<div class="estructura-barra"><div><strong>'+nombre+'</strong><span>'+valor+' / '+total+'</span></div><meter min="0" max="'+Math.max(1,total)+'" value="'+valor+'"></meter><small>'+listaCuerpos(cuerpos)+'</small></div>';
+  const tempColor={Colérico:'#B45A3C',Melancólico:'#55764A',Sanguíneo:'#B38B35',Flemático:'#3F7C93'};
+  destino.insertAdjacentHTML('beforeend',`<section class="estructura-panel" id="estructuraProfesional"><header><span class="pro-criterio"><b>Paquete profesional 3</b></span><h2>Estructura de la carta</h2><p>Distribución espacial de los diez cuerpos y una síntesis temperamental cuyos criterios pueden revisarse paso a paso.</p></header>
+    ${!a.conHora?`<aside class="sin-hora-panel"><h3>Carta sin hora · lectura parcial</h3><p>Las posiciones por signo y la síntesis elemental de Sol y Luna siguen disponibles. No se estiman ángulos ni casas.</p><ul><li>Cuadrantes, hemisferios y angularidad requieren Ascendente y cúspides.</li><li>El temperamento queda con 2 de 4 testigos; faltan Ascendente y regente de la carta.</li><li>Para completar la estructura, edita los datos y añade una hora natal fiable.</li></ul><button type="button" class="secundario" id="estructuraEditar">Añadir hora natal</button></aside>`:''}
+    <div class="estructura-resumen">
+      ${tarjeta('Horizonte',a.resumen.horizonte||'Requiere hora',a.conHora?'Comparación entre casas 7–12 y 1–6.':'No se interpreta sin horizonte.')}
+      ${tarjeta('Orientación',a.resumen.lateral||'Requiere hora',a.conHora?'Comparación entre hemisferio oriental y occidental.':'No se interpreta sin meridiano.')}
+      ${tarjeta('Cuadrante dominante',a.resumen.cuadrante||(!a.conHora?'Requiere hora':'Equilibrio'),a.conHora?(a.resumen.cuadrante?'Mayor concentración de cuerpos.':'Empate entre '+a.resumen.cuadrantesEmpate.join(' · '))+'.':'Necesita casas calculadas.')}
+      ${tarjeta('Síntesis temperamental',dominanteTemp,temp.completo?'Cuatro testigos disponibles.':'Resultado parcial: '+temp.testigos.length+' de 4 testigos.')}
+    </div>
+    <h3 class="estructura-subtitulo">Diagrama de cuadrantes</h3>
+    ${a.conHora?`<div class="cuadrantes-diagrama">${a.cuadrantes.map(q=>`<button type="button" class="cuadrante" data-cuadrante="${q.id}" aria-pressed="false"><b>${q.nombre}</b><span>Casas ${q.casas.join('–')} · ${q.cuerpos.length} cuerpos</span><small>${listaCuerpos(q.cuerpos)}</small></button>`).join('')}</div><p class="reporte-aviso">Toca un cuadrante para resaltarlo también sobre la rueda natal.</p>`:'<div class="sin-hora-panel"><p>El diagrama aparecerá al proporcionar la hora de nacimiento.</p></div>'}
+    <h3 class="estructura-subtitulo">Hemisferios</h3><div class="estructura-barras">${a.conHora?a.hemisferios.map(h=>barra(h.nombre,h.cuerpos.length,a.cuerpos.length,h.cuerpos)).join(''):'<p class="aviso">Requiere hora natal.</p>'}</div>
+    <h3 class="estructura-subtitulo">Angularidad</h3><div class="estructura-barras">${a.conHora?a.angularidad.map(g=>barra(g.nombre,g.cuerpos.length,a.cuerpos.length,g.cuerpos)).join(''):'<p class="aviso">Requiere hora natal.</p>'}</div>
+    <h3 class="estructura-subtitulo">Temperamento</h3><div class="temperamento-grid">${Object.entries(temp.conteo).map(([nombre,valor])=>`<div class="temperamento-item" style="--temp:${tempColor[nombre]}"><b>${nombre}</b><small>${valor} de ${temp.testigos.length} testigos</small><meter min="0" max="${maxTemp}" value="${valor}"></meter></div>`).join('')}</div>
+    <details class="temp-testigos"><summary>Ver cómo se calculó</summary><div class="temp-testigos-lista">${temp.testigos.map(t=>`<div class="temp-testigo"><b>${t.glifo} ${t.nombre}</b><span>${t.signoNombre} · ${t.elemento} · ${t.temperamento}<br>${t.cualidades.join(' + ')}</span></div>`).join('')}<p class="reg-criterio"><b>Criterio:</b> ${temp.criterio}</p></div></details>
+    <section class="pro-criterios"><h3>Criterios de estructura</h3><div class="pro-criterios-grid"><div class="pro-criterio"><b>Población</b><span>${a.criterio.poblacion}</span></div><div class="pro-criterio"><b>Cuadrantes</b><span>${a.criterio.cuadrantes}</span></div><div class="pro-criterio"><b>Hemisferios</b><span>${a.criterio.hemisferios}</span></div><div class="pro-criterio"><b>Angularidad</b><span>${a.criterio.angularidad}</span></div></div></section>
+  </section>`);
+  destino.querySelectorAll('[data-cuadrante]').forEach(b=>b.addEventListener('click',()=>{const q=Number(b.dataset.cuadrante);cuadranteResaltado=cuadranteResaltado===q?null:q;destino.querySelectorAll('[data-cuadrante]').forEach(x=>x.setAttribute('aria-pressed',String(Number(x.dataset.cuadrante)===cuadranteResaltado)))}));
+  document.getElementById('estructuraEditar')?.addEventListener('click',()=>document.getElementById('btnEditar').click());
+}
+function lienzoInforme(titulo,subtitulo){const c=document.createElement('canvas');c.width=1600;c.height=2263;const g=c.getContext('2d');g.fillStyle='#FBF8F1';g.fillRect(0,0,c.width,c.height);g.fillStyle='#22212B';g.font='52px Cinzel, Georgia, serif';g.fillText(titulo,85,105);g.fillStyle='#6B6A78';g.font='23px "IBM Plex Mono", monospace';g.fillText(subtitulo,85,150);g.strokeStyle='#CFC7B4';g.beginPath();g.moveTo(85,180);g.lineTo(1515,180);g.stroke();return{c,g,y:240}}
+function textoInforme(g,texto,x,y,max,alto=30){const palabras=String(texto).split(/\s+/);let linea='',yy=y;for(const p of palabras){const prueba=linea?linea+' '+p:p;if(g.measureText(prueba).width>max&&linea){g.fillText(linea,x,yy);linea=p;yy+=alto}else linea=prueba}if(linea)g.fillText(linea,x,yy);return yy+alto}
+function paginaCondicion(){const a=window.NatalProfesional.analizar(carta,window.Efem),o=lienzoInforme('Condición tradicional','Hoja 2 de 4 · dignidades, capacidad accidental y secta'),g=o.g;let y=o.y;g.font='29px Spectral, Georgia, serif';g.fillStyle='#22212B';for(const f of a.filas){const z=posZod(f.lon);g.fillStyle='#8A6A22';g.font='31px Cinzel, Georgia, serif';g.fillText(`${f.glifo} ${f.nombre}`,85,y);g.fillStyle='#22212B';g.font='25px Spectral, Georgia, serif';g.fillText(`${z.texto}${f.casa?' · casa '+ROMANOS[f.casa]:''}`,410,y);g.textAlign='right';g.fillText(`Esencial ${f.esencial.puntos>=0?'+':''}${f.esencial.puntos} · Accidental ${f.accidental.puntos>=0?'+':''}${f.accidental.puntos}`,1515,y);g.textAlign='left';y+=42;g.fillStyle='#5C5B68';g.font='21px Spectral, Georgia, serif';y=textoInforme(g,'Esencial: '+f.esencial.detalles.map(x=>x.label+(x.puntos?` ${x.puntos>0?'+':''}${x.puntos}`:'')).join(' · '),115,y,1360,27);y=textoInforme(g,'Accidental: '+f.accidental.detalles.map(x=>x.label+(x.puntos?` ${x.puntos>0?'+':''}${x.puntos}`:'')).join(' · '),115,y,1360,27);if(f.secta)y=textoInforme(g,`Secta: ${f.secta.coincide?'en secta':'fuera de secta'} · ${f.secta.secta}${f.secta.fase?' · '+f.secta.fase:''}`,115,y,1360,27);y+=26;g.strokeStyle='#E0D8C8';g.beginPath();g.moveTo(85,y);g.lineTo(1515,y);g.stroke();y+=34}g.fillStyle='#6B6A78';g.font='19px Spectral, Georgia, serif';textoInforme(g,a.horaConocida?'Puntuación mostrada por componentes.':'Carta sin hora: se omiten casas, triplicidad activa y secta.',85,2190,1430,25);return o.c}
+function paginaRegencias(){const a=window.NatalRegencias.analizar(carta,{D:window.Dignidades,E:window.Efem}),o=lienzoInforme('Regencias y dispositores','Hoja 3 de 4 · gobierno, cadenas y recepciones'),g=o.g;let y=o.y;g.fillStyle='#22212B';g.font='28px Spectral, Georgia, serif';const dato=(r,v)=>{g.fillStyle='#8A6A22';g.font='20px "IBM Plex Mono", monospace';g.fillText(r.toUpperCase(),85,y);g.fillStyle='#22212B';g.font='31px Cinzel, Georgia, serif';y=textoInforme(g,v,85,y+40,1430,38);y+=25};dato('Regente de la carta',a.regenteCarta?`${a.regenteCarta.glifo} ${a.regenteCarta.nombre} · rige el Ascendente en ${a.regenteCarta.signo}`:'Requiere hora natal');dato('Almutén figuris',a.almuten?`${a.almuten.glifo} ${a.almuten.nombre} · ${a.almuten.total} puntos`:'Requiere hora y cálculo completo');dato('Recepciones mutuas',a.recepciones.length?a.recepciones.map(x=>`${x.glifoA} ${x.nombreA} ↔ ${x.glifoB} ${x.nombreB}`).join(' · '):'Ninguna por domicilio');y+=12;g.fillStyle='#8A6A22';g.font='20px "IBM Plex Mono", monospace';g.fillText('MAPA Y CADENAS',85,y);y+=48;for(const f of a.filas){g.fillStyle='#22212B';g.font='27px Spectral, Georgia, serif';g.fillText(`${f.glifo} ${f.nombre} en ${f.signoNombre} → ${f.dispositorGlifo} ${f.dispositorNombre}`,85,y);y+=36;g.fillStyle='#5C5B68';g.font='21px Spectral, Georgia, serif';const recorrido=f.cadena.recorrido.map(id=>{const p=window.NatalRegencias.PLANETAS[id];return `${p.glifo} ${p.nombre}`}).join(' → ');y=textoInforme(g,recorrido+(f.cadena.tipo==='final'?' · dispositor final':f.cadena.tipo==='ciclo'?' · circuito':' · cadena incompleta'),115,y,1360,28);y+=24}return o.c}
+function paginaEstructura(){const a=window.NatalEstructura.analizar(carta),o=lienzoInforme('Estructura y temperamento','Hoja 4 de 4 · cuadrantes, hemisferios y angularidad'),g=o.g;let y=o.y;const seccion=t=>{g.fillStyle='#8A6A22';g.font='21px "IBM Plex Mono", monospace';g.fillText(t.toUpperCase(),85,y);y+=45};const fila=(n,v,d)=>{g.fillStyle='#22212B';g.font='29px Cinzel, Georgia, serif';g.fillText(n,85,y);g.textAlign='right';g.fillStyle='#8A6A22';g.fillText(v,1515,y);g.textAlign='left';y+=34;g.fillStyle='#5C5B68';g.font='21px Spectral, Georgia, serif';y=textoInforme(g,d,115,y,1360,27);y+=20};seccion('Vista general');fila('Horizonte',a.resumen.horizonte||'Requiere hora',a.conHora?'Casas 7–12 frente a casas 1–6.':'No se estima sin hora.');fila('Orientación',a.resumen.lateral||'Requiere hora',a.conHora?'Hemisferio oriental frente a occidental.':'No se estima sin hora.');fila('Cuadrante',a.resumen.cuadrante||(!a.conHora?'Requiere hora':'Equilibrio'),a.conHora?'Distribución de diez cuerpos.':'No se estima sin casas.');const t=a.temperamento;fila('Temperamento',t.dominante||'Equilibrio',`${t.testigos.length} de 4 testigos · ${t.criterio}`);seccion('Cuadrantes');for(const q of a.cuadrantes)fila(q.nombre,a.conHora?`${q.cuerpos.length} cuerpos`:'—',a.conHora?`Casas ${q.casas.join('–')} · ${listaCuerpos(q.cuerpos)}`:'Requiere hora natal.');seccion('Angularidad');for(const x of a.angularidad)fila(x.nombre,a.conHora?`${x.cuerpos.length} cuerpos`:'—',a.conHora?`${listaCuerpos(x.cuerpos)}`:'Requiere hora natal.');seccion('Testigos temperamentales');for(const x of t.testigos)fila(`${x.glifo} ${x.nombre}`,x.temperamento,`${x.signoNombre} · ${x.elemento} · ${x.cualidades.join(' + ')}`);return o.c}
+function bytesJpeg(c){const b=atob(c.toDataURL('image/jpeg',.9).split(',')[1]),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}
+function pdfDeLienzos(lienzos){const enc=new TextEncoder(),partes=[],offsets=[0];let largo=0;const add=x=>{const u=typeof x==='string'?enc.encode(x):x;partes.push(u);largo+=u.length};add('%PDF-1.4\n');const total=2+lienzos.length*3;const obj=(n,contenido)=>{offsets[n]=largo;add(`${n} 0 obj\n`);add(contenido);add('\nendobj\n')};obj(1,'<< /Type /Catalog /Pages 2 0 R >>');const paginas=lienzos.map((_,i)=>3+i*3);obj(2,`<< /Type /Pages /Count ${lienzos.length} /Kids [${paginas.map(n=>n+' 0 R').join(' ')}] >>`);lienzos.forEach((c,i)=>{const pn=3+i*3,cn=pn+1,im=pn+2,j=bytesJpeg(c),pw=595.28,ph=841.89,m=24,esc=Math.min((pw-m*2)/c.width,(ph-m*2)/c.height),w=c.width*esc,h=c.height*esc,x=(pw-w)/2,y=(ph-h)/2,stream=`q ${w.toFixed(2)} 0 0 ${h.toFixed(2)} ${x.toFixed(2)} ${y.toFixed(2)} cm /Im${i} Do Q`;obj(pn,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pw} ${ph}] /Resources << /XObject << /Im${i} ${im} 0 R >> >> /Contents ${cn} 0 R >>`);obj(cn,`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);offsets[im]=largo;add(`${im} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${c.width} /Height ${c.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${j.length} >>\nstream\n`);add(j);add('\nendstream\nendobj\n')});const xref=largo;add(`xref\n0 ${total+1}\n0000000000 65535 f \n`);for(let i=1;i<=total;i++)add(String(offsets[i]).padStart(10,'0')+' 00000 n \n');add(`trailer\n<< /Size ${total+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`);const out=new Uint8Array(largo);let pos=0;for(const u of partes){out.set(u,pos);pos+=u.length}return new Blob([out],{type:'application/pdf'})}
+async function descargaInformeAvanzado(){const boton=document.getElementById('descargaAvanzada');if(!carta||!boton)return;const previo=boton.textContent;boton.disabled=true;boton.textContent='Preparando 4 hojas…';try{const primera=await fabricaHoja('completa'),blob=pdfDeLienzos([primera,paginaCondicion(),paginaRegencias(),paginaEstructura()]),u=URL.createObjectURL(blob),a=document.createElement('a'),base=((carta.datos.nombre)||'carta-natal').replace(/[^\wÁÉÍÓÚÑáéíóúñ -]/g,'').trim()||'carta-natal';a.href=u;a.download=`${base} - informe avanzado.pdf`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000)}finally{boton.disabled=false;boton.textContent=previo}}
+
 function pintaProfesional(){
   const destino=document.getElementById("hojaProfesional"),motor=window.NatalProfesional;
   if(!destino||!motor){if(destino)destino.innerHTML='<p class="aviso error">No se pudo cargar el análisis profesional.</p>';return}
@@ -3215,6 +3290,7 @@ function pintaProfesional(){
   const secta=s=>!s?'<span class="pro-secta-estado"><b>Requiere hora</b>No se asigna secta sin horizonte.</span>':`<span class="pro-secta-estado ${s.coincide?'coincide':'contraria'}"><b>${s.coincide?'En secta':'Fuera de secta'}</b>${s.secta}${s.fase?' · '+s.fase:''}${s.hemisferio==null?'':s.hemisferio?' · hemisferio acorde':' · hemisferio contrario'}</span>`;
   const resumen=a.cartaSecta?`<h3>Carta ${a.cartaSecta.tipo}</h3><p><strong>${a.cartaSecta.luminaria}</strong> es la luminaria de la secta. El benéfico principal es <strong>${a.cartaSecta.benefico}</strong>; ${a.cartaSecta.maleficoModerado} es el maléfico moderado por la secta y ${a.cartaSecta.maleficoContrario} actúa contra ella.</p>`:`<h3>Secta sin calcular</h3><p>La secta exige saber si el Sol estaba sobre o bajo el horizonte. Añade una hora natal fiable para completar esta parte.</p>`;
   destino.innerHTML=`
+    <section class="pro-portada" id="vistaGeneralProfesional"><span class="pro-criterio"><b>Modo avanzado</b></span><h2>Lectura profesional organizada</h2><p>Revisa la condición de los planetas, sus cadenas de gobierno y la estructura completa de la carta sin perder de vista los criterios.</p><nav class="pro-navegacion" aria-label="Secciones avanzadas"><button type="button" data-pro-ir="proTablaCaja">Condición</button><button type="button" data-pro-ir="regenciasProfesionales">Regencias</button><button type="button" data-pro-ir="estructuraProfesional">Estructura</button></nav></section>
     <div class="pro-cabecera">
       <section class="pro-intro"><h2>Condición tradicional de los planetas</h2><p>Este panel estudia los siete planetas tradicionales. Separa la dignidad esencial —la relación con el signo— de la accidental —la capacidad circunstancial para actuar— y muestra cada componente del resultado.</p>${!a.horaConocida?'<p class="aviso"><strong>Análisis parcial:</strong> sin hora no se calculan casas, triplicidad activa ni secta. Las posiciones por signo, términos, decanos, movimiento y relación con el Sol siguen disponibles.</p>':''}</section>
       <aside class="pro-secta">${resumen}</aside>
@@ -3226,6 +3302,8 @@ function pintaProfesional(){
       <div class="pro-criterio"><b>Zodiaco</b><span>${a.criterio.zodiaco}</span></div><div class="pro-criterio"><b>Triplicidades</b><span>${a.criterio.triplicidades}</span></div><div class="pro-criterio"><b>Términos</b><span>${a.criterio.terminos}</span></div><div class="pro-criterio"><b>Decanos</b><span>${a.criterio.decanos}</span></div><div class="pro-criterio"><b>Puntuación</b><span>${a.criterio.puntuacion}</span></div><div class="pro-criterio"><b>Relación solar</b><span>${a.criterio.solar}</span></div>
     </div><p>Domicilio +5 · exaltación +4 · triplicidad +3 · término +2 · decano +1 · exilio −5 · caída −4. Los planetas transaturninos quedan fuera de esta tabla porque no forman parte del esquema tradicional que se está puntuando.</p></section>`;
   pintaRegenciasProfesionales(destino);
+  pintaEstructuraProfesional(destino);
+  destino.querySelectorAll('[data-pro-ir]').forEach(b=>b.addEventListener('click',()=>document.getElementById(b.dataset.proIr)?.scrollIntoView({behavior:'smooth',block:'start'})));
   const cajaTabla=document.getElementById('proTablaCaja'),botonTabla=document.getElementById('proExpandir');
   if(cajaTabla&&botonTabla){
     let reserva=null;
@@ -5094,6 +5172,24 @@ document.addEventListener("click", ev => {
 });
 document.addEventListener("keydown", ev => { if(ev.key === "Escape") cierraMenuBarra(); });
 
+/* selector Normal / Avanzado: no recalcula ni altera los datos de la carta */
+let modoCarta='normal';
+function cambiaModoCarta(modo){
+  modoCarta=modo==='avanzado'?'avanzado':'normal';
+  const panel=document.getElementById('cartaPanel'),avanzado=modoCarta==='avanzado';
+  panel.classList.toggle('modo-avanzado',avanzado);
+  document.getElementById('app').classList.toggle('modo-avanzado-global',avanzado);
+  document.getElementById('modoNormal').setAttribute('aria-pressed',String(!avanzado));
+  document.getElementById('modoAvanzado').setAttribute('aria-pressed',String(avanzado));
+  document.getElementById('avanzadoCabecera').hidden=!avanzado;
+  cuadranteResaltado=null;
+  if(avanzado)document.getElementById('tabProfesional').click();
+  else if(document.getElementById('tabProfesional').getAttribute('aria-selected')==='true')document.getElementById('tabResumen').click();
+}
+document.getElementById('modoNormal').addEventListener('click',()=>cambiaModoCarta('normal'));
+document.getElementById('modoAvanzado').addEventListener('click',()=>cambiaModoCarta('avanzado'));
+document.getElementById('descargaAvanzada').addEventListener('click',descargaInformeAvanzado);
+
 /* pestañas del panel */
 const pestañas = [["tabResumen","hojaResumen"],["tabPos","hojaPos"],["tabBalance","hojaBalance"],["tabProfesional","hojaProfesional"],["tabAsp","hojaAsp"],["tabCasas","hojaCasas"],["tabSent","hojaSent"],
                   ["tabAtacir","hojaAtacir"],["tabTransitos","hojaTransitos"],["tabRevolucion","hojaRevolucion"],["tabProgres","hojaProgres"],
@@ -5213,7 +5309,7 @@ abrirFicha("marte");     // deja la ficha lista detrás de la portada, para quie
                   atacir:'tabAtacir', transitos:'tabTransitos', revolucion:'tabRevolucion', progresiones:'tabProgres',
                   sinastria:'tabSinastria'};
       var bot = document.getElementById(mapa[pestana]);
-      if(bot) setTimeout(function(){ bot.click(); }, 220);
+      if(bot) setTimeout(function(){ if(pestana === 'profesional') document.getElementById('modoAvanzado').click(); else bot.click(); }, 220);
     }
     if(v === 'natal' && q.get('auto') === '1'){
       setTimeout(function(){ var f = document.getElementById('natalForm'); if(f) f.requestSubmit(); }, 320);
@@ -5225,4 +5321,3 @@ abrirFicha("marte");     // deja la ficha lista detrás de la portada, para quie
 </script>
 </body>
 </html>
-
