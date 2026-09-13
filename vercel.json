@@ -39,9 +39,44 @@
     {
       "source": "/liberacion-zodiacal/",
       "destination": "/liberacion-zodiacal.html"
+    },
+    {
+      "source": "/calculadora-liberacion-zodiacal",
+      "destination": "/liberacion-zodiacal-calculadora.html"
+    },
+    {
+      "source": "/calculadora-liberacion-zodiacal/",
+      "destination": "/liberacion-zodiacal-calculadora.html"
     }
   ],
   "headers": [
+    {
+      "source": "/liberacion-zodiacal-calculadora.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/app/liberacion-zodiacal.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/app/liberacion-zodiacal-ui.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
     {
       "source": "/liberacion-zodiacal.html",
       "headers": [
