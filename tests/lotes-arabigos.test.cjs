@@ -37,11 +37,12 @@ test('la calculadora incluye los siete lotes y no evalúa fórmulas', () => {
   assert.equal((avanzados[1].match(/\{id:/g) || []).length, 20);
 });
 
-test('una carta válida genera 7 lotes herméticos, dos grupos de 20 y una selección de 16', () => {
-  const ids = ['themeToggle','cartaSelect','calcular','estado','salida','resumen','resultados','personalizados','nombreFormula','baseFormula','sumaFormula','restaFormula','invertirFormula','agregarFormula','sinCartas','ruedaLotes','leyendaLotes','detalleLote','tituloResultados','textoResultados','selectorLote'];
+test('una carta válida organiza los 63 lotes en ocho categorías temáticas', () => {
+  const ids = ['themeToggle','cartaSelect','calcular','estado','salida','resumen','resultados','personalizados','nombreFormula','baseFormula','sumaFormula','restaFormula','invertirFormula','agregarFormula','sinCartas','ruedaLotes','leyendaLotes','detalleLote','tituloResultados','textoResultados','selectorLote','buscarLote','loteAnterior','loteSiguiente','progresoLote'];
   const elemento = id => ({id,innerHTML:'',textContent:'',hidden:false,value:id==='cartaSelect'?'c1':'',checked:true,disabled:false,className:'',dataset:{},style:{},classList:{toggle(){}},listeners:{},addEventListener(t,f){this.listeners[t]=f},setAttribute(){},focus(){},closest(){return null},getBoundingClientRect(){return{left:0,top:0,width:500,height:500}}});
   const els = Object.fromEntries(ids.map(id => [id, elemento(id)]));
-  const botones = ['hermeticos','avanzados','expansion','seleccion'].map(g => { const b=elemento(g); b.dataset.grupo=g; return b; });
+  const categorias = ['hermeticos','identidad','familia','relaciones','patrimonio','vocacion','conocimiento','desafios'];
+  const botones = categorias.map(g => { const b=elemento(g); b.dataset.grupo=g; return b; });
   const carta={id:'c1',datos:{nombre:'Prueba',anio:1990,mes:6,dia:15,hora:12,min:0,horaConocida:true,lugarTexto:'Ciudad de México',lat:19.4326,lon:-99.1332,tz:'America/Mexico_City',desambiguacion:'reject',sistema:'placidio',factorOrbe:1,resumenFecha:'15 de junio de 1990',husoTexto:''}};
   const storage={'astroplanetario-cartas':JSON.stringify([carta])};
   const ctx={console,Intl,Date,Math,JSON,setTimeout,clearTimeout,matchMedia:()=>({matches:false}),localStorage:{getItem:k=>storage[k]||null,setItem:(k,v)=>storage[k]=v},document:{documentElement:{dataset:{}},body:{textContent:''},getElementById:id=>els[id],querySelectorAll:q=>q==='[data-grupo]'?botones:[]},window:null};ctx.window=ctx;
@@ -49,24 +50,37 @@ test('una carta válida genera 7 lotes herméticos, dos grupos de 20 y una selec
   assert.equal((els.ruedaLotes.innerHTML.match(/class="lote-marca/g)||[]).length,1);
   assert.equal((els.resultados.innerHTML.match(/<article/g)||[]).length,1);
   assert.match(els.resultados.innerHTML,/Aspectos cercanos que recibe/);
-  botones[1].listeners.click();
+  const conteos = [7,6,11,6,8,8,6,11], lotes = [];
+  for (let i=0;i<botones.length;i++) {
+    botones[i].listeners.click();
+    assert.equal((els.ruedaLotes.innerHTML.match(/class="lote-marca/g)||[]).length,1);
+    assert.equal((els.resultados.innerHTML.match(/<article/g)||[]).length,1);
+    const opciones=[...els.selectorLote.innerHTML.matchAll(/<option value="([^"]+)"/g)].map(m=>m[1]);
+    assert.equal(opciones.length,conteos[i]);
+    lotes.push(...opciones);
+  }
+  assert.equal(lotes.length,63);
+  assert.equal(new Set(lotes).size,63);
+  botones[4].listeners.click();
+  els.selectorLote.value='propiedad';
+  els.selectorLote.listeners.change();
   assert.equal((els.ruedaLotes.innerHTML.match(/class="lote-marca/g)||[]).length,1);
   assert.equal((els.resultados.innerHTML.match(/<article/g)||[]).length,1);
-  assert.equal((els.selectorLote.innerHTML.match(/<option/g)||[]).length,20);
-  botones[2].listeners.click();
-  assert.equal((els.ruedaLotes.innerHTML.match(/class="lote-marca/g)||[]).length,1);
-  assert.equal((els.resultados.innerHTML.match(/<article/g)||[]).length,1);
-  assert.equal((els.selectorLote.innerHTML.match(/<option/g)||[]).length,20);
   assert.match(els.resultados.innerHTML,/Patrimonio/);
   assert.match(els.resultados.innerHTML,/Cúspide de casa 2/);
   assert.match(els.resultados.innerHTML,/Regente de casa 2/);
+  botones[6].listeners.click();
   els.selectorLote.value='viajes';
   els.selectorLote.listeners.change();
   assert.match(els.resultados.innerHTML,/Viajes/);
-  botones[3].listeners.click();
-  assert.equal((els.ruedaLotes.innerHTML.match(/class="lote-marca/g)||[]).length,1);
-  assert.equal((els.selectorLote.innerHTML.match(/<option/g)||[]).length,16);
-  assert.match(els.resultados.innerHTML,/Pilar de la carta/);
+  assert.match(els.progresoLote.textContent,/de 6/);
+  els.loteSiguiente.listeners.click();
+  assert.doesNotMatch(els.resultados.innerHTML,/Viajes<\/h3>/);
+  els.buscarLote.value='sabiduría';
+  els.buscarLote.listeners.input();
+  assert.match(els.leyendaLotes.innerHTML,/Entendimiento y sabiduría/);
+  assert.doesNotMatch(els.leyendaLotes.innerHTML,/Viajes por agua/);
+  botones[7].listeners.click();
   els.selectorLote.value='rivalidadHermes';
   els.selectorLote.listeners.change();
   assert.match(els.resultados.innerHTML,/Cúspide de casa 12/);
@@ -110,7 +124,18 @@ test('la rueda muestra un solo lote y la ficha explica aspectos con orbes reduci
   assert.match(js, /nombre:"Oposición"[\s\S]{0,80}orbe:3/);
   assert.match(js, /function relevanciaAspecto/);
   assert.match(js, /El lote no emite el aspecto: lo recibe del planeta/);
+  assert.match(js, /pluton:"⯓"/);
+  assert.match(js, /aspecto-linea/);
   assert.doesNotMatch(js, /for\(const def of \[\.\.\.defs\]/);
+});
+
+test('la interfaz presenta las ocho categorías y navegación accesible', () => {
+  const html = read('lotes-arabigos-calculadora.html');
+  for (const nombre of ['Esenciales y herméticos','Identidad y propósito','Familia y raíces','Amor y relaciones','Dinero y patrimonio','Vocación y reconocimiento','Viajes y conocimiento','Desafíos y protección']) assert.match(html,new RegExp(nombre));
+  assert.match(html,/id="buscarLote"/);
+  assert.match(html,/id="loteAnterior"[^>]+aria-label="Lote anterior"/);
+  assert.match(html,/id="loteSiguiente"[^>]+aria-label="Lote siguiente"/);
+  assert.match(html,/Noto\+Sans\+Symbols\+2/);
 });
 
 test('Neptuno y las rutas públicas enlazan el nuevo módulo', () => {
