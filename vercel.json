@@ -83,6 +83,15 @@
   ],
   "headers": [
     {
+      "source": "/app/natal-profesional.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
       "source": "/liberacion-zodiacal-calculadora.html",
       "headers": [
         {

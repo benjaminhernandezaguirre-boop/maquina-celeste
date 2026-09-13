@@ -769,6 +769,24 @@
     .tabla-eventos thead{display:none}.tabla-eventos,.tabla-eventos tbody,.tabla-eventos tr,.tabla-eventos td{display:block;width:100%}
     .tabla-eventos tr{display:grid;grid-template-columns:1fr auto;gap:.2rem .5rem;padding:.55rem 0;border-bottom:1px solid #D5CEBF}.tabla-eventos td{border:0;padding:.05rem 0}.tabla-eventos td:nth-child(1){grid-column:1/-1}.tabla-eventos .casa{text-align:left}.tabla-eventos .fecha{grid-column:2;grid-row:2}
   }
+  /* paquete profesional 1: dignidades tradicionales y secta */
+  .pro-cabecera{display:grid;grid-template-columns:1fr;gap:.65rem;margin:.45rem 0 1rem}
+  .pro-intro,.pro-secta,.pro-criterios{border:1px solid #D5CEBF;border-radius:12px;background:#F7F2E8;padding:.85rem;color:#22212B}
+  .pro-intro h2,.pro-secta h3,.pro-criterios h3{margin:0 0 .35rem;font:500 1.05rem Cinzel,Georgia,serif}
+  .pro-intro p,.pro-secta p,.pro-criterios p{margin:.25rem 0;color:#5C5B68;font-size:.82rem;line-height:1.45}
+  .pro-secta{border-top:3px solid #A8801F}.pro-secta strong{color:#8A6A22;font-weight:600}
+  .pro-tabla-wrap{overflow-x:auto;border:1px solid #D5CEBF;border-radius:12px;background:#FBF8F1}
+  .pro-tabla{width:100%;border-collapse:collapse;min-width:760px;color:#22212B;font-size:.76rem}
+  .pro-tabla th{text-align:left;padding:.55rem .5rem;background:#EEE8DB;border-bottom:1px solid #CFC7B4;color:#6B6A78;font:500 .54rem "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase}
+  .pro-tabla td{padding:.62rem .5rem;border-bottom:1px solid #E7E1D3;vertical-align:top}.pro-tabla tr:last-child td{border-bottom:0}
+  .pro-planeta{display:flex;align-items:center;gap:.42rem;white-space:nowrap}.pro-planeta .cg{font-size:1.2rem;color:#8A6A22}.pro-planeta small{display:block;color:#6B6A78}
+  .pro-puntos{font:600 .72rem "IBM Plex Mono",monospace;white-space:nowrap}.pro-puntos.pos{color:#4E733E}.pro-puntos.neg{color:#A14535}.pro-puntos.neutro{color:#6B6A78}
+  .pro-etiquetas{display:flex;flex-wrap:wrap;gap:.28rem;max-width:23rem}.pro-etiqueta{display:inline-flex;border:1px solid #CFC7B4;border-radius:999px;padding:.16rem .38rem;background:#fff;color:#5C5B68;font-size:.62rem;line-height:1.2}
+  .pro-etiqueta.fortaleza{border-color:#91AA80;color:#46613A;background:#F2F7ED}.pro-etiqueta.debilidad{border-color:#D3A092;color:#8C3E31;background:#FFF4F0}.pro-etiqueta.neutral{border-color:#CFC7B4;color:#6B6A78}
+  .pro-secta-estado{font-size:.69rem;line-height:1.35;color:#5C5B68}.pro-secta-estado b{display:block;color:#22212B}.pro-secta-estado.coincide b{color:#4E733E}.pro-secta-estado.contraria b{color:#A14535}
+  .pro-criterios{margin:1rem 0}.pro-criterios-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;margin-top:.6rem}.pro-criterio{border-top:1px solid #D5CEBF;padding-top:.42rem}.pro-criterio b{display:block;color:#8A6A22;font:500 .56rem "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase}.pro-criterio span{font-size:.75rem;color:#5C5B68}
+  #app:not(.natal) .pro-intro,#app:not(.natal) .pro-secta,#app:not(.natal) .pro-criterios{background:#111522;color:var(--pergamino);border-color:var(--linea-suave)}
+  @media(max-width:620px){.pro-cabecera{grid-template-columns:1fr}.pro-criterios-grid{grid-template-columns:1fr 1fr}.pro-tabla-wrap{border-radius:9px}.pro-tabla{min-width:700px}}
 </style>
 
 <div id="app">
@@ -1027,6 +1045,7 @@
               <button role="tab" id="tabResumen" aria-selected="true" aria-controls="hojaResumen">Resumen</button>
               <button role="tab" id="tabPos" aria-selected="false" aria-controls="hojaPos">Posiciones</button>
               <button role="tab" id="tabBalance" aria-selected="false" aria-controls="hojaBalance">Balance</button>
+              <button role="tab" id="tabProfesional" aria-selected="false" aria-controls="hojaProfesional">Profesional</button>
               <button role="tab" id="tabAsp" aria-selected="false" aria-controls="hojaAsp">Aspectos</button>
               <button role="tab" id="tabCasas" aria-selected="false" aria-controls="hojaCasas">Casas</button>
               <button role="tab" id="tabSent" aria-selected="false" aria-controls="hojaSent">Significados</button>
@@ -1055,6 +1074,7 @@
             <option value="tabResumen">Resumen</option>
             <option value="tabPos">Posiciones</option>
             <option value="tabBalance">Balance</option>
+            <option value="tabProfesional">Profesional</option>
             <option value="tabAsp">Aspectos</option>
             <option value="tabCasas">Casas</option>
             <option value="tabSent">Significados</option>
@@ -1074,6 +1094,7 @@
       <div class="hoja" id="hojaResumen" role="tabpanel"></div>
       <div class="hoja" id="hojaPos" role="tabpanel" hidden></div>
       <div class="hoja" id="hojaBalance" role="tabpanel" hidden></div>
+      <div class="hoja" id="hojaProfesional" role="tabpanel" hidden></div>
       <div class="hoja" id="hojaAsp" role="tabpanel" hidden></div>
       <div class="hoja" id="hojaCasas" role="tabpanel" hidden></div>
       <div class="hoja" id="hojaSent" role="tabpanel" hidden></div>
@@ -1093,6 +1114,7 @@
 <script src="app/efemerides.js"></script>
 <script src="app/profecciones.js"></script>
 <script src="app/dignidades.js"></script>
+<script src="app/natal-profesional.js?v=profesional-1-20260913-2"></script>
 <script src="app/planetas.js?v=planet-textures-2-20260912"></script>
 <script>
 (() => {
@@ -3146,6 +3168,26 @@ function pintaResumen(){
   document.getElementById("resDescarga").addEventListener("click",()=>descargaHoja("resumen"));
 }
 
+function pintaProfesional(){
+  const destino=document.getElementById("hojaProfesional"),motor=window.NatalProfesional;
+  if(!destino||!motor){if(destino)destino.innerHTML='<p class="aviso error">No se pudo cargar el análisis profesional.</p>';return}
+  const a=motor.analizar(carta,window.Efem),puntaje=n=>`<span class="pro-puntos ${n>0?'pos':n<0?'neg':'neutro'}">${n>0?'+':''}${n}</span>`;
+  const etiquetas=items=>`<div class="pro-etiquetas">${items.map(x=>`<span class="pro-etiqueta ${x.tipo}" title="${escaparHTML(x.detalle)}">${escaparHTML(x.label)} ${x.puntos?`(${x.puntos>0?'+':''}${x.puntos})`:''}</span>`).join('')}</div>`;
+  const secta=s=>!s?'<span class="pro-secta-estado"><b>Requiere hora</b>No se asigna secta sin horizonte.</span>':`<span class="pro-secta-estado ${s.coincide?'coincide':'contraria'}"><b>${s.coincide?'En secta':'Fuera de secta'}</b>${s.secta}${s.fase?' · '+s.fase:''}${s.hemisferio==null?'':s.hemisferio?' · hemisferio acorde':' · hemisferio contrario'}</span>`;
+  const resumen=a.cartaSecta?`<h3>Carta ${a.cartaSecta.tipo}</h3><p><strong>${a.cartaSecta.luminaria}</strong> es la luminaria de la secta. El benéfico principal es <strong>${a.cartaSecta.benefico}</strong>; ${a.cartaSecta.maleficoModerado} es el maléfico moderado por la secta y ${a.cartaSecta.maleficoContrario} actúa contra ella.</p>`:`<h3>Secta sin calcular</h3><p>La secta exige saber si el Sol estaba sobre o bajo el horizonte. Añade una hora natal fiable para completar esta parte.</p>`;
+  destino.innerHTML=`
+    <div class="pro-cabecera">
+      <section class="pro-intro"><h2>Condición tradicional de los planetas</h2><p>Este panel estudia los siete planetas tradicionales. Separa la dignidad esencial —la relación con el signo— de la accidental —la capacidad circunstancial para actuar— y muestra cada componente del resultado.</p>${!a.horaConocida?'<p class="aviso"><strong>Análisis parcial:</strong> sin hora no se calculan casas, triplicidad activa ni secta. Las posiciones por signo, términos, decanos, movimiento y relación con el Sol siguen disponibles.</p>':''}</section>
+      <aside class="pro-secta">${resumen}</aside>
+    </div>
+    <div class="pro-tabla-wrap"><table class="pro-tabla"><thead><tr><th>Planeta</th><th>Dignidad esencial</th><th>Total</th><th>Dignidad accidental</th><th>Total</th><th>Secta</th></tr></thead><tbody>
+      ${a.filas.map(f=>{const z=posZod(f.lon);return`<tr data-pro-planeta="${f.id}"><td><span class="pro-planeta"><span class="cg">${gh(f.glifo)}</span><span><b>${f.nombre}</b><small>${z.texto}${f.casa?' · casa '+ROMANOS[f.casa]:''}</small></span></span></td><td>${etiquetas(f.esencial.detalles)}</td><td>${puntaje(f.esencial.puntos)}</td><td>${etiquetas(f.accidental.detalles)}</td><td>${puntaje(f.accidental.puntos)}</td><td>${secta(f.secta)}</td></tr>`}).join('')}
+    </tbody></table></div>
+    <section class="pro-criterios"><h3>Criterios de este cálculo</h3><p>Los totales son una guía comparativa del estado tradicional del planeta; no equivalen por sí solos a “bueno” o “malo”. Puedes revisar cada suma directamente en las etiquetas.</p><div class="pro-criterios-grid">
+      <div class="pro-criterio"><b>Zodiaco</b><span>${a.criterio.zodiaco}</span></div><div class="pro-criterio"><b>Triplicidades</b><span>${a.criterio.triplicidades}</span></div><div class="pro-criterio"><b>Términos</b><span>${a.criterio.terminos}</span></div><div class="pro-criterio"><b>Decanos</b><span>${a.criterio.decanos}</span></div><div class="pro-criterio"><b>Puntuación</b><span>${a.criterio.puntuacion}</span></div><div class="pro-criterio"><b>Relación solar</b><span>${a.criterio.solar}</span></div>
+    </div><p>Domicilio +5 · exaltación +4 · triplicidad +3 · término +2 · decano +1 · exilio −5 · caída −4. Los planetas transaturninos quedan fuera de esta tabla porque no forman parte del esquema tradicional que se está puntuando.</p></section>`;
+  destino.querySelectorAll('[data-pro-planeta]').forEach(tr=>tr.addEventListener('click',()=>marcaFila(tr.dataset.proPlaneta,false)));
+}
 let filaAbierta = null;
 function pintaCarta(){
   if(!carta) return;
@@ -3229,6 +3271,7 @@ function pintaCarta(){
       <a href="astrocarto.html" style="color:inherit">Míralo en el mapa del mundo →</a></p>`;
 
   pintaResumen();
+  pintaProfesional();
   pintaSignificados();
   if(atacirActivo) pintaAtacir();
   if(transitosActivo) pintaTransitos();
@@ -4997,7 +5040,7 @@ document.addEventListener("click", ev => {
 document.addEventListener("keydown", ev => { if(ev.key === "Escape") cierraMenuBarra(); });
 
 /* pestañas del panel */
-const pestañas = [["tabResumen","hojaResumen"],["tabPos","hojaPos"],["tabBalance","hojaBalance"],["tabAsp","hojaAsp"],["tabCasas","hojaCasas"],["tabSent","hojaSent"],
+const pestañas = [["tabResumen","hojaResumen"],["tabPos","hojaPos"],["tabBalance","hojaBalance"],["tabProfesional","hojaProfesional"],["tabAsp","hojaAsp"],["tabCasas","hojaCasas"],["tabSent","hojaSent"],
                   ["tabAtacir","hojaAtacir"],["tabTransitos","hojaTransitos"],["tabRevolucion","hojaRevolucion"],["tabProgres","hojaProgres"],
                   ["tabSinastria","hojaSinastria"]];
 for(const [b,h] of pestañas){
@@ -5111,7 +5154,7 @@ abrirFicha("marte");     // deja la ficha lista detrás de la portada, para quie
     tarjeta.click();
     var pestana = q.get('tab');
     if(v === 'natal' && pestana){
-      var mapa = {resumen:'tabResumen', posiciones:'tabPos', aspectos:'tabAsp', casas:'tabCasas', significados:'tabSent',
+      var mapa = {resumen:'tabResumen', posiciones:'tabPos', balance:'tabBalance', profesional:'tabProfesional', aspectos:'tabAsp', casas:'tabCasas', significados:'tabSent',
                   atacir:'tabAtacir', transitos:'tabTransitos', revolucion:'tabRevolucion', progresiones:'tabProgres',
                   sinastria:'tabSinastria'};
       var bot = document.getElementById(mapa[pestana]);
