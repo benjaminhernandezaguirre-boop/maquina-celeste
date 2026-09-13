@@ -1,5 +1,9 @@
 # Astroplanetario · lo que falta
 
+> La lista amplia de métodos básicos, profesionales y etapas de la futura aplicación está en
+> [`HOJA-DE-RUTA-ASTROLOGICA.md`](HOJA-DE-RUTA-ASTROLOGICA.md). Este archivo conserva los pendientes
+> operativos originales del proyecto.
+
 Lista de trabajo al 12 de septiembre de 2026. Marca las casillas conforme avances.
 El tamaño es orientativo: **chico** es una tarde, **mediano** son varios días, **grande** es un módulo entero.
 
@@ -86,4 +90,3 @@ Carta natal con cuatro sistemas de casas, aspectos con orbes ajustables, nodos, 
 Fortuna · Significados de planeta en signo y en casa, Ascendente y aspectos · Atacires con veintiséis
 claves agrupadas, rueda doble y calendario de contactos · Descarga de la rueda sola y de la hoja
 completa · Módulo de Luna con fases, lunaciones, revolución lunar, luna vacía y luna progresada.
-
