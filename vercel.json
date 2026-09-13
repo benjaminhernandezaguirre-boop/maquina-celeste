@@ -31,9 +31,26 @@
     {
       "source": "/calculadora-lotes-arabigos/",
       "destination": "/lotes-arabigos-calculadora.html"
+    },
+    {
+      "source": "/liberacion-zodiacal",
+      "destination": "/liberacion-zodiacal.html"
+    },
+    {
+      "source": "/liberacion-zodiacal/",
+      "destination": "/liberacion-zodiacal.html"
     }
   ],
   "headers": [
+    {
+      "source": "/liberacion-zodiacal.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, must-revalidate"
+        }
+      ]
+    },
     {
       "source": "/app/lotes-arabigos.js",
       "headers": [
@@ -144,4 +161,3 @@
     }
   ]
 }
-
