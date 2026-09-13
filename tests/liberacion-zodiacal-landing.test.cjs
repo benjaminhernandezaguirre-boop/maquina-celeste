@@ -28,3 +28,24 @@ test('clean route and sitemap expose the guide', () => {
   assert.ok(vercel.rewrites.some(r => r.source === '/liberacion-zodiacal' && r.destination === '/liberacion-zodiacal.html'));
   assert.match(read('sitemap.xml'), /<loc>https:\/\/astroplanetario\.com\/liberacion-zodiacal<\/loc>/);
 });
+
+test('guide opens the complete calculator and its public route is indexable', () => {
+  const guide = read('liberacion-zodiacal.html');
+  assert.match(guide, /href="\/calculadora-liberacion-zodiacal"[^>]*>Abrir calculadora<\/a>/);
+
+  const calculator = read('liberacion-zodiacal-calculadora.html');
+  assert.match(calculator, /<html lang="es" data-studio-theme="light">/);
+  assert.match(calculator, /<link rel="canonical" href="https:\/\/astroplanetario\.com\/calculadora-liberacion-zodiacal">/);
+  assert.match(calculator, /id="loteEspiritu"[^>]+checked/);
+  assert.match(calculator, /id="loteFortuna"/);
+  assert.match(calculator, /id="ruedaTiempo"/);
+  assert.match(calculator, /Nivel 1 · Grandes capítulos/);
+  assert.match(calculator, /Nivel 2 · Dentro del capítulo/);
+  assert.match(calculator, /app\/efemerides\.js/);
+  assert.match(calculator, /app\/liberacion-zodiacal\.js/);
+  assert.match(calculator, /app\/liberacion-zodiacal-ui\.js/);
+
+  const vercel = JSON.parse(read('vercel.json'));
+  assert.ok(vercel.rewrites.some(r => r.source === '/calculadora-liberacion-zodiacal' && r.destination === '/liberacion-zodiacal-calculadora.html'));
+  assert.match(read('sitemap.xml'), /<loc>https:\/\/astroplanetario\.com\/calculadora-liberacion-zodiacal<\/loc>/);
+});
