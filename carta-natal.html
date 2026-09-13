@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <script>(()=>{let t="light";try{const s=localStorage.getItem("astro-studio-theme");if(s==="light"||s==="dark")t=s}catch{}document.documentElement.dataset.studioTheme=t})()</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Carta natal gratis: Sol, Luna, Ascendente y casas | Astroplanetario</title>
-<meta name="description" content="Calcula tu carta natal gratis con fecha, hora y lugar de nacimiento. Descubre Sol, Luna, Ascendente, casas, aspectos, elementos y modalidades.">
+<title>Carta natal gratis y análisis profesional | Astroplanetario</title>
+<meta name="description" content="Calcula tu carta natal gratis con fecha, hora y lugar. Consulta Sol, Luna, Ascendente, casas, dignidades esenciales y accidentales, secta y aspectos.">
 <link rel="canonical" href="https://astroplanetario.com/carta-natal">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="theme-color" content="#f3f1eb" id="themeColor">
@@ -14,7 +14,7 @@
 <meta property="og:locale" content="es_MX">
 <meta property="og:site_name" content="Astroplanetario">
 <meta property="og:title" content="Carta natal gratis | Astroplanetario">
-<meta property="og:description" content="Calcula tu carta natal y consulta Sol, Luna, Ascendente, casas, aspectos, elementos y modalidades.">
+<meta property="og:description" content="Calcula tu carta natal y consulta dignidades esenciales y accidentales, secta, casas, aspectos, elementos y modalidades.">
 <meta property="og:url" content="https://astroplanetario.com/carta-natal">
 <meta property="og:image" content="https://astroplanetario.com/hero-cosmica.webp">
 <meta name="twitter:card" content="summary_large_image">
@@ -28,7 +28,7 @@
 {
   "@context":"https://schema.org",
   "@graph":[
-    {"@type":"WebPage","@id":"https://astroplanetario.com/carta-natal#pagina","url":"https://astroplanetario.com/carta-natal","name":"Carta natal gratis","description":"Calculadora y guía de carta natal con Sol, Luna, Ascendente, casas y aspectos.","inLanguage":"es-MX","isPartOf":{"@id":"https://astroplanetario.com/#sitio"}},
+    {"@type":"WebPage","@id":"https://astroplanetario.com/carta-natal#pagina","url":"https://astroplanetario.com/carta-natal","name":"Carta natal gratis y análisis profesional","description":"Calculadora y guía de carta natal con dignidades esenciales y accidentales, secta, casas y aspectos.","inLanguage":"es-MX","isPartOf":{"@id":"https://astroplanetario.com/#sitio"}},
     {"@type":"WebSite","@id":"https://astroplanetario.com/#sitio","url":"https://astroplanetario.com/","name":"Astroplanetario","inLanguage":"es-MX"},
     {"@type":"WebApplication","@id":"https://astroplanetario.com/carta-natal#calculadora","name":"Calculadora de carta natal de Astroplanetario","applicationCategory":"LifestyleApplication","operatingSystem":"Cualquier navegador moderno","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"MXN"},"url":"https://astroplanetario.com/astroplanetario.html?view=natal"}
   ]
@@ -52,6 +52,9 @@ html[data-studio-theme="dark"]{color-scheme:dark;--bg:#091323;--panel:#111f31;--
 .cierre{text-align:center;padding:6rem 1rem}.cierre h2{margin:0 auto 1rem;font:500 clamp(2rem,5vw,3.6rem)/1.1 var(--display);max-width:820px}.cierre p{color:var(--muted);max-width:650px;margin:0 auto}.cierre .acciones{justify-content:center}.pie{border-top:1px solid var(--line);padding:2rem 0;color:var(--muted);font:500 .62rem var(--mono);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}.pie a{color:var(--gold)}
 @media(max-width:820px){body{font-size:17px}.nav a:not([aria-current]){display:none}.hero{grid-template-columns:1fr;padding:3.2rem 0 4rem}.rueda{width:min(88vw,430px)}.signo{transform:translate(-50%,-50%) rotate(var(--a)) translateY(-44%) translateY(-38vw) rotate(calc(-1 * var(--a)))}.temporada-caja{grid-template-columns:1fr}.temporada-signo{min-height:390px;border-right:0;border-bottom:1px solid var(--line)}.temporada-signo:before{width:260px}.temporada-signo:after{width:170px}.temporada-ilustracion{max-height:390px;width:auto}.dos-columnas{grid-template-columns:1fr}.indice{position:static}.rejilla{grid-template-columns:1fr 1fr}.pasos{grid-template-columns:1fr}.hora{grid-template-columns:1fr}.hora .reloj{font-size:2rem}}
 @media(max-width:480px){.ancho{width:min(100% - 1.25rem,1160px)}.cabecera{height:60px}.marca span,.nav a{display:none}.nav{margin-left:auto}.theme-toggle{padding:.42rem .58rem}.hero{min-height:auto;padding-top:3rem}.hero h1{font-size:clamp(2.25rem,14vw,3.8rem)}.rejilla{grid-template-columns:1fr}.tarjeta{min-height:0}.rueda{width:82vw}.signo{font-size:1.18rem;transform:translate(-50%,-50%) rotate(var(--a)) translateY(-44%) translateY(-35vw) rotate(calc(-1 * var(--a)))}.seccion{padding:4rem 0}.boton{width:100%}}
+.profesional-guia{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:2rem 0}.profesional-guia article{position:relative;border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:13px;background:var(--panel);padding:1.35rem}.profesional-guia .numero{color:var(--gold);font:500 .62rem var(--mono);letter-spacing:.14em}.profesional-guia h3{font:500 1.08rem var(--display);margin:.55rem 0}.profesional-guia p{color:var(--muted);font-size:.9rem;margin:.4rem 0}.profesional-guia strong{color:var(--text)}.formula{display:block;margin-top:.75rem;border-top:1px solid var(--line);padding-top:.65rem;color:var(--gold);font:500 .6rem/1.5 var(--mono);letter-spacing:.02em}.nota-metodo{max-width:850px;border-left:2px solid var(--gold);padding-left:1rem;color:var(--muted);font-size:.9rem}
+
+@media(max-width:820px){.profesional-guia{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -114,6 +117,19 @@ html[data-studio-theme="dark"]{color-scheme:dark;--bg:#091323;--panel:#111f31;--
       <article class="tarjeta"><div class="glifo">🜂 🜃 🜁 🜄</div><h3>Elementos y modalidades</h3><p>Balance de fuego, tierra, aire y agua; cualidades cardinal, fija y mutable.</p></article>
       <article class="tarjeta"><div class="glifo">↻</div><h3>Técnicas de tiempo</h3><p>Tránsitos, atacires, revolución solar y progresiones conectados con la carta natal.</p></article>
     </div>
+  </div></section>
+
+  <section class="seccion" id="analisis-profesional"><div class="ancho">
+    <p class="ceja">Carta natal profesional · paquete 1</p>
+    <h2>Tres criterios tradicionales para evaluar la condición de un planeta</h2>
+    <p class="intro-seccion">Además de decir en qué signo y casa está un planeta, el nuevo panel separa tres preguntas: qué recursos posee por su posición zodiacal, en qué condiciones puede actuar y si pertenece a la familia diurna o nocturna de la carta.</p>
+    <div class="profesional-guia">
+      <article id="dignidades-esenciales"><span class="numero">01 · POSICIÓN</span><h3>Dignidades esenciales</h3><p>Describen la relación del planeta con el signo y el grado que ocupa. El cálculo muestra <strong>domicilio, exaltación, triplicidad, término y decano</strong>, además de exilio, caída o estado peregrino.</p><span class="formula">+5 domicilio · +4 exaltación · +3 triplicidad · +2 término · +1 decano · −5 exilio · −4 caída</span></article>
+      <article id="dignidades-accidentales"><span class="numero">02 · CIRCUNSTANCIA</span><h3>Dignidades accidentales</h3><p>Observan las condiciones concretas en las que el planeta opera. Este primer paquete considera <strong>casa, movimiento directo o retrógrado, velocidad</strong> y cercanía al Sol: cazimi, combustión o bajo los rayos.</p><span class="formula">Cada componente aparece por separado para que el total pueda revisarse.</span></article>
+      <article id="secta"><span class="numero">03 · DÍA O NOCHE</span><h3>Secta</h3><p>Primero se comprueba si el Sol está sobre o bajo el horizonte. Después se distingue la familia <strong>diurna</strong> —Sol, Júpiter y Saturno— de la <strong>nocturna</strong> —Luna, Venus y Marte—; Mercurio cambia según su relación con el Sol.</p><span class="formula">Sin una hora natal fiable, la secta no se calcula.</span></article>
+    </div>
+    <p class="nota-metodo">El panel usa zodiaco tropical, triplicidades doroteanas, términos egipcios y decanos caldeos. Puntúa únicamente los siete planetas tradicionales para no mezclar sistemas de épocas distintas. Los totales facilitan la comparación, pero no convierten un planeta en “bueno” o “malo” por sí solos.</p>
+    <div class="acciones"><a class="boton principal" href="/astroplanetario.html?view=natal&amp;tab=profesional">Abrir análisis profesional</a></div>
   </div></section>
 
   <section class="seccion"><div class="ancho">
