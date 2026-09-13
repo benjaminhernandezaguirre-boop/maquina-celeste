@@ -787,6 +787,11 @@
   .pro-criterios{margin:1rem 0}.pro-criterios-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;margin-top:.6rem}.pro-criterio{border-top:1px solid #D5CEBF;padding-top:.42rem}.pro-criterio b{display:block;color:#8A6A22;font:500 .56rem "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase}.pro-criterio span{font-size:.75rem;color:#5C5B68}
   #app:not(.natal) .pro-intro,#app:not(.natal) .pro-secta,#app:not(.natal) .pro-criterios{background:#111522;color:var(--pergamino);border-color:var(--linea-suave)}
   @media(max-width:620px){.pro-cabecera{grid-template-columns:1fr}.pro-criterios-grid{grid-template-columns:1fr 1fr}.pro-tabla-wrap{border-radius:9px}.pro-tabla{min-width:700px}}
+  .reg-panel{margin:1.25rem 0 1.6rem;border-top:1px solid #CFC7B4;padding-top:1.1rem;color:#22212B}.reg-panel>header h2{margin:0;font:500 1.25rem Cinzel,Georgia,serif}.reg-panel>header p{margin:.3rem 0 .85rem;color:#5C5B68;font-size:.82rem}
+  .reg-resumen{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;margin:.75rem 0 1rem}.reg-tarjeta{border:1px solid #D5CEBF;border-radius:10px;background:#F7F2E8;padding:.7rem}.reg-tarjeta small{display:block;color:#6B6A78;font:500 .52rem "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase}.reg-tarjeta b{display:block;margin:.2rem 0;color:#8A6A22;font:500 .94rem Cinzel,Georgia,serif}.reg-tarjeta span{display:block;color:#5C5B68;font-size:.71rem;line-height:1.35}
+  .reg-subtitulo{margin:1rem 0 .45rem;color:#8A6A22;font:500 .57rem "IBM Plex Mono",monospace;letter-spacing:.13em;text-transform:uppercase}.reg-mapa{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.4rem}.reg-enlace{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:.35rem;border:1px solid #D5CEBF;border-radius:9px;background:#FBF8F1;padding:.5rem;text-align:left;color:#22212B}.reg-enlace:hover{border-color:#A8801F}.reg-cuerpo{display:flex;align-items:center;gap:.3rem;min-width:0}.reg-cuerpo .cg{font-size:1rem;color:#8A6A22}.reg-cuerpo span{min-width:0}.reg-cuerpo b,.reg-cuerpo small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.reg-cuerpo b{font-size:.73rem}.reg-cuerpo small{color:#6B6A78;font-size:.59rem}.reg-flecha{color:#A8801F;font:600 .8rem "IBM Plex Mono",monospace}
+  .reg-cadenas{margin-top:.75rem;border:1px solid #D5CEBF;border-radius:10px;background:#FBF8F1}.reg-cadenas summary{cursor:pointer;padding:.65rem .75rem;color:#5C5B68;font:500 .61rem "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase}.reg-cadenas-lista{padding:0 .75rem .65rem}.reg-cadena{padding:.45rem 0;border-top:1px solid #E7E1D3;font-size:.73rem;color:#4A4956}.reg-cadena b{color:#22212B}.reg-cadena em{color:#8A6A22;font-style:normal}.reg-recepcion{margin:.7rem 0 0;border-left:3px solid #A8801F;padding:.5rem .7rem;background:#F7F2E8;color:#4A4956;font-size:.75rem}.reg-criterio{margin:.75rem 0 0;color:#6B6A78;font-size:.68rem;line-height:1.45}.reg-criterio a{color:#8A6A22}
+  @media(max-width:620px){.reg-resumen,.reg-mapa{grid-template-columns:1fr}.reg-panel>header h2{font-size:1.05rem}}
 </style>
 
 <div id="app">
@@ -1115,6 +1120,7 @@
 <script src="app/profecciones.js"></script>
 <script src="app/dignidades.js"></script>
 <script src="app/natal-profesional.js?v=profesional-1-20260913-2"></script>
+<script src="app/natal-regencias.js?v=profesional-2-20260913"></script>
 <script src="app/planetas.js?v=planet-textures-2-20260912"></script>
 <script>
 (() => {
@@ -3168,6 +3174,30 @@ function pintaResumen(){
   document.getElementById("resDescarga").addEventListener("click",()=>descargaHoja("resumen"));
 }
 
+function pintaRegenciasProfesionales(destino){
+  const motor=window.NatalRegencias;if(!motor)return;
+  const a=motor.analizar(carta,{D:window.Dignidades,E:window.Efem}),planeta=id=>motor.PLANETAS[id];
+  const reg=a.regenteCarta?`${a.regenteCarta.glifo} ${a.regenteCarta.nombre}`:"Requiere hora natal";
+  const alm=a.almuten?`${a.almuten.glifo} ${a.almuten.nombre}`:"Requiere hora y cálculo completo";
+  const lider=a.autoridad[0],lideres=a.autoridad.filter(x=>x.alcance.length===lider.alcance.length&&x.directos.length===lider.directos.length);
+  const autoridad=lideres.map(x=>`${x.glifo} ${x.nombre}`).join(" · ");
+  const recepcion=a.recepciones.length?a.recepciones.map(x=>`${x.glifoA} ${x.nombreA} ↔ ${x.glifoB} ${x.nombreB}`).join(" · "):"No hay recepción mutua por domicilio";
+  const cadenaTexto=c=>c.recorrido.map(id=>`${planeta(id).glifo} ${planeta(id).nombre}`).join(" → ")+(c.tipo==="final"?" · dispositor final":c.tipo==="ciclo"?` → ${planeta(c.ciclo[0]).glifo} · circuito`:" · cadena incompleta");
+  destino.insertAdjacentHTML("beforeend",`
+    <section class="reg-panel" id="regenciasProfesionales"><header><span class="pro-criterio"><b>Paquete profesional 2</b></span><h2>Regencias y dispositores</h2><p>Quién gobierna cada posición, hacia dónde conduce su cadena y qué planetas concentran la estructura de la carta.</p></header>
+      <div class="reg-resumen">
+        <article class="reg-tarjeta"><small>Regente de la carta</small><b>${reg}</b><span>${a.regenteCarta?`Rige el Ascendente en ${a.regenteCarta.signo}.`:'El Ascendente depende de una hora natal fiable.'}</span></article>
+        <article class="reg-tarjeta"><small>Almutén figuris</small><b>${alm}</b><span>${a.almuten?`${a.almuten.total} puntos: ${a.almuten.esencial} esenciales y ${a.almuten.accidental} accidentales.`:'Se reutiliza el resultado del módulo de dignidades; no se estima sin hora.'}</span></article>
+        <article class="reg-tarjeta"><small>Mayor alcance estructural</small><b>${autoridad}</b><span>Recibe ${lider.alcance.length} ${lider.alcance.length===1?'cadena':'cadenas'} y ${lider.directos.length} ${lider.directos.length===1?'dependencia directa':'dependencias directas'}.</span></article>
+        <article class="reg-tarjeta"><small>Recepción mutua</small><b>${a.recepciones.length?a.recepciones.length:'Ninguna'}</b><span>${recepcion}</span></article>
+      </div>
+      <h3 class="reg-subtitulo">Mapa de disposiciones</h3><div class="reg-mapa">${a.filas.map(f=>`<button type="button" class="reg-enlace" data-reg-planeta="${f.id}"><span class="reg-cuerpo"><span class="cg">${f.glifo}</span><span><b>${f.nombre}</b><small>en ${f.signoNombre}</small></span></span><span class="reg-flecha">→</span><span class="reg-cuerpo"><span class="cg">${f.dispositorGlifo}</span><span><b>${f.dispositorNombre}</b><small>${f.domicilio?'domicilio propio':'dispositor'}</small></span></span></button>`).join("")}</div>
+      <details class="reg-cadenas"><summary>Ver las siete cadenas completas</summary><div class="reg-cadenas-lista">${a.filas.map(f=>`<div class="reg-cadena"><b>${f.nombre}:</b> ${cadenaTexto(f.cadena)}</div>`).join("")}</div></details>
+      ${a.recepciones.length?`<p class="reg-recepcion"><b>Recepción mutua por domicilio:</b> ${recepcion}. Cada planeta ocupa un signo gobernado por el otro; el circuito se muestra sin asignarle puntos adicionales.</p>`:''}
+      <p class="reg-criterio"><b>Criterio:</b> ${a.criterio.regencias}. ${a.criterio.cadena}. ${a.criterio.recepcion}. El almutén se toma del cálculo de Ibn Ezra ya disponible en <a href="/dignidades">Dignidades</a>.</p>
+    </section>`);
+  destino.querySelectorAll("[data-reg-planeta]").forEach(b=>b.addEventListener("click",()=>marcaFila(b.dataset.regPlaneta,false)));
+}
 function pintaProfesional(){
   const destino=document.getElementById("hojaProfesional"),motor=window.NatalProfesional;
   if(!destino||!motor){if(destino)destino.innerHTML='<p class="aviso error">No se pudo cargar el análisis profesional.</p>';return}
@@ -3186,6 +3216,7 @@ function pintaProfesional(){
     <section class="pro-criterios"><h3>Criterios de este cálculo</h3><p>Los totales son una guía comparativa del estado tradicional del planeta; no equivalen por sí solos a “bueno” o “malo”. Puedes revisar cada suma directamente en las etiquetas.</p><div class="pro-criterios-grid">
       <div class="pro-criterio"><b>Zodiaco</b><span>${a.criterio.zodiaco}</span></div><div class="pro-criterio"><b>Triplicidades</b><span>${a.criterio.triplicidades}</span></div><div class="pro-criterio"><b>Términos</b><span>${a.criterio.terminos}</span></div><div class="pro-criterio"><b>Decanos</b><span>${a.criterio.decanos}</span></div><div class="pro-criterio"><b>Puntuación</b><span>${a.criterio.puntuacion}</span></div><div class="pro-criterio"><b>Relación solar</b><span>${a.criterio.solar}</span></div>
     </div><p>Domicilio +5 · exaltación +4 · triplicidad +3 · término +2 · decano +1 · exilio −5 · caída −4. Los planetas transaturninos quedan fuera de esta tabla porque no forman parte del esquema tradicional que se está puntuando.</p></section>`;
+  pintaRegenciasProfesionales(destino);
   destino.querySelectorAll('[data-pro-planeta]').forEach(tr=>tr.addEventListener('click',()=>marcaFila(tr.dataset.proPlaneta,false)));
 }
 let filaAbierta = null;
