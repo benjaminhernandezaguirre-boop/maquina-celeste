@@ -1,16 +1,15 @@
 # Astroplanetario · lo que falta
 
-Lista de trabajo al 10 de septiembre de 2026. Marca las casillas conforme avances.
+Lista de trabajo al 12 de septiembre de 2026. Marca las casillas conforme avances.
 El tamaño es orientativo: **chico** es una tarde, **mediano** son varios días, **grande** es un módulo entero.
 
 ---
 
 ## 1. Arreglos pendientes
 
-- [ ] **El sprite del zodiaco no es una imagen.** `assets/zodiac/zodiac-sprite.webp` pesa 15 KB pero no tiene cabecera de imagen: ningún navegador lo abre, y por eso el recuadro de la ilustración zodiacal en Luna sale vacío. Hay que reemplazarlo por el archivo bueno. *(chico)*
-- [ ] **El título de Luna se encima.** En pantallas anchas, «LUNA MENGUANTE» se mete por debajo de la tarjeta del signo. Se arregla reservándole espacio al encabezado. *(chico)*
-- [ ] **Los workflows `apply-*.yml` fallan en silencio.** Parchan buscando texto exacto; si la cadena cambió, terminan en verde sin haber hecho nada. Si los sigues usando, que aborten con error cuando no encuentren el punto de inserción. Y recuerda que ya no sirven: el sitio lee `astroplanetario.html`, no los trozos. *(chico)*
-- [ ] **Rutas absolutas.** `lunar-zodiac-v2.js` pide el sprite como `/assets/…`. Funciona en la raíz de Vercel, se rompe si algún día lo cuelgas en una subcarpeta. *(chico)*
+No hay errores visuales o de estructura conocidos con prioridad alta. El módulo Luna ya utiliza las
+doce ilustraciones zodiacales reales, reserva espacio para su ficha y obtiene las ciudades del motor
+compartido.
 
 ## 2. Las tres herramientas que más falta hacen
 
@@ -70,7 +69,6 @@ quieras:
 - [x] **Afinar la precisión del Sol.** Hoy andamos en fracciones de minuto de arco: de sobra para signos, casas y aspectos, pero corto para una revolución solar, donde medio minuto de arco mueve el instante del retorno unos diez minutos de reloj y corre el Ascendente dos o tres grados. Es trabajo acotado y conocido. *(mediano, bloquea la revolución solar)*  
   → hecho, y de paso apareció algo más gordo: faltaba la precesión de los equinoccios en todos los planetas, y ΔT. Ver ESTADO-DEL-PROYECTO.md.
 - [ ] **Que se instale en el teléfono y funcione sin internet.** Un manifiesto y un service worker: el alumno le da «instalar» y le queda como app, y en el salón funciona aunque el wifi esté caído. *(chico, se nota mucho)*
-- [ ] **Una sola fuente de verdad.** Ya hecho: se edita `astroplanetario.html`. Los `app/part-XX.txt` quedan como respaldo y el sitio no los lee.
 
 ## 7. Decisiones que dependen de ti
 
@@ -88,3 +86,4 @@ Carta natal con cuatro sistemas de casas, aspectos con orbes ajustables, nodos, 
 Fortuna · Significados de planeta en signo y en casa, Ascendente y aspectos · Atacires con veintiséis
 claves agrupadas, rueda doble y calendario de contactos · Descarga de la rueda sola y de la hoja
 completa · Módulo de Luna con fases, lunaciones, revolución lunar, luna vacía y luna progresada.
+
