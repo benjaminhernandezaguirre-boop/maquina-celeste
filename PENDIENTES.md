@@ -1,6 +1,6 @@
 # Astroplanetario · lo que falta
 
-Lista de trabajo al 12 de septiembre de 2026. Marca las casillas conforme avances.
+Lista de trabajo al 13 de septiembre de 2026. Marca las casillas conforme avances.
 El tamaño es orientativo: **chico** es una tarde, **mediano** son varios días, **grande** es un módulo entero.
 
 ---
@@ -32,6 +32,11 @@ Siete astros dicen «Próximamente». Este es el orden que yo seguiría:
 
 ## 4. Técnicas de cálculo que faltan
 
+- [x] **Profecciones anuales con señor del año.** *(chico)*  
+  → hechas el 13 sep 2026. Ver la sección 4 ter.
+- [x] **Dignidades esenciales con almutén.** *(mediano)*  
+  → hechas el 13 sep 2026. Ver la sección 4 ter.
+
 - [x] **Zodiaco sideral**, con selector de ayanamsa (Lahiri, Fagan-Bradley, Krishnamurti, Raman) y un botón para alternar con el tropical sobre la misma carta. Es restar un valor a todas las longitudes. *(chico)*  
   → hecho el 11 sep 2026, con las cuatro ayanamsas y el selector junto a las posiciones.
 - [x] **Carta dracónica.** Rotar la carta hasta poner el Nodo Norte en 0° de Aries. *(chico)*  
@@ -42,6 +47,45 @@ Siete astros dicen «Próximamente». Este es el orden que yo seguiría:
   → hecho el 11 sep 2026, como segundo modo de la pestaña «Progresiones».
 - [x] **Revolución solar y revolución lunar.** La lunar ya está en el módulo de Luna; falta la solar, con su propio selector de lugar, porque la persona no siempre cumple años donde nació. *(mediano, depende de la precisión del Sol)*  
   → la solar ya está, con selector de lugar.
+
+## 4 ter. Profecciones anuales y dignidades esenciales · hechas el 13 sep 2026 (Claude)
+
+**Profecciones anuales.** `app/profecciones.js` + `app/profecciones-ui.js`, con guía en
+`profecciones.html` y calculadora en `profecciones-calculadora.html` (rutas `/profecciones` y
+`/calculadora-profecciones`). Signo y casa profectados, señor del año con su condición esencial,
+profección mensual y diaria, tabla de la vida de 0 a 90 años, y opción de alinear el corte con la
+revolución solar exacta en vez del cumpleaños civil.
+Además, el bloque «La profección del año» aparece dentro de la pestaña **Revolución** del
+astroplanetario: es la conexión que hace útil la técnica, porque la profección dice qué mirar en la
+revolución. Ahí la edad se ancla al año de la revolución, no al instante del retorno, porque el
+retorno puede caer unas horas antes del cumpleaños y devolvería el año anterior.
+En la portada, **Marte** dejó de decir «Próximamente» y lleva a la guía de profecciones.
+
+**Dignidades esenciales.** `app/dignidades.js` + `app/dignidades-ui.js`, con guía en `dignidades.html`
+y calculadora en `dignidades-calculadora.html` (rutas `/dignidades` y `/calculadora-dignidades`).
+Las cinco dignidades con puntuación ptolemaica, almutén de grado, almutén figuris por el método de
+Ibn Ezra (cinco puntos hylegiacales + casa + regentes del día y de la hora), hora planetaria con horas
+desiguales y sicigia prenatal. La tabla de posiciones del astroplanetario gana una columna
+**Dignidad** con la puntuación, y el detalle de cada astro explica de dónde sale el número.
+
+Criterios elegidos, todos visibles en pantalla y cambiables desde la propia página:
+términos **egipcios** por omisión (ptolemaicos en el selector), triplicidades de **Dorotheo** con
+participante (Ptolomeo en el selector), y **regencias tradicionales**, sin dignidad esencial para los
+planetas modernos. Solo puntúa el regente de triplicidad que corresponde a la secta.
+
+Las tablas que se ven en la guía de dignidades se generan desde el mismo módulo que hace los
+cálculos, así que no pueden desincronizarse de la calculadora.
+
+Pruebas: `tests/profecciones.test.cjs` (14) y `tests/dignidades.test.cjs` (31). El suite completo
+pasa de 49 a 94. Se corren con `node --test tests/*.test.cjs` (con `tests/` a secas no funciona en
+esta versión de Node, y eso ya venía de antes).
+
+También se documentó en `liberacion-zodiacal.html` que los periodos se cuentan en **años simbólicos
+de 360 días**: la calculadora ya lo decía, la guía no.
+
+Lo que se le puede añadir después: enlazar el señor del año con la pestaña de Tránsitos para fechar
+los contactos dentro del año, y dar a las dignidades un lugar propio en el carrusel de la portada
+(hoy se llega desde el menú de las páginas de técnica y desde la tabla de posiciones).
 
 ## 4 bis. Astrocartografía · hecha el 10 sep 2026
 

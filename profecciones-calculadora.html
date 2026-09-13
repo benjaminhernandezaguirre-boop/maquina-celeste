@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="es" data-studio-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Calculadora de profecciones anuales y señor del año | Astroplanetario</title>
+<meta name="description" content="Calcula tu profección anual: signo profectado, casa del año, señor del año con su condición natal, profección mensual y la tabla completa año por año.">
+<link rel="canonical" href="https://astroplanetario.com/calculadora-profecciones">
+<meta name="robots" content="index,follow"><meta name="theme-color" content="#f4f0e9"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website"><meta property="og:locale" content="es_MX">
+<meta property="og:title" content="Calculadora de profecciones anuales">
+<meta property="og:description" content="Tu signo profectado, la casa del año y el señor del año, con la tabla completa de tu vida.">
+<meta property="og:url" content="https://astroplanetario.com/calculadora-profecciones">
+<meta property="og:image" content="https://astroplanetario.com/hero-cosmica.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/app/tecnica-theme.css">
+<style>
+.tablero{display:grid;grid-template-columns:minmax(320px,.85fr) minmax(0,1.15fr);gap:1.4rem;align-items:center}
+.anillo{position:relative;width:min(100%,430px);aspect-ratio:1;margin:auto}
+.anillo:before{content:"";position:absolute;inset:9%;border:1px solid var(--line);border-radius:50%}
+.anillo .nodo{--a:0deg;position:absolute;left:50%;top:50%;width:58px;height:58px;display:grid;place-content:center;gap:1px;transform:translate(-50%,-50%) rotate(var(--a)) translateY(-175px) rotate(calc(-1*var(--a)));border:1px solid var(--line);border-radius:50%;background:var(--panel);color:var(--muted);cursor:pointer;box-shadow:0 5px 18px #2b102014}
+.anillo .nodo span{font-size:1.2rem;line-height:1;color:var(--plum)}
+.anillo .nodo small{font:600 .44rem var(--mono);text-transform:uppercase}
+.anillo .nodo.activo{border-color:var(--plum);background:var(--plum);box-shadow:0 0 0 5px #8d527116}
+.anillo .nodo.activo span,.anillo .nodo.activo small{color:#fff}
+.anillo .centro{position:absolute;inset:30%;display:grid;place-content:center;text-align:center;border:1px solid var(--line);border-radius:50%;background:radial-gradient(circle,var(--panel),var(--soft));box-shadow:inset 0 0 35px #73405d12}
+.anillo .centro small{color:var(--plum2);font:600 .46rem var(--mono);text-transform:uppercase}
+.anillo .centro b{display:block;font:500 1.35rem var(--display);color:var(--plum)}
+.anillo .centro span{color:var(--muted);font-size:.76rem}
+.meses{display:grid;grid-template-columns:repeat(6,1fr);gap:.4rem;margin-top:.6rem}
+.mes{padding:.6rem .35rem;border:1px solid var(--line);border-radius:12px;background:var(--soft);color:var(--ink);cursor:pointer;text-align:center}
+.mes span{display:block;font-size:1.15rem;color:var(--plum)}
+.mes b{display:block;font-size:.7rem}
+.mes small{display:block;color:var(--muted);font:500 .43rem var(--mono)}
+.mes.activo{background:var(--plum);border-color:var(--plum);color:#fff}
+.mes.activo span,.mes.activo small{color:#fff}
+.scroll-alto{max-height:26rem;overflow:auto}
+table.t tr.ahora{background:#aa7c3018}
+table.t tr.ahora td{font-weight:600}
+.boton.mini{min-height:auto;padding:.24rem .6rem;font-size:.46rem}
+@media(max-width:980px){.tablero{grid-template-columns:1fr}.meses{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:680px){.anillo{width:min(88vw,340px)}.anillo .nodo{width:46px;height:46px;transform:translate(-50%,-50%) rotate(var(--a)) translateY(-37vw) rotate(calc(-1*var(--a)))}.meses{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body><div class="fondo"></div>
+<header class="ancho cabecera">
+  <a class="marca" href="/">Astroplanetario <span>Máquina Celeste</span></a>
+  <nav class="nav" aria-label="Navegación principal">
+    <a href="/profecciones">Guía de profecciones</a><a href="/dignidades">Dignidades</a><a href="/liberacion-zodiacal">Liberación zodiacal</a>
+    <button class="tema" id="themeToggle" type="button"></button>
+  </nav>
+</header>
+<main class="ancho">
+
+<section class="hero" data-glifo="♃">
+  <p class="ceja">Júpiter · Calculadora anual</p>
+  <h1>Tu profección del año</h1>
+  <p>El signo al que se profecta tu carta este año, la casa que activa, el señor del año con su condición natal, y la tabla completa de tu vida año por año.</p>
+</section>
+
+<section class="panel">
+  <h2>1. Elige los datos de nacimiento</h2>
+  <div class="tabs" role="tablist" aria-label="Origen de los datos">
+    <button class="tab activo" data-fuente="guardada" type="button">Carta guardada</button>
+    <button class="tab" data-fuente="manual" type="button">Datos nuevos</button>
+  </div>
+  <div class="fuente-panel" id="panelGuardada">
+    <div class="campo"><label for="cartaSelect">Carta natal guardada</label><select id="cartaSelect"></select></div>
+    <a class="boton sec" href="/astroplanetario.html?view=natal">Crear otra carta</a>
+  </div>
+  <div id="panelManual" hidden>
+    <div class="manual-grid">
+      <div class="campo"><label for="nNombre">Nombre de la carta</label><input id="nNombre" maxlength="80" placeholder="Ej. Mi carta"></div>
+      <div class="campo"><label for="nFecha">Fecha de nacimiento</label><input id="nFecha" type="date" min="1800-01-01" max="2050-12-31"></div>
+      <div class="campo"><label for="nHora">Hora exacta</label><input id="nHora" type="time" step="60"></div>
+      <div class="campo"><label for="nLugar">Ciudad de nacimiento</label><input id="nLugar" list="ciudades" autocomplete="off" placeholder="Escribe y elige una ciudad"><datalist id="ciudades"></datalist></div>
+    </div>
+    <div class="campo" id="campoOcurrencia" hidden>
+      <label for="nOcurrencia">Esta hora ocurrió dos veces</label>
+      <select id="nOcurrencia"><option value="reject">Elige una opción</option><option value="earlier">Primera ocurrencia</option><option value="later">Segunda ocurrencia</option></select>
+    </div>
+    <div class="manual-acciones"><button class="boton sec" id="nEjemplo" type="button">Cargar ejemplo</button></div>
+  </div>
+  <div class="config">
+    <div><span class="selector-label">Fecha que quieres estudiar</span>
+      <div class="fecha-estudio"><input id="fechaObjetivo" type="date" min="1800-01-01" max="2200-12-31" aria-label="Fecha que quieres estudiar"><input id="horaObjetivo" type="time" value="12:00" aria-label="Hora"></div></div>
+    <div><span class="selector-label">Inicio del año profectado</span>
+      <label style="display:flex;gap:.55rem;align-items:center;min-height:48px;padding:.4rem .7rem;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--muted);font-size:.85rem">
+        <input type="checkbox" id="alinear" style="width:auto;min-height:auto"> Alinear con la revolución solar exacta</label></div>
+    <button class="boton" id="calcular" type="button">Calcular profección</button>
+  </div>
+  <p class="estado" id="estado" aria-live="polite"></p>
+  <p class="metodo-mini">Método visible: signos enteros desde el Ascendente · un signo por año cumplido · regencias tradicionales · corte en el cumpleaños</p>
+</section>
+
+<section id="salida" hidden>
+  <div class="resumen" id="resumen"></div>
+  <section class="panel tablero">
+    <div class="anillo" id="anillo" role="img" aria-label="Rueda de las doce casas profectadas"></div>
+    <div id="ano"></div>
+  </section>
+  <section class="bloque" id="activados"></section>
+  <section class="bloque">
+    <h2>Los doce meses profectados</h2>
+    <p style="color:var(--muted);margin:.2rem 0 0">Cada tramo dura unos 30 días y medio y avanza un signo más. Toca uno para estudiarlo.</p>
+    <div class="meses" id="meses"></div>
+  </section>
+  <section class="bloque">
+    <h2>Tu vida año por año</h2>
+    <p style="color:var(--muted);margin:.2rem 0 .8rem">Noventa y un renglones, del nacimiento a los 90. El año en curso va resaltado.</p>
+    <div class="tabla-envoltura scroll-alto"><table class="t">
+      <thead><tr><th>Edad</th><th></th><th>Signo</th><th>Casa</th><th>Asunto</th><th>Señor del año</th><th>Empieza</th><th></th></tr></thead>
+      <tbody id="vidaCuerpo"></tbody></table></div>
+  </section>
+</section>
+
+<aside class="metodo"><b>Criterio de cálculo.</b> Profección de signos enteros desde el Ascendente: un signo por año cumplido, contado en la hora y la zona horaria del nacimiento. Regencias tradicionales, de modo que cada signo tiene señor. Los meses profectados dividen el año en doce partes iguales. La casa natal del señor del año se cuenta por signos enteros. Con la casilla de alineación marcada, el año arranca en el momento exacto de la revolución solar en lugar del cumpleaños civil; la diferencia no pasa de un día. Esta página presenta interpretación simbólica y no predice acontecimientos concretos.</aside>
+
+</main>
+<footer class="ancho pie">
+  <span>Astroplanetario · Profecciones anuales
+    <span class="firma">Un proyecto del <a href="https://tarot-academy-theta.vercel.app/" target="_blank" rel="noopener">Instituto de Artes Esotéricas y Saberes Ancestrales</a></span>
+  </span>
+  <a href="/profecciones">Volver a la guía</a>
+</footer>
+<script src="/app/tema.js"></script>
+<script src="/app/efemerides.js"></script>
+<script src="/app/dignidades.js"></script>
+<script src="/app/profecciones.js"></script>
+<script src="/app/profecciones-ui.js"></script>
+</body></html>

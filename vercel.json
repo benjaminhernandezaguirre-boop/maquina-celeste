@@ -47,6 +47,38 @@
     {
       "source": "/calculadora-liberacion-zodiacal/",
       "destination": "/liberacion-zodiacal-calculadora.html"
+    },
+    {
+      "source": "/profecciones",
+      "destination": "/profecciones.html"
+    },
+    {
+      "source": "/profecciones/",
+      "destination": "/profecciones.html"
+    },
+    {
+      "source": "/calculadora-profecciones",
+      "destination": "/profecciones-calculadora.html"
+    },
+    {
+      "source": "/calculadora-profecciones/",
+      "destination": "/profecciones-calculadora.html"
+    },
+    {
+      "source": "/dignidades",
+      "destination": "/dignidades.html"
+    },
+    {
+      "source": "/dignidades/",
+      "destination": "/dignidades.html"
+    },
+    {
+      "source": "/calculadora-dignidades",
+      "destination": "/dignidades-calculadora.html"
+    },
+    {
+      "source": "/calculadora-dignidades/",
+      "destination": "/dignidades-calculadora.html"
     }
   ],
   "headers": [
@@ -191,6 +223,96 @@
         {
           "key": "Cache-Control",
           "value": "no-cache, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/profecciones.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/profecciones-calculadora.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/dignidades.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/dignidades-calculadora.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/app/profecciones.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/app/profecciones-ui.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/app/dignidades.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/app/dignidades-ui.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/app/tecnica-theme.css",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/app/tema.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
         }
       ]
     }

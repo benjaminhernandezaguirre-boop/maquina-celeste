@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="es" data-studio-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Profecciones anuales: qué son y cómo se calculan | Astroplanetario</title>
+<meta name="description" content="Qué son las profecciones anuales, cómo la carta avanza un signo por cada año cumplido, qué es el señor del año y cómo se combinan con la revolución solar.">
+<link rel="canonical" href="https://astroplanetario.com/profecciones">
+<meta name="robots" content="index,follow"><meta name="theme-color" content="#f4f0e9"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="article"><meta property="og:locale" content="es_MX">
+<meta property="og:title" content="Profecciones anuales: qué son y cómo se calculan">
+<meta property="og:description" content="Cada año cumplido la carta avanza un signo. El regente de ese signo es el señor del año y marca el tema que se activa.">
+<meta property="og:url" content="https://astroplanetario.com/profecciones">
+<meta property="og:image" content="https://astroplanetario.com/hero-cosmica.webp">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/app/tecnica-theme.css">
+<style>
+.rueda{position:relative;width:min(100%,460px);aspect-ratio:1;margin:1.6rem auto}
+.rueda .aro{position:absolute;inset:8%;border:1px solid var(--line);border-radius:50%}
+.rueda .nodo{--a:0deg;position:absolute;left:50%;top:50%;width:62px;height:62px;display:grid;place-content:center;text-align:center;transform:translate(-50%,-50%) rotate(var(--a)) translateY(-40%) rotate(calc(-1*var(--a)));border:1px solid var(--line);border-radius:50%;background:var(--panel);box-shadow:0 5px 18px #2b102014}
+.rueda .nodo b{display:block;font:600 .82rem var(--mono);color:var(--plum)}
+.rueda .nodo small{display:block;font:500 .44rem var(--mono);color:var(--muted);text-transform:uppercase}
+.rueda .centro{position:absolute;inset:31%;display:grid;place-content:center;text-align:center;border:1px solid var(--line);border-radius:50%;background:radial-gradient(circle,var(--panel),var(--soft))}
+.rueda .centro small{color:var(--plum2);font:600 .46rem var(--mono);text-transform:uppercase}
+.rueda .centro b{font:500 .95rem var(--display)}
+.pasos{counter-reset:p;margin:1.3rem 0;padding:0;list-style:none}
+.pasos li{position:relative;margin-bottom:.9rem;padding-left:3rem;color:var(--muted)}
+.pasos li:before{counter-increment:p;content:counter(p);position:absolute;left:0;top:-.1rem;display:grid;place-items:center;width:2.1rem;height:2.1rem;border-radius:50%;background:var(--plum);color:#fff;font:600 .62rem var(--mono)}
+.pasos b{color:var(--ink)}
+@media(max-width:680px){.rueda{width:min(90vw,340px)}.rueda .nodo{width:50px;height:50px}}
+</style>
+</head>
+<body><div class="fondo"></div>
+<header class="ancho cabecera">
+  <a class="marca" href="/">Astroplanetario <span>Máquina Celeste</span></a>
+  <nav class="nav" aria-label="Navegación principal">
+    <a href="/dignidades">Dignidades</a><a href="/liberacion-zodiacal">Liberación zodiacal</a><a href="/carta-natal">Carta natal</a>
+    <button class="tema" id="themeToggle" type="button"></button>
+  </nav>
+</header>
+<main class="ancho">
+
+<section class="hero" data-glifo="♃">
+  <p class="ceja">Técnica de tiempo · Tradición helenística</p>
+  <h1>Profecciones anuales</h1>
+  <p>Cada año cumplido, la carta entera avanza un signo. El signo al que llega marca el asunto del año, y su regente —el <strong>señor del año</strong>— es el planeta que hay que seguir de cerca durante esos doce meses.</p>
+  <p style="margin-top:1.4rem"><a class="boton grande" href="/calculadora-profecciones">Calcular mis profecciones</a></p>
+</section>
+
+<section class="seccion">
+  <p class="ceja">Lo esencial</p>
+  <h2>Un reloj de doce dientes</h2>
+  <p>La profección anual es probablemente la técnica de tiempo más sencilla que produjo la astrología antigua, y también una de las más usadas: aparece en Vetio Valente, en Ptolomeo y en prácticamente toda la tradición posterior, árabe y medieval incluidas.</p>
+  <p>La idea cabe en una frase: <strong>el Ascendente avanza un signo completo por cada cumpleaños</strong>. No importa cuántos grados tenga el Ascendente ni qué sistema de casas uses; se cuenta por signos enteros, de uno en uno.</p>
+  <ol class="pasos">
+    <li><b>El año que naces</b> estás en el signo de tu Ascendente: casa I. El asunto es el cuerpo, la persona, el arranque.</li>
+    <li><b>Al cumplir un año</b> pasas al siguiente signo: casa II, los recursos.</li>
+    <li><b>A los once</b> llegas a la casa XII, y <b>a los doce</b> vuelves al Ascendente. El ciclo se cierra.</li>
+    <li><b>A los 24, 36, 48…</b> vuelves otra vez a la casa I. Por eso esas edades se sienten como reinicios.</li>
+  </ol>
+  <div class="aviso">La cuenta es <strong>por años cumplidos</strong>, no por año calendario: el cambio ocurre en tu cumpleaños, no el 1 de enero.</div>
+</section>
+
+<section class="seccion">
+  <p class="ceja">La cuenta</p>
+  <h2>Cómo se calcula</h2>
+  <p>Solo hacen falta dos cosas: el signo del Ascendente y la edad cumplida.</p>
+  <div class="rejilla">
+    <div class="tarjeta"><small>Signo profectado</small><b>Ascendente + edad</b><span>Contando signos, y volviendo a empezar después de Piscis.</span></div>
+    <div class="tarjeta"><small>Casa profectada</small><b>(edad ÷ 12), el resto + 1</b><span>La edad 0 da casa I; la 13, casa II; la 30, casa VII.</span></div>
+    <div class="tarjeta"><small>Señor del año</small><b>Regente del signo</b><span>Con las regencias tradicionales: Marte rige Escorpio, Saturno Acuario, Júpiter Piscis.</span></div>
+  </div>
+  <h3>Un ejemplo</h3>
+  <p>Alguien con <strong>Ascendente en Piscis</strong> que cumple <strong>30 años</strong>: contamos 30 signos desde Piscis y llegamos a <strong>Virgo</strong>. 30 dividido entre 12 deja resto 6, así que es la <strong>casa VII</strong>. Virgo lo rige <strong>Mercurio</strong>: ése es el señor de ese año. Toca mirar dónde está Mercurio en la carta natal, qué casa gobierna y qué tránsitos recibe: es el planeta de guardia.</p>
+</section>
+
+<section class="seccion">
+  <p class="ceja">El ciclo completo</p>
+  <h2>Las doce casas, año por año</h2>
+  <p>El significado del año lo da la casa a la que se profecta. Esta es la lectura tradicional de cada una:</p>
+  <div class="tabla-envoltura"><table class="t" id="tablaCasas"><caption>Casa profectada y asunto del año</caption>
+    <thead><tr><th>Casa</th><th>Edades</th><th>Asunto</th><th>Qué se mueve</th></tr></thead><tbody></tbody></table></div>
+  <p>Las edades de la segunda columna se repiten cada doce años: si tienes 37, estás en la misma casa que a los 25 y a los 13, pero con el signo y el señor recorridos tres vueltas más de experiencia.</p>
+</section>
+
+<section class="seccion">
+  <p class="ceja">El planeta de guardia</p>
+  <h2>El señor del año</h2>
+  <p>De todo lo que entrega la técnica, esto es lo más útil. El regente del signo profectado se convierte en el planeta que organiza los doce meses: su condición natal describe cómo va a ir el año, y los tránsitos que recibe marcan <em>cuándo</em> pasan las cosas.</p>
+  <div class="tabla-envoltura"><table class="t" id="tablaSenor"><caption>Qué activa cada señor del año</caption>
+    <thead><tr><th></th><th>Señor</th><th>Lo que pone sobre la mesa</th></tr></thead><tbody></tbody></table></div>
+  <h3>Qué revisar cuando lo identificas</h3>
+  <div class="rejilla">
+    <div class="tarjeta"><small>Condición natal</small><b>¿Está digno o peregrino?</b><span>Un señor del año en domicilio o exaltación trabaja a favor; en exilio o caída, cuesta más. Eso se mide con las <a href="/dignidades">dignidades esenciales</a>.</span></div>
+    <div class="tarjeta"><small>Casa natal</small><b>¿De dónde viene?</b><span>La casa donde está natalmente indica de qué terreno vienen los asuntos del año.</span></div>
+    <div class="tarjeta"><small>Tránsitos</small><b>¿Quién lo toca este año?</b><span>Los tránsitos al señor del año son los que fechan los acontecimientos dentro de los doce meses.</span></div>
+    <div class="tarjeta"><small>Revolución solar</small><b>¿Dónde cayó?</b><span>Su posición y su casa en la revolución solar del año afinan la lectura.</span></div>
+  </div>
+</section>
+
+<section class="seccion">
+  <p class="ceja">Más fino</p>
+  <h2>Profección mensual y diaria</h2>
+  <p>La misma lógica se aplica hacia adentro. El año profectado se divide en doce partes iguales —unos <strong>30 días y medio</strong> cada una— y cada parte avanza un signo más desde el signo del año. Eso da la <strong>profección mensual</strong>, con su propio señor del mes.</p>
+  <p>Y cada mes profectado se vuelve a dividir en doce, dando periodos de unos <strong>dos días y medio</strong>: la <strong>profección diaria</strong>. Se usa menos, pero sirve para afinar fechas cuando el año y el mes ya apuntan a algo.</p>
+  <div class="aviso">Ojo con un detalle práctico: el mes profectado <strong>no coincide con el mes del calendario</strong>. Corre de cumpleaños en adelante, en tramos de 30 días y medio.</div>
+</section>
+
+<section class="seccion">
+  <p class="ceja">No trabaja sola</p>
+  <h2>Cómo se combina con lo demás</h2>
+  <div class="rejilla">
+    <div class="tarjeta"><small>Con la revolución solar</small><b>La profección dice qué mirar</b><span>La revolución solar entrega una carta entera para el año; la profección te dice cuál de sus piezas importa. Sin ella, la revolución se lee a ciegas.</span></div>
+    <div class="tarjeta"><small>Con la liberación zodiacal</small><b>Dos escalas del mismo tiempo</b><span>La <a href="/liberacion-zodiacal">liberación</a> marca capítulos largos y desiguales; la profección, un ritmo parejo de doce. Cuando coinciden en el mismo signo, el año pesa.</span></div>
+    <div class="tarjeta"><small>Con los tránsitos</small><b>El calendario fino</b><span>Los tránsitos al señor del año y al signo profectado fechan lo que la profección anunció.</span></div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2>Calcula tu año</h2>
+  <p>Con tu fecha, hora y lugar de nacimiento la calculadora entrega el signo profectado, la casa, el señor del año con su condición natal, la profección del mes en curso y la tabla completa de tu vida año por año.</p>
+  <a class="boton grande" href="/calculadora-profecciones">Ir a la calculadora de profecciones</a>
+</section>
+
+<section class="seccion" style="border:0">
+  <p class="ceja">Preguntas frecuentes</p>
+  <h2>Dudas que salen siempre</h2>
+  <h3>¿Necesito la hora exacta de nacimiento?</h3>
+  <p>Sí. Todo se cuenta desde el Ascendente, y el Ascendente cambia de signo cada dos horas aproximadamente. Sin hora no hay profección posible.</p>
+  <h3>¿El año profectado empieza en mi cumpleaños o en la revolución solar?</h3>
+  <p>Las dos convenciones se usan y difieren como mucho en un día. Esta calculadora arranca en el <strong>cumpleaños</strong> y te deja alinear al momento exacto de la revolución solar si lo prefieres.</p>
+  <h3>¿Por qué usan las regencias tradicionales y no Plutón, Urano y Neptuno?</h3>
+  <p>Porque la técnica es anterior a esos planetas y su lógica depende de que cada planeta rija dos signos. Con regentes modernos, tres signos se quedarían sin señor del año dentro del sistema. Los planetas modernos se leen como participantes, no como señores.</p>
+  <h3>¿Qué pasa si nací un 29 de febrero?</h3>
+  <p>El año profectado cambia el 28 de febrero en los años comunes y el 29 en los bisiestos, que es lo que hace el calendario civil.</p>
+</section>
+
+<aside class="metodo"><b>Criterio de cálculo.</b> Profección de signos enteros desde el Ascendente, un signo por año cumplido, contada en la hora y la zona horaria del nacimiento. Regencias tradicionales. Los meses profectados dividen el año en doce partes iguales y los días dividen cada mes en otras doce. La casa natal del señor del año se cuenta por signos enteros desde el Ascendente. Esta página presenta interpretación simbólica y no predice acontecimientos concretos.</aside>
+
+</main>
+<footer class="ancho pie">
+  <span>Astroplanetario · Profecciones anuales
+    <span class="firma">Un proyecto del <a href="https://tarot-academy-theta.vercel.app/" target="_blank" rel="noopener">Instituto de Artes Esotéricas y Saberes Ancestrales</a></span>
+  </span>
+  <a href="/calculadora-profecciones">Ir a la calculadora</a>
+</footer>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[
+{"@type":"Article","headline":"Profecciones anuales: qué son y cómo se calculan","description":"Guía sobre la profección anual, el señor del año y su combinación con la revolución solar.","inLanguage":"es-MX","mainEntityOfPage":"https://astroplanetario.com/profecciones","publisher":{"@type":"Organization","name":"Astroplanetario","url":"https://astroplanetario.com/"}},
+{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Astroplanetario","item":"https://astroplanetario.com/"},{"@type":"ListItem","position":2,"name":"Profecciones anuales","item":"https://astroplanetario.com/profecciones"}]},
+{"@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"¿Qué es una profección anual?","acceptedAnswer":{"@type":"Answer","text":"Es una técnica de tiempo en la que la carta avanza un signo completo por cada año cumplido desde el Ascendente. El signo al que llega marca el asunto del año y su regente es el señor del año."}},
+{"@type":"Question","name":"¿Cómo se calcula el señor del año?","acceptedAnswer":{"@type":"Answer","text":"Se cuentan tantos signos desde el Ascendente como años cumplidos se tengan, y se toma el regente tradicional del signo resultante. Ese planeta es el señor del año."}},
+{"@type":"Question","name":"¿Necesito la hora exacta de nacimiento?","acceptedAnswer":{"@type":"Answer","text":"Sí. La profección se cuenta desde el Ascendente, que cambia de signo aproximadamente cada dos horas, así que sin hora de nacimiento no puede calcularse."}},
+{"@type":"Question","name":"¿El año profectado empieza en el cumpleaños o en la revolución solar?","acceptedAnswer":{"@type":"Answer","text":"Se usan ambas convenciones y difieren como mucho en un día. Lo habitual es contar desde el cumpleaños, con la opción de alinear al momento exacto de la revolución solar."}},
+{"@type":"Question","name":"¿Cómo se combinan las profecciones con la revolución solar?","acceptedAnswer":{"@type":"Answer","text":"La revolución solar entrega la carta del año y la profección indica qué parte de ella mirar: la casa profectada y el señor del año señalan el tema y el planeta a seguir."}}]}]}</script>
+<script src="/app/tema.js"></script>
+<script src="/app/profecciones.js"></script>
+<script>
+(function(){
+  "use strict";
+  var P = window.Profecciones; if(!P) return;
+  var cuerpo = document.querySelector('#tablaCasas tbody');
+  if(cuerpo) cuerpo.innerHTML = P.CASAS.map(function(c,i){
+    var edades = [i, i+12, i+24, i+36, i+48].join(', ') + '…';
+    return '<tr><td><b>'+c.n+'</b></td><td class="num">'+edades+'</td><td>'+c.titulo+'</td><td style="white-space:normal">'+c.tema+'</td></tr>';
+  }).join('');
+  var senores = document.querySelector('#tablaSenor tbody');
+  if(senores) senores.innerHTML = Object.keys(P.TEMAS_SENOR).map(function(p){
+    return '<tr><td class="glifo">'+(P.SIMBOLOS[p]||'')+'</td><td><b>'+p+'</b></td><td style="white-space:normal">'+P.TEMAS_SENOR[p]+'</td></tr>';
+  }).join('');
+})();
+</script>
+</body></html>

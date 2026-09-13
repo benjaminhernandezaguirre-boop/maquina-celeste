@@ -389,6 +389,15 @@
   }
   .d-dom{color:#9BC48A}.d-exa{color:var(--laton)}.d-exi{color:#D08A6E}.d-cai{color:var(--fuego)}.d-per{color:#7C7A96}
 
+  /* Puntuación de las cinco dignidades esenciales en la tabla de posiciones */
+  .dig-marca{
+    display:inline-block;min-width:2.1rem;padding:.08rem .4rem;border-radius:999px;
+    border:1px solid currentColor;font-family:"IBM Plex Mono",monospace;font-size:.66rem;
+    font-weight:600;text-align:center;vertical-align:middle;
+  }
+  .dig-bien{color:#9BC48A}.dig-mal{color:#D08A6E}.dig-neutro{color:#7C7A96;opacity:.75}
+  .dig-quien{display:inline-block;margin-top:.3rem;color:var(--tenue);font-size:.85rem;line-height:1.5}
+
   ul.aspectos{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
   ul.aspectos li{
     display:grid;grid-template-columns:auto auto auto 1fr auto;gap:.5rem;align-items:center;
@@ -1082,6 +1091,8 @@
 </div>
 
 <script src="app/efemerides.js"></script>
+<script src="app/profecciones.js"></script>
+<script src="app/dignidades.js"></script>
 <script src="app/planetas.js?v=planet-textures-2-20260912"></script>
 <script>
 (() => {
@@ -3169,7 +3180,12 @@ function pintaCarta(){
     ${!datos.horaConocida ? `<p class="aviso" style="margin:.8rem 0 0">Carta sin hora: no hay Ascendente ni casas. Los grados de la Luna son aproximados.</p>` : ""}
     <table class="posiciones"><thead><tr>
       <th></th><th>Astro</th><th>Posición</th><th style="text-align:right">Casa</th>
-    </tr></thead><tbody>${filas.join("")}</tbody></table>`;
+      <th style="text-align:right" title="Suma de las cinco dignidades esenciales">Dignidad</th>
+    </tr></thead><tbody>${filas.join("")}</tbody></table>
+    ${carta.diurna === null ? "" : `<p class="aviso" style="margin-top:.8rem">La columna <strong>Dignidad</strong> suma las cinco dignidades esenciales
+      en el grado exacto: domicilio 5, exaltación 4, triplicidad 3, término 2 y faz 1, restando 5 por exilio y 4 por caída. Toca un renglón para ver
+      de dónde sale el número. <a href="/dignidades" target="_blank" rel="noopener">Guía de dignidades</a> ·
+      <a href="/calculadora-dignidades" target="_blank" rel="noopener">tabla completa de esta carta</a>.</p>`}`;
 
   // aspectos
   document.getElementById("hojaAsp").innerHTML = aspectos.length ? `
@@ -3237,28 +3253,59 @@ const REGENTE_TRAD = {
   Aries:"marte", Tauro:"venus", "Géminis":"mercurio", "Cáncer":"luna", Leo:"sol", Virgo:"mercurio",
   Libra:"venus", Escorpio:"marte", Sagitario:"jupiter", Capricornio:"saturno", Acuario:"saturno", Piscis:"jupiter"
 };
+/* --- Dignidades esenciales: se calculan sobre la longitud tal como se
+   muestra, de modo que el estado siempre corresponda al signo del renglón
+   aunque esté activo un zodiaco sideral o dracónico. --- */
+const NOMBRE_DIG = {sol:"Sol",luna:"Luna",mercurio:"Mercurio",venus:"Venus",marte:"Marte",jupiter:"Júpiter",saturno:"Saturno"};
+function lonMostrada(lon){ return mod360(lon - desfaseZodiaco()); }
+function estadoEsencial(id, lon){
+  const D = window.Dignidades;
+  if(!D || !NOMBRE_DIG[id] || carta.diurna === null) return null;
+  return D.estadoDe(NOMBRE_DIG[id], lonMostrada(lon), carta.diurna, {});
+}
+function insigniaEsencial(e){
+  if(!e) return '<span class="ccasa">—</span>';
+  const cl = e.puntuacion > 0 ? "dig-bien" : e.puntuacion < 0 ? "dig-mal" : "dig-neutro";
+  const n  = e.puntuacion > 0 ? "+" + e.puntuacion : String(e.puntuacion);
+  return `<span class="dig-marca ${cl}" title="${escaparHTML(e.resumen)}">${n}</span>`;
+}
+function desgloseEsencial(e){
+  const D = window.Dignidades;
+  if(!e || !D) return "";
+  const ET = {domicilio:"domicilio",exaltacion:"exaltación",triplicidad:"triplicidad",termino:"término",faz:"faz",exilio:"exilio",caida:"caída"};
+  const suyas = e.dignidades.concat(e.debilidades)
+    .map(d => `${ET[d.tipo]} ${d.puntos > 0 ? "+" : ""}${d.puntos}`).join(", ");
+  const d = e.detalle;
+  return `<br><b>Dignidades esenciales:</b> ${e.peregrino ? "peregrino — ninguna en este grado" : suyas + ` · total ${e.puntuacion > 0 ? "+" : ""}${e.puntuacion}`}.
+    <br><span class="dig-quien">Aquí mandan: ${d.domicilio} por domicilio${d.exaltacion ? `, ${d.exaltacion.planeta} por exaltación` : ""},
+    ${d.regenteTriplicidad} por triplicidad ${carta.diurna ? "diurna" : "nocturna"}, ${d.termino.planeta} por término (${d.termino.desde}–${d.termino.hasta}°) y ${d.faz.planeta} por faz.
+    <a href="/dignidades" target="_blank" rel="noopener">Qué significa esto</a>.</span>`;
+}
 function filaSimple(glifo, nombre, lon, casa, retro, id){
   const z = posZod(lon);
   return `<tr class="astro-fila" data-id="${id}">
     <td class="cg">${gh(glifo)}</td>
     <td>${nombre}</td>
     <td><span class="cgrado">${z.texto}</span> <span class="csigno">${z.signo.g} ${z.signo.n}</span>${retro?' <span class="crx">℞</span>':""}</td>
-    <td class="ccasa">${casa?ROMANOS[casa]:"—"}</td></tr>`;
+    <td class="ccasa">${casa?ROMANOS[casa]:"—"}</td>
+    <td class="ccasa">${insigniaEsencial(estadoEsencial(id, lon))}</td></tr>`;
 }
 function filaAstro(c, cusp){
   const z = posZod(c.lon), casa = cusp ? casaDe(c.lon, cusp) : null;
   const dig = dignidadDe(c.id, z.signo.n);
+  const esen = estadoEsencial(c.id, c.lon);
   const a = porId[c.id];
   const detalle = `<b>${a.nombre} en ${z.signo.n}</b>${casa?` · casa ${ROMANOS[casa]}`:""}${dig?` <span class="dignidad ${dig.c}">${dig.t}</span>`:""}<br>
     ${a.claves.slice(0,3).join(", ")} — ${casa?CASAS_SIGNIFICADO[casa].toLowerCase():"sin casa (falta la hora)"}.<br>
-    Regencia tradicional: ${a.tradicional}. ${c.retro?"Retrógrado en el nacimiento.":""}`;
+    Regencia tradicional: ${a.tradicional}. ${c.retro?"Retrógrado en el nacimiento.":""}${desgloseEsencial(esen)}`;
   return `<tr class="astro-fila" data-id="${c.id}">
       <td class="cg">${gh(c.glifo)}</td>
       <td>${c.nombre}</td>
       <td><span class="cgrado">${z.texto}</span> <span class="csigno">${z.signo.g} ${z.signo.n}</span>${c.retro?' <span class="crx">℞</span>':""}</td>
       <td class="ccasa">${casa?ROMANOS[casa]:"—"}</td>
+      <td class="ccasa">${insigniaEsencial(esen)}</td>
     </tr>
-    <tr class="detalle" data-detalle="${c.id}" hidden><td colspan="4">${detalle}</td></tr>`;
+    <tr class="detalle" data-detalle="${c.id}" hidden><td colspan="5">${detalle}</td></tr>`;
 }
 function enlazaFilas(){
   document.querySelectorAll("#hojaPos tr.astro-fila").forEach(tr => {
@@ -3886,6 +3933,53 @@ function enAngulosRS(R){
   return out.sort((a,b) => a.d - b.d);
 }
 
+/* --- Profección anual: la carta avanza un signo por año cumplido.
+   Se cuenta sobre el zodiaco que esté activo, igual que el resto de la
+   pestaña, de modo que el signo mostrado siempre coincida. --- */
+function cartaParaProfeccion(){
+  const P = window.Profecciones;
+  if(!P || !carta || !carta.ang || carta.diurna === null || !carta.datos.horaConocida) return null;
+  const cuerpos = {};
+  carta.cuerpos.forEach(c => { cuerpos[c.id] = lonMostrada(c.lon); });
+  const asc = lonMostrada(carta.ang.asc);
+  return {datos:carta.datos, nacimiento:carta.ms, asc, mc:lonMostrada(carta.ang.mc),
+          ascSigno:Math.floor(mod360(asc)/30), cuerpos, diurna:carta.diurna};
+}
+function bloqueProfeccion(ms, cuspRS, cuerposRS, edadForzada){
+  const P = window.Profecciones, D = window.Dignidades;
+  const cp = cartaParaProfeccion();
+  if(!P || !cp) return "";
+  let a, casa;
+  try {
+    /* El retorno solar puede caer unas horas antes del cumpleaños civil.
+       Cuando nos llaman desde la revolución sabemos qué año es, así que
+       anclamos la profección a esa edad en lugar de medirla en el instante
+       del retorno, que devolvería el año anterior. */
+    const edad = Number.isFinite(edadForzada) ? edadForzada : P.edadEn(cp.datos, ms, window.Efem);
+    a = P.anual(cp, edad, window.Efem, Number.isFinite(edadForzada));
+    casa = P.CASAS[a.casa - 1];
+  } catch(e){ return ""; }
+  const idSenor = Object.keys(P.NOMBRES).find(k => P.NOMBRES[k] === a.senor);
+  const enRS = cuerposRS ? cuerposRS.find(c => c.id === idSenor) : null;
+  const casaRS = (enRS && cuspRS) ? ROMANOS[casaDe(enRS.lon, cuspRS)] : null;
+  const esen = D && idSenor ? estadoEsencial(idSenor, carta.cuerpos.find(c => c.id === idSenor).lon) : null;
+  const zs = posZod(carta.cuerpos.find(c => c.id === idSenor).lon);
+  return `
+    <div class="rotulo">La profección del año</div>
+    <div class="cuadro">
+      <div><span class="k">Signo profectado</span><span class="v">${P.GLIFOS[a.signo]} ${P.SIGNOS[a.signo]}</span></div>
+      <div><span class="k">Casa profectada</span><span class="v">${casa.n} · ${casa.titulo}</span></div>
+      <div><span class="k">Señor del año</span><span class="v">${a.senor}${esen ? " " + insigniaEsencial(esen) : ""}</span></div>
+      <div><span class="k">Dónde está natalmente</span><span class="v">${zs.texto} ${zs.signo.g} ${zs.signo.n}</span></div>
+      ${casaRS ? `<div><span class="k">Su casa en la revolución</span><span class="v">${casaRS}</span></div>` : ""}
+    </div>
+    <p class="aviso">A los <strong>${a.edad} años</strong> la carta se profecta a <strong>${P.SIGNOS[a.signo]}</strong>, que cae en la
+      <strong>casa ${casa.n}</strong>: ${casa.tema}. El señor del año es <strong>${a.senor}</strong>${esen && !esen.peregrino ? ` (${esen.resumen.toLowerCase()})` : esen ? " (peregrino)" : ""},
+      así que es el planeta que hay que seguir estos doce meses: mira sus tránsitos y dónde cayó en esta revolución.
+      ${casaRS ? `Aquí cayó en la casa ${casaRS} del año.` : ""}
+      <a href="/profecciones" target="_blank" rel="noopener">Qué es esto</a> ·
+      <a href="/calculadora-profecciones" target="_blank" rel="noopener">ver el año mes a mes</a>.</p>`;
+}
 function pintaRevolucion(){
   if(!carta) return;
   const hoja = document.getElementById("hojaRevolucion");
@@ -3944,6 +4038,8 @@ function pintaRevolucion(){
       <div><span class="k">Casa solar del año</span><span class="v">${ejes.casaSolar ? ROMANOS[ejes.casaSolar] : "—"}</span></div>
     </div>
     ${ejes.casaSolar ? `<p class="aviso">Casa ${ROMANOS[ejes.casaSolar]}: ${CASAS_SIGNIFICADO[ejes.casaSolar].toLowerCase()}. Es el terreno donde el año pide que pongas la atención.</p>` : ""}
+
+    ${bloqueProfeccion(R.ms, R.cusp, R.cuerpos, anio - carta.datos.anio)}
 
     <div class="rotulo">Los ejes del año</div>
     <table class="posiciones"><tbody>

@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es" data-studio-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Calculadora de dignidades esenciales y almutén | Astroplanetario</title>
+<meta name="description" content="Calcula las cinco dignidades esenciales de cada planeta de tu carta: domicilio, exaltación, triplicidad, término y faz, con puntuación ptolemaica y almutén figuris.">
+<link rel="canonical" href="https://astroplanetario.com/calculadora-dignidades">
+<meta name="robots" content="index,follow"><meta name="theme-color" content="#f4f0e9"><link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website"><meta property="og:locale" content="es_MX">
+<meta property="og:title" content="Calculadora de dignidades esenciales y almutén">
+<meta property="og:description" content="Las cinco dignidades de cada planeta, su puntuación y el almutén figuris de la carta.">
+<meta property="og:url" content="https://astroplanetario.com/calculadora-dignidades">
+<meta property="og:image" content="https://astroplanetario.com/hero-cosmica.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/app/tecnica-theme.css">
+<style>
+table.t tr.ahora{background:#aa7c3018}
+table.t th.g{border-left:1px solid var(--line)}
+table.t td.num.cero{color:var(--muted)}
+.leyenda{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.9rem;color:var(--muted);font-size:.8rem;align-items:center}
+</style>
+</head>
+<body><div class="fondo"></div>
+<header class="ancho cabecera">
+  <a class="marca" href="/">Astroplanetario <span>Máquina Celeste</span></a>
+  <nav class="nav" aria-label="Navegación principal">
+    <a href="/dignidades">Guía de dignidades</a><a href="/profecciones">Profecciones</a><a href="/carta-natal">Carta natal</a>
+    <button class="tema" id="themeToggle" type="button"></button>
+  </nav>
+</header>
+<main class="ancho">
+
+<section class="hero" data-glifo="♄">
+  <p class="ceja">Saturno · Calculadora esencial</p>
+  <h1>Dignidades de tu carta</h1>
+  <p>Las cinco dignidades de cada planeta, su puntuación ptolemaica, quién manda en cada ángulo y el almutén figuris de la carta completa.</p>
+</section>
+
+<section class="panel">
+  <h2>1. Elige los datos de nacimiento</h2>
+  <div class="tabs" role="tablist" aria-label="Origen de los datos">
+    <button class="tab activo" data-fuente="guardada" type="button">Carta guardada</button>
+    <button class="tab" data-fuente="manual" type="button">Datos nuevos</button>
+  </div>
+  <div class="fuente-panel" id="panelGuardada">
+    <div class="campo"><label for="cartaSelect">Carta natal guardada</label><select id="cartaSelect"></select></div>
+    <a class="boton sec" href="/astroplanetario.html?view=natal">Crear otra carta</a>
+  </div>
+  <div id="panelManual" hidden>
+    <div class="manual-grid">
+      <div class="campo"><label for="nNombre">Nombre de la carta</label><input id="nNombre" maxlength="80" placeholder="Ej. Mi carta"></div>
+      <div class="campo"><label for="nFecha">Fecha de nacimiento</label><input id="nFecha" type="date" min="1800-01-01" max="2050-12-31"></div>
+      <div class="campo"><label for="nHora">Hora exacta</label><input id="nHora" type="time" step="60"></div>
+      <div class="campo"><label for="nLugar">Ciudad de nacimiento</label><input id="nLugar" list="ciudades" autocomplete="off" placeholder="Escribe y elige una ciudad"><datalist id="ciudades"></datalist></div>
+    </div>
+    <div class="campo" id="campoOcurrencia" hidden>
+      <label for="nOcurrencia">Esta hora ocurrió dos veces</label>
+      <select id="nOcurrencia"><option value="reject">Elige una opción</option><option value="earlier">Primera ocurrencia</option><option value="later">Segunda ocurrencia</option></select>
+    </div>
+    <div class="manual-acciones"><button class="boton sec" id="nEjemplo" type="button">Cargar ejemplo</button></div>
+  </div>
+  <div class="opciones">
+    <div class="campo"><label for="selTerminos">Tabla de términos</label>
+      <select id="selTerminos"><option value="egipcios">Egipcios (Valente, Firmico)</option><option value="ptolemaicos">Ptolemaicos (Tetrabiblos)</option></select></div>
+    <div class="campo"><label for="selTriplicidad">Triplicidades</label>
+      <select id="selTriplicidad"><option value="doroteo">Dorotheo (tres regentes)</option><option value="ptolomeo">Ptolomeo (dos regentes)</option></select></div>
+    <div style="display:flex;align-items:end"><button class="boton" id="calcular" type="button">Calcular dignidades</button></div>
+  </div>
+  <p class="estado" id="estado" aria-live="polite"></p>
+  <p class="metodo-mini">Método visible: regencias tradicionales · puntuación ptolemaica 5-4-3-2-1 · exilio −5 y caída −4 · solo puntúa el regente de triplicidad en secta</p>
+</section>
+
+<section id="salida" hidden>
+  <section class="bloque">
+    <h2>Las cinco dignidades, planeta por planeta</h2>
+    <p style="color:var(--muted);margin:.2rem 0 .6rem">Cada columna es una de las cinco dignidades. Las dos últimas marcas son las debilidades.</p>
+    <div class="tabla-envoltura"><table class="t">
+      <thead><tr>
+        <th></th><th>Planeta</th><th>Posición</th><th>Casa</th>
+        <th class="g">Dom.</th><th>Exalt.</th><th>Tripl.</th><th>Térm.</th><th>Faz</th>
+        <th class="g">Exilio</th><th>Caída</th>
+        <th class="g">Total</th><th>Estado</th><th>Rige término / faz</th>
+      </tr></thead><tbody id="tablaDig"></tbody></table></div>
+    <div class="leyenda">
+      <span class="marca-dig fuerte">+n</span> dignidad
+      <span class="marca-dig debil">−n</span> debilidad
+      <span class="cero">·</span> no aplica
+      <span style="margin-left:auto">Puntuación ptolemaica: domicilio 5, exaltación 4, triplicidad 3, término 2, faz 1, exilio −5, caída −4.</span>
+    </div>
+    <div class="rejilla" id="lecturaTabla"></div>
+  </section>
+
+  <section class="bloque">
+    <h2>Quién manda en los ángulos</h2>
+    <p style="color:var(--muted);margin:.2rem 0 .6rem">Los regentes del grado exacto del Ascendente y del Medio Cielo, y el almutén de cada uno.</p>
+    <div class="tabla-envoltura"><table class="t">
+      <thead><tr><th>Punto</th><th>Posición</th><th>Domicilio</th><th>Exaltación</th><th>Triplicidad</th><th>Término</th><th>Faz</th><th>Almutén</th></tr></thead>
+      <tbody id="tablaAngulos"></tbody></table></div>
+  </section>
+
+  <section class="bloque">
+    <h2>Almutén figuris</h2>
+    <p style="color:var(--muted);margin:.2rem 0 .6rem">El regente general de la carta, por el método de Ibn Ezra: se puntúan las dignidades de cada planeta sobre cinco puntos —Sol, Luna, Ascendente, Lote de Fortuna y sicigia prenatal— y se suman su posición por casa y los regentes del día y de la hora.</p>
+    <div class="rejilla" id="almutenResumen"></div>
+    <div class="tabla-envoltura" style="margin-top:1.2rem"><table class="t">
+      <thead><tr><th></th><th>Planeta</th><th>Esencial</th><th>Accidental</th><th>Total</th><th>De dónde salen los puntos</th></tr></thead>
+      <tbody id="almutenTabla"></tbody></table></div>
+  </section>
+</section>
+
+<aside class="metodo"><b>Criterio de cálculo.</b> Regencias tradicionales: Marte rige Escorpio, Saturno Acuario y Júpiter Piscis. Puntuación ptolemaica de 5, 4, 3, 2 y 1 punto, con −5 por exilio y −4 por caída; solo puntúa el regente de triplicidad que corresponde a la secta, no el participante. Las casas se cuentan por signos enteros desde el Ascendente. El almutén figuris usa el reparto accidental por casa de Ibn Ezra (12 a 1 punto) más 7 puntos al regente del día y 6 al de la hora; el día astrológico corre de una salida del Sol a la siguiente y las horas planetarias son desiguales. La sicigia prenatal es la última luna nueva o llena anterior al nacimiento. Los planetas modernos no reciben dignidad esencial porque el sistema es anterior a su descubrimiento.</aside>
+
+</main>
+<footer class="ancho pie">
+  <span>Astroplanetario · Dignidades esenciales
+    <span class="firma">Un proyecto del <a href="https://tarot-academy-theta.vercel.app/" target="_blank" rel="noopener">Instituto de Artes Esotéricas y Saberes Ancestrales</a></span>
+  </span>
+  <a href="/dignidades">Volver a la guía</a>
+</footer>
+<script src="/app/tema.js"></script>
+<script src="/app/efemerides.js"></script>
+<script src="/app/profecciones.js"></script>
+<script src="/app/dignidades.js"></script>
+<script src="/app/dignidades-ui.js"></script>
+</body></html>
