@@ -209,7 +209,7 @@ function drawMoon(angle){
   g.restore();
 }
 let cities=[];const fallback=[['Ciudad de México','México',19.4326,-99.1332,'America/Mexico_City'],['Xalapa','Veracruz, MX',19.5438,-96.9102,'America/Mexico_City'],['Coatzacoalcos','Veracruz, MX',18.1345,-94.459,'America/Mexico_City'],['Madrid','España',40.4168,-3.7038,'Europe/Madrid'],['Buenos Aires','Argentina',-34.6037,-58.3816,'America/Argentina/Buenos_Aires'],['Bogotá','Colombia',4.711,-74.0721,'America/Bogota'],['Lima','Perú',-12.0464,-77.0428,'America/Lima'],['Nueva York','Estados Unidos',40.7128,-74.006,'America/New_York']].map(p=>({n:p[0],r:p[1],lat:p[2],lon:p[3],tz:p[4],etiqueta:`${p[0]}, ${p[1]}`}));
-async function loadCities(){try{if(window.Efem&&Efem.CIUDADES&&Efem.CIUDADES.length){cities=Efem.CIUDADES;return}const rs=await Promise.all(['app/part-04.txt','app/part-05.txt'].map(u=>fetch(u,{cache:'no-cache'})));const tx=(await Promise.all(rs.map(r=>r.text()))).join('');const m=tx.match(/const CIUDADES = `([\s\S]*?)`\.trim\(\)\.split/);if(m){cities=m[1].trim().split('\n').map(l=>{const p=l.split('|');return{n:p[0],r:p[1],lat:+p[2],lon:+p[3],tz:p[4],etiqueta:`${p[0]}, ${p[1]}`}}).filter(c=>c.tz)}}catch(e){}if(!cities.length)cities=fallback;cityList.innerHTML=cities.map(c=>`<option value="${c.etiqueta}"></option>`).join('')}
+async function loadCities(){if(window.Efem&&Efem.CIUDADES&&Efem.CIUDADES.length)cities=Efem.CIUDADES;else cities=fallback;cityList.innerHTML=cities.map(c=>`<option value="${c.etiqueta}"></option>`).join('')}
 const norm=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();function cityFind(s){return cities.find(c=>norm(c.etiqueta)===norm(s))||cities.find(c=>norm(c.n)===norm(s))}
 function utcMs(y,mo,d,h,mi){const t=Date.UTC(y,mo-1,d,h,mi,0);if(y>=0&&y<100){const f=new Date(t);f.setUTCFullYear(y);return f.getTime()}return t}
 function offsetTZ(tz,ms){const dtf=new Intl.DateTimeFormat('en-US',{timeZone:tz,hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}),p=Object.fromEntries(dtf.formatToParts(new Date(ms)).map(o=>[o.type,o.value]));return utcMs(+p.year,+p.month,+p.day,+p.hour,+p.minute)+(+p.second)*1000-ms}
@@ -299,3 +299,4 @@ selDate.addEventListener('change',updateAll);selTime.addEventListener('change',u
 <script src="app/lunar-zodiac-v2.js?v=5"></script>
 </body>
 </html>
+
