@@ -775,7 +775,15 @@
   .pro-intro h2,.pro-secta h3,.pro-criterios h3{margin:0 0 .35rem;font:500 1.05rem Cinzel,Georgia,serif}
   .pro-intro p,.pro-secta p,.pro-criterios p{margin:.25rem 0;color:#5C5B68;font-size:.82rem;line-height:1.45}
   .pro-secta{border-top:3px solid #A8801F}.pro-secta strong{color:#8A6A22;font-weight:600}
-  .pro-tabla-wrap{overflow-x:auto;border:1px solid #D5CEBF;border-radius:12px;background:#FBF8F1}
+MethodInvocationException: 
+Line |
+   2 |  … f([Environment]::NewLine,$m); $mobile=$s.Substring($m,$me-$m); $j=$s. …
+     |                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Exception calling "Substring" with "2" argument(s): "length ('-49794') must be a non-negative value. (Parameter 'length')
+Actual value was -49794."
+  .pro-tabla-caja{position:relative;margin:.15rem 0 1rem}.pro-tabla-barra{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin:0 0 .35rem;padding-left:.15rem;color:#6B6A78;font:500 .53rem "IBM Plex Mono",monospace;letter-spacing:.06em;text-transform:uppercase}.pro-expandir{display:inline-flex;align-items:center;gap:.4rem;flex:none;border:1px solid #CFC7B4;border-radius:999px;background:#F7F2E8;color:#5C5B68;padding:.38rem .62rem;cursor:ew-resize;font:500 .55rem "IBM Plex Mono",monospace;letter-spacing:.06em;text-transform:uppercase;touch-action:none}.pro-expandir:hover,.pro-expandir:focus-visible{border-color:#A8801F;color:#8A6A22;outline:none}.pro-expandir-icono{font-size:.9rem;line-height:1}
+  .pro-tabla-wrap{overflow:auto;border:1px solid #D5CEBF;border-radius:12px;background:#FBF8F1}
+  .pro-tabla-caja.expandida{position:fixed;z-index:400;inset:5.2rem 1rem 1rem;display:flex;flex-direction:column;margin:0;padding:.85rem;background:#F4F0E6;border:1px solid #A8801F;border-radius:16px;box-shadow:0 24px 80px #17130E66}.pro-tabla-caja.expandida .pro-tabla-barra{flex:none}.pro-tabla-caja.expandida .pro-tabla-wrap{flex:1;min-height:0;box-shadow:inset 0 0 0 1px #FFFFFF88}.pro-tabla-caja.expandida .pro-tabla{min-width:900px}.pro-tabla-caja.expandida .pro-expandir{cursor:e-resize;background:#8A6A22;color:#fff;border-color:#8A6A22}
   .pro-tabla{width:100%;border-collapse:collapse;min-width:760px;color:#22212B;font-size:.76rem}
   .pro-tabla th{text-align:left;padding:.55rem .5rem;background:#EEE8DB;border-bottom:1px solid #CFC7B4;color:#6B6A78;font:500 .54rem "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase}
   .pro-tabla td{padding:.62rem .5rem;border-bottom:1px solid #E7E1D3;vertical-align:top}.pro-tabla tr:last-child td{border-bottom:0}
@@ -786,7 +794,7 @@
   .pro-secta-estado{font-size:.69rem;line-height:1.35;color:#5C5B68}.pro-secta-estado b{display:block;color:#22212B}.pro-secta-estado.coincide b{color:#4E733E}.pro-secta-estado.contraria b{color:#A14535}
   .pro-criterios{margin:1rem 0}.pro-criterios-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;margin-top:.6rem}.pro-criterio{border-top:1px solid #D5CEBF;padding-top:.42rem}.pro-criterio b{display:block;color:#8A6A22;font:500 .56rem "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase}.pro-criterio span{font-size:.75rem;color:#5C5B68}
   #app:not(.natal) .pro-intro,#app:not(.natal) .pro-secta,#app:not(.natal) .pro-criterios{background:#111522;color:var(--pergamino);border-color:var(--linea-suave)}
-  @media(max-width:620px){.pro-cabecera{grid-template-columns:1fr}.pro-criterios-grid{grid-template-columns:1fr 1fr}.pro-tabla-wrap{border-radius:9px}.pro-tabla{min-width:700px}}
+  @media(max-width:620px){.pro-cabecera{grid-template-columns:1fr}.pro-criterios-grid{grid-template-columns:1fr 1fr}.pro-tabla-wrap{border-radius:9px}.pro-tabla{min-width:700px}.pro-tabla-barra>span{max-width:12rem}.pro-tabla-caja.expandida{inset:4rem .45rem .45rem;padding:.55rem;border-radius:12px}.pro-tabla-caja.expandida .pro-tabla{min-width:760px}}
   .reg-panel{margin:1.25rem 0 1.6rem;border-top:1px solid #CFC7B4;padding-top:1.1rem;color:#22212B}.reg-panel>header h2{margin:0;font:500 1.25rem Cinzel,Georgia,serif}.reg-panel>header p{margin:.3rem 0 .85rem;color:#5C5B68;font-size:.82rem}
   .reg-resumen{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;margin:.75rem 0 1rem}.reg-tarjeta{border:1px solid #D5CEBF;border-radius:10px;background:#F7F2E8;padding:.7rem}.reg-tarjeta small{display:block;color:#6B6A78;font:500 .52rem "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase}.reg-tarjeta b{display:block;margin:.2rem 0;color:#8A6A22;font:500 .94rem Cinzel,Georgia,serif}.reg-tarjeta span{display:block;color:#5C5B68;font-size:.71rem;line-height:1.35}
   .reg-subtitulo{margin:1rem 0 .45rem;color:#8A6A22;font:500 .57rem "IBM Plex Mono",monospace;letter-spacing:.13em;text-transform:uppercase}.reg-mapa{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.4rem}.reg-enlace{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:.35rem;border:1px solid #D5CEBF;border-radius:9px;background:#FBF8F1;padding:.5rem;text-align:left;color:#22212B}.reg-enlace:hover{border-color:#A8801F}.reg-cuerpo{display:flex;align-items:center;gap:.3rem;min-width:0}.reg-cuerpo .cg{font-size:1rem;color:#8A6A22}.reg-cuerpo span{min-width:0}.reg-cuerpo b,.reg-cuerpo small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.reg-cuerpo b{font-size:.73rem}.reg-cuerpo small{color:#6B6A78;font-size:.59rem}.reg-flecha{color:#A8801F;font:600 .8rem "IBM Plex Mono",monospace}
@@ -3201,6 +3209,7 @@ function pintaRegenciasProfesionales(destino){
 function pintaProfesional(){
   const destino=document.getElementById("hojaProfesional"),motor=window.NatalProfesional;
   if(!destino||!motor){if(destino)destino.innerHTML='<p class="aviso error">No se pudo cargar el análisis profesional.</p>';return}
+  document.querySelector('body > #proTablaCaja.expandida')?.remove();
   const a=motor.analizar(carta,window.Efem),puntaje=n=>`<span class="pro-puntos ${n>0?'pos':n<0?'neg':'neutro'}">${n>0?'+':''}${n}</span>`;
   const etiquetas=items=>`<div class="pro-etiquetas">${items.map(x=>`<span class="pro-etiqueta ${x.tipo}" title="${escaparHTML(x.detalle)}">${escaparHTML(x.label)} ${x.puntos?`(${x.puntos>0?'+':''}${x.puntos})`:''}</span>`).join('')}</div>`;
   const secta=s=>!s?'<span class="pro-secta-estado"><b>Requiere hora</b>No se asigna secta sin horizonte.</span>':`<span class="pro-secta-estado ${s.coincide?'coincide':'contraria'}"><b>${s.coincide?'En secta':'Fuera de secta'}</b>${s.secta}${s.fase?' · '+s.fase:''}${s.hemisferio==null?'':s.hemisferio?' · hemisferio acorde':' · hemisferio contrario'}</span>`;
@@ -3210,13 +3219,28 @@ function pintaProfesional(){
       <section class="pro-intro"><h2>Condición tradicional de los planetas</h2><p>Este panel estudia los siete planetas tradicionales. Separa la dignidad esencial —la relación con el signo— de la accidental —la capacidad circunstancial para actuar— y muestra cada componente del resultado.</p>${!a.horaConocida?'<p class="aviso"><strong>Análisis parcial:</strong> sin hora no se calculan casas, triplicidad activa ni secta. Las posiciones por signo, términos, decanos, movimiento y relación con el Sol siguen disponibles.</p>':''}</section>
       <aside class="pro-secta">${resumen}</aside>
     </div>
-    <div class="pro-tabla-wrap"><table class="pro-tabla"><thead><tr><th>Planeta</th><th>Dignidad esencial</th><th>Total</th><th>Dignidad accidental</th><th>Total</th><th>Secta</th></tr></thead><tbody>
+    <div class="pro-tabla-caja" id="proTablaCaja"><div class="pro-tabla-barra"><span>Tabla desplazable</span><button type="button" class="pro-expandir" id="proExpandir" aria-expanded="false" aria-controls="proTabla"><span class="pro-expandir-icono">⇤</span><span>Arrastra o toca para ampliar</span></button></div><div class="pro-tabla-wrap" id="proTabla"><table class="pro-tabla"><thead><tr><th>Planeta</th><th>Dignidad esencial</th><th>Total</th><th>Dignidad accidental</th><th>Total</th><th>Secta</th></tr></thead><tbody>
       ${a.filas.map(f=>{const z=posZod(f.lon);return`<tr data-pro-planeta="${f.id}"><td><span class="pro-planeta"><span class="cg">${gh(f.glifo)}</span><span><b>${f.nombre}</b><small>${z.texto}${f.casa?' · casa '+ROMANOS[f.casa]:''}</small></span></span></td><td>${etiquetas(f.esencial.detalles)}</td><td>${puntaje(f.esencial.puntos)}</td><td>${etiquetas(f.accidental.detalles)}</td><td>${puntaje(f.accidental.puntos)}</td><td>${secta(f.secta)}</td></tr>`}).join('')}
-    </tbody></table></div>
+    </tbody></table></div></div>
     <section class="pro-criterios"><h3>Criterios de este cálculo</h3><p>Los totales son una guía comparativa del estado tradicional del planeta; no equivalen por sí solos a “bueno” o “malo”. Puedes revisar cada suma directamente en las etiquetas.</p><div class="pro-criterios-grid">
       <div class="pro-criterio"><b>Zodiaco</b><span>${a.criterio.zodiaco}</span></div><div class="pro-criterio"><b>Triplicidades</b><span>${a.criterio.triplicidades}</span></div><div class="pro-criterio"><b>Términos</b><span>${a.criterio.terminos}</span></div><div class="pro-criterio"><b>Decanos</b><span>${a.criterio.decanos}</span></div><div class="pro-criterio"><b>Puntuación</b><span>${a.criterio.puntuacion}</span></div><div class="pro-criterio"><b>Relación solar</b><span>${a.criterio.solar}</span></div>
     </div><p>Domicilio +5 · exaltación +4 · triplicidad +3 · término +2 · decano +1 · exilio −5 · caída −4. Los planetas transaturninos quedan fuera de esta tabla porque no forman parte del esquema tradicional que se está puntuando.</p></section>`;
   pintaRegenciasProfesionales(destino);
+  const cajaTabla=document.getElementById('proTablaCaja'),botonTabla=document.getElementById('proExpandir');
+  if(cajaTabla&&botonTabla){
+    let reserva=null;
+    const cambiaTabla=abierta=>{
+      if(abierta&&!cajaTabla.classList.contains('expandida')){reserva=document.createElement('div');reserva.className='pro-tabla-reserva';reserva.style.height=`${cajaTabla.offsetHeight}px`;cajaTabla.before(reserva);cajaTabla.classList.add('expandida');document.body.appendChild(cajaTabla)}
+      if(!abierta&&cajaTabla.classList.contains('expandida')){cajaTabla.classList.remove('expandida');if(reserva?.isConnected)reserva.replaceWith(cajaTabla);reserva=null}
+      botonTabla.setAttribute('aria-expanded',String(abierta));botonTabla.querySelector('.pro-expandir-icono').textContent=abierta?'⇥':'⇤';botonTabla.lastElementChild.textContent=abierta?'Arrastra a la derecha o toca para cerrar':'Arrastra o toca para ampliar';
+    };
+    let inicioX=0,arrastrado=false;
+    botonTabla.addEventListener('pointerdown',e=>{inicioX=e.clientX;arrastrado=false;botonTabla.setPointerCapture?.(e.pointerId)});
+    botonTabla.addEventListener('pointerup',e=>{const dx=e.clientX-inicioX;if(Math.abs(dx)>36){cambiaTabla(dx<0);arrastrado=true}});
+    botonTabla.addEventListener('pointercancel',()=>{arrastrado=false});
+    botonTabla.addEventListener('click',e=>{if(arrastrado){e.preventDefault();arrastrado=false;return}cambiaTabla(!cajaTabla.classList.contains('expandida'))});
+    cajaTabla.addEventListener('keydown',e=>{if(e.key==='Escape'&&cajaTabla.classList.contains('expandida')){e.preventDefault();cambiaTabla(false);botonTabla.focus()}});
+  }
   destino.querySelectorAll('[data-pro-planeta]').forEach(tr=>tr.addEventListener('click',()=>marcaFila(tr.dataset.proPlaneta,false)));
 }
 let filaAbierta = null;
