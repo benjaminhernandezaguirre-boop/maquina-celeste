@@ -9,10 +9,10 @@ function agregaRol(mapa,cuerpo,rol,peso,detalle){
   if(!cuerpo)return;const actual=mapa.get(cuerpo.id)||{id:cuerpo.id,nombre:cuerpo.nombre,glifo:cuerpo.glifo,roles:[],peso:0};
   if(!actual.roles.some(x=>x.rol===rol)){actual.roles.push({rol,peso,detalle});actual.peso+=peso}mapa.set(cuerpo.id,actual);
 }
-function analizar(carta,{profesional=root.NatalProfesional,regencias=root.NatalRegencias,estructura=root.NatalEstructura,patrones=root.NatalPatrones,relaciones=root.NatalRelaciones,luminarias=root.NatalLuminarias,D=root.Dignidades,E=root.Efem}={}){
+function analizar(carta,{profesional=root.NatalProfesional,regencias=root.NatalRegencias,estructura=root.NatalEstructura,patrones=root.NatalPatrones,relaciones=root.NatalRelaciones,luminarias=root.NatalLuminarias,estrellas=root.NatalEstrellas,D=root.Dignidades,E=root.Efem}={}){
   if(!carta||!Array.isArray(carta.cuerpos))throw new TypeError("Falta una carta natal calculada.");
-  if(!profesional||!regencias||!estructura||!patrones||!relaciones||!luminarias)throw new TypeError("Faltan módulos profesionales para construir la síntesis.");
-  const condicion=profesional.analizar(carta,E),gobierno=regencias.analizar(carta,{D,E}),forma=estructura.analizar(carta),geometria=patrones.analizar(carta),avanzadas=relaciones.analizar(carta,E),luz=luminarias.analizar(carta,E,regencias);
+  if(!profesional||!regencias||!estructura||!patrones||!relaciones||!luminarias||!estrellas)throw new TypeError("Faltan módulos profesionales para construir la síntesis.");
+  const condicion=profesional.analizar(carta,E),gobierno=regencias.analizar(carta,{D,E}),forma=estructura.analizar(carta),geometria=patrones.analizar(carta),avanzadas=relaciones.analizar(carta,E),luz=luminarias.analizar(carta,E,regencias),firmamento=estrellas.analizar(carta,E);
   const porId=Object.fromEntries(carta.cuerpos.map(c=>[c.id,c])),roles=new Map();
   const cuerpo=id=>{const c=porId[id],p=profesional.PLANETAS?.[id]||regencias.PLANETAS?.[id];return c&&{id,nombre:c.nombre||p?.nombre||id,glifo:c.glifo||p?.glifo||""}};
   agregaRol(roles,cuerpo(gobierno.regenteCarta?.id),"Regente de la carta",4,"Gobierna el signo del Ascendente.");
@@ -39,6 +39,7 @@ function analizar(carta,{profesional=root.NatalProfesional,regencias=root.NatalR
   const geometriaTexto=`La distribución adopta una forma ${geometria.forma.nombre.toLowerCase()} aproximada, con ${geometria.forma.arco.toFixed(1)}° ocupados. ${patronesTexto}.${geometria.aislados.length?` ${nombres(geometria.aislados)} queda sin aspectos mayores dentro de estos orbes.`:" Todos los cuerpos participan en al menos un aspecto mayor."}`;
   const relacionesTexto=`Se registran ${avanzadas.resumen.aplicativos} aspectos aplicativos, ${avanzadas.resumen.separativos} separativos y ${avanzadas.resumen.partiles} partiles. La declinación aporta ${avanzadas.resumen.paralelos} contactos y ${avanzadas.resumen.fueraLimites} cuerpos fuera de límites; además aparecen ${avanzadas.resumen.antiscios} contactos por antiscio y ${avanzadas.resumen.puntosMedios} cuadros de puntos medios dentro de los orbes declarados.`;
   const sizigia=luz.sizigia,luminariasTexto=`La fase natal es ${luz.fase.nombre.toLowerCase()}, con ${luz.fase.iluminacion.toFixed(1)} % de iluminación aproximada y ${luz.fase.edadDias.toFixed(1)} días desde la Luna nueva exacta. La sizigia prenatal fue ${sizigia.tipo.toLowerCase()}, ${sizigia.diasAntes.toFixed(1)} días antes, en ${sizigia.gradoSigno.toFixed(1)}° de ${sizigia.signoNombre}${sizigia.casa?`, casa ${sizigia.casa}`:""}; su polo lunar forma ${sizigia.aspectos.length} ${sizigia.aspectos.length===1?'contacto natal':'contactos natales'} dentro de los orbes estrictos.`;
+  const estrellasTexto=firmamento.contactos.length?`El catálogo principal produce ${firmamento.contactos.length} ${firmamento.contactos.length===1?'conjunción':'conjunciones'} dentro de los orbes estrictos: ${firmamento.contactos.slice(0,4).map(x=>`${x.estrella.nombre} con ${x.referencia.nombre} a ${x.diferencia.toFixed(2)}°`).join("; ")}. La naturaleza tradicional se conserva como referencia y no suma dignidad esencial.`:`No se detectan conjunciones con las 20 estrellas principales dentro de los orbes estrictos. Las aproximaciones fuera del límite permanecen separadas del juicio.`;
   const balanceTexto=`${elementoDominante?`${elementoDominante.nombre} concentra ${elementoDominante.cuerpos.length} de ${geometria.cuerpos.length} cuerpos.`:`No existe un único elemento dominante.`} La síntesis temperamental indica ${temperamento.toLowerCase()} con ${temp.testigos.length} de cuatro testigos disponibles.`;
   const fortalezas=totales.filter(x=>x.total>0).sort((a,b)=>b.total-a.total).map(x=>({cuerpo:cuerpo(x.id),total:x.total,detalle:`Esencial ${x.esencial.puntos>=0?"+":""}${x.esencial.puntos} · accidental ${x.accidental.puntos>=0?"+":""}${x.accidental.puntos}`}));
   const revisar=totales.filter(x=>x.total<0).sort((a,b)=>a.total-b.total).map(x=>({cuerpo:cuerpo(x.id),total:x.total,detalle:`Esencial ${x.esencial.puntos>=0?"+":""}${x.esencial.puntos} · accidental ${x.accidental.puntos>=0?"+":""}${x.accidental.puntos}`}));
@@ -50,16 +51,18 @@ function analizar(carta,{profesional=root.NatalProfesional,regencias=root.NatalR
   if(geometria.patrones.length)pasos.push(`Leer las configuraciones desde sus planetas focales y después el patrón completo.`);
   pasos.push("Contrastar los aspectos aplicativos y separativos con declinación, antiscios y puntos medios relevantes.");
   pasos.push("Situar la fase lunar y la sizigia prenatal antes de integrar sus contactos con el resto de la carta.");
+  if(firmamento.contactos.length)pasos.push("Revisar las conjunciones con estrellas fijas después de establecer la condición de los planetas implicados.");
   if(forma.conHora)pasos.push("Integrar casas, cuadrantes y angularidad al juicio final.");else pasos.push("Completar la hora natal antes de formular conclusiones sobre casas y angularidad.");
-  return{horaConocida:!!carta.datos?.horaConocida,condicion,gobierno,estructura:forma,geometria,avanzadas,luminarias:luz,prioridades,masSostenidos,masExigidos,fortalezas,revisar,pasos,lecturas:[
+  return{horaConocida:!!carta.datos?.horaConocida,condicion,gobierno,estructura:forma,geometria,avanzadas,luminarias:luz,estrellas:firmamento,prioridades,masSostenidos,masExigidos,fortalezas,revisar,pasos,lecturas:[
     {id:"gobierno",titulo:"Gobierno de la carta",texto:gobiernoTexto},
     {id:"condicion",titulo:"Condición planetaria",texto:condicionTexto},
     {id:"estructura",titulo:"Estructura",texto:estructuraTexto},
     {id:"geometria",titulo:"Geometría y aspectos",texto:geometriaTexto},
     {id:"relaciones",titulo:"Relaciones avanzadas",texto:relacionesTexto},
     {id:"luminarias",titulo:"Luminarias y sizigia",texto:luminariasTexto},
+    {id:"estrellas",titulo:"Estrellas fijas",texto:estrellasTexto},
     {id:"balance",titulo:"Balance y temperamento",texto:balanceTexto}
-  ],criterio:"La síntesis cruza testimonios independientes ya calculados y conserva sus límites. Las ponderaciones de prioridad organizan la lectura: regente y almutén 4, autoridad dispositora 3, angularidad y foco geométrico 2. Las relaciones avanzadas y la sizigia aportan geometría y dinámica sin sumar dignidad. No sustituyen la interpretación del astrólogo."};
+  ],criterio:"La síntesis cruza testimonios independientes ya calculados y conserva sus límites. Las ponderaciones de prioridad organizan la lectura: regente y almutén 4, autoridad dispositora 3, angularidad y foco geométrico 2. Las relaciones avanzadas, la sizigia y las estrellas fijas aportan geometría sin sumar dignidad. No sustituyen la interpretación del astrólogo."};
 }
 
 root.NatalSintesis={ORDEN,unico,maximos,analizar};
