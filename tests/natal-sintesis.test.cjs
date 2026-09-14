@@ -16,22 +16,24 @@ const patrones={analizar:()=>({cuerpos,patrones:[{nombre:'Cuadratura T'}],focale
 const relaciones={analizar:()=>({resumen:{aplicativos:3,separativos:4,exactos:0,partiles:1,paralelos:2,fueraLimites:1,limitrofes:1,antiscios:2,puntosMedios:3}})};
 const luminarias={analizar:()=>({fase:{nombre:'Cuarto creciente',iluminacion:50,edadDias:7.4},sizigia:{tipo:'Luna nueva',diasAntes:7.4,gradoSigno:12.5,signoNombre:'Aries',casa:1,aspectos:[1,2]}})};
 const estrellas={analizar:()=>({contactos:[{estrella:{nombre:'Regulus'},referencia:{nombre:'Sol'},diferencia:.3}],resumen:{catalogo:20,contactos:1}})};
+const puntos={analizar:c=>({conHora:c.datos.horaConocida,resumen:{puntos:c.datos.horaConocida?8:3,ejes:c.datos.horaConocida?3:1,contactos:4,partiles:2}})};
 
-const r=S.analizar(carta,{profesional,regencias,estructura,patrones,relaciones,luminarias,estrellas});
+const r=S.analizar(carta,{profesional,regencias,estructura,patrones,relaciones,luminarias,estrellas,puntos});
 assert.equal(r.prioridades[0].id,'marte');
 assert.equal(r.prioridades[0].peso,8,'suma regente, angularidad y foco sin mezclarlo con dignidad');
 assert.equal(r.masSostenidos[0].id,'sol');
 assert.equal(r.masSostenidos[0].total,10);
 assert.equal(r.masExigidos[0].id,'saturno');
 assert.ok(r.revisar.some(x=>x.cuerpo.id==='urano'&&x.total===null));
-assert.equal(r.lecturas.length,8);
+assert.equal(r.lecturas.length,9);
 assert.equal(r.avanzadas.resumen.aplicativos,3);
 assert.equal(r.luminarias.sizigia.tipo,'Luna nueva');
 assert.ok(r.lecturas.some(x=>x.id==='luminarias'&&x.texto.includes('12.5° de Aries')));
 assert.ok(r.lecturas.some(x=>x.id==='estrellas'&&x.texto.includes('Regulus con Sol')));
+assert.ok(r.lecturas.some(x=>x.id==='puntos'&&x.texto.includes('8 puntos sensibles')));
 assert.ok(r.criterio.includes('regente y almutén 4'));
 
-const parcial=S.analizar({datos:{horaConocida:false},cuerpos},{profesional,regencias,estructura,patrones,relaciones,luminarias,estrellas});
+const parcial=S.analizar({datos:{horaConocida:false},cuerpos},{profesional,regencias,estructura,patrones,relaciones,luminarias,estrellas,puntos});
 assert.equal(parcial.estructura.conHora,false);
 assert.ok(parcial.pasos.some(x=>x.includes('Completar la hora natal')));
 
