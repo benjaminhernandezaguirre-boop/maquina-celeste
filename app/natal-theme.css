@@ -1,0 +1,213 @@
+/* Astroplanetario · Carta natal
+   Capa visual: no modifica cálculos, posiciones, aspectos ni controles del canvas. */
+
+#app.natal{
+  --natal-bg:#02040b;
+  --natal-panel:rgba(7,10,20,.94);
+  --natal-panel-2:rgba(10,14,27,.88);
+  --natal-line:rgba(224,189,114,.20);
+  --natal-line-soft:rgba(150,146,173,.14);
+  --natal-gold:#d9b86e;
+  --natal-ivory:#eee5d5;
+  --natal-muted:#928da3;
+  --natal-blue:#7897c7;
+  background:
+    radial-gradient(circle at 31% 38%,rgba(50,70,116,.16),transparent 31%),
+    radial-gradient(circle at 68% 64%,rgba(181,132,55,.08),transparent 27%),
+    linear-gradient(145deg,#050815,#02040b 68%);
+  color:var(--natal-ivory);
+}
+
+#app.natal header{
+  min-height:3.65rem;
+  padding:.58rem clamp(.75rem,1.7vw,1.25rem);
+  background:linear-gradient(180deg,rgba(8,11,24,.97),rgba(3,5,12,.90));
+  border-bottom:1px solid var(--natal-line);
+  box-shadow:0 10px 28px rgba(0,0,0,.22);
+  backdrop-filter:blur(14px);
+}
+#app.natal .marca h1{color:var(--natal-ivory);font-weight:500;letter-spacing:.12em}
+#app.natal .marca .sub{color:var(--natal-gold)}
+#app.natal #escena{
+  background:
+    radial-gradient(circle at 50% 48%,rgba(38,53,91,.18),transparent 32%),
+    radial-gradient(circle at 50% 50%,#080d1a 0,#03050c 67%,#010207 100%);
+}
+#app.natal #escena::before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.34;
+  background-image:
+    radial-gradient(circle,rgba(242,238,226,.60) 0 1px,transparent 1.3px),
+    radial-gradient(circle,rgba(207,182,124,.35) 0 .8px,transparent 1.2px);
+  background-size:173px 173px,277px 277px;
+  background-position:19px 37px,83px 121px;
+}
+#app.natal canvas{position:relative;z-index:1;touch-action:none}
+#app.natal .pista{
+  z-index:2;color:#777287;font-size:.62rem;letter-spacing:.12em;
+  text-shadow:0 2px 10px #000;
+}
+
+/* Barra de datos natal */
+#app.natal #barraNatal{
+  background:rgba(7,10,20,.91)!important;
+  border-bottom-color:var(--natal-line)!important;
+  color:var(--natal-muted)!important;
+  backdrop-filter:blur(13px);
+  padding:.46rem clamp(.75rem,1.7vw,1.25rem);
+  box-shadow:0 8px 26px rgba(0,0,0,.16);
+}
+#app.natal #barraNatal .quien{color:var(--natal-ivory)!important;font-family:Cinzel,serif;font-size:.78rem}
+#app.natal #barraNatal .dato{color:var(--natal-gold)!important}
+#app.natal #barraDatos{gap:.42rem}
+#app.natal #barraDatos span{
+  border:1px solid var(--natal-line-soft);border-radius:999px;
+  padding:.15rem .48rem;background:rgba(255,255,255,.025);
+}
+#app.natal #barraDatos span+span::before{display:none}
+#app.natal .secundario{
+  color:#aaa4b7!important;border-color:rgba(224,189,114,.20)!important;
+  background:rgba(255,255,255,.025);
+}
+#app.natal .secundario:hover{color:var(--natal-gold)!important;border-color:rgba(224,189,114,.55)!important}
+
+/* Panel de lectura */
+#app.natal #cartaPanel{
+  width:min(450px,94vw);
+  background:linear-gradient(180deg,rgba(9,13,25,.965),rgba(4,7,15,.955))!important;
+  border-left-color:var(--natal-line)!important;
+  color:var(--natal-ivory)!important;
+  box-shadow:-22px 0 58px rgba(0,0,0,.46),inset 1px 0 rgba(255,255,255,.025);
+  backdrop-filter:blur(18px) saturate(1.05);
+}
+#app.natal .pest-fila{background:rgba(4,7,15,.92);border-bottom:1px solid var(--natal-line-soft)}
+#app.natal .pest{
+  border-bottom-color:transparent!important;
+  overflow-x:auto;scrollbar-width:none;flex:1;
+}
+#app.natal .pest::-webkit-scrollbar{display:none}
+#app.natal .pest button{
+  flex:0 0 auto;min-width:max-content;padding:.72rem .72rem;
+  color:#837e91!important;font-size:.62rem;letter-spacing:.115em;
+  border-bottom:2px solid transparent;
+}
+#app.natal .pest button:hover{color:#c9c0b1!important;background:rgba(255,255,255,.025)}
+#app.natal .pest button[aria-selected="true"]{
+  color:var(--natal-gold)!important;border-bottom-color:var(--natal-gold)!important;
+  background:linear-gradient(180deg,transparent,rgba(224,189,114,.055));
+}
+#app.natal #plegar{color:#9d97aa!important}
+#app.natal .hoja{padding:.35rem 1rem 2rem}
+
+#app.natal table.posiciones,#app.natal ul.aspectos{color:var(--natal-ivory)!important}
+#app.natal table.posiciones th{
+  color:#817c8e!important;border-bottom-color:var(--natal-line)!important;
+  background:rgba(8,12,23,.97)!important;
+}
+#app.natal table.posiciones td{border-bottom-color:var(--natal-line-soft)!important}
+#app.natal table.posiciones tr.astro-fila:hover td{background:rgba(224,189,114,.045)!important}
+#app.natal table.posiciones tr.activa td{background:rgba(224,189,114,.075)!important}
+#app.natal .cg{color:#d8b86f!important}
+#app.natal .ccasa{color:#8f899c!important}
+#app.natal .crx{color:#d27b62!important}
+#app.natal tr.detalle td{background:rgba(255,255,255,.025)!important;color:#bab3c0!important}
+#app.natal tr.detalle b{color:var(--natal-ivory)!important}
+#app.natal ul.aspectos li{border-bottom-color:var(--natal-line-soft)!important}
+#app.natal ul.aspectos .orbe,#app.natal ul.aspectos .nom{color:#8e899b!important}
+#app.natal .a-rojo{color:#dc765b!important}
+#app.natal .a-azul{color:#7da1d5!important}
+#app.natal .a-oro{color:#d9b86e!important}
+#app.natal .a-lila{color:#a18ed5!important}
+#app.natal .d-dom{color:#8ab57b!important}
+#app.natal .d-exa{color:#d9b86e!important}
+#app.natal .d-exi{color:#ce845f!important}
+#app.natal .d-cai{color:#d56c54!important}
+#app.natal .d-per{color:#8c879b!important}
+#app.natal .rotulo{color:#a88950;border-bottom-color:var(--natal-line-soft)}
+#app.natal .cuadro{
+  border-color:rgba(224,189,114,.29)!important;
+  background:rgba(224,189,114,.045)!important;
+  border-radius:5px;
+}
+#app.natal .cuadro .k{color:#898394!important}
+#app.natal .cuadro .v{color:#d9b86e!important}
+#app.natal .aviso{color:#aaa4b2!important;border-left-color:#8d713c!important}
+#app.natal .aviso.error{color:#df8870!important;border-left-color:#c45d43!important}
+#app.natal .marcar{color:#9690a1!important}
+#app.natal .marcar input{accent-color:#c9a85f!important}
+
+/* Formulario inicial */
+#app.natal #velo{
+  background:
+    radial-gradient(circle at 50% 42%,rgba(37,51,87,.30),transparent 36%),
+    rgba(2,4,11,.90)!important;
+  backdrop-filter:blur(13px)!important;
+}
+#app.natal form#natalForm{
+  width:min(610px,100%);
+  background:linear-gradient(145deg,rgba(11,15,28,.97),rgba(5,8,17,.98))!important;
+  border:1px solid rgba(224,189,114,.28)!important;
+  color:var(--natal-ivory)!important;
+  border-radius:9px!important;
+  box-shadow:0 26px 80px rgba(0,0,0,.62),0 0 70px rgba(176,129,48,.045)!important;
+  padding:1.5rem!important;
+}
+#app.natal form#natalForm h2{color:var(--natal-ivory)!important;font-weight:500}
+#app.natal form#natalForm h2 span,#app.natal .campo label{color:#8f899a!important}
+#app.natal .campo input,#app.natal .campo select{
+  background:rgba(2,5,13,.82)!important;color:#ebe3d5!important;
+  border-color:rgba(163,155,180,.20)!important;border-radius:5px!important;
+  min-height:2.42rem;
+}
+#app.natal .campo input:focus,#app.natal .campo select:focus{
+  border-color:rgba(224,189,114,.68)!important;
+  box-shadow:0 0 0 3px rgba(224,189,114,.07);
+}
+#app.natal .campo input[type="date"],#app.natal .campo input[type="time"]{color-scheme:dark!important}
+#app.natal .primario{
+  background:linear-gradient(180deg,#daba73,#aa823e)!important;
+  color:#130e04!important;border:1px solid #e4c780!important;
+  box-shadow:0 9px 26px rgba(0,0,0,.3),0 0 24px rgba(224,189,114,.10);
+}
+#app.natal .primario:hover{background:linear-gradient(180deg,#e5c982,#bd9349)!important}
+
+/* Regreso al selector */
+#app.natal .astro-back{
+  display:inline-flex;align-items:center;gap:.42rem;flex:none;
+  border:1px solid rgba(224,189,114,.24);border-radius:999px;
+  padding:.33rem .72rem;background:rgba(255,255,255,.025);
+  color:#aaa4b4;font:500 .62rem "IBM Plex Mono",monospace;
+  letter-spacing:.10em;text-transform:uppercase;transition:.2s;
+}
+#app.natal .astro-back:hover{color:var(--natal-gold);border-color:rgba(224,189,114,.58);background:rgba(224,189,114,.04)}
+
+@media(max-width:760px){
+  #app.natal header{gap:.45rem;padding:.48rem .62rem;min-height:3.25rem}
+  #app.natal .marca h1{font-size:.88rem;letter-spacing:.08em}
+  #app.natal .marca .sub{display:block;font-size:.52rem;letter-spacing:.11em}
+  #app.natal .astro-back{font-size:.54rem;padding:.3rem .56rem;letter-spacing:.07em}
+  #app.natal #barraNatal{font-size:.59rem;gap:.35rem;padding:.34rem .55rem;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+  #app.natal #barraNatal::-webkit-scrollbar{display:none}
+  #app.natal #barraDatos{flex-wrap:nowrap;min-width:max-content}
+  #app.natal #cartaPanel{
+    width:100%;height:min(61dvh,570px);top:auto;bottom:0;
+    border-left:none!important;border-top:1px solid rgba(224,189,114,.24)!important;
+    border-radius:16px 16px 0 0;
+    box-shadow:0 -22px 60px rgba(0,0,0,.48);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  #app.natal #cartaPanel.plegado{height:3rem}
+  #app.natal .pest button{padding:.66rem .67rem;font-size:.58rem}
+  #app.natal .hoja{padding:.25rem .78rem calc(1.2rem + env(safe-area-inset-bottom))}
+  #app.natal #velo{padding:max(.65rem,env(safe-area-inset-top)) .65rem max(.65rem,env(safe-area-inset-bottom))}
+  #app.natal form#natalForm{padding:1.05rem!important;border-radius:12px!important}
+  #app.natal .campos{grid-template-columns:1fr 1fr;gap:.65rem}
+  #app.natal .ancho{grid-column:1/-1}
+  #app.natal .acciones{gap:.45rem}
+  #app.natal .primario,#app.natal .secundario{min-height:2.35rem}
+}
+@media(max-width:430px){
+  #app.natal .campos{grid-template-columns:1fr}
+  #app.natal .ancho{grid-column:auto}
+  #app.natal form#natalForm h2{font-size:1.05rem;flex-wrap:wrap}
+  #app.natal #cartaPanel{height:59dvh}
+}
