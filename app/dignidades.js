@@ -235,15 +235,16 @@ const PUNTOS_CASA=[12,6,4,9,7,2,10,3,5,11,8,1]; // casas I a XII
 function almutenFiguris(carta,op={}){
   const E=op.E||root.Efem;
   const esDia=carta.diurna;
-  const asc=carta.asc,ascSigno=signoDe(asc);
+  const aya=Number(op.ayanamsa)||0, lectura=lon=>mod(lon-aya,360);
+  const asc=lectura(carta.asc),ascSigno=signoDe(asc);
   const fortuna=mod(asc+(esDia?carta.cuerpos.luna-carta.cuerpos.sol:carta.cuerpos.sol-carta.cuerpos.luna),360);
   const sz=sicigiaPrenatal(carta.nacimiento,E);
   const puntos=[
-    {nombre:"Sol",lon:carta.cuerpos.sol},
-    {nombre:"Luna",lon:carta.cuerpos.luna},
+    {nombre:"Sol",lon:lectura(carta.cuerpos.sol)},
+    {nombre:"Luna",lon:lectura(carta.cuerpos.luna)},
     {nombre:"Ascendente",lon:asc},
     {nombre:"Lote de Fortuna",lon:fortuna},
-    {nombre:"Sicigia prenatal",lon:sz?sz.lon:null,tipo:sz?sz.tipo:null}
+    {nombre:"Sicigia prenatal",lon:sz?lectura(sz.lon):null,tipo:sz?sz.tipo:null}
   ].filter(p=>p.lon!==null);
 
   const marcador={};PLANETAS.forEach(p=>{marcador[p]={planeta:p,esencial:0,accidental:0,total:0,detalle:[]}});
@@ -259,7 +260,7 @@ function almutenFiguris(carta,op={}){
   });
   // accidental: casa por signos enteros
   PLANETAS.forEach(p=>{
-    const lon=carta.cuerpos[ID[p]],casa=mod(signoDe(lon)-ascSigno,12)+1,pts=PUNTOS_CASA[casa-1];
+    const lon=carta.cuerpos[ID[p]],casa=op.cuspides&&root.Casas?root.Casas.casaDe(lon,op.cuspides):mod(signoDe(lectura(lon))-ascSigno,12)+1,pts=PUNTOS_CASA[casa-1];
     marcador[p].accidental+=pts;
     marcador[p].detalle.push({punto:`Casa ${casa}`,tipos:["posición"],puntos:pts});
   });

@@ -19,6 +19,7 @@
 
 const mod = (n,m) => ((n%m)+m)%m;
 const signoDe = lon => Math.floor(mod(lon,360)/30);
+const lonLectura=(carta,lon,cfg)=>root.NatalLectura?root.NatalLectura.longitud(carta,lon,cfg):lon;
 const sep = (a,b) => { const d = Math.abs(mod(a,360)-mod(b,360)); return d > 180 ? 360-d : d; };
 const SIGNOS = ["Aries","Tauro","Géminis","Cáncer","Leo","Virgo","Libra","Escorpio",
                 "Sagitario","Capricornio","Acuario","Piscis"];
@@ -55,7 +56,7 @@ const casaDe = (lon, cusp) => root.Casas ? root.Casas.casaDe(lon, cusp) : null;
 function regenteAscendente(carta, cfg){
   if(!carta.ang) return {aplica:false, motivo:"Sin hora de nacimiento no hay Ascendente."};
   const e = Esc().resuelve(cfg);
-  const signo = signoDe(carta.ang.asc);
+  const signo = signoDe(lonLectura(carta,carta.ang.asc,cfg));
   const nombre = e.regentes[signo];
   const id = idDe(nombre);
   const cuerpo = (carta.cuerpos||[]).find(c => c.id === id);
@@ -65,7 +66,7 @@ function regenteAscendente(carta, cfg){
     regente: nombre,
     id,
     lon: cuerpo ? cuerpo.lon : null,
-    signo: cuerpo ? SIGNOS[signoDe(cuerpo.lon)] : null,
+    signo: cuerpo ? SIGNOS[signoDe(lonLectura(carta,cuerpo.lon,cfg))] : null,
     casa: (cuerpo && carta.cusp) ? casaDe(cuerpo.lon, carta.cusp) : null,
     regencias: e.regencias,
     nota: e.regencias === "modernas"
@@ -87,7 +88,7 @@ function conjuncionesAscendente(carta, cfg, orbe){
     const dirigida = ((mod(c.lon - carta.ang.asc, 360) + 180) % 360) - 180;
     return {
       id:c.id, nombre:c.nombre || nombreDe(c.id), lon:c.lon, orbe:d,
-      lado: dirigida < 0 ? "casa XII" : "casa I",
+      lado: carta.cusp ? "casa " + casaDe(c.lon,carta.cusp) : (dirigida < 0 ? "antes del AC" : "después del AC"),
       complementario: e.fuera.includes(c.id)
     };
   }).filter(x => x.orbe <= tope).sort((a,b) => a.orbe - b.orbe);
@@ -133,7 +134,7 @@ function dispositores(carta, cfg){
 
   const disponeA = {};
   cuerpos.forEach(c => {
-    const regente = e.regentes[signoDe(c.lon)];
+    const regente = e.regentes[signoDe(lonLectura(carta,c.lon,cfg))];
     const rid = idDe(regente);
     disponeA[c.id] = (rid && porId[rid]) ? rid : null;
   });
@@ -170,7 +171,7 @@ function dispositores(carta, cfg){
     disponeA,
     cadenas,
     finales: [...finales].map(id => ({id, nombre:nombreDe(id),
-      signo: SIGNOS[signoDe(porId[id].lon)]})),
+      signo: SIGNOS[signoDe(lonLectura(carta,porId[id].lon,cfg))]})),
     circuitos,
     regencias: e.regencias,
     nota:"El dispositor de un planeta es el regente del signo que ese planeta ocupa. No depende de conjunciones ni de la casa."
@@ -194,7 +195,7 @@ function almuten(carta, cfg){
   const adaptada = {datos:carta.datos, nacimiento:carta.ms, asc:carta.ang.asc,
                     mc:carta.ang.mc, cuerpos, diurna:carta.diurna};
   let r;
-  try { r = D.almutenFiguris(adaptada, {E:root.Efem}); }
+  try { r = D.almutenFiguris(adaptada, {E:root.Efem, ayanamsa:root.NatalLectura?root.NatalLectura.ayanamsa(carta,cfg):0, cuspides:carta.cusp}); }
   catch(err){ return {aplica:false, motivo:"No se pudo calcular el almutén: " + err.message}; }
   return {
     aplica:true,
@@ -246,7 +247,7 @@ function dominancia(carta, cfg){
   const alm = almuten(carta, cfg);
   if(alm.aplica && alm.ganador) suma(idDe(alm.ganador.planeta), "almuten");
 
-  if(carta.diurna != null) suma(carta.diurna ? "sol" : "luna", "luminaria");
+  if(Esc().permite(cfg,"secta") && carta.diurna != null) suma(carta.diurna ? "sol" : "luna", "luminaria");
 
   const orden = Object.values(marcador).sort((a,b) => b.puntos - a.puntos);
   const techo = orden.length ? orden[0].puntos : 0;

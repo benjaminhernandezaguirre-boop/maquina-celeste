@@ -1243,6 +1243,7 @@
 <script src="app/dignidades.js"></script>
 <script src="app/casas.js"></script>
 <script src="app/escuelas.js"></script>
+<script src="app/natal-lectura.js"></script>
 <script src="app/natal-gobierno.js"></script>
 <script src="app/natal-profesional.js?v=profesional-1-20260913-2"></script>
 <script src="app/natal-regencias.js?v=profesional-2-20260913"></script>
@@ -1253,6 +1254,9 @@
 <script src="app/natal-estrellas.js?v=profesional-8-20260913"></script>
 <script src="app/natal-puntos.js?v=profesional-9-20260913-2"></script>
 <script src="app/natal-sintesis.js?v=profesional-5-20260913-2"></script>
+<script src="app/natal-informe.js"></script>
+<script src="app/natal-informe-ui.js"></script>
+<link rel="stylesheet" href="app/natal-informe.css">
 <script src="app/planetas.js?v=planet-textures-2-20260912"></script>
 <script>
 (() => {
@@ -1447,7 +1451,7 @@ function trazaPluton(g, x, y, alto){
 }
 function pintaGlifo(g, glifo, x, y, tam){
   if(glifo === porId.pluton.glifo){ trazaPluton(g, x, y, tam*1.22); return; }
-  g.font = `${tam}px Spectral, serif`;
+  g.font = `600 ${tam}px Spectral, serif`;
   g.fillText(glifo, x, y);
 }
 
@@ -2607,7 +2611,7 @@ let carta = null;
 function levantarCarta(d, asignar){
   validaCarta(d);
   const res = cartaDeInstante(localAUTC(d.anio, d.mes, d.dia, d.hora, d.min, d.tz, d.desambiguacion), d);
-  if(asignar !== false) carta = res;
+  if(asignar !== false){carta = res; aplicaLectura();}
   return res;
 }
 /* la carta de un instante dado en UTC: la usan la natal y la revolución solar */
@@ -2633,11 +2637,11 @@ function cartaDeInstante(ms, d){
        el dato de nacimiento no se toca. */
     const sisLectura = (typeof lecturaResuelta === "function" && lecturaResuelta())
       ? lecturaResuelta().casas : d.sistema;
-    const r = cuspides(sisLectura, ang);
+    const cfg=lecturaResuelta();
+    const r = window.Casas.cuspides(sisLectura,ang,{ayanamsa:window.NatalLectura.ayanamsa({jd,ms},cfg)});
     cusp = r.c; aviso = r.aviso || null; d.sistemaReal = r.sistema;
     const sol = cuerpos[0], luna = cuerpos[1];
-    const casaSol = casaDe(sol.lon, cusp);
-    diurna = casaSol >= 7 && casaSol <= 12;
+    diurna = window.NatalLectura.secta({ms,datos:d});
     const lonFort = diurna ? mod360(ang.asc + luna.lon - sol.lon) : mod360(ang.asc + sol.lon - luna.lon);
     fortuna = {id:"fortuna", nombre:PUNTOS.fortuna.nombre, glifo:PUNTOS.fortuna.glifo,
                color:PUNTOS.fortuna.color, lon:lonFort, retro:false, tipo:"punto"};
@@ -2658,7 +2662,7 @@ function cartaDeInstante(ms, d){
 const PAPEL_CLARO = {
   fondo:"#F4F0E6", borde:"#CFC7B4", ticks:"#00000026", casa:"#00000018", eje:"#A8801F",
   tinta:"#22212B", suave:"#6B6A78", acento:"#8A6A22", caja:"#F4F0E6E6",
-  el:{fuego:"#B14A26", tierra:"#6B733F", aire:"#5A6C8C", agua:"#3E5D8A"},
+  el:{fuego:"#A63116", tierra:"#3C611F", aire:"#364E85", agua:"#155B87"},
   asp:{"a-oro":"#9A7420AA","a-rojo":"#C0472AAA","a-azul":"#2F5F9EAA","a-lila":"#6B57A888"}
 };
 
@@ -2739,7 +2743,7 @@ function pintaRueda(g, cx, cy, R, vivo, capa, ch){
     g.strokeStyle = PAPEL.borde; g.lineWidth = 1; g.stroke();
     const am = aPant(i*30 + 15 + dz), rm = (rExt+rInt)/2;
     g.fillStyle = col; g.textAlign="center"; g.textBaseline="middle";
-    g.font = `${Math.round(R*0.062)}px Spectral, serif`;
+    g.font = `600 ${Math.round(R*0.067)}px Spectral, serif`;
     g.fillText(SIGNOS[i].g, cx+Math.cos(am)*rm, cy+Math.sin(am)*rm);
   }
   // grados
@@ -2814,7 +2818,8 @@ function pintaRueda(g, cx, cy, R, vivo, capa, ch){
     colocados.push({lon:c.lon, r:radio});
     const a = aPant(c.lon), x = cx+Math.cos(a)*radio, y = cy+Math.sin(a)*radio;
     const act = vivo && (seleccion === c.id || sobre === c.id);
-    const tinta = sinastriaActivo && capa ? PAPEL.acento : PAPEL === PAPEL_OSCURO ? c.color : mezcla(c.color, "#000000", 0.52);
+    const colores={sol:"#946000",luna:"#435A87",mercurio:"#68468C",venus:"#28754A",marte:"#B13629",jupiter:"#985500",saturno:"#67513B",urano:"#00747B",neptuno:"#285CAE",pluton:"#873D74"};
+    const tinta = sinastriaActivo && capa ? PAPEL.acento : PAPEL === PAPEL_OSCURO ? mezcla(c.color||"#ABBBDD", "#FFFFFF", .22) : (colores[c.id]||"#4F536D");
     g.strokeStyle = tinta + "44"; g.lineWidth = 1;
     g.beginPath();
     g.moveTo(cx+Math.cos(a)*(rInt-R*0.008), cy+Math.sin(a)*(rInt-R*0.008));
@@ -2831,7 +2836,7 @@ function pintaRueda(g, cx, cy, R, vivo, capa, ch){
     }
     g.fillStyle = act ? PAPEL.acento : tinta;
     g.textAlign="center"; g.textBaseline="middle";
-    pintaGlifo(g, c.glifo, x, y, Math.max(13, Math.round(R*0.055)));
+    pintaGlifo(g, c.glifo, x, y, Math.max(15, Math.round(R*0.061)));
     g.shadowBlur = 0;
     if(R > 190){
       const z = posZod(c.lon);
@@ -2875,34 +2880,13 @@ function pintaRueda(g, cx, cy, R, vivo, capa, ch){
     }
   }
 
-  // encabezado dentro de la rueda
-  g.textAlign="center"; g.textBaseline="middle";
-  const apretada = R < 190;
-  const cajaW=R*(apretada?.52:.62), cajaH=R*(capa?.24:.19);
-  g.fillStyle=PAPEL.caja;g.beginPath();g.roundRect(cx-cajaW/2,cy-cajaH/2,cajaW,cajaH,Math.max(8,R*.025));g.fill();
-  g.strokeStyle=PAPEL.borde;g.lineWidth=1;g.stroke();
-  g.fillStyle = PAPEL.tinta; g.font = `${Math.max(11,Math.round(R*0.05))}px Cinzel, serif`;
-  /* Cuando la rueda es pequeña —teléfono— el rótulo del centro se encabalga con
-     las líneas y no se lee ninguno de los dos. Ahí se queda solo el nombre, que
-     es lo único que hace falta para saber de quién es la carta; la fecha y el
-     lugar ya están en la barra de arriba. */
-  g.fillText(ch.datos.nombre || "Carta natal", cx, apretada ? cy : cy - R*0.055);
-  if(!apretada){
-    g.fillStyle = PAPEL.suave; g.font = `${Math.max(8,Math.round(R*0.026))}px "IBM Plex Mono", monospace`;
-    g.fillText(ch.datos.resumenFecha, cx, cy + R*0.02);
-    g.fillText(ch.datos.lugarTexto, cx, cy + R*0.065);
-  }
-  if(capa){
-    g.fillStyle = PAPEL.acento;
-    g.font = `${Math.max(8,Math.round(R*0.024))}px "IBM Plex Mono", monospace`;
-    const t = `${capa.clave.n.split(" · ")[0]} · ${fmtCorta.format(new Date(capa.fecha))}`;
-    g.fillText(apretada ? capa.clave.n.split(" · ")[0] : t, cx, cy + (apretada ? R*0.075 : R*0.115));
-  }
+  // El centro queda libre. Los datos aparecen fuera de la rueda.
+
 }
 
 
 /* --- exportar la carta como imagen --- */
-const NOMBRE_SISTEMA = {placidio:"Placidio", signos:"signos enteros", igual:"casas iguales", porfirio:"Porfirio"};
+const NOMBRE_SISTEMA = {placidio:"Plácidus", signos:"signos enteros", igual:"casas iguales", porfirio:"Porfirio",alcabitius:"Alcabitius",regiomontano:"Regiomontanus"};
 const TINTA_ASP = {"a-oro":"#9A7420","a-rojo":"#C0472A","a-azul":"#2F5F9E","a-lila":"#6B57A8"};
 
 function filaHoja(g, y, glifo, nombre, texto, casa, x, ancho){
@@ -2925,6 +2909,7 @@ function rotuloHoja(g, y, texto, x, ancho){
   g.beginPath(); g.moveTo(x, y + 20); g.lineTo(x + ancho, y + 20); g.stroke();
 }
 async function fabricaHoja(modo){
+  const carta=cartaParaRueda();
   if(!carta) return null;
   try { await document.fonts.ready; } catch(e){}
   const d = carta.datos;
@@ -2934,7 +2919,11 @@ async function fabricaHoja(modo){
     c.width = L; c.height = L;
     const g = c.getContext("2d");
     g.fillStyle = PAPEL.fondo; g.fillRect(0, 0, L, L);
-    pintaRueda(g, L/2, L/2, L*0.452, false, capaExterior(), cartaEnRueda());
+    g.fillStyle=PAPEL.tinta;g.textAlign='left';g.font='32px Cinzel, Georgia, serif';
+    g.fillText(d.nombre||'Carta natal',80,64,L-160);
+    g.fillStyle=PAPEL.suave;g.font='24px Spectral, Georgia, serif';
+    g.fillText(`${d.resumenFecha||''} · ${d.lugarTexto||''}`,80,106,L-160);
+    pintaRueda(g, L/2, 960, 750, false, capaExterior(), cartaEnRueda());
     return c;
   }
 
@@ -3015,10 +3004,11 @@ async function fabricaHoja(modo){
     y += 36;
   }
   g.textAlign = "left"; g.fillStyle = PAPEL.borde; g.font = '18px "IBM Plex Mono", monospace';
-  g.fillText("Astroplanetario · zodiaco tropical · posiciones geocéntricas", margen, alto - 26);
+  g.fillText("Astroplanetario · "+zodiacoDe().n+" · posiciones geocéntricas", margen, alto - 26);
   return c;
 }
 function descargaHoja(modo){
+  const carta=cartaParaRueda();
   fabricaHoja(modo).then(c => {
     if(!c) return;
     c.toBlob(b => {
@@ -3034,7 +3024,7 @@ function descargaHoja(modo){
 
 /* --- panel de resultados --- */
 function datosBalance(){
-  const bodies = carta.cuerpos.filter(c=>Number.isFinite(c.lon));
+  const bodies = cartaDelMarco().cuerpos.filter(c=>Number.isFinite(c.lon));
   const groups = [
     {title:"Elementos",labels:["Fuego","Tierra","Aire","Agua"],mod:4},
     {title:"Modalidades",labels:["Cardinal","Fija","Mutable"],mod:3},
@@ -3042,7 +3032,7 @@ function datosBalance(){
   ];
   return {bodies, groups:groups.map(group=>{
     const counts=group.labels.map(()=>[]);
-    bodies.forEach(c=>counts[Math.floor(mod360(c.lon)/30)%group.mod].push(c.nombre));
+    bodies.forEach(c=>counts[Math.floor(lonMostrada(c.lon)/30)%group.mod].push(c.nombre));
     return {...group,counts};
   })};
 }
@@ -3080,10 +3070,11 @@ function pintaBalance(){
       const n=counts[i].length, percent=bodies.length ? Math.round(n/bodies.length*100) : 0;
       return '<div class="studio-balance-row '+(n===max&&n>0?'balance-dominante':'')+'" style="--tono:'+tonos[i]+'"><div><span>'+label+'</span><strong>'+n+' / '+bodies.length+' · '+percent+'%</strong></div><meter min="0" max="'+Math.max(1,bodies.length)+'" value="'+n+'" aria-label="'+label+'"></meter><small>'+ (counts[i].map(escaparHTML).join(' · ') || 'Sin cuerpos')+'</small></div>';
     }).join('')+'</section>';
-  }).join('') + '<p class="aviso">Método: conteo simple de las diez luminarias y planetas por signo. Un empate significa que no hay un único grupo dominante.</p>' + (!carta.datos.horaConocida ? '<p class="aviso">Sin hora conocida, un cuerpo cercano a un cambio de signo puede cambiar de grupo.</p>' : '');
+  }).join('') + '<p class="aviso">Método: conteo simple de la población del marco por signo. Un empate significa que no hay un único grupo dominante.</p>' + (!carta.datos.horaConocida ? '<p class="aviso">Sin hora conocida, un cuerpo cercano a un cambio de signo puede cambiar de grupo.</p>' : '');
 }
 
 function resumenCarta(){
+  const carta=cartaDelMarco();
   const sol=carta.cuerpos.find(x=>x.id==="sol"), luna=carta.cuerpos.find(x=>x.id==="luna");
   const asc=carta.ang ? {id:"asc",nombre:"Ascendente",glifo:PUNTOS.asc.glifo,lon:carta.ang.asc,tipo:"angulo"} : null;
   const {groups}=datosBalance();
@@ -3376,7 +3367,7 @@ function lienzoInforme(titulo,seccion,pagina){
   /* Cuando el informe se arma según el perfil, el número y el total los
      decide el conductor, no cada página. */
   if(HOJA_FORZADA!=null)pagina=HOJA_FORZADA;
-  const TOTAL_HOJAS=(TOTAL_FORZADO!=null)?TOTAL_FORZADO:TOTAL_HOJAS_INFORME;const c=document.createElement('canvas');c.width=1600;c.height=2263;const g=c.getContext('2d');g.fillStyle=INFORME.fondo;g.fillRect(0,0,c.width,c.height);g.strokeStyle=INFORME.linea;g.lineWidth=2;redondea(g,42,42,1516,2179,18);g.stroke();g.fillStyle=INFORME.oro;g.font='600 19px "IBM Plex Mono", monospace';g.fillText('ASTROPLANETARIO · INFORME NATAL PROFESIONAL',84,88);g.textAlign='right';g.fillText(`HOJA ${pagina} / ${TOTAL_HOJAS}`,1516,88);g.textAlign='left';g.fillStyle=INFORME.tinta;g.font='48px Cinzel, Georgia, serif';g.fillText(titulo,84,148);g.fillStyle=INFORME.oro;g.font='600 18px "IBM Plex Mono", monospace';g.fillText(seccion.toUpperCase(),84,186);const meta=metadataInforme();g.fillStyle=INFORME.tenue;g.font='21px Spectral, Georgia, serif';g.fillText(meta[0],84,220);g.fillText(meta[1],84,249);g.strokeStyle=INFORME.linea;g.beginPath();g.moveTo(84,278);g.lineTo(1516,278);g.stroke();g.strokeStyle=INFORME.linea;g.beginPath();g.moveTo(84,2168);g.lineTo(1516,2168);g.stroke();g.fillStyle=INFORME.tenue;g.font='18px "IBM Plex Mono", monospace';g.fillText('astroplanetario.com · Instituto de Artes Esotéricas y Saberes Ancestrales',84,2202);g.textAlign='right';g.fillText(`${pagina} / ${TOTAL_HOJAS_INFORME}`,1516,2202);g.textAlign='left';return{c,g,y:316}}
+  const TOTAL_HOJAS=(TOTAL_FORZADO!=null)?TOTAL_FORZADO:TOTAL_HOJAS_INFORME;const c=document.createElement('canvas');c.width=1600;c.height=2263;const g=c.getContext('2d');g.fillStyle=INFORME.fondo;g.fillRect(0,0,c.width,c.height);g.strokeStyle=INFORME.linea;g.lineWidth=2;redondea(g,42,42,1516,2179,18);g.stroke();g.fillStyle=INFORME.oro;g.font='600 19px "IBM Plex Mono", monospace';g.fillText('ASTROPLANETARIO · INFORME NATAL PROFESIONAL',84,88);g.textAlign='right';g.fillText(`HOJA ${pagina} / ${TOTAL_HOJAS}`,1516,88);g.textAlign='left';g.fillStyle=INFORME.tinta;g.font='48px Cinzel, Georgia, serif';g.fillText(titulo,84,148);g.fillStyle=INFORME.oro;g.font='600 18px "IBM Plex Mono", monospace';g.fillText(seccion.toUpperCase(),84,186);const meta=metadataInforme();g.fillStyle=INFORME.tenue;g.font='21px Spectral, Georgia, serif';g.fillText(meta[0],84,220);g.fillText(meta[1],84,249);g.strokeStyle=INFORME.linea;g.beginPath();g.moveTo(84,278);g.lineTo(1516,278);g.stroke();g.strokeStyle=INFORME.linea;g.beginPath();g.moveTo(84,2168);g.lineTo(1516,2168);g.stroke();g.fillStyle=INFORME.tenue;g.font='18px "IBM Plex Mono", monospace';g.fillText('astroplanetario.com · Instituto de Artes Esotéricas y Saberes Ancestrales',84,2202);g.textAlign='right';g.fillText(`${pagina} / ${TOTAL_HOJAS}`,1516,2202);g.textAlign='left';return{c,g,y:316}}
 function rotuloInforme(g,texto,x,y){g.fillStyle=INFORME.oro;g.font='600 18px "IBM Plex Mono", monospace';g.fillText(texto.toUpperCase(),x,y);return y+28}
 function cajaInforme(g,x,y,w,h,rotulo,valor,detalle,tono=INFORME.oro,maxDetalle=3){g.fillStyle=INFORME.papel;g.strokeStyle=INFORME.linea;g.lineWidth=2;redondea(g,x,y,w,h,14);g.fill();g.stroke();g.fillStyle=tono;g.fillRect(x,y,7,h);g.fillStyle=INFORME.tenue;g.font='600 17px "IBM Plex Mono", monospace';g.fillText(rotulo.toUpperCase(),x+28,y+38);g.fillStyle=INFORME.tinta;g.font='30px Cinzel, Georgia, serif';textoInforme(g,valor,x+28,y+78,w-54,34,2);g.fillStyle=INFORME.tenue;g.font='20px Spectral, Georgia, serif';textoInforme(g,detalle,x+28,y+132,w-54,26,maxDetalle)}
 function tablaInforme(g,columnas,filas,x,y,w,altoFila,{encabezado=54,tamano=20,lineas=3}={}){const anchos=columnas.map(c=>w*c.frac),xs=[x];for(const a of anchos)xs.push(xs[xs.length-1]+a);g.fillStyle='#E9E0CF';g.strokeStyle=INFORME.linea;g.lineWidth=2;redondea(g,x,y,w,encabezado+filas.length*altoFila,12);g.fill();g.stroke();g.save();redondea(g,x,y,w,encabezado+filas.length*altoFila,12);g.clip();g.fillStyle='#DDD0B7';g.fillRect(x,y,w,encabezado);for(let i=0;i<filas.length;i++){g.fillStyle=i%2?INFORME.fondo:INFORME.papel;g.fillRect(x,y+encabezado+i*altoFila,w,altoFila)}g.restore();g.strokeStyle=INFORME.lineaSuave;for(let i=1;i<xs.length-1;i++){g.beginPath();g.moveTo(xs[i],y);g.lineTo(xs[i],y+encabezado+filas.length*altoFila);g.stroke()}for(let i=0;i<=filas.length;i++){const yy=y+encabezado+i*altoFila;g.beginPath();g.moveTo(x,yy);g.lineTo(x+w,yy);g.stroke()}g.fillStyle=INFORME.tenue;g.font='600 16px "IBM Plex Mono", monospace';for(let i=0;i<columnas.length;i++){const c=columnas[i],tx=c.align==='right'?xs[i+1]-18:xs[i]+18;g.textAlign=c.align||'left';g.fillText(c.titulo.toUpperCase(),tx,y+34)}g.textAlign='left';for(let r=0;r<filas.length;r++)for(let i=0;i<columnas.length;i++){const c=columnas[i],celda=filas[r][i]??'',tx=c.align==='right'?xs[i+1]-18:xs[i]+18,tw=anchos[i]-36,ty=y+encabezado+r*altoFila+34;g.textAlign=c.align||'left';g.fillStyle=c.color||INFORME.tinta;g.font=c.font||`${tamano}px Spectral, Georgia, serif`;const ls=lineasInforme(g,celda,tw).slice(0,lineas);for(let k=0;k<ls.length;k++)g.fillText(ls[k],tx,ty+k*(tamano+7))}g.textAlign='left';return y+encabezado+filas.length*altoFila}
@@ -3521,6 +3512,7 @@ function pdfDeLienzos(lienzos){const enc=new TextEncoder(),partes=[],offsets=[0]
 /* El informe se arma según el perfil: las hojas de método moderno solo
    entran si el marco las admite. La numeración sale del resultado. */
 function hojasDelInforme(){
+  if(window.NatalInformeUI&&carta)return window.NatalInformeUI.plan(window.NatalInforme.crear(carta,lecturaActual));
   const E=window.Escuelas, cfg=lecturaActual;
   const lista=[
     {t:'Configuración de lectura', f:paginaConfiguracion, siempre:true},
@@ -3537,12 +3529,31 @@ function hojasDelInforme(){
   ];
   return lista.filter(h => h.siempre || (E && E.permite(cfg, h.metodo)));
 }
-async function descargaInformeAvanzado(){const boton=document.getElementById('descargaAvanzada');if(!carta||!boton)return;const previo=boton.textContent;boton.disabled=true;boton.textContent=`Preparando ${hojasDelInforme().length} hojas…`;try{const hojas=hojasDelInforme();TOTAL_FORZADO=hojas.length;
+async function descargaInformeEscuela(){
+  const boton=document.getElementById('descargaAvanzada');if(!carta||boton.disabled)return;
+  boton.disabled=true;boton.textContent='Preparando informe…';
+  try{
+    await document.fonts.ready;
+    const datos=window.NatalInforme.crear(carta,lecturaActual);
+    const anterior=PAPEL;let lienzos;
+    try{PAPEL=PAPEL_CLARO;lienzos=window.NatalInformeUI.lienzos(datos,(g,x,y,r)=>pintaRueda(g,x,y,r,false,null,cartaParaRueda()));}finally{PAPEL=anterior;}
+    const blob=pdfDeLienzos(lienzos),url=URL.createObjectURL(blob),a=document.createElement('a');
+    const nombre=(carta.datos.nombre||'Carta natal').replace(/[^\wÁÉÍÓÚÑáéíóúñ -]/g,'');
+    a.href=url;a.download=nombre+' - '+datos.escuela.nombrePerfil+' - informe.pdf';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
+  }finally{boton.disabled=false;sincronizaMandosEscuela();}
+}
+async function descargaInformeAvanzado(){
+  if(window.NatalInformeUI)return descargaInformeEscuela();const boton=document.getElementById('descargaAvanzada');if(!carta||!boton)return;const previo=boton.textContent;boton.disabled=true;boton.textContent=`Preparando ${hojasDelInforme().length} hojas…`;try{const hojas=hojasDelInforme();TOTAL_FORZADO=hojas.length;
   const lienzos=hojas.map((h,i)=>{HOJA_FORZADA=i+1;try{return h.f()}finally{HOJA_FORZADA=null}});
   TOTAL_FORZADO=null;
   const blob=pdfDeLienzos(lienzos),u=URL.createObjectURL(blob),a=document.createElement('a'),base=((carta.datos.nombre)||'carta-natal').replace(/[^\wÁÉÍÓÚÑáéíóúñ -]/g,'').trim()||'carta-natal';a.href=u;a.download=`${base} - informe avanzado.pdf`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),5000)}finally{boton.disabled=false;boton.textContent=previo}}
 
 function pintaProfesional(){
+  if(window.NatalInformeUI){
+    const destino=document.getElementById("hojaProfesional");if(!destino||!carta)return;
+    window.NatalInformeUI.pantalla(destino,window.NatalInforme.crear(carta,lecturaActual),id=>marcaFila(id,false),q=>{cuadranteResaltado=cuadranteResaltado===q?null:q;dibujaNatal();return cuadranteResaltado;});
+    pintaBandaLectura();return;
+  }
   /* Al terminar se repintan la banda y las tarjetas de gobierno, que esta
      función borra al reescribir la hoja. */
   setTimeout(() => { try{ pintaBandaLectura(); pintaGobierno(); }catch(e){} }, 0);
@@ -3653,7 +3664,7 @@ function pintaCarta(){
   // casas
   document.getElementById("hojaCasas").innerHTML = cusp ? `
     <div class="cuadro">
-      <div><span class="k">Sistema</span><span class="v">${({placidio:"Placidio",signos:"Signos enteros",igual:"Casas iguales",porfirio:"Porfirio"})[datos.sistemaReal||datos.sistema]}</span></div>
+      <div><span class="k">Sistema</span><span class="v">${NOMBRE_SISTEMA[datos.sistemaReal||datos.sistema]}</span></div>
       <div><span class="k">Carta</span><span class="v">${carta.diurna ? "Diurna" : "Nocturna"}</span></div>
       <div><span class="k">Latitud</span><span class="v">${datos.lat.toFixed(4)}°</span></div>
       <div><span class="k">Longitud</span><span class="v">${datos.lon.toFixed(4)}°</span></div>
@@ -3662,11 +3673,11 @@ function pintaCarta(){
     <table class="posiciones"><thead><tr><th>Casa</th><th>Cúspide</th><th>Regente</th><th></th></tr></thead><tbody>
       ${Array.from({length:12},(_,k)=>{
         const i=k+1, z=posZod(cusp[i]);
-        const reg = REGENTE_TRAD[z.signo.n];
+        const reg = window.NatalLectura.regente(carta,cusp[i],lecturaActual);
         return `<tr><td class="ccasa" style="text-align:left">${ROMANOS[i]}</td>
           <td class="cgrado">${z.texto}</td>
           <td class="csigno">${z.signo.g} ${z.signo.n}</td>
-          <td class="cg" title="Regente tradicional: ${porId[reg].nombre}">${gh(porId[reg].glifo)}</td></tr>
+          <td class="cg" title="Regencias ${lecturaResuelta().regencias}: ${porId[reg].nombre}">${gh(porId[reg].glifo)}</td></tr>
           <tr class="detalle"><td colspan="4">${CASAS_SIGNIFICADO[i]}</td></tr>`;
       }).join("")}
     </tbody></table>`
@@ -3687,8 +3698,8 @@ function pintaCarta(){
   enlazaFilas();
   const sz = document.getElementById("selZodiaco");
   if(sz) sz.addEventListener("change", ev => {
-    zodiacoActivo = ev.target.value;
-    pintaCarta(); pintaBarra(); dibujaNatal();
+    if(ev.target.value==="draco"){zodiacoActivo="draco";pintaCarta();pintaBarra();dibujaNatal();return;}
+    lecturaActual={...lecturaActual,perfil:"personalizada",...{poblacion:lecturaResuelta().poblacion,regencias:lecturaResuelta().regencias,casas:lecturaResuelta().casas},zodiaco:ev.target.value};aplicaLectura();
   });
   const cb = document.getElementById("soloMayores");
   if(cb) cb.addEventListener("change", () => {
@@ -3709,7 +3720,7 @@ const NOMBRE_DIG = {sol:"Sol",luna:"Luna",mercurio:"Mercurio",venus:"Venus",mart
 function lonMostrada(lon){ return mod360(lon - desfaseZodiaco()); }
 function estadoEsencial(id, lon){
   const D = window.Dignidades;
-  if(!D || !NOMBRE_DIG[id] || carta.diurna === null) return null;
+  if(!D || !NOMBRE_DIG[id] || carta.diurna === null || !window.Escuelas.permite(lecturaActual,"dignidadesEsenciales")) return null;
   return D.estadoDe(NOMBRE_DIG[id], lonMostrada(lon), carta.diurna, {});
 }
 function insigniaEsencial(e){
@@ -3797,6 +3808,7 @@ function bloqueSentido(c, cusp){
   </div>`;
 }
 function pintaSignificados(){
+  const carta=cartaDelMarco();
   const {cuerpos, puntos, cusp, ang} = carta;
   const asc = ang ? (() => {
     const i = Math.floor(mod360(ang.asc)/30);
@@ -5464,6 +5476,7 @@ function cambiaModoCarta(modo){
   cuadranteResaltado=null;
   patronCuerposResaltados.clear();
   if(avanzado){
+    if(zodiacoActivo==="draco")aplicaLectura();
     document.getElementById('tabProfesional').click();
     /* Van después, porque pintaProfesional() reescribe la hoja entera. */
     try{ montaSelectorEscuela(); pintaBandaLectura(); pintaGobierno(); }catch(e){}
@@ -5486,22 +5499,12 @@ let lecturaActual = (window.Escuelas ? window.Escuelas.carga() : {perfil:"contem
    carta.cuerpos, así que filtrando aquí la escuela alcanza a todos sin
    tocar ninguno de ellos. Los datos de nacimiento se conservan por
    referencia: no se altera nada de lo que escribió el usuario. */
-let _marcoCache = null, _marcoFirma = "";
 function cartaDelMarco(){
-  if(typeof carta === "undefined" || !carta) return null;
-  const e = lecturaResuelta();
-  if(!e || !e.fuera.length) return carta;
-  const firma = e.perfil + "|" + e.poblacion + "|" + (carta.ms || 0) + "|" + (carta.cuerpos ? carta.cuerpos.length : 0);
-  if(_marcoCache && _marcoFirma === firma) return _marcoCache;
-  const dentro = new Set(e.cuerpos);
-  const vive = x => !x || !x.id || dentro.has(x.id) || x.tipo === "angulo" || x.tipo === "punto";
-  _marcoCache = Object.assign({}, carta, {
-    cuerpos: (carta.cuerpos || []).filter(c => dentro.has(c.id)),
-    aspectos: (carta.aspectos || []).filter(a => vive(a.A) && vive(a.B)),
-    marcoAplicado: e.perfil
-  });
-  _marcoFirma = firma;
-  return _marcoCache;
+  if(!carta)return null;
+  const e=lecturaResuelta(),fuera=new Set(e.fuera);
+  return {...carta,lectura:{...lecturaActual},ayanamsa:window.NatalLectura.ayanamsa(carta,lecturaActual),
+    cuerpos:carta.cuerpos.filter(c=>!fuera.has(c.id)),
+    aspectos:carta.aspectos.filter(a=>!fuera.has(a.A.id)&&!fuera.has(a.B.id))};
 }
 /* Para dibujar: si la capa complementaria está activa, los transaturninos
    se pintan marcados, pero NO entran en los aspectos ni en ningún cálculo. */
@@ -5574,6 +5577,11 @@ function montaSelectorEscuela(){
     lecturaActual = Object.assign({}, lecturaActual, {complementaria: e.target.checked});
     aplicaLectura();
   });
+  bloque.insertAdjacentHTML('beforeend','<fieldset id="metodosOpcionales" class="escuela-opcionales"><legend>Técnicas complementarias</legend></fieldset>');
+  document.getElementById('metodosOpcionales').addEventListener('change',ev=>{
+    const id=ev.target.dataset.metodo;if(!id)return;
+    lecturaActual={...lecturaActual,opcionales:{...lecturaActual.opcionales,[id]:ev.target.checked}};aplicaLectura();
+  });
   sincronizaMandosEscuela();
 }
 function sincronizaMandosEscuela(){
@@ -5587,6 +5595,9 @@ function sincronizaMandosEscuela(){
   if(capa) capa.hidden = !e.fuera.length;
   const chk = document.getElementById('chkComplementaria');
   if(chk) chk.checked = !!e.complementaria;
+  const opc=document.getElementById('metodosOpcionales');
+  if(opc){const metodos=(window.Escuelas.perfilDe(e.perfil).metodosOpcionales||[]).filter(id=>!['profecciones','liberacion','transaturninos','lotes'].includes(id));
+    opc.hidden=!metodos.length;opc.innerHTML='<legend>Técnicas complementarias · activación opcional</legend>'+metodos.map(id=>'<label><input type="checkbox" data-metodo="'+id+'" '+(e.opcionales[id]?'checked':'')+'>'+escaparHTML(window.Escuelas.METODOS[id].nombre)+'</label>').join('');}
   /* El botón debe decir cuántas hojas trae el informe de ESTE perfil. */
   const bot = document.getElementById('descargaAvanzada');
   if(bot && typeof hojasDelInforme === 'function' && !bot.disabled){
@@ -5614,7 +5625,7 @@ function pintaBandaLectura(){
       <span><b>Escuela</b>${escaparHTML(e.nombrePerfil)}</span>
       <span><b>Zodiaco</b>${escaparHTML(e.nombreZodiaco)}</span>
       ${e.sideral && aya != null ? `<span><b>Ayanamsa</b>${gradoMinDe(aya)}</span>` : ''}
-      <span><b>Casas</b>${escaparHTML(sustituido ? casasReal.nombrePedido + ' → ' + e.nombreCasas : e.nombreCasas)}</span>
+      <span><b>Casas</b>${escaparHTML(!carta?.ang ? 'Sin hora conocida' : sustituido ? casasReal.nombrePedido + ' → ' + casasReal.nombre : e.nombreCasas)}</span>
       <span><b>Planetas</b>${e.poblacion === 'siete' ? 'Siete tradicionales' : 'Diez'}</span>
       <span><b>Regencias</b>${escaparHTML(e.regencias)}</span>
     </div>
@@ -5625,25 +5636,20 @@ function pintaBandaLectura(){
 
 /* Recalcula las casas con el sistema del marco y repinta todo. */
 function aplicaLectura(){
-  if(!window.Escuelas) return;
-  const e = lecturaResuelta();
-  window.Escuelas.guarda(lecturaActual);
-  if(carta && carta.ang){
-    zodiacoActivo = e.zodiaco;
-    const r = cuspides(e.casas, carta.ang);
-    carta.cusp = r.c;
-    carta.casasReal = r;
-    carta.datos.sistemaReal = r.sistema;
+  const e=lecturaResuelta();window.Escuelas.guarda(lecturaActual);zodiacoActivo=e.zodiaco;
+  if(carta){
+    const actualizada=window.NatalLectura.preparar(carta,lecturaActual);
+    // Preserve the full astronomical population for subsequent school changes.
+    carta={...actualizada,cuerpos:carta.cuerpos,aspectos:carta.aspectos};
+    _capaFirma=null;_ruedaFirma=null;
+    pintaCarta();pintaBarra();dibujaNatal();
   }
   sincronizaMandosEscuela();
-  try { pintaCarta(); } catch(err){}
-  try { pintaProfesional(); } catch(err){}
-  pintaBandaLectura();
-  pintaGobierno();
 }
 
 /* ---------- las seis tarjetas de gobierno ---------- */
 function pintaGobierno(){
+  if(window.NatalInformeUI)return;
   const hoja = document.getElementById('hojaProfesional');
   if(!hoja || !window.NatalGobierno || !carta) return;
   let caja = document.getElementById('gobiernoProfesional');
@@ -5867,4 +5873,3 @@ abrirFicha("marte");     // deja la ficha lista detrás de la portada, para quie
 </script>
 </body>
 </html>
-

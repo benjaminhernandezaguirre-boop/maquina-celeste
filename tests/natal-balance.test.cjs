@@ -4,6 +4,7 @@ const source=html.slice(html.indexOf('function datosBalance(){'),html.indexOf('l
 function render(lons,horaConocida=true){
  const node={innerHTML:''};
  const ctx={carta:{cuerpos:lons.map((lon,i)=>({lon,nombre:'Planeta '+i})),datos:{horaConocida}},mod360:x=>(x%360+360)%360,escaparHTML:s=>s,document:{getElementById:()=>node}};
+ ctx.cartaDelMarco=()=>ctx.carta;ctx.lonMostrada=ctx.mod360;
  vm.runInNewContext(source+';pintaBalance();',ctx);return node.innerHTML;
 }
 test('twelve signs distribute equally and each group conserves all bodies',()=>{
@@ -24,6 +25,7 @@ test('full-sheet balance paints nine bars and matching percentages within its re
  const texts=[],rects=[];
  const g={fillText:(text,x,y)=>texts.push({text,x,y}),fillRect:(...r)=>rects.push(r)};
  const ctx={carta:{cuerpos:Array.from({length:10},(_,i)=>({lon:i*30,nombre:'Planeta '+i})),datos:{horaConocida:false}},mod360:x=>(x%360+360)%360,PAPEL:{},rotuloHoja:(g,y,text,x)=>g.fillText(text,x,y)};
+ ctx.cartaDelMarco=()=>ctx.carta;ctx.lonMostrada=ctx.mod360;
  vm.createContext(ctx);vm.runInContext(source,ctx);ctx.pintaBalanceHoja(g,60,1780,1500);
  assert.equal(rects.length,18);
  for(const [x,y,w,h] of rects){assert.ok(x>=60&&x+w<=1560);assert.ok(y>=1780&&y+h<2430);}
