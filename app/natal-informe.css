@@ -31,3 +31,4 @@
 #cartaPanel.modo-avanzado .modo-carta{position:sticky;top:0;z-index:3;flex-shrink:0}
 [data-studio-theme="dark"] #cartaPanel .modo-carta,[data-studio-theme="dark"] #bandaLectura{background:#20283a;color:#eae6de;border-color:#536079}
 [data-studio-theme="dark"] #avanzadoCabecera span,[data-studio-theme="dark"] .lectura-ceja,[data-studio-theme="dark"] #bandaLectura b,[data-studio-theme="dark"] .lectura-seccion summary span{color:#e3c88e}
+[data-studio-theme="dark"] #bandaLectura .banda-encuadre,[data-studio-theme="dark"] #cartaPanel .modo-carta>span{color:#c3c8d1}
