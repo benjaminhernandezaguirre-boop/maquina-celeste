@@ -3,8 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Saturno · Astroplanetario</title>
+<title>Retorno de Saturno y tu línea de vida planetaria | Astroplanetario</title>
 <meta name="description" content="Línea de vida: retorno de Saturno, oposición de Urano, cuadratura de Neptuno y retornos nodales, fechados para una carta.">
+<link rel="canonical" href="https://astroplanetario.com/saturno.html">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_MX">
+<meta property="og:site_name" content="Astroplanetario">
+<meta property="og:title" content="Retorno de Saturno y tu línea de vida planetaria">
+<meta property="og:description" content="Las fechas de tus retornos y tránsitos generacionales, puestas sobre una sola línea de tiempo.">
+<meta property="og:url" content="https://astroplanetario.com/saturno.html">
+<meta property="og:image" content="https://astroplanetario.com/assets/planetas/saturno.webp">
+<meta name="twitter:card" content="summary_large_image">
+
 <meta name="theme-color" content="#02040b">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -64,6 +75,14 @@ ul.eventos li.proximo{background:#12100833;border-left:2px solid var(--gold);pad
 .pases{font:.62rem 'IBM Plex Mono',monospace;color:#7d7790}
 .aviso{color:#cdc6ba;font-style:italic;font-size:.9rem;border-left:2px solid #c9a96355;padding-left:.75rem;margin:.8rem 0 0}
 .footer-note{color:#7e7890;font-size:.78rem;line-height:1.6;border-top:1px solid var(--line);padding-top:1rem;margin-top:1.6rem}
+
+/* Firma del Instituto, común a todo el sitio */
+.firma-instituto{display:inline-block;margin-top:.35rem;font-size:.78rem;line-height:1.5;opacity:.85}
+.firma-instituto a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.pie-instituto{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.6rem 1.2rem;
+  width:min(1180px,calc(100% - 2rem));margin:2.5rem auto 2rem;padding-top:1.2rem;
+  border-top:1px solid currentColor;border-top-color:color-mix(in srgb,currentColor 18%,transparent);
+  font-size:.78rem;opacity:.8}
 </style>
 </head>
 <body>
@@ -97,7 +116,7 @@ ul.eventos li.proximo{background:#12100833;border-left:2px solid var(--gold);pad
   <p class="footer-note">
     Cada fecha se busca por cambio de signo y se afina por bisección hasta el minuto, sobre el mismo motor de efemérides del resto del proyecto.
     No incluye a Quirón: su órbita es inestable y el modelo aproximado que usamos aquí no lo sostiene con honradez. Las lecturas son simbólicas.
-  </p>
+  <br><span class="firma-instituto">Un proyecto del <a href="https://tarot-academy-theta.vercel.app/" target="_blank" rel="noopener">Instituto de Artes Esotéricas y Saberes Ancestrales</a> · Datos de ciudades: <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> · CC BY 4.0</span></p>
 </div>
 
 <script src="app/efemerides.js"></script>

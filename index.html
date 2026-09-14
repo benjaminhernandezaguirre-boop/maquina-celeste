@@ -37,6 +37,14 @@
 @media(max-width:760px){.brand{top:max(.45rem,env(safe-area-inset-top));width:96vw}.atajo{top:auto;right:auto;left:50%;transform:translateX(-50%);bottom:max(5.1rem,calc(3.6rem + env(safe-area-inset-bottom)));font-size:.52rem;padding:.4rem .85rem}.brand h1{font-size:clamp(1.3rem,6.9vw,2rem);white-space:nowrap;letter-spacing:.075em}.brand p{font-size:.76rem;margin-top:.18rem}.eyebrow{font-size:.4rem;letter-spacing:.24em}.stage{top:51%;width:100vw;height:min(535px,67vh)}.halo{top:44%;width:72%;height:31%}.orbit{top:44%;width:104%;height:36%}.zodiac{top:44%;width:111%;height:43%}.zodiac-sign{font-size:.58rem;color:rgba(224,191,117,.52)}.sun{top:44%;width:84px;height:84px}.sun::before{inset:-17px}.planet{top:44%;--size:54px}.mercury{--size:40px}.venus{--size:54px}.earth{--size:62px}.moon{--size:35px}.mars{--size:48px}.jupiter{--size:88px}.saturn{--size:76px}.uranus{--size:57px}.neptune{--size:57px}.pluto{--size:37px}.info{bottom:1.55rem;min-width:94vw}.info-name{font-size:1rem}.info-action{font-size:.6rem}.info-hint{display:none}.micro{display:none}.mobile-tip{display:block;width:90vw;bottom:max(.5rem,env(safe-area-inset-bottom));font-size:.52rem;letter-spacing:.08em;white-space:normal;text-align:center;line-height:1.5}.soon-card{padding:1.3rem 1.15rem}}
 @media(max-width:430px){.brand{width:98vw}.brand h1{font-size:clamp(1.15rem,7vw,1.65rem);letter-spacing:.055em}.eyebrow{font-size:.37rem;letter-spacing:.2em}.brand p{font-size:.72rem}.stage{top:50.5%;height:65vh}.orbit{width:112%;height:33%}.zodiac{width:120%;height:40%}.sun{width:78px;height:78px}.jupiter{--size:80px}.saturn{--size:70px}.info{bottom:1.9rem}.mobile-tip{bottom:max(.45rem,env(safe-area-inset-bottom));font-size:.48rem;width:92vw;line-height:1.45}}
 @media(prefers-reduced-motion:reduce){.sun::before,.planet.active,.loader .wheel{animation:none!important}}
+
+/* Firma del Instituto, común a todo el sitio */
+.firma-instituto{display:inline-block;margin-top:.35rem;font-size:.78rem;line-height:1.5;opacity:.85}
+.firma-instituto a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.pie-instituto{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.6rem 1.2rem;
+  width:min(1180px,calc(100% - 2rem));margin:2.5rem auto 2rem;padding-top:1.2rem;
+  border-top:1px solid currentColor;border-top-color:color-mix(in srgb,currentColor 18%,transparent);
+  font-size:.78rem;opacity:.8}
 </style>
 </head>
 <body>
@@ -61,10 +69,13 @@
 <div class="info"><div class="info-name" id="infoName">Tierra</div><div class="info-action" id="infoAction">Carta natal</div><div class="info-hint" id="infoHint">Clic para abrir · arrastra para explorar.</div></div>
 </div>
 <div class="micro">Arrastra para explorar · clic para abrir · Sol = Órbitas · Anillo = Zodiaco
-  <!-- Aquí va tu nombre y el de tu academia cuando quieras: <span class="cred">Academia · contacto</span> -->
-  <span class="cred">Texturas: <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noopener">Solar System Scope</a> · CC BY 4.0 · NASA/JPL</span></div>
+  <span class="cred">Un proyecto del <a href="https://tarot-academy-theta.vercel.app/" target="_blank" rel="noopener">Instituto de Artes Esotéricas y Saberes Ancestrales</a></span>
+  <span class="cred">Texturas: <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noopener">Solar System Scope</a> · CC BY 4.0 · NASA/JPL</span>
+  <span class="cred">Ciudades: <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> · CC BY 4.0</span></div>
 <div class="mobile-tip">Desliza por el fondo para explorar · toca un astro para abrir
-  <span class="cred">Texturas: <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noopener">Solar System Scope</a> · CC BY 4.0 · NASA/JPL</span></div>
+  <span class="cred">Un proyecto del <a href="https://tarot-academy-theta.vercel.app/" target="_blank" rel="noopener">Instituto de Artes Esotéricas y Saberes Ancestrales</a></span>
+  <span class="cred">Texturas: <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noopener">Solar System Scope</a> · CC BY 4.0 · NASA/JPL</span>
+  <span class="cred">Ciudades: <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> · CC BY 4.0</span></div>
 </section>
 <section class="soon" id="soon"><div class="soon-card"><div class="glyph" id="soonGlyph">✦</div><h2 id="soonTitle">Próximamente</h2><p id="soonText">Este astro tendrá su propia herramienta dentro de Astroplanetario.</p><button id="closeSoon">Volver al planetario</button></div></section>
 <section class="load" id="load"><div class="loader"><div class="mini">Astroplanetario</div><div class="wheel"></div><p>Abriendo el módulo…</p></div></section>

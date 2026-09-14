@@ -1,6 +1,6 @@
 # Astroplanetario · lo que falta
 
-Lista de trabajo al 13 de septiembre de 2026. Marca las casillas conforme avances.
+Lista de trabajo al 14 de septiembre de 2026. Marca las casillas conforme avances.
 El tamaño es orientativo: **chico** es una tarde, **mediano** son varios días, **grande** es un módulo entero.
 
 ---
@@ -10,6 +10,16 @@ El tamaño es orientativo: **chico** es una tarde, **mediano** son varios días,
 No hay errores visuales o de estructura conocidos con prioridad alta. El módulo Luna ya utiliza las
 doce ilustraciones zodiacales reales, reserva espacio para su ficha y obtiene las ciudades del motor
 compartido.
+
+## 1 bis. Mantenimiento · hecho el 14 sep 2026 (Claude)
+
+- [x] **Etiquetas de buscador en las seis páginas que faltaban.** 17 de 17 con
+      canonical, Open Graph y description. Títulos reescritos para búsqueda real.
+- [x] **Firma del Instituto en las 17 páginas**, más el pie del PDF.
+- [x] **Crédito de GeoNames**, que la licencia CC BY 4.0 exige y solo estaba en
+      un comentario del código.
+- [x] **Imágenes del zodiaco recomprimidas**: 3.76 MB → 2.57 MB, sin bajar de
+      resolución retina para el tamaño al que se muestran.
 
 ## 2. Las tres herramientas que más falta hacen
 

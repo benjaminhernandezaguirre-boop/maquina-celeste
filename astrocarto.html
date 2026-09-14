@@ -3,8 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Astrocartografía · Astroplanetario</title>
+<title>Astrocartografía: el mapa de tus líneas planetarias | Astroplanetario</title>
 <meta name="description" content="El mapa del mundo con las líneas de tus planetas: dónde cada uno sale, culmina, se pone o toca el fondo del cielo en el momento de tu nacimiento.">
+<link rel="canonical" href="https://astroplanetario.com/astrocarto.html">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_MX">
+<meta property="og:site_name" content="Astroplanetario">
+<meta property="og:title" content="Astrocartografía: el mapa de tus líneas planetarias">
+<meta property="og:description" content="Dibuja tus líneas AC, MC, DC e IC sobre el mundo y descubre qué planetas pasan por cada ciudad.">
+<meta property="og:url" content="https://astroplanetario.com/astrocarto.html">
+<meta property="og:image" content="https://astroplanetario.com/hero-cosmica.webp">
+<meta name="twitter:card" content="summary_large_image">
+
 <meta name="theme-color" content="#02040b">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -61,6 +72,14 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
 .leyenda{display:flex;flex-wrap:wrap;gap:.9rem;margin-top:.7rem;font:500 .6rem 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .leyenda span{display:inline-flex;align-items:center;gap:.4rem}
 .leyenda i{width:1.6rem;height:0;border-top-width:2px;border-top-color:#dfbd75;display:inline-block}
+
+/* Firma del Instituto, común a todo el sitio */
+.firma-instituto{display:inline-block;margin-top:.35rem;font-size:.78rem;line-height:1.5;opacity:.85}
+.firma-instituto a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.pie-instituto{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.6rem 1.2rem;
+  width:min(1180px,calc(100% - 2rem));margin:2.5rem auto 2rem;padding-top:1.2rem;
+  border-top:1px solid currentColor;border-top-color:color-mix(in srgb,currentColor 18%,transparent);
+  font-size:.78rem;opacity:.8}
 </style>
 <link rel="stylesheet" href="app/studio-theme.css">
 <script src="app/studio-theme.js"></script>
@@ -560,5 +579,7 @@ if(sel.options.length > 1){ sel.selectedIndex = 1; cargaGuardada(); }
 else { pintaTablaLugar("", 0, 0); pintaTablaLinea(); }
 })();
 </script>
+
+<footer class="pie-instituto"><span>Astroplanetario</span><span class="firma-instituto">Un proyecto del <a href="https://tarot-academy-theta.vercel.app/" target="_blank" rel="noopener">Instituto de Artes Esotéricas y Saberes Ancestrales</a></span> <span class="firma-instituto">Datos de ciudades: <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> · CC BY 4.0</span></footer>
 </body>
 </html>

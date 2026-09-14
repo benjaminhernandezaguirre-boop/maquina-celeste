@@ -3,7 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Luna · Astroplanetario</title>
+<title>Fases de la Luna, lunaciones y revolución lunar | Astroplanetario</title>
+<meta name="description" content="Fases lunares, lunaciones del mes, luna vacía de curso, revolución lunar y luna progresada, calculadas para tu carta y tu ciudad.">
+<link rel="canonical" href="https://astroplanetario.com/luna.html">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_MX">
+<meta property="og:site_name" content="Astroplanetario">
+<meta property="og:title" content="Fases de la Luna, lunaciones y revolución lunar">
+<meta property="og:description" content="El módulo lunar completo: fases, lunaciones, luna vacía de curso, revolución lunar y luna progresada.">
+<meta property="og:url" content="https://astroplanetario.com/luna.html">
+<meta property="og:image" content="https://astroplanetario.com/assets/planetas/luna.webp">
+<meta name="twitter:card" content="summary_large_image">
+
 <meta name="theme-color" content="#02040b">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,6 +29,14 @@
 .zodiac-current{position:absolute;right:0;top:.55rem;z-index:6;display:flex;align-items:center;gap:.7rem;min-width:170px;padding:.58rem .75rem;border:1px solid #dabb6f32;border-radius:10px;background:linear-gradient(145deg,#0b1020ed,#050812f0);box-shadow:0 14px 34px #0005,0 0 24px #dabb6f08;backdrop-filter:blur(12px)}
 .zodiac-current .zg{min-width:34px;text-align:center;color:var(--gold);font:500 1.55rem Cinzel,serif;text-shadow:0 0 18px #dfbd7566}.zodiac-current .zc{display:grid;gap:.05rem}.zodiac-current .zk{color:#817b8b;font:500 .49rem 'IBM Plex Mono',monospace;letter-spacing:.13em;text-transform:uppercase}.zodiac-current .zv{color:#eee5d7;font:500 .86rem Cinzel,serif;letter-spacing:.08em;text-transform:uppercase}.zodiac-current .zd{color:#b79e68;font:500 .56rem 'IBM Plex Mono',monospace;letter-spacing:.06em}
 @media(max-width:600px){.zodiac-current{position:static;width:max-content;max-width:100%;margin:0 auto .45rem;justify-content:center}.zodiac-current .zg{font-size:1.3rem}}
+
+/* Firma del Instituto, común a todo el sitio */
+.firma-instituto{display:inline-block;margin-top:.35rem;font-size:.78rem;line-height:1.5;opacity:.85}
+.firma-instituto a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.pie-instituto{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.6rem 1.2rem;
+  width:min(1180px,calc(100% - 2rem));margin:2.5rem auto 2rem;padding-top:1.2rem;
+  border-top:1px solid currentColor;border-top-color:color-mix(in srgb,currentColor 18%,transparent);
+  font-size:.78rem;opacity:.8}
 </style>
 </head>
 <body>
@@ -130,7 +150,7 @@
     </article>
   </div>
 </section>
-<p class="footer-note">Astroplanetario calcula estas herramientas localmente en tu navegador con un modelo astronómico aproximado coherente con el resto del proyecto. Para trabajos profesionales que exijan precisión de efeméride al segundo, eclipses exactos o fechas muy fuera de 1800–2050, conviene conectar después una efeméride de alta precisión como Swiss Ephemeris/JPL. Las interpretaciones astrológicas son simbólicas y no deben usarse como consejo médico.</p>
+<p class="footer-note">Astroplanetario calcula estas herramientas localmente en tu navegador con un modelo astronómico aproximado coherente con el resto del proyecto. Para trabajos profesionales que exijan precisión de efeméride al segundo, eclipses exactos o fechas muy fuera de 1800–2050, conviene conectar después una efeméride de alta precisión como Swiss Ephemeris/JPL. Las interpretaciones astrológicas son simbólicas y no deben usarse como consejo médico.<br><span class="firma-instituto">Un proyecto del <a href="https://tarot-academy-theta.vercel.app/" target="_blank" rel="noopener">Instituto de Artes Esotéricas y Saberes Ancestrales</a> · Datos de ciudades: <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> · CC BY 4.0</span></p>
 </main>
 </div>
 <script src="app/ciudades-buscador.js"></script><script src="app/efemerides.js"></script>

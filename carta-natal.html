@@ -55,6 +55,14 @@ html[data-studio-theme="dark"]{color-scheme:dark;--bg:#091323;--panel:#111f31;--
 .profesional-guia{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:2rem 0}.profesional-guia article{position:relative;border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:13px;background:var(--panel);padding:1.35rem}.profesional-guia .numero{color:var(--gold);font:500 .62rem var(--mono);letter-spacing:.14em}.profesional-guia h3{font:500 1.08rem var(--display);margin:.55rem 0}.profesional-guia p{color:var(--muted);font-size:.9rem;margin:.4rem 0}.profesional-guia strong{color:var(--text)}.formula{display:block;margin-top:.75rem;border-top:1px solid var(--line);padding-top:.65rem;color:var(--gold);font:500 .6rem/1.5 var(--mono);letter-spacing:.02em}.nota-metodo{max-width:850px;border-left:2px solid var(--gold);padding-left:1rem;color:var(--muted);font-size:.9rem}
 
 @media(max-width:820px){.profesional-guia{grid-template-columns:1fr}}
+
+/* Firma del Instituto, común a todo el sitio */
+.firma-instituto{display:inline-block;margin-top:.35rem;font-size:.78rem;line-height:1.5;opacity:.85}
+.firma-instituto a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.pie-instituto{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.6rem 1.2rem;
+  width:min(1180px,calc(100% - 2rem));margin:2.5rem auto 2rem;padding-top:1.2rem;
+  border-top:1px solid currentColor;border-top-color:color-mix(in srgb,currentColor 18%,transparent);
+  font-size:.78rem;opacity:.8}
 </style>
 </head>
 <body>
@@ -81,7 +89,7 @@ html[data-studio-theme="dark"]{color-scheme:dark;--bg:#091323;--panel:#111f31;--
 
   <section class="ancho temporada" aria-labelledby="temporadaTitulo">
     <div class="temporada-caja elemento-tierra estacion-verano" id="temporadaCaja">
-      <div class="temporada-signo"><img class="temporada-ilustracion" id="temporadaImagen" src="/assets/zodiaco/virgo-celestial.webp" alt="Ilustración celestial de Virgo como una doncella con trigo y flores" width="800" height="1200" loading="lazy"></div>
+      <div class="temporada-signo"><img class="temporada-ilustracion" id="temporadaImagen" src="/assets/zodiaco/virgo-celestial.webp" alt="Ilustración celestial de Virgo como una doncella con trigo y flores" width="740" height="1110" loading="lazy"></div>
       <div class="temporada-contenido">
         <p class="ceja">Temporada zodiacal</p>
         <div class="temporada-ambiente" aria-label="Elemento y estación actuales"><span class="elemento-sello"><i class="elemento-glifo" id="elementoGlifo" aria-hidden="true">❧</i><span id="elementoNombre">Tierra</span></span><span class="estacion-sello" id="temporadaEstacion">Verano · transición al otoño</span></div>
@@ -168,7 +176,7 @@ html[data-studio-theme="dark"]{color-scheme:dark;--bg:#091323;--panel:#111f31;--
 
   <section class="cierre"><p class="ceja">Tu mapa comienza aquí</p><h2>Calcula el cielo del momento en que naciste</h2><p>Introduce tus datos y recorre la carta a tu ritmo. Podrás guardar el resultado en este navegador y descargar una rueda, un resumen o el informe completo.</p><div class="acciones"><a class="boton principal" href="/astroplanetario.html?view=natal">Calcular mi carta natal gratis</a></div></section>
 </main>
-<footer class="ancho pie"><span>© Astroplanetario · Herramientas astrológicas interactivas</span><span><a href="/">Inicio</a> · <a href="/astrocarto.html">Astrocartografía</a></span></footer>
+<footer class="ancho pie"><span>© Astroplanetario · Herramientas astrológicas interactivas<span class="firma-instituto">Un proyecto del <a href="https://tarot-academy-theta.vercel.app/" target="_blank" rel="noopener">Instituto de Artes Esotéricas y Saberes Ancestrales</a></span> <span class="firma-instituto">Datos de ciudades: <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> · CC BY 4.0</span></span><span><a href="/">Inicio</a> · <a href="/astrocarto.html">Astrocartografía</a></span></footer>
 <script src="/app/efemerides.js"></script>
 <script>
 (()=>{

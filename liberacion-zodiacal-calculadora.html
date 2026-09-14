@@ -18,6 +18,14 @@
 @media(max-width:680px){body{font-size:17px}.ancho{width:calc(100% - 1.1rem)}.cabecera{height:60px}.nav a{display:none}.hero{padding:3.2rem 0 2rem}.hero:after{font-size:9rem}.fuente-panel,.config{grid-template-columns:1fr}.manual-grid{grid-template-columns:1fr}.manual-acciones .boton{width:100%}.fecha-estudio{grid-template-columns:1fr 105px}.resumen{grid-template-columns:1fr 1fr}.tablero{padding:.75rem}.rueda-tiempo{transform:scale(.82);margin-block:-2.2rem}.signo-nodo{transform:translate(-50%,-50%) rotate(var(--a)) translateY(-42vw) rotate(calc(-1*var(--a)))}.pila{grid-template-columns:1fr}.bloque-cab{display:block}.lectura-grid,.transiciones{grid-template-columns:1fr}.pie{display:block}.pie a{display:block;margin-top:.4rem}}
 @media(max-width:420px){.resumen{grid-template-columns:1fr}.fecha-estudio{grid-template-columns:1fr}.rueda-tiempo{transform:scale(.75);margin-block:-3.4rem}.signo-nodo{transform:translate(-50%,-50%) rotate(var(--a)) translateY(-43vw) rotate(calc(-1*var(--a)))}.lote-switch label{padding:.5rem}.lote-switch small{font-size:.65rem}.tabs{display:grid;grid-template-columns:1fr 1fr}.tab{padding:.55rem .35rem}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+
+/* Firma del Instituto, común a todo el sitio */
+.firma-instituto{display:inline-block;margin-top:.35rem;font-size:.78rem;line-height:1.5;opacity:.85}
+.firma-instituto a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.pie-instituto{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.6rem 1.2rem;
+  width:min(1180px,calc(100% - 2rem));margin:2.5rem auto 2rem;padding-top:1.2rem;
+  border-top:1px solid currentColor;border-top-color:color-mix(in srgb,currentColor 18%,transparent);
+  font-size:.78rem;opacity:.8}
 </style></head>
 <body><div class="fondo"></div>
 <header class="ancho cabecera"><a class="marca" href="/">Astroplanetario</a><nav class="nav"><a href="/liberacion-zodiacal">Guía de liberación</a><a href="/profecciones">Profecciones</a><a href="/lotes-arabigos">Lotes arábigos</a><button class="tema" id="themeToggle" type="button"></button></nav></header>
@@ -37,6 +45,6 @@
   <section class="bloque"><div class="bloque-cab"><div><p class="ceja">Alrededor de la fecha</p><h2>Transiciones cercanas</h2></div><p>Toca una transición para estudiarla.</p></div><div class="transiciones" id="transiciones"></div></section>
 </section>
 <aside class="metodo"><b>Criterio de cálculo.</b> La cronología utiliza zodiaco tropical, regencias tradicionales, lotes invertidos por secta, años ideales de 360 días y divisiones sucesivas de 30 días, 2½ días y 5 horas. Los signos angulares y culminantes se miden desde Fortuna. La página muestra interpretación simbólica y no garantiza acontecimientos concretos.</aside>
-</main><footer class="ancho pie"><span>Astroplanetario · Liberación zodiacal</span><a href="/liberacion-zodiacal">Volver a la guía</a></footer>
+</main><footer class="ancho pie"><span>Astroplanetario · Liberación zodiacal<span class="firma-instituto">Un proyecto del <a href="https://tarot-academy-theta.vercel.app/" target="_blank" rel="noopener">Instituto de Artes Esotéricas y Saberes Ancestrales</a></span> <span class="firma-instituto">Datos de ciudades: <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> · CC BY 4.0</span></span><a href="/liberacion-zodiacal">Volver a la guía</a></footer>
 <script src="/app/ciudades-buscador.js"></script><script src="/app/efemerides.js"></script><script src="/app/liberacion-zodiacal.js"></script><script src="/app/liberacion-zodiacal-ui.js"></script>
 </body></html>

@@ -3,8 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Mercurio · Astroplanetario</title>
+<title>Mercurio retrógrado: calendario de retrogradaciones y sombras | Astroplanetario</title>
 <meta name="description" content="Calendario de retrogradaciones de Mercurio: estaciones, periodos de sombra y qué toca de tu carta natal.">
+<link rel="canonical" href="https://astroplanetario.com/mercurio.html">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_MX">
+<meta property="og:site_name" content="Astroplanetario">
+<meta property="og:title" content="Mercurio retrógrado: calendario de retrogradaciones">
+<meta property="og:description" content="Fechas exactas de estaciones y sombras, y qué grados de tu carta natal recorre cada retrogradación.">
+<meta property="og:url" content="https://astroplanetario.com/mercurio.html">
+<meta property="og:image" content="https://astroplanetario.com/assets/planetas/mercurio.webp">
+<meta name="twitter:card" content="summary_large_image">
+
 <meta name="theme-color" content="#02040b">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -71,6 +82,14 @@ ul.toques .gl{font-size:1.1rem;color:var(--gold);min-width:1.4rem;text-align:cen
 ul.toques .p{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--muted)}
 .footer-note{color:#7e7890;font-size:.78rem;line-height:1.6;border-top:1px solid var(--line);padding-top:1rem;margin-top:1.6rem}
 .aviso{color:#cdc6ba;font-style:italic;font-size:.9rem;border-left:2px solid #c9a96355;padding-left:.75rem;margin:.6rem 0 0}
+
+/* Firma del Instituto, común a todo el sitio */
+.firma-instituto{display:inline-block;margin-top:.35rem;font-size:.78rem;line-height:1.5;opacity:.85}
+.firma-instituto a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.pie-instituto{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.6rem 1.2rem;
+  width:min(1180px,calc(100% - 2rem));margin:2.5rem auto 2rem;padding-top:1.2rem;
+  border-top:1px solid currentColor;border-top-color:color-mix(in srgb,currentColor 18%,transparent);
+  font-size:.78rem;opacity:.8}
 </style>
 </head>
 <body>
@@ -125,7 +144,7 @@ ul.toques .p{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--m
     Las estaciones se calculan buscando el instante en que la velocidad de Mercurio cambia de signo, afinado por bisección hasta el minuto.
     Astroplanetario calcula todo en tu navegador con un modelo astronómico aproximado, coherente con el resto del proyecto: suficiente para fechas y grados,
     no para trabajos que exijan precisión al segundo. Las lecturas astrológicas son simbólicas.
-  </p>
+  <br><span class="firma-instituto">Un proyecto del <a href="https://tarot-academy-theta.vercel.app/" target="_blank" rel="noopener">Instituto de Artes Esotéricas y Saberes Ancestrales</a> · Datos de ciudades: <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> · CC BY 4.0</span></p>
 </div>
 
 <script src="app/planetas.js?v=planet-textures-2-20260912"></script>
