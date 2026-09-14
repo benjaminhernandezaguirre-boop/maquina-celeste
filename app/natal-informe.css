@@ -24,7 +24,8 @@
 #avanzadoCabecera .escuela-libre .escuela-campo{min-width:0}
 #avanzadoCabecera .escuela-opcionales{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
 #avanzadoCabecera .escuela-opcionales[hidden]{display:none}
-.lectura-cuadrantes{margin:1rem;min-height:18rem}
+.lectura-cuadrantes{margin:1rem;min-height:18rem;aspect-ratio:auto;grid-template-columns:repeat(2,minmax(0,1fr))}
+.lectura-cuadrantes .cuadrante{min-width:0;white-space:normal;overflow-wrap:anywhere}
 #cartaPanel.modo-avanzado{overflow-y:auto;overflow-x:hidden}
 #cartaPanel.modo-avanzado>.pest-fila{flex-shrink:0;min-width:0;width:100%}
 #cartaPanel.modo-avanzado>.hoja{flex:0 0 auto;overflow:visible}
