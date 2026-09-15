@@ -2622,8 +2622,8 @@ const ASPECTOS = [
   {n:"Oposición",  g:"☍︎", a:180, orbe:8, cl:"a-rojo", mayor:true},
   {n:"Trígono",    g:"△",       a:120, orbe:7, cl:"a-azul", mayor:true},
   {n:"Cuadratura", g:"□",       a:90,  orbe:7, cl:"a-rojo", mayor:true},
-  {n:"Sextil",     g:"✳",       a:60,  orbe:5, cl:"a-azul", mayor:true},
-  {n:"Quincuncio", g:"⚻",       a:150, orbe:2.5,cl:"a-lila",mayor:false},
+  {n:"Sextil",     g:"✳",       a:60,  orbe:5, cl:"a-violeta", mayor:true},
+  {n:"Quincuncio", g:"⚻",       a:150, orbe:2.5,cl:"a-verde",mayor:false},
   {n:"Semisextil", g:"⚺",       a:30,  orbe:2, cl:"a-lila", mayor:false}
 ];
 function calculaAspectos(lista, factor){
@@ -2706,14 +2706,14 @@ const PAPEL_CLARO = {
   fondo:"#F4F0E6", borde:"#CFC7B4", ticks:"#00000026", casa:"#00000018", eje:"#A8801F",
   tinta:"#22212B", suave:"#6B6A78", acento:"#8A6A22", caja:"#F4F0E6E6",
   el:{fuego:"#A63116", tierra:"#3C611F", aire:"#364E85", agua:"#155B87"},
-  asp:{"a-oro":"#9A7420AA","a-rojo":"#C0472AAA","a-azul":"#2F5F9EAA","a-lila":"#6B57A888"}
+  asp:{"a-oro":"#9A7420AA","a-rojo":"#C0472AAA","a-azul":"#2F5F9EAA","a-lila":"#6B57A888","a-verde":"#21754BCC","a-violeta":"#8851B8CC"}
 };
 
 const PAPEL_OSCURO = {
  fondo:"#0b1220",borde:"#40516a",ticks:"#d6e1ee55",casa:"#d6e1ee30",eje:"#d5b779",
  tinta:"#e9edf3",suave:"#a8b5c7",acento:"#d5b779",caja:"#0b1220ee",
  el:{fuego:"#edaa8b",tierra:"#b5c68e",aire:"#a4bddf",agua:"#8ec5dc"},
- asp:{"a-oro":"#ddc28ccc","a-rojo":"#eb917ecc","a-azul":"#83baf0cc","a-lila":"#bdabdfaa"}
+ asp:{"a-oro":"#ddc28ccc","a-rojo":"#eb917ecc","a-azul":"#83baf0cc","a-lila":"#bdabdfaa","a-verde":"#75D6A0DD","a-violeta":"#D0A0FFDD"}
 };
 let PAPEL = document.documentElement.dataset.studioTheme === "light" ? PAPEL_CLARO : PAPEL_OSCURO;
 window.addEventListener("astro-theme-change",()=>{ PAPEL = document.documentElement.dataset.studioTheme === "light" ? PAPEL_CLARO : PAPEL_OSCURO; });
@@ -2994,7 +2994,7 @@ function pintaRueda(g, cx, cy, R, vivo, capa, ch){
     }
     for(const c of capa.cerca){
       const a1 = aPant(mod360(c.P.lon + capa.arco)), a2 = aPant(c.N.lon);
-      g.strokeStyle = TINTA_ASP[c.asp.cl] + "BB"; g.lineWidth = 1.5;
+      g.strokeStyle = PAPEL.asp[c.asp.cl]; g.lineWidth = 1.5;
       g.beginPath();
       g.moveTo(cx+Math.cos(a1)*rAsp, cy+Math.sin(a1)*rAsp);
       g.lineTo(cx+Math.cos(a2)*rAsp, cy+Math.sin(a2)*rAsp);
@@ -3009,7 +3009,7 @@ function pintaRueda(g, cx, cy, R, vivo, capa, ch){
 
 /* --- exportar la carta como imagen --- */
 const NOMBRE_SISTEMA = {placidio:"Plácidus", signos:"signos enteros", igual:"casas iguales", porfirio:"Porfirio",alcabitius:"Alcabitius",regiomontano:"Regiomontanus"};
-const TINTA_ASP = {"a-oro":"#9A7420","a-rojo":"#C0472A","a-azul":"#2F5F9E","a-lila":"#6B57A8"};
+const TINTA_ASP = {"a-oro":"#9A7420","a-rojo":"#C0472A","a-azul":"#2F5F9E","a-lila":"#6B57A8","a-verde":"#21754B","a-violeta":"#8851B8"};
 
 function filaHoja(g, y, glifo, nombre, texto, casa, x, ancho){
   g.textAlign = "center"; g.textBaseline = "middle"; g.fillStyle = PAPEL.acento;
@@ -4044,10 +4044,13 @@ const CLAVES_ATACIR = [
 const TODAS_CLAVES = CLAVES_ATACIR.flatMap(g => g.claves);
 const ANG_ATACIR = [
   {n:"Conjunción", g:"☌︎", a:0,   cl:"a-oro"},
-  {n:"Sextil",     g:"✳",       a:60,  cl:"a-azul"},
+  {n:"Sextil",     g:"✳",       a:60,  cl:"a-violeta"},
   {n:"Cuadratura", g:"□",       a:90,  cl:"a-rojo"},
   {n:"Trígono",    g:"△",       a:120, cl:"a-azul"},
   {n:"Oposición",  g:"☍︎", a:180, cl:"a-rojo"}
+];
+const ANG_CONTACTOS_ATACIR = [...ANG_ATACIR,
+  {n:"Quincuncio", g:"⚻", a:150, cl:"a-verde"}
 ];
 const ORBE_ATACIR = 1;                       // grados de orbe para "contacto activo"
 
@@ -4097,14 +4100,15 @@ function contactosAtacir(clave, arcoDesde, arcoHasta){
   if(arcoHasta - arcoDesde > 1080) arcoHasta = arcoDesde + 1080;   // dos vueltas y media, tope
   for(const P of pts) for(const N of pts){
     if(P.id === N.id) continue;
-    for(const asp of ANG_ATACIR){
+    for(const asp of ANG_CONTACTOS_ATACIR){
       const desvios = (asp.a === 0 || asp.a === 180) ? [asp.a] : [asp.a, -asp.a];
       for(const dv of desvios){
         const base = mod360(N.lon + dv - P.lon);
         const k0 = Math.floor((arcoDesde - base)/360), k1 = Math.ceil((arcoHasta - base)/360);
         for(let k = k0; k <= k1; k++){
           const arco = base + 360*k;
-          if(arco < arcoDesde || arco > arcoHasta) continue;
+          // El paso fecha→arco puede añadir unas billonésimas tras varias vueltas.
+          if(arco < arcoDesde - 1e-8 || arco > arcoHasta + 1e-8) continue;
           out.push({P, N, asp, arco, ms: msDeArco(arco, clave)});
         }
       }
@@ -4140,11 +4144,21 @@ const arcoTexto = arco => {
   return `${s}${m === 60 ? g+1 : g}° ${String(m === 60 ? 0 : m).padStart(2,"0")}′`;
 };
 
+/* Un paso es una fecha del calendario local, también al cambiar de mes o de horario. */
+function avanzarFechaAtacir(ms, dias){
+  const fecha = new Date(ms);
+  fecha.setDate(fecha.getDate() + dias);
+  return fecha.getTime();
+}
 function pintaAtacir(){
   if(!carta) return;
+  const foco = document.getElementById("hojaAtacir").contains(document.activeElement) ? document.activeElement.id : null;
+  const hoja = document.getElementById("hojaAtacir");
+  const guiaComparada = hoja.querySelector('#guiaComparada'), scrollAntes = hoja.scrollTop;
   const capa = capaAtacir();
   if(!capa) return;
   const {clave, fecha, arco, movidos, cerca} = capa;
+  const pasoDiario = ["dia1", "d360", "dia2"].includes(clave.id);
   const proximos = contactosAtacir(clave, arco + 0.0001, arco + Math.min(porAnio(clave)*12, 720)).slice(0, 30);
   const fechaISO = new Date(fecha - new Date(fecha).getTimezoneOffset()*60000).toISOString().slice(0,10);
 
@@ -4175,6 +4189,8 @@ function pintaAtacir(){
         <input id="atFecha" type="date" value="${fechaISO}">
       </div>
       <div class="acciones" style="margin:0">
+        ${pasoDiario ? `<button type="button" class="secundario at-dia" id="atDiaMenos" aria-label="Retroceder un día">− 1 día</button>
+        <button type="button" class="secundario at-dia" id="atDiaMas" aria-label="Avanzar un día">+ 1 día</button>` : ""}
         <button class="secundario" id="atHoy">Hoy</button>
         <button class="secundario" id="atMenos">− 1 año</button>
         <button class="secundario" id="atMas">+ 1 año</button>
@@ -4188,6 +4204,9 @@ function pintaAtacir(){
       <div><span class="k">Vuelta completa</span><span class="v">${vueltaAnios(clave) >= 1 ? Math.round(vueltaAnios(clave)) + " años" : Math.round(vueltaAnios(clave)*365.2422) + " días"}</span></div>
     </div>
 
+    <ul class="leyenda-aspectos" aria-label="Colores y ángulos de los aspectos">
+      ${ANG_CONTACTOS_ATACIR.map(a => `<li class="${a.cl}"><span aria-hidden="true">${a.g}</span> ${a.n} · ${a.a}°</li>`).join("")}
+    </ul>
     <div class="rotulo">Contactos dentro del orbe · ±${ORBE_ATACIR}°</div>
     ${cerca.length
       ? `<ul class="aspectos">${cerca.map(linea).join("")}</ul>`
@@ -4210,6 +4229,10 @@ function pintaAtacir(){
     </tbody></table>
     <p class="aviso" style="margin-top:.9rem">La rueda muestra la carta natal por dentro y el atacir por fuera. Las líneas del centro son los contactos en curso.</p>`;
 
+  // Conserva el espacio de la guía para que el botón no salte al repintar.
+  if(guiaComparada) hoja.prepend(guiaComparada);
+  hoja.scrollTop = scrollAntes;
+  if(foco) document.getElementById(foco)?.focus({preventScroll:true});
   const sel = document.getElementById("atClave");
   sel.addEventListener("change", () => {
     estadoAtacir.clave = sel.value;
@@ -4225,6 +4248,12 @@ function pintaAtacir(){
     const [a, m, d] = e.target.value.split("-").map(Number);
     if(a) { estadoAtacir.fecha = new Date(a, m-1, d, 12).getTime(); pintaAtacir(); }
   });
+  for(const [id, paso] of [["atDiaMenos", -1], ["atDiaMas", 1]]){
+    document.getElementById(id)?.addEventListener("click", () => {
+      estadoAtacir.fecha = avanzarFechaAtacir(estadoAtacir.fecha ?? Date.now(), paso);
+      pintaAtacir();
+    });
+  }
   document.getElementById("atHoy").addEventListener("click", () => { estadoAtacir.fecha = Date.now(); pintaAtacir(); });
   document.getElementById("atMenos").addEventListener("click", () => { estadoAtacir.fecha = (estadoAtacir.fecha || Date.now()) - 365.2422*86400000; pintaAtacir(); });
   document.getElementById("atMas").addEventListener("click", () => { estadoAtacir.fecha = (estadoAtacir.fecha || Date.now()) + 365.2422*86400000; pintaAtacir(); });

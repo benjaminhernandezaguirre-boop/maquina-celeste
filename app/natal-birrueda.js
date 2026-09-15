@@ -132,7 +132,7 @@
       tinta:p.tinta || (oscuro ? '#E9EDF3' : '#22212B'),
       suave:p.suave || (oscuro ? '#A8B5C7' : '#6B6A78'),
       elementos:p.el || (oscuro ? {fuego:'#EDAA8B',tierra:'#B5C68E',aire:'#A4BDDF',agua:'#8EC5DC'} : {fuego:'#A63116',tierra:'#3C611F',aire:'#364E85',agua:'#155B87'}),
-      aspectos:p.asp || {'a-oro':'#AA8430','a-rojo':'#CA6249','a-azul':'#5687BF','a-lila':'#967DBC'}
+      aspectos:p.asp || {'a-oro':'#AA8430','a-rojo':'#CA6249','a-azul':'#5687BF','a-lila':'#967DBC','a-verde':'#21754B','a-violeta':'#8851B8'}
     };
     const pos = (lon,r)=>punto(lon,r,geo.cx,geo.cy,asc);
     const linea = (a,b)=>{g.beginPath(); g.moveTo(a.x,a.y); g.lineTo(b.x,b.y); g.stroke();};
