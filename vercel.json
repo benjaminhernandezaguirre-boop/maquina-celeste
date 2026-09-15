@@ -412,5 +412,11 @@
         }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/ciudades.js": {
+      "includeFiles": "app/datos/ciudades-*.json",
+      "maxDuration": 10
+    }
+  }
 }

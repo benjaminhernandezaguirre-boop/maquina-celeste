@@ -4,6 +4,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 const assert=require('node:assert/strict');
 const {test}=require('node:test');
+const {createHash,webcrypto}=require('node:crypto');
 const lee=n=>fs.readFileSync(path.join(__dirname,'../app/',n),'utf8');
 const turno=()=>new Promise(resolve=>setImmediate(resolve));
 const diferida=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return{promise,resolve,reject};};
@@ -13,10 +14,13 @@ const resuelta=c=>({ciudad:c,ambiguas:false,coincidencias:[c],total:1});
 function facade(){
   const workers=[],timers=new Map();let reloj=0;
   class Worker{
-    constructor(url){this.url=String(url);this.messages=[];this.terminated=false;workers.push(this);}
+    constructor(url){this.url=String(url);this.messages=[];this.terminated=false;this.versions=new Map();workers.push(this);}
     postMessage(message){this.messages.push(message);}
     terminate(){this.terminated=true;}
-    respond(message,resultado,error){this.onmessage({data:{id:message.id,resultado,error}});}
+    respond(message,resultado,error,version=VERSION_WORKER,revision){
+      if(!this.versions.has(version))this.versions.set(version,this.versions.size+1);
+      this.onmessage({data:{id:message.id,resultado,error,version,revision:revision??this.versions.get(version)}});
+    }
   }
   const c={console,URL,Worker,document:{baseURI:'https://prueba.test/carta-natal',currentScript:{src:'https://prueba.test/app/ciudades.js?v=20260915'}},
     setTimeout:(fn,ms)=>{const id=++reloj;timers.set(id,{fn,ms});return id;},clearTimeout:id=>timers.delete(id)};
@@ -120,38 +124,211 @@ test('el resultado seleccionado se resuelve en caché y el historial visible tie
   assert.equal(timers.size,0);
 });
 
+test('cambiar de SHA vacía todas las cachés de la fachada y descarta respuestas tardías',async()=>{
+  const {C,workers}=facade(),lista=C.lista,nueva='b'.repeat(64);
+  const inicio=C.carga(),w=workers[0];w.respond(w.messages[0],{total:1});await inicio;
+  const recordada=C.resolverAsync('Ciudad');await turno();
+  w.respond(w.messages.at(-1),resuelta(ciudad(1)));await recordada;
+  assert.equal(C.resolver('Ciudad').ciudad.id,1);assert.equal(C.lista.length,1);
+  const vieja=C.buscar('Pendiente'),rechazo=assert.rejects(vieja,/actualizado/),actual=C.buscar('Nueva');await turno();
+  const pendiente=w.messages.find(m=>m.texto==='Pendiente'),reciente=w.messages.find(m=>m.texto==='Nueva');
+  w.respond(reciente,[ciudad(2)],undefined,nueva);await actual;
+  assert.equal(C.lista,lista);assert.deepEqual(Array.from(C.lista,c=>c.id),[2]);
+  assert.equal(C.resolver('Ciudad').ciudad,null);assert.equal(C.resolver(ciudad(1).etiqueta).ciudad,null);
+  w.respond(pendiente,[ciudad(1)],undefined,VERSION_WORKER);await rechazo;
+  assert.deepEqual(Array.from(C.lista,c=>c.id),[2]);
+  const repetida=C.resolverAsync('Ciudad');await turno();
+  assert.equal(w.messages.at(-1).tipo,'carga');w.respond(w.messages.at(-1),{total:2},undefined,nueva);await turno();
+  const ambigua={ciudad:null,ambiguas:true,coincidencias:[ciudad(2),ciudad(3)],total:2};
+  w.respond(w.messages.at(-1),ambigua,undefined,nueva);assert.equal((await repetida).ambiguas,true);
+  assert.equal((await C.resolverAsync('Ciudad')).total,2,'no conserva la antigua ciudad única');
+});
+
+test('la fachada no recuerda respuestas cuya versión cambia antes de continuar la promesa',async()=>{
+  const {C,workers}=facade(),inicio=C.carga(),w=workers[0];w.respond(w.messages[0],{total:2});await inicio;
+  const vieja=C.buscar('Vieja'),rechazo=assert.rejects(vieja,/actualizado/),nueva=C.buscar('Nueva');await turno();
+  w.respond(w.messages.find(m=>m.texto==='Vieja'),[ciudad(1)]);
+  w.respond(w.messages.find(m=>m.texto==='Nueva'),[ciudad(2)],undefined,'b'.repeat(64));
+  await Promise.all([rechazo,nueva]);assert.deepEqual(Array.from(C.lista,c=>c.id),[2]);
+});
+
 function workerReal(){
   const fetches=[],messages=[],imports=[];
-  const ctx={console,CiudadesMotor:require('../app/ciudades-motor.js'),fetch:(url,options)=>{const d=diferida();fetches.push({url,options,...d});return d.promise;},
-    importScripts:url=>imports.push(url),postMessage:m=>messages.push(m)};
+  const ctx={console,crypto:webcrypto,TextDecoder,CiudadesMotor:require('../app/ciudades-motor.js'),fetch:(url,options)=>{const d=diferida();fetches.push({url,options,...d});return d.promise;},
+    importScripts:url=>{imports.push(url);if(url.startsWith('astrocartografia'))ctx.AstroGeo=require('../app/astrocartografia.js');},postMessage:m=>messages.push(m)};
   ctx.self=ctx;vm.createContext(ctx);vm.runInContext(lee('ciudades-worker.js'),ctx);
   return{ctx,fetches,messages,imports};
 }
+const VERSION_WORKER='a'.repeat(64);
+const manifiestoWorker=(extra={})=>({archivo:'ciudades-2026-09-15.json',version:'2026-09-15',sha256:VERSION_WORKER,total:235810,fuente:'GeoNames cities500',zonas:394,...extra});
+const jsonRespuesta=datos=>({ok:true,json:async()=>datos});
+const bytesDatos=datos=>Buffer.from(JSON.stringify(datos));
+const hashDatos=datos=>createHash('sha256').update(bytesDatos(datos)).digest('hex');
+const archivoRespuesta=datos=>({ok:true,arrayBuffer:async()=>{const b=bytesDatos(datos);return b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength);}});
+const apiRespuesta=(resultado,version=VERSION_WORKER)=>jsonRespuesta({version,resultado});
+async function preparaWorker(extra={}){
+  const w=workerReal(),carga=w.ctx.onmessage({data:{id:0,tipo:'carga'}});
+  w.fetches[0].resolve(jsonRespuesta(manifiestoWorker(extra)));await carga;return w;
+}
 
-test('el Worker real comparte manifiesto y catálogo, y reconsulta la versión tras una descarga fallida',async()=>{
+test('el Worker carga solo metadatos y comparte consultas normalizadas sin descargar el catálogo',async()=>{
   const {ctx,fetches,messages,imports}=workerReal();
-  const datos={regiones:['Nepal (NP)'],zonas:['Asia/Kathmandu'],filas:[[1,'Kathmandu',0,27.7,85.3,0,1000,'']]};
-  const a=ctx.onmessage({data:{id:1,tipo:'carga'}}),b=ctx.onmessage({data:{id:2,tipo:'buscar',texto:'Kath'}});
+  const a=ctx.onmessage({data:{id:1,tipo:'carga'}}),b=ctx.onmessage({data:{id:2,tipo:'buscar',texto:'  São—PAULO '}}),
+    duplicada=ctx.onmessage({data:{id:3,tipo:'buscar',texto:'sao paulo'}});
   assert.equal(fetches.length,1);
   assert.equal(fetches[0].url,'datos/ciudades-manifest.json');
   assert.equal(fetches[0].options.cache,'no-cache','el manifiesto se revalida para descubrir actualizaciones');
-  fetches[0].resolve({ok:true,json:async()=>({archivo:'ciudades-2026-09-15.json'})});await turno();
-  assert.equal(fetches.length,2,'las consultas paralelas comparten una sola descarga de datos');
-  assert.equal(fetches[1].url,'datos/ciudades-2026-09-15.json');
-  fetches[1].resolve({ok:false});await Promise.all([a,b]);
-  assert.equal(messages.length,2);assert.ok(messages.every(m=>/descargar/.test(m.error)));
-  const c=ctx.onmessage({data:{id:3,tipo:'resolver',texto:'Kathmandu'}}),d=ctx.onmessage({data:{id:4,tipo:'buscar',texto:'Kath'}});
-  assert.equal(fetches.length,3);assert.equal(fetches[2].url,'datos/ciudades-manifest.json');
-  assert.equal(fetches[2].options.cache,'no-cache');
-  // Otra fecha se sirve sin modificar ciudades-worker.js.
-  fetches[2].resolve({ok:true,json:async()=>({archivo:'ciudades-2026-10-01.json'})});await turno();
-  assert.equal(fetches.length,4);assert.equal(fetches[3].url,'datos/ciudades-2026-10-01.json');
-  fetches[3].resolve({ok:true,json:async()=>datos});await Promise.all([c,d]);
-  assert.equal(messages.find(m=>m.id===3).resultado.ciudad.tz,'Asia/Kathmandu');
-  assert.equal(messages.find(m=>m.id===4).resultado[0].id,1);
-  await ctx.onmessage({data:{id:5,tipo:'carga'}});
-  assert.equal(fetches.length,4,'el motor cargado se reutiliza durante la misma sesión');
+  fetches[0].resolve(jsonRespuesta(manifiestoWorker()));await turno();
+  assert.equal(fetches.length,2,'consultas equivalentes comparten la misma petición');
+  const url=new URL(fetches[1].url,'https://prueba.test');
+  assert.equal(url.pathname,'/api/ciudades');assert.equal(url.searchParams.get('tipo'),'buscar');
+  assert.equal(url.searchParams.get('q'),'sao paulo');assert.equal(url.searchParams.get('v'),VERSION_WORKER);
+  fetches[1].resolve(apiRespuesta([ciudad(1)]));await Promise.all([a,b,duplicada]);
+  assert.equal(messages.find(m=>m.id===1).resultado.total,235810);
+  assert.deepEqual(messages.find(m=>m.id===2).resultado,messages.find(m=>m.id===3).resultado);
+  await ctx.onmessage({data:{id:4,tipo:'buscar',texto:'SÃO PAULO'}});
+  assert.equal(fetches.length,2,'la misma búsqueda usa caché después de completarse');
+  const corta=ctx.onmessage({data:{id:5,tipo:'buscar',texto:'北'}});await turno();
+  assert.equal(new URL(fetches[2].url,'https://prueba.test').searchParams.get('q'),'北','se conserva Unicode y mínimo de un carácter');
+  fetches[2].resolve(apiRespuesta([]));await corta;
+  assert.ok(fetches.every(f=>!/^datos\/ciudades-\d/.test(f.url)));
   assert.equal(imports.filter(url=>url.startsWith('ciudades-motor')).length,1);
+  assert.ok(!imports.some(url=>url.startsWith('astrocartografia')));
+});
+
+test('el Worker conserva la ambigüedad mundial aunque transfiera solo cuarenta coincidencias',async()=>{
+  const w=await preparaWorker(),resultado={ciudad:null,ambiguas:true,coincidencias:Array.from({length:40},(_,i)=>ciudad(i+1)),total:127};
+  const a=w.ctx.onmessage({data:{id:1,tipo:'resolver',texto:'San José'}}),b=w.ctx.onmessage({data:{id:2,tipo:'resolver',texto:'SAN JOSE'}});await turno();
+  assert.equal(w.fetches.length,2);w.fetches[1].resolve(apiRespuesta(resultado));await Promise.all([a,b]);
+  assert.deepEqual(w.messages.find(m=>m.id===1).resultado,resultado);
+  await w.ctx.onmessage({data:{id:3,tipo:'resolver',texto:'San José'}});
+  assert.equal(w.fetches.length,2);assert.equal(w.messages.at(-1).resultado.total,127);
+});
+
+test('fallar la API permite reintentar y nunca activa la descarga mundial como alternativa',async()=>{
+  const w=await preparaWorker();
+  for(const respuesta of [{ok:false,status:503},{ok:true,json:async()=>{throw Error('JSON inválido');}}]){
+    const a=w.ctx.onmessage({data:{id:1,tipo:'buscar',texto:'Ciudad'}}),b=w.ctx.onmessage({data:{id:2,tipo:'buscar',texto:'Ciudad'}});await turno();
+    w.fetches.at(-1).resolve(respuesta);await Promise.all([a,b]);
+    assert.ok(w.messages.slice(-2).every(m=>m.error));
+  }
+  const retry=w.ctx.onmessage({data:{id:3,tipo:'buscar',texto:'Ciudad'}});await turno();
+  w.fetches.at(-1).resolve(apiRespuesta([ciudad(1)]));await retry;
+  assert.equal(w.messages.at(-1).resultado[0].id,1);
+  assert.equal(w.fetches.filter(f=>f.url==='datos/ciudades-manifest.json').length,1);
+  assert.ok(w.fetches.every(f=>f.url.includes('manifest')||f.url.startsWith('/api/ciudades?')));
+});
+
+test('el Worker rechaza respuestas API con versión, identidad o ambigüedad inválidas',async()=>{
+  const casos=[
+    ['buscar',{version:'b'.repeat(64),resultado:[ciudad(1)]}],
+    ['buscar',{version:VERSION_WORKER,resultado:Array.from({length:41},(_,i)=>ciudad(i+1))}],
+    ['buscar',{version:VERSION_WORKER,resultado:[{...ciudad(1),lat:91}]}],
+    ['buscar',{version:VERSION_WORKER,resultado:[ciudad(1),ciudad(1)]}],
+    ['resolver',{version:VERSION_WORKER,resultado:{ciudad:ciudad(1),ambiguas:false,coincidencias:[ciudad(1)],total:2}}],
+    ['resolver',{version:VERSION_WORKER,resultado:{ciudad:ciudad(2),ambiguas:false,coincidencias:[ciudad(1)],total:1}}],
+    ['resolver',{version:VERSION_WORKER,resultado:null}]
+  ];
+  for(const [tipo,respuesta] of casos){
+    const w=await preparaWorker(),consulta=w.ctx.onmessage({data:{id:1,tipo,texto:'Ciudad'}});await turno();
+    w.fetches[1].resolve(jsonRespuesta(respuesta));await consulta;
+    assert.match(w.messages.at(-1).error,/respuesta.*no es válida/);
+    assert.equal(w.fetches.length,2);
+  }
+});
+
+test('dos respuestas 409 comparten la actualización y reintentan una vez con la nueva versión',async()=>{
+  const w=await preparaWorker(),nueva='b'.repeat(64);
+  const a=w.ctx.onmessage({data:{id:1,tipo:'buscar',texto:'Madrid'}}),b=w.ctx.onmessage({data:{id:2,tipo:'resolver',texto:'Córdoba'}});await turno();
+  w.fetches[1].resolve({ok:false,status:409});w.fetches[2].resolve({ok:false,status:409});await turno();
+  assert.equal(w.fetches.length,4);assert.equal(w.fetches[3].url,'datos/ciudades-manifest.json');
+  assert.equal(w.fetches[3].options.cache,'no-cache');
+  w.fetches[3].resolve(jsonRespuesta(manifiestoWorker({sha256:nueva,archivo:'ciudades-2026-10-01.json',version:'2026-10-01'})));await turno();
+  assert.equal(w.fetches.length,6);
+  for(const f of w.fetches.slice(4)){
+    const u=new URL(f.url,'https://prueba.test');assert.equal(u.searchParams.get('v'),nueva);
+    f.resolve(apiRespuesta(u.searchParams.get('tipo')==='buscar'?[ciudad(1)]:resuelta(ciudad(2)),nueva));
+  }
+  await Promise.all([a,b]);assert.ok(w.messages.slice(-2).every(m=>!m.error));
+  await w.ctx.onmessage({data:{id:3,tipo:'buscar',texto:'Madrid'}});
+  assert.equal(w.fetches.length,6,'la respuesta reintentada se guarda bajo la nueva versión');
+  const agotada=w.ctx.onmessage({data:{id:4,tipo:'buscar',texto:'Otra'}});await turno();
+  w.fetches[6].resolve({ok:false,status:409});await turno();
+  w.fetches[7].resolve(jsonRespuesta(manifiestoWorker({sha256:nueva})));await turno();
+  w.fetches[8].resolve({ok:false,status:409});await agotada;
+  assert.match(w.messages.at(-1).error,/actualizando/);assert.equal(w.fetches.length,9,'no hay un ciclo de reintentos');
+});
+
+test('las cachés buscar y resolver son independientes, LRU y están limitadas a 64 consultas',async()=>{
+  const w=await preparaWorker();let id=0;
+  async function consulta(tipo,texto,red){
+    const antes=w.fetches.length,p=w.ctx.onmessage({data:{id:++id,tipo,texto}});await turno();
+    assert.equal(w.fetches.length,antes+(red?1:0),tipo+' '+texto);
+    if(red)w.fetches.at(-1).resolve(apiRespuesta(tipo==='buscar'?[]:{ciudad:null,ambiguas:false,coincidencias:[],total:0}));
+    await p;assert.equal(w.messages.at(-1).error,undefined);
+  }
+  for(let i=0;i<64;i++)await consulta('buscar','Lugar '+i,true);
+  await consulta('buscar','Lugar 0',false); // Reciente aunque fue la primera insertada.
+  await consulta('buscar','Lugar 64',true);
+  await consulta('buscar','Lugar 0',false);await consulta('buscar','Lugar 1',true);
+  for(let i=0;i<65;i++)await consulta('resolver','Lugar '+i,true);
+  await consulta('resolver','Lugar 64',false);await consulta('resolver','Lugar 0',true);
+  await consulta('buscar','Lugar 64',false); // Resolver no expulsa la caché de buscar.
+});
+
+test('una respuesta API antigua que llega después del refresco no se devuelve como datos nuevos',async()=>{
+  const w=await preparaWorker(),nueva='b'.repeat(64);
+  const vieja=w.ctx.onmessage({data:{id:1,tipo:'buscar',texto:'Antigua'}}),actual=w.ctx.onmessage({data:{id:2,tipo:'buscar',texto:'Nueva'}});await turno();
+  w.fetches[2].resolve({ok:false,status:409});await turno();
+  w.fetches[3].resolve(jsonRespuesta(manifiestoWorker({sha256:nueva})));await turno();
+  w.fetches[4].resolve(apiRespuesta([ciudad(2)],nueva));await actual;
+  w.fetches[1].resolve(apiRespuesta([ciudad(1)]));await vieja;
+  assert.equal(w.messages.find(m=>m.id===2).version,nueva);
+  assert.equal(w.messages.find(m=>m.id===2).revision,2);
+  const rechazada=w.messages.find(m=>m.id===1);
+  assert.match(rechazada.error,/actualizado/);assert.equal(rechazada.resultado,undefined);
+  assert.equal(rechazada.version,nueva);
+});
+
+test('el catálogo geográfico usa el SHA nuevo en la URL y rechaza bytes viejos bajo el mismo nombre',async()=>{
+  const viejo={regiones:['Nepal (NP)'],zonas:['Asia/Kathmandu'],filas:[[1,'Kathmandu',0,27.7,85.3,0,1000,'']]};
+  const nuevo={...viejo,filas:[[1,'Kathmandu',0,27.8,85.4,0,1000,'']]};
+  const hashViejo=hashDatos(viejo),hashNuevo=hashDatos(nuevo),w=await preparaWorker({sha256:hashViejo});
+  const actualiza=w.ctx.onmessage({data:{id:1,tipo:'buscar',texto:'Kath'}});await turno();
+  w.fetches[1].resolve({ok:false,status:409});await turno();
+  w.fetches[2].resolve(jsonRespuesta(manifiestoWorker({sha256:hashNuevo})));await turno();
+  w.fetches[3].resolve(apiRespuesta([],hashNuevo));await actualiza;
+  const peticion={tipo:'cercanasLinea',a:{lonMC:0,dec:0},eje:'MC'};
+  const geo=w.ctx.onmessage({data:{id:2,...peticion}});await turno();
+  assert.equal(w.fetches[4].url,'datos/ciudades-2026-09-15.json?v='+hashNuevo);
+  w.fetches[4].resolve(archivoRespuesta(viejo));await geo;
+  assert.match(w.messages.at(-1).error,/no coincide/);
+  const retry=w.ctx.onmessage({data:{id:3,...peticion}});await turno();
+  w.fetches[5].resolve(archivoRespuesta(nuevo));await retry;
+  assert.equal(w.messages.at(-1).resultado[0].c.lat,27.8);
+  assert.equal(w.messages.at(-1).version,hashNuevo);
+  await w.ctx.onmessage({data:{id:4,tipo:'resolver',texto:'Kathmandu'}});
+  assert.equal(w.messages.at(-1).resultado.ciudad.lon,85.4);
+  assert.equal(w.fetches.length,6,'los bytes viejos nunca llegan al motor local');
+});
+
+test('solo explorar líneas carga el catálogo; un fallo geográfico se reintenta y luego reutiliza el motor',async()=>{
+  const a={lonMC:0,dec:0},datos={version:'2026-09-15',regiones:['Nepal (NP)'],zonas:['Asia/Kathmandu'],filas:[[1,'Kathmandu',0,27.7,85.3,0,1000,'']]};
+  const hash=hashDatos(datos),w=await preparaWorker({sha256:hash});
+  const consulta=w.ctx.onmessage({data:{id:1,tipo:'cercanasLinea',a,eje:'MC'}});await turno();
+  assert.equal(w.fetches[1].url,'datos/ciudades-2026-09-15.json?v='+hash);
+  w.fetches[1].resolve({ok:false});await consulta;assert.match(w.messages.at(-1).error,/descargar/);
+  const retry=w.ctx.onmessage({data:{id:2,tipo:'cercanasLinea',a,eje:'MC'}}),otra=w.ctx.onmessage({data:{id:3,tipo:'explorarLinea',a,eje:'MC',opciones:{radioKm:null}}});await turno();
+  assert.equal(w.fetches.length,3,'las dos acciones comparten una descarga geográfica');
+  w.fetches[2].resolve(archivoRespuesta(datos));await Promise.all([retry,otra]);
+  assert.equal(w.messages.find(m=>m.id===2).resultado[0].c.id,1);
+  assert.equal(w.messages.find(m=>m.id===3).resultado.total,1);
+  await w.ctx.onmessage({data:{id:4,tipo:'buscar',texto:'Kath'}});
+  await w.ctx.onmessage({data:{id:5,tipo:'resolver',texto:'Kathmandu'}});
+  assert.equal(w.messages.find(m=>m.id===4).resultado[0].id,1);
+  assert.equal(w.messages.find(m=>m.id===5).resultado.ciudad.tz,'Asia/Kathmandu');
+  assert.equal(w.fetches.length,3,'el motor geográfico ya cargado también resuelve búsquedas locales');
+  assert.equal(w.imports.filter(url=>url.startsWith('astrocartografia')).length,1);
 });
 
 test('el Worker informa errores del manifiesto y rechaza rutas ajenas al catálogo',async()=>{
@@ -159,8 +336,12 @@ test('el Worker informa errores del manifiesto y rechaza rutas ajenas al catálo
     [{ok:false},/consultar la versión/],
     [{ok:true,json:async()=>{throw new SyntaxError('JSON de manifiesto inválido');}},/JSON de manifiesto inválido/],
     [{ok:true,json:async()=>({})},/Versión del catálogo inválida/],
-    [{ok:true,json:async()=>({archivo:'../ciudades-2026-09-15.json'})},/Versión del catálogo inválida/],
-    [{ok:true,json:async()=>({archivo:'https://otro.test/ciudades-2026-09-15.json'})},/Versión del catálogo inválida/]
+    [jsonRespuesta(manifiestoWorker({archivo:'../ciudades-2026-09-15.json'})),/Versión del catálogo inválida/],
+    [jsonRespuesta(manifiestoWorker({archivo:'https://otro.test/ciudades-2026-09-15.json'})),/Versión del catálogo inválida/],
+    [jsonRespuesta(manifiestoWorker({sha256:'../ajeno'})),/Versión del catálogo inválida/],
+    [jsonRespuesta(manifiestoWorker({sha256:[VERSION_WORKER]})),/Versión del catálogo inválida/],
+    [jsonRespuesta(manifiestoWorker({archivo:['ciudades-2026-09-15.json']})),/Versión del catálogo inválida/],
+    [jsonRespuesta(manifiestoWorker({total:-1})),/Versión del catálogo inválida/]
   ]){
     const {ctx,fetches,messages}=workerReal();
     const carga=ctx.onmessage({data:{id:1,tipo:'carga'}});

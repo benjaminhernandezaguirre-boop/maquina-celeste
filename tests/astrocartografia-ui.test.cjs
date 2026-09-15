@@ -31,7 +31,7 @@ async function app(saved=[],config={}){
             resultadosLineas.push({peticion,resultado});
           }
           else throw Error('Tipo de consulta inesperado: '+peticion.tipo);
-          this.onmessage({data:{id:peticion.id,resultado}});
+          this.onmessage({data:{id:peticion.id,resultado,version:'a'.repeat(64),revision:1}});
         }catch(e){this.onmessage({data:{id:peticion.id,error:e.message}});}
       };
       if(config.demorarLineas&&['cercanasLinea','explorarLinea'].includes(peticion.tipo))lineasPendientes.push({peticion,contesta});

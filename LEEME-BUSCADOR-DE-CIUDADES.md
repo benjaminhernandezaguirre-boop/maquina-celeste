@@ -20,14 +20,19 @@ ASCII y aliases del catálogo anterior, no todos los nombres alternativos de Geo
 ## Cómo funciona
 
 - `app/ciudades.js`: fachada ligera. Al abrir la página no inicia Worker ni descarga datos.
-- `app/ciudades-buscador.js`: inicia carga al tocar un campo, espera 140 ms entre
-  pulsaciones y muestra hasta 40 opciones. Informa carga/error y permite reintentar.
-- `app/ciudades-worker.js`: consulta el manifiesto y descarga una sola copia del
-  catálogo por página. La carga, el índice y las búsquedas corren en segundo plano.
+- `app/ciudades-buscador.js`: consulta solo cuando hay texto, espera 140 ms entre
+  pulsaciones y muestra hasta 40 opciones. Enfocar un campo vacío no descarga datos.
+- `app/ciudades-worker.js`: consulta el manifiesto y pide resultados a la API, con
+  cachés acotadas. Solo la exploración de líneas descarga el catálogo completo.
+- `api/ciudades.js`: busca y resuelve sobre el mismo motor y catálogo en Vercel.
+  Devuelve coincidencias y conteos, sin enviar el catálogo al navegador.
 - `app/ciudades-motor.js`: resolución global de nombres/etiquetas, ranking por
   coincidencia y población, búsqueda sin acentos y consulta de cercanía a líneas.
 - `app/datos/ciudades-manifest.json`: fecha, conteos, pesos y SHA-256 de la fuente
   y del catálogo. Archivo pequeño que se revalida; el JSON fechado se puede cachear.
+
+Configuración de servidor, versiones, cachés y desarrollo local en
+[CIUDADES-CONSULTA.md](CIUDADES-CONSULTA.md).
 
 `Ciudades.resolverAsync(texto)` devuelve `{ciudad, ambiguas, coincidencias, total}`.
 Una entrada ambigua no selecciona automáticamente la ciudad más poblada. La búsqueda
