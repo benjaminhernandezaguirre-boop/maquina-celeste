@@ -22,6 +22,22 @@ function distancia(a,eje,lat,lon){
   const angulo = Math.acos(clamp(x >= 0 ? Math.hypot(x,y) : Math.abs(y)));
   return {grados:angulo*D, km:angulo*RADIO_KM};
 }
+function puntoCercano(a,eje,lat,lon){
+  const u = vector(lat,lon), [v,w] = base(a,eje), x = dot(u,v), y = dot(u,w);
+  const n = Math.hypot(x,y);
+  // La rama admite únicamente un coeficiente no negativo de v. Si la
+  // proyección cae fuera de ella, el máximo producto escalar está en ±w.
+  // En empates (también sobre la normal del plano) elegimos siempre +w;
+  // el margen absorbe exclusivamente el redondeo de las funciones trigonométricas.
+  const q = x >= 0 && n > 1e-15
+    ? v.map((c,k)=>(x*c+y*w[k])/n)
+    : w.map(c=>c*(y < -1e-15 ? -1 : 1));
+  const horizontal = Math.hypot(q[0],q[1]);
+  // En un polo la longitud es indeterminada: usar el meridiano de entrada
+  // de la rama coincide con el límite que dibuja curva().
+  const longitude = Math.atan2(horizontal < 1e-12 ? v[1] : q[1],horizontal < 1e-12 ? v[0] : q[0])*D;
+  return {lat:Math.atan2(q[2],horizontal)*D,lon:env180(longitude),...distancia(a,eje,lat,lon)};
+}
 function longitud(a,eje,lat){
   if(eje === 'MC') return env180(a.lonMC);
   if(eje === 'IC') return env180(a.lonMC+180);
@@ -54,7 +70,7 @@ function curva(a,eje){
   if(tramo.length>1) tramos.push(tramo);
   return tramos;
 }
-const api = {RADIO_KM,distancia,longitud,curva};
+const api = {RADIO_KM,distancia,puntoCercano,longitud,curva};
 if(typeof module === 'object' && module.exports) module.exports = api;
 else root.AstroGeo = api;
 })(typeof window === 'object' ? window : this);

@@ -93,6 +93,78 @@ test('distance is spherical and branch-aware, including beyond circumpolar endpo
   near(G.distancia({lonMC:0,dec:0},'DC',0,90).grados,0);
   near(G.distancia({lonMC:0,dec:0},'AC',0,90).grados,90);
 });
+test('nearest point projects onto a meridian and uses its endpoints on the opposite branch',()=>{
+  const a={lonMC:0,dec:30};
+  const p=G.puntoCercano(a,'MC',30,60);
+  near(p.lon,0);
+  // A right spherical triangle gives tan(latitude at foot) = tan(latitude)/cos(delta longitude).
+  near(p.lat,Math.atan(Math.tan(30*E.RAD)/Math.cos(60*E.RAD))*E.DEG);
+  near(p.grados,Math.asin(Math.cos(30*E.RAD)*Math.sin(60*E.RAD))*E.DEG);
+  for(const [lat,expected] of [[30,90],[-30,-90],[0,90]]){
+    const q=G.puntoCercano(a,'MC',lat,180);
+    near(q.lat,expected);near(q.lon,0);near(q.grados,90-Math.abs(lat));
+  }
+  const ic=G.puntoCercano(a,'IC',0,180);
+  near(ic.lat,0);near(ic.lon,-180);near(ic.km,0);
+});
+
+test('nearest AC/DC points include circumpolar tangencies and cross the antimeridian',()=>{
+  for(const eje of ['AC','DC']){
+    const north=G.puntoCercano({lonMC:0,dec:30},eje,60.1,180);
+    near(north.lat,60);near(north.lon,-180);near(north.grados,.1,1e-10);
+    const south=G.puntoCercano({lonMC:0,dec:30},eje,-60.1,0);
+    near(south.lat,-60);near(south.lon,0);near(south.grados,.1,1e-10);
+  }
+  for(const [a,eje] of [[{lonMC:179,dec:0},'MC'],[{lonMC:-91,dec:0},'AC'],[{lonMC:89,dec:0},'DC']]){
+    const p=G.puntoCercano(a,eje,23,-179);
+    near(p.lon,179);
+    near(p.lat,Math.atan(Math.tan(23*E.RAD)/Math.cos(2*E.RAD))*E.DEG);
+  }
+});
+
+test('nearest points lie on the requested astronomical branch and preserve spherical distances',()=>{
+  const unit=(lat,lon)=>[Math.cos(lat*E.RAD)*Math.cos(lon*E.RAD),Math.cos(lat*E.RAD)*Math.sin(lon*E.RAD),Math.sin(lat*E.RAD)];
+  // atan2 of the cross product stays accurate near coincident and antipodal points.
+  const separation=(a,b)=>Math.atan2(Math.hypot(a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]),a[0]*b[0]+a[1]*b[1]+a[2]*b[2])*E.DEG;
+  for(const dec of [-89.999999,-60,-23.44,0,23.44,60,89.999999])for(const lonMC of [-179,0,179])for(const eje of ['AC','DC','MC','IC']){
+    const a={dec,lonMC};
+    for(const [lat,lon] of [[-90,35],[-72,179],[-12,-77],[0,0],[35,-179],[89,93],[90,-114]]){
+      const p=G.puntoCercano(a,eje,lat,lon),distance=G.distancia(a,eje,lat,lon);
+      assert.ok(Object.values(p).every(Number.isFinite));
+      assert.ok(p.lat>=-90&&p.lat<=90&&p.lon>=-180&&p.lon<180);
+      assert.equal(p.grados,distance.grados);assert.equal(p.km,distance.km);
+      const measured=separation(unit(lat,lon),unit(p.lat,p.lon));
+      near(p.grados,measured,2e-6);near(p.km,measured*E.RAD*G.RADIO_KM,.00025);
+      if(eje==='MC'||eje==='IC')near(wrap(p.lon-lonMC-(eje==='IC'?180:0)),0,1e-7);
+      else{
+        const h=wrap(p.lon-lonMC)*E.RAD;
+        const altitudeSin=Math.sin(p.lat*E.RAD)*Math.sin(dec*E.RAD)+Math.cos(p.lat*E.RAD)*Math.cos(dec*E.RAD)*Math.cos(h);
+        near(altitudeSin,0,1e-12);
+        assert.ok(eje==='AC'?Math.sin(h)<=1e-12:Math.sin(h)>=-1e-12);
+      }
+    }
+  }
+});
+
+test('nearest point resolves normal, antipodal and polar ties deterministically',()=>{
+  for(const lonMC of [-179,0,137])for(const dec of [-60,0,30])for(const eje of ['AC','DC']){
+    const a={lonMC,dec};
+    // The substellar and antipodal points are perpendicular to every point on the horizon.
+    for(const [lat,lon] of [[dec,lonMC],[-dec,wrap(lonMC+180)]]){
+      const p=G.puntoCercano(a,eje,lat,lon);
+      near(p.lat,90-Math.abs(dec));near(p.grados,90);
+      const expectedLon=dec===0?lonMC+(eje==='AC'?-90:90):lonMC+(dec>0?180:0);
+      near(wrap(p.lon-expectedLon),0);
+      assert.deepEqual(p,G.puntoCercano(a,eje,lat,lon));
+    }
+  }
+  for(const eje of ['AC','DC','MC','IC']){
+    const a={lonMC:35,dec:0},p=G.puntoCercano(a,eje,90,-70);
+    near(p.lat,90);near(p.km,0);
+    near(wrap(p.lon-(35+({AC:-90,DC:90,MC:0,IC:180}[eje]))),0);
+  }
+});
+
 test('curves include exact polar endpoints and both antimeridian borders',()=>{
   for(const dec of [-60,-23.44,0,23.44,60])for(const lonMC of [-179,0,179])for(const eje of ['AC','DC','MC','IC']){
     const a={dec,lonMC},segments=G.curva(a,eje);
