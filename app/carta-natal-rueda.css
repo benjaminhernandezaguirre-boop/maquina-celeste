@@ -1,0 +1,162 @@
+/* A self-contained teaching illustration; no chart calculation or dependencies. */
+.natal-rueda-demo {
+  --nrd-fire: #b45f3f;
+  --nrd-earth: #4f6b46;
+  --nrd-air: #826a9c;
+  --nrd-water: #3e7896;
+  --nrd-tension: #ae6c57;
+  --nrd-flow: #43827f;
+  width: 100%;
+  max-width: 560px;
+  min-width: 0;
+  margin: 0 auto;
+  color: var(--text, #213a40);
+}
+.natal-rueda-demo, .natal-rueda-demo * { box-sizing: border-box; }
+.natal-rueda-demo .nrd-overline {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 1.1rem .45rem;
+  color: var(--muted, #617476);
+  font: 500 .56rem/1.4 var(--mono, "IBM Plex Mono", monospace);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.natal-rueda-demo .nrd-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.natal-rueda-demo .nrd-framework { fill: none; stroke: var(--line, #d7ddd8); stroke-width: .8; }
+.natal-rueda-demo .nrd-paper { fill: var(--panel, #fffdf8); fill-opacity: .55; stroke: none; }
+.natal-rueda-demo .nrd-inner-guide { stroke-dasharray: 1 5; stroke-opacity: .85; }
+.natal-rueda-demo .nrd-element-fuego { --nrd-element: var(--nrd-fire); }
+.natal-rueda-demo .nrd-element-tierra { --nrd-element: var(--nrd-earth); }
+.natal-rueda-demo .nrd-element-aire { --nrd-element: var(--nrd-air); }
+.natal-rueda-demo .nrd-element-agua { --nrd-element: var(--nrd-water); }
+.natal-rueda-demo .nrd-sector { fill: var(--nrd-element); fill-opacity: .095; }
+.natal-rueda-demo .nrd-glyph { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.natal-rueda-demo .nrd-sign-glyph { color: var(--nrd-element); }
+.natal-rueda-demo .nrd-sign-name, .natal-rueda-demo .nrd-degree,
+.natal-rueda-demo .nrd-house-number, .natal-rueda-demo .nrd-angle-label,
+.natal-rueda-demo .nrd-planet-degree { text-anchor: middle; dominant-baseline: middle; }
+.natal-rueda-demo .nrd-sign-name {
+  fill: var(--nrd-element);
+  font: 500 12px var(--serif, Georgia, serif);
+  letter-spacing: .1px;
+}
+.natal-rueda-demo .nrd-tick { fill: none; stroke: var(--gold, #917345); stroke-linecap: butt; }
+.natal-rueda-demo .nrd-tick-minor { stroke-width: .6; stroke-opacity: .5; }
+.natal-rueda-demo .nrd-tick-major { stroke-width: .85; stroke-opacity: .7; }
+.natal-rueda-demo .nrd-tick-cusp { stroke-width: 1.3; }
+.natal-rueda-demo .nrd-sign-divider { fill: none; stroke: var(--line, #d7ddd8); stroke-width: .8; }
+.natal-rueda-demo .nrd-degree { fill: var(--muted, #617476); font: 500 7px var(--mono, monospace); }
+.natal-rueda-demo .nrd-house-cusp { fill: none; stroke: var(--muted, #617476); stroke-width: .85; stroke-opacity: .45; }
+.natal-rueda-demo .nrd-house-angle { stroke: var(--gold, #917345); stroke-width: 1.2; stroke-opacity: .8; }
+.natal-rueda-demo .nrd-house-number { fill: var(--muted, #617476); font: 400 13px var(--serif, Georgia, serif); }
+.natal-rueda-demo .nrd-angle-tip { fill: none; stroke: var(--gold, #917345); stroke-width: 1.5; }
+.natal-rueda-demo .nrd-angle-label {
+  fill: var(--gold, #917345);
+  stroke: var(--panel, #fffdf8);
+  stroke-width: 5px;
+  stroke-linejoin: round;
+  paint-order: stroke;
+  font: 500 9px var(--mono, monospace);
+}
+.natal-rueda-demo .nrd-aspect { fill: none; stroke-width: 1.15; stroke-opacity: .68; }
+.natal-rueda-demo .nrd-aspect-tension { stroke: var(--nrd-tension); }
+.natal-rueda-demo .nrd-aspect-fluido { stroke: var(--nrd-flow); }
+.natal-rueda-demo .nrd-aspect-node { fill: var(--gold, #917345); stroke: var(--panel, #fffdf8); stroke-width: 1; }
+.natal-rueda-demo .nrd-planet { color: var(--text, #213a40); }
+.natal-rueda-demo .nrd-luminary { color: var(--gold, #917345); }
+.natal-rueda-demo .nrd-planet-backing { fill: var(--panel, #fffdf8); fill-opacity: .96; }
+.natal-rueda-demo .nrd-planet-glyph { stroke-width: 1.75; }
+.natal-rueda-demo .nrd-dot-fill { fill: currentColor; stroke: none; }
+.natal-rueda-demo .nrd-planet-degree { fill: var(--muted, #617476); font: 500 8px var(--mono, monospace); }
+.natal-rueda-demo .nrd-caption {
+  margin: .4rem 0 1rem;
+  color: var(--muted, #617476);
+  text-align: center;
+  font: 400 .62rem/1.5 var(--mono, "IBM Plex Mono", monospace);
+}
+.natal-rueda-demo .nrd-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .3rem;
+  margin: 0 -.15rem;
+}
+.natal-rueda-demo .nrd-controls[hidden] { display: none; }
+.natal-rueda-demo .nrd-controls button {
+  appearance: none;
+  min-height: 36px;
+  padding: .48rem .65rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted, #617476);
+  font: 500 .62rem/1.2 var(--mono, "IBM Plex Mono", monospace);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.natal-rueda-demo .nrd-controls button:hover {
+  color: var(--text, #213a40);
+  background: color-mix(in srgb, var(--line, #d7ddd8) 35%, transparent);
+}
+.natal-rueda-demo .nrd-controls button[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--blue, #28645d) 33%, var(--line, #d7ddd8));
+  background: color-mix(in srgb, var(--blue, #28645d) 8%, transparent);
+  color: var(--blue, #28645d);
+}
+.natal-rueda-demo .nrd-controls button:focus-visible { outline: 2px solid var(--blue, #28645d); outline-offset: 3px; }
+.natal-rueda-demo .nrd-explanation {
+  max-width: 450px;
+  min-height: 5.2em;
+  margin: .8rem auto 0;
+  padding: 0 .65rem;
+  text-align: center;
+  color: var(--muted, #617476);
+  font: 400 .88rem/1.55 var(--serif, Georgia, serif);
+}
+.natal-rueda-demo .nrd-explanation p { margin: 0; }
+.natal-rueda-demo .nrd-explanation strong { color: var(--text, #213a40); font-weight: 600; }
+.natal-rueda-demo .nrd-key {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .5rem 1.25rem;
+  list-style: none;
+  margin: .4rem 0 0;
+  padding: 0;
+  color: var(--muted, #617476);
+  font: 400 .59rem/1.5 var(--mono, monospace);
+}
+.natal-rueda-demo .nrd-key li { display: inline-flex; align-items: center; gap: .4rem; }
+.natal-rueda-demo .nrd-key li span { width: 5px; height: 5px; border-radius: 50%; background: var(--nrd-element); }
+.natal-rueda-demo .nrd-layer { transition: opacity .22s ease; }
+.natal-rueda-demo[data-nrd-view="signos"] .nrd-layer:not(.nrd-signs),
+.natal-rueda-demo[data-nrd-view="casas"] .nrd-layer:not(.nrd-houses),
+.natal-rueda-demo[data-nrd-view="planetas"] .nrd-layer:not(.nrd-planets),
+.natal-rueda-demo[data-nrd-view="aspectos"] .nrd-layer:not(.nrd-aspects):not(.nrd-planets) { opacity: .23; }
+.natal-rueda-demo[data-nrd-view="casas"] .nrd-house-cusp { stroke-opacity: .95; stroke-width: 1.45; }
+.natal-rueda-demo[data-nrd-view="casas"] .nrd-house-number { fill: var(--text, #213a40); font-weight: 600; }
+.natal-rueda-demo[data-nrd-view="aspectos"] .nrd-aspect { stroke-opacity: 1; stroke-width: 1.65; }
+.natal-rueda-demo[data-nrd-view="signos"] .nrd-sector { fill-opacity: .18; }
+html[data-studio-theme="dark"] .natal-rueda-demo {
+  --nrd-fire: #d79278;
+  --nrd-earth: #a1b487;
+  --nrd-air: #b6a1d0;
+  --nrd-water: #8fb8c6;
+  --nrd-tension: #d89681;
+  --nrd-flow: #79b5af;
+}
+html[data-studio-theme="dark"] .natal-rueda-demo .nrd-sector { fill-opacity: .13; }
+html[data-studio-theme="dark"] .natal-rueda-demo .nrd-paper { fill-opacity: .7; }
+@media (max-width: 520px) {
+  .natal-rueda-demo .nrd-overline { margin-right: .4rem; margin-left: .4rem; font-size: .47rem; letter-spacing: .065em; }
+  .natal-rueda-demo .nrd-caption { max-width: 280px; margin: .45rem auto .8rem; font-size: .56rem; }
+  .natal-rueda-demo .nrd-controls { gap: .15rem; }
+  .natal-rueda-demo .nrd-controls button { min-height: 40px; padding: .45rem .5rem; font-size: .59rem; }
+  .natal-rueda-demo .nrd-explanation { min-height: 6.2em; margin-top: .65rem; padding: 0 .4rem; font-size: .83rem; }
+  .natal-rueda-demo .nrd-key { gap: .4rem 1rem; margin-top: .1rem; font-size: .55rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .natal-rueda-demo .nrd-layer { transition: none; }
+}
