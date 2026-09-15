@@ -100,7 +100,11 @@ test('caché acotado conserva solo la última línea y reutiliza sus distancias 
 
 test('el Worker enruta filtros y paginación y devuelve solo la página con sus metadatos',async()=>{
   const d=muestra(),mensajes=[],importados=[];
-  const context={console,fetch:async url=>({ok:true,json:async()=>url.includes('manifest')?{archivo:'ciudades-2026-09-15.json'}:d})};
+  const bytes=Buffer.from(JSON.stringify(d)),crypto=require('node:crypto');
+  const sha256=crypto.createHash('sha256').update(bytes).digest('hex');
+  const context={console,crypto:crypto.webcrypto,TextDecoder,fetch:async url=>({ok:true,
+    json:async()=>({archivo:'ciudades-2026-09-15.json',version:'2026-09-15',sha256,total:d.filas.length,fuente:'GeoNames cities500'}),
+    arrayBuffer:async()=>{assert.ok(url.endsWith('?v='+sha256));return bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);}})};
   context.self=context;context.globalThis=context;context.postMessage=m=>mensajes.push(m);
   vm.createContext(context);
   context.importScripts=(...nombres)=>{for(const n of nombres){importados.push(n);vm.runInContext(fs.readFileSync(path.join(raiz,'app',n.split('?')[0]),'utf8'),context);}};
