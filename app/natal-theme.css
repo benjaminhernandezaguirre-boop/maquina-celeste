@@ -211,3 +211,14 @@
   #app.natal form#natalForm h2{font-size:1.05rem;flex-wrap:wrap}
   #app.natal #cartaPanel{height:59dvh}
 }
+
+/* Aspectos: el color acompaña siempre al nombre, al símbolo y al ángulo. */
+#app.natal .a-verde{color:#75d6a0!important}
+#app.natal .a-violeta{color:#d0a0ff!important}
+html[data-studio-theme="light"] #app.natal .a-verde{color:#21754b!important}
+html[data-studio-theme="light"] #app.natal .a-violeta{color:#8851b8!important}
+#hojaAtacir .leyenda-aspectos{display:flex;flex-wrap:wrap;gap:.55rem 1rem;list-style:none;padding:.8rem 0;margin:.4rem 0;border-bottom:1px solid var(--natal-line);font-size:.79rem}
+#hojaAtacir .leyenda-aspectos li{display:flex;align-items:center;gap:.3rem}
+#hojaAtacir .leyenda-aspectos span{font-size:1.1rem}
+#hojaAtacir .acciones{flex-wrap:wrap}
+#hojaAtacir .at-dia{min-height:44px;border-color:currentColor!important;font-weight:600}
