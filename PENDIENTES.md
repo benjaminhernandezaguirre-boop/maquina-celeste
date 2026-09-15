@@ -107,7 +107,8 @@ quieras. Primera mejora descrita en `ASTROCARTOGRAFIA-ESTUDIO.md`:
 
 - [x] **Estado coherente de la carta.** Nombre, nueva carta y aviso natal pendiente independiente del destino.
 - [x] **Mapa interactivo.** Zoom, arrastre, pinza, teclado, ampliación, etiquetas legibles, selección de líneas y consulta por coordenadas. Localidades bajo demanda y vinculadas al mapa.
-- [ ] **Accesos por continente y filtros regionales.** El zoom ya permite explorar regiones; faltan atajos y filtros de país/población en la lista mundial.
+- [x] **Localidades por país y región.** Vista mundial que alterna países, selección de cualquier país del catálogo y sus subdivisiones, alcance de distancia configurable y páginas de 24 resultados.
+- [ ] **Accesos por continente y población.** El zoom ya permite explorar regiones; faltan atajos continentales del mapa y filtro por población.
 - [ ] **Carta relocalizada y comparación de destinos.** Conservar el instante UTC natal, recalcular casas/ejes para el lugar elegido y mostrar ambos marcos. *(mediano)*
 - [ ] **Precisión y reporte geográfico.** Ampliar contraste de efemérides, sensibilidad a la hora y PDF independiente del informe natal. *(mediano)*
 - [ ] **Paranes.** Simultaneidad de angularidades de dos cuerpos; definir la convención temporal y geográfica antes de implementar. No basta detectar cruces de píxeles. *(mediano)*

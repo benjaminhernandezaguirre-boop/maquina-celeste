@@ -5,11 +5,16 @@ const CiudadesMotor=require('../app/ciudades-motor.js'),Geo=require('../app/astr
 // regiones y zonas reales. La suite de catálogo comprueba el archivo completo.
 const datos=JSON.parse(fs.readFileSync(path.join(root,'app/datos/ciudades-2026-09-15.json'),'utf8'));
 const ids=new Set([3530597,3117735,5128581,3860259,2519240,3530240,1850147,1283240,4035413,2179537,3369157,2147714,2988507,2643743,1816670,292223]);
+// Dos subdivisiones reales con más de una página de localidades cada una.
+for(const region of ['Madrid, España (ES)','Andalusia, España (ES)']){
+  const muestra=datos.filas.filter(f=>datos.regiones[f[2]]===region).sort((a,b)=>b[6]-a[6]).slice(0,40);
+  for(const fila of muestra)ids.add(fila[0]);
+}
 const motor=CiudadesMotor.crear({...datos,filas:datos.filas.filter(f=>ids.has(f[0])||CiudadesMotor.normaliza(f[1])==='cordoba')});
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 async function app(saved=[],config={}){
   const nodes=new Map(),ctx=new Proxy({measureText:text=>({width:String(text).length*8})},{get:(t,k)=>t[k]||(()=>{}),set:(t,k,v)=>(t[k]=v,true)});
-  const solicitudes=[],lineasPendientes=[],resolucionesPendientes=[];
+  const solicitudes=[],lineasPendientes=[],resolucionesPendientes=[],resultadosLineas=[];
   class WorkerMock{
     postMessage(peticion){
       solicitudes.push(peticion);
@@ -21,11 +26,15 @@ async function app(saved=[],config={}){
           else if(peticion.tipo==='resolver')resultado=motor.resolver(peticion.texto);
           else if(peticion.tipo==='buscar')resultado=motor.buscar(peticion.texto);
           else if(peticion.tipo==='cercanasLinea')resultado=motor.cercanasLinea(peticion.a,peticion.eje,Geo);
+          else if(peticion.tipo==='explorarLinea'){
+            resultado=motor.explorarLinea(peticion.a,peticion.eje,peticion.opciones,Geo);
+            resultadosLineas.push({peticion,resultado});
+          }
           else throw Error('Tipo de consulta inesperado: '+peticion.tipo);
           this.onmessage({data:{id:peticion.id,resultado}});
         }catch(e){this.onmessage({data:{id:peticion.id,error:e.message}});}
       };
-      if(config.demorarLineas&&peticion.tipo==='cercanasLinea')lineasPendientes.push({peticion,contesta});
+      if(config.demorarLineas&&['cercanasLinea','explorarLinea'].includes(peticion.tipo))lineasPendientes.push({peticion,contesta});
       else if(config.demorarResoluciones&&peticion.tipo==='resolver')resolucionesPendientes.push({peticion,contesta});
       else queueMicrotask(contesta);
     }
@@ -34,7 +43,7 @@ async function app(saved=[],config={}){
   function node(id){
     if(!nodes.has(id)){
       const handlers=new Map(),attributes=new Map(),classes=new Set(),captures=new Set();
-      const n={id,value:({modo:'mundo',orbe:'550',lnAstro:'sol',lnEje:'MC',ocurrencia:'reject'})[id]||'',innerHTML:'',hidden:false,
+      const n={id,value:({modo:'mundo',orbe:'550',lnAstro:'sol',lnEje:'MC',ocurrencia:'reject',localidadesRadio:'300'})[id]||'',innerHTML:'',hidden:false,
         width:2160,height:1080,clientWidth:1080,clientHeight:540,clientLeft:1,clientTop:1,offsetWidth:1082,offsetHeight:542,
         options:[{}],listeners:{},dataset:{},style:{},
         addEventListener(type,fn){
@@ -66,7 +75,8 @@ async function app(saved=[],config={}){
   const html=fs.readFileSync(path.join(root,'astrocarto.html'),'utf8');
   vm.runInContext(html.match(/<script>\s*([\s\S]*?)<\/script>/)[1],context);
   await flush();
-  return {node,solicitudes,lineasPendientes,resolucionesPendientes,async event(id,type,event={}){await node(id).listeners[type](event);await flush();},
+  return {node,solicitudes,lineasPendientes,resolucionesPendientes,resultadosLineas,async event(id,type,event={}){await node(id).listeners[type](event);await flush();},
+    change(id,value){node(id).value=value;return this.event(id,'change',{target:node(id)});},
     async tap(x,y){const event={pointerId:1,button:0,clientX:x,clientY:y,preventDefault(){}};await this.event('mapa','pointerdown',event);await this.event('mapa','pointerup',event);},
     draw(){return this.event('dibujar','click');},fill(id,value){node(id).value=value;node(id).listeners.input({target:node(id)});},table:()=>node('#tablaLugar tbody').innerHTML,lineTable:()=>node('#tablaLinea tbody').innerHTML};
 }
@@ -297,10 +307,84 @@ test('localities near a line load only on request, including after selecting a d
   const a=await app([saved]);
   assert.equal(a.solicitudes.length,0,'dibujar con coordenadas guardadas no necesita el catálogo');
   a.node('lnAstro').value='mercurio';await a.event('lnAstro','change');
-  assert.equal(a.solicitudes.filter(p=>p.tipo==='cercanasLinea').length,0);
+  assert.equal(a.solicitudes.filter(p=>p.tipo==='explorarLinea').length,0);
+  await a.change('localidadesRadio','todos');
+  assert.equal(a.solicitudes.length,0,'cambiar el alcance antes de buscar tampoco descarga el catálogo');
   await a.event('buscarLocalidades','click');
-  assert.equal(a.solicitudes.filter(p=>p.tipo==='cercanasLinea').length,1);
+  assert.equal(a.solicitudes.filter(p=>p.tipo==='explorarLinea').length,1);
   assert.ok(a.lineTable().includes('Mercurio MC'));
+});
+
+test('global locality exploration filters country and subdivision and pages without replacing the destination',async()=>{
+  const a=await app([saved]);
+  a.node('ciudad').value='Madrid, España';await a.event('ciudad','change',{target:a.node('ciudad')});
+  const destino=a.table(),nombreDestino=a.node('ciudad').value,latDestino=a.node('latDestino').value;
+  await a.change('localidadesRadio','todos');
+  await a.event('buscarLocalidades','click');
+  const mundo=a.resultadosLineas.at(-1).resultado;
+  assert.ok(mundo.paises.some(p=>p.codigo==='ES'));
+  assert.ok(mundo.paises.some(p=>p.codigo==='NP'),'el selector incluye países de otros continentes');
+  assert.ok(a.node('localidadesPais').innerHTML.includes('value="NP"'));
+  assert.ok(a.node('localidadesPais').innerHTML.includes('España'));
+  await a.change('localidadesPais','ES');
+  const espana=a.resultadosLineas.at(-1).resultado;
+  assert.ok(espana.filas.every(f=>f.c.r.includes('España')));
+  const madrid=espana.regiones.find(r=>/^Madrid(?:,|$)/.test(r.nombre));
+  assert.ok(madrid,'las subdivisiones de España incluyen Madrid');
+  await a.change('localidadesRegion',String(madrid.id));
+  const primera=a.resultadosLineas.at(-1).resultado;
+  assert.equal(primera.pagina,1);assert.equal(primera.filas.length,24);
+  assert.ok(primera.total>24);assert.ok(primera.filas.every(f=>f.c.r.startsWith('Madrid,')));
+  assert.equal(a.node('localidadesAnterior').disabled,true);
+  assert.equal(a.node('localidadesSiguiente').disabled,false);
+  const tablaPrimera=a.lineTable();
+  await a.event('localidadesSiguiente','click');
+  const segunda=a.resultadosLineas.at(-1).resultado;
+  assert.equal(segunda.pagina,2);assert.equal(segunda.limite,24);
+  assert.notEqual(a.lineTable(),tablaPrimera);
+  assert.ok(!segunda.filas.some(f=>primera.filas.some(anterior=>anterior.c.id===f.c.id)));
+  assert.equal(a.node('localidadesAnterior').disabled,false);
+  assert.equal(a.table(),destino,'país, región y página no sustituyen la consulta del destino');
+  assert.equal(a.node('ciudad').value,nombreDestino);assert.equal(a.node('latDestino').value,latDestino);
+  const elegida=segunda.filas[0].c;
+  await a.event('tablaLinea','click',{target:{closest:()=>({dataset:{localidad:'0'}})}});
+  assert.equal(a.node('ciudad').value,elegida.etiqueta);
+  assert.equal(Number(a.node('latDestino').value),elegida.lat);
+  assert.equal(Number(a.node('lonDestino').value),elegida.lon);
+  await a.change('localidadesPais','NP');
+  const nepal=a.resultadosLineas.at(-1).resultado;
+  assert.equal(a.node('localidadesRegion').value,'','cambiar país limpia la subdivisión anterior');
+  assert.equal(nepal.pagina,1);
+  assert.ok(nepal.filas.some(f=>f.c.n==='Kathmandu'));
+  assert.ok(!a.lineTable().includes('España'));
+});
+
+test('out-of-order country responses and an abandoned exploration cannot restore stale rows or filters',async()=>{
+  const a=await app([saved],{demorarLineas:true});
+  await a.change('localidadesRadio','todos');
+  const inicio=a.event('buscarLocalidades','click');await flush();
+  a.lineasPendientes[0].contesta();await inicio;await flush();
+  const espana=a.change('localidadesPais','ES');await flush();
+  const nepal=a.change('localidadesPais','NP');await flush();
+  assert.equal(a.lineasPendientes.length,3);
+  a.lineasPendientes[2].contesta();await nepal;await flush();
+  const tabla=a.lineTable(),regiones=a.node('localidadesRegion').innerHTML,estado=a.node('localidadesEstado').textContent;
+  assert.ok(tabla.includes('Kathmandu'));
+  a.lineasPendientes[1].contesta();await espana;await flush();
+  assert.equal(a.lineTable(),tabla);
+  assert.equal(a.node('localidadesRegion').innerHTML,regiones);
+  assert.equal(a.node('localidadesEstado').textContent,estado);
+  assert.equal(a.node('localidadesPais').value,'NP');
+  const japon=a.change('localidadesPais','JP');await flush();
+  assert.equal(a.lineasPendientes.length,4);
+  await a.event('nuevaCarta','click');
+  const vacia=a.lineTable(),estadoVacio=a.node('localidadesEstado').textContent;
+  a.lineasPendientes[3].contesta();await japon;await flush();
+  assert.equal(a.lineTable(),vacia);
+  assert.equal(a.node('localidadesEstado').textContent,estadoVacio);
+  assert.equal(a.node('resumen').hidden,true);
+  assert.equal(a.node('localidadesPais').value,'');
+  assert.equal(a.node('localidadesRegion').value,'');
 });
 
 test('a city outside the previous regional priorities resolves through the worker with its IANA zone',async()=>{

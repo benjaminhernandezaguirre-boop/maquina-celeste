@@ -39,9 +39,13 @@ caché; sólo sirve para presentación. Toda entrada que determine coordenadas u
 `resolverAsync`. La fachada conserva además hasta 64 respuestas recientes, cada una
 con un máximo de 40 coincidencias. Nunca recibe el catálogo completo desde el Worker.
 
-Astrocartografía utiliza `Ciudades.cercanasLinea(astro,eje)` para buscar las 12
-localidades más próximas entre todos los registros con la misma geometría esférica
-que el mapa. Respuestas antiguas no reemplazan una consulta más reciente.
+Astrocartografía utiliza `Ciudades.explorarLinea(astro,eje,opciones)` para recorrer
+localidades de todos los países, filtradas por país, subdivisión y distancia a la
+línea. La geometría esférica es la misma que en el mapa. El Worker conserva la última
+línea calculada y devuelve páginas de 24 localidades, contadores de países y regiones.
+La vista mundial alterna países; dentro de un país o región se ordena por distancia.
+Respuestas antiguas no reemplazan una consulta más reciente. La API previa
+`cercanasLinea(astro,eje)` sigue disponible con sus 12 resultados de compatibilidad.
 
 ## Zonas horarias y cartas guardadas
 
