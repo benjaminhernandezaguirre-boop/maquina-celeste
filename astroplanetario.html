@@ -277,11 +277,11 @@
   form#natalForm{
     width:min(560px,100%);background:#0A0D1BF7;border:1px solid var(--linea);
     box-shadow:var(--sombra);padding:1.4rem 1.4rem 1.2rem;border-radius:3px;
-    display:grid;gap:.85rem;margin:auto;
+    display:grid;grid-template-columns:minmax(0,1fr);min-width:0;gap:.85rem;margin:auto;
   }
   form#natalForm h2{
     font-family:Cinzel,serif;font-size:1.25rem;letter-spacing:.06em;margin:0;
-    display:flex;align-items:baseline;gap:.6rem;
+    display:flex;flex-wrap:wrap;align-items:baseline;gap:.6rem;
   }
   form#natalForm h2 span{
     font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.18em;
@@ -295,7 +295,7 @@
   }
   .campo input,.campo select{
     font:inherit;font-size:.95rem;background:#060915;color:var(--pergamino);
-    border:1px solid var(--linea);border-radius:2px;padding:.42rem .55rem;width:100%;
+    border:1px solid var(--linea);border-radius:2px;padding:.42rem .55rem;width:100%;min-width:0;max-width:100%;
   }
   .campo input:focus,.campo select:focus{border-color:var(--laton-hondo);outline:none}
   .campo input[type="date"],.campo input[type="time"]{font-family:"IBM Plex Mono",monospace;color-scheme:dark}
@@ -1091,7 +1091,7 @@
           <div class="campo ancho">
             <label for="nLugar">Lugar de nacimiento</label>
             <input id="nLugar" list="ciudades" placeholder="Escribe y elige de la lista">
-            <small class="ciudades-nota">Catálogo de 2,921 ciudades · datos de <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> (CC BY 4.0)</small>
+            <small class="ciudades-nota">Catálogo mundial de localidades · <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> · CC BY 4.0</small>
             <datalist id="ciudades"></datalist>
           </div>
         </div>
@@ -1237,7 +1237,8 @@
   </footer>
 </div>
 
-<script src="app/ciudades.js?v=20260913"></script>
+<script src="app/ciudades.js?v=20260915"></script>
+<script src="app/ciudades-buscador.js?v=20260915"></script>
 <script src="app/efemerides.js"></script>
 <script src="app/profecciones.js"></script>
 <script src="app/dignidades.js"></script>
@@ -1458,9 +1459,11 @@ function pintaGlifo(g, glifo, x, y, tam){
 
 /* ===================== Tiempo ===================== */
 let factor = 1, anclaReal = Date.now(), anclaSim = Date.now();
+let solicitudCartaMomento=0, solicitudLugarRS=0;
 function ahoraSim(){ return anclaSim + (Date.now()-anclaReal)*factor; }
 const velSel = document.getElementById("velocidad");
 function fijaTiempo(ms, nuevoFactor=0){
+  solicitudCartaMomento++;
   anclaSim = ms; anclaReal = Date.now(); factor = nuevoFactor;
   const valor = String(nuevoFactor);
   if([...velSel.options].some(o => o.value === valor)) velSel.value = valor;
@@ -1480,6 +1483,7 @@ function msFechaOrbital(){
   return new Date(Y,M-1,D,hh||0,mm||0,0,0).getTime();
 }
 velSel.addEventListener("change", () => {
+  solicitudCartaMomento++;
   anclaSim = ahoraSim(); anclaReal = Date.now(); factor = Number(velSel.value);
 });
 document.getElementById("btnHoy").addEventListener("click", () => {
@@ -1525,16 +1529,25 @@ function partesEnZona(ms, tz){
   return {fecha:`${p.year}-${p.month}-${p.day}`, hora:`${p.hour}:${p.minute}`};
 }
 
-document.getElementById("btnCartaMomento").addEventListener("click", () => {
+document.getElementById("btnCartaMomento").addEventListener("click", async () => {
+  const solicitud=++solicitudCartaMomento;
   const instante = ahoraSim();
   const entrada = document.getElementById("ciudadCartaMomento");
+  if(entrada)entrada.setCustomValidity("");
   const escrito = (entrada?.value || document.getElementById("nLugar")?.value || "").trim();
-  const ciudad = resolverCiudad(escrito).ciudad;
-
   if(!escrito){
     if(entrada){ entrada.classList.add("falta-ciudad"); entrada.focus(); }
     return;
   }
+
+  let ciudad;
+  try { ciudad = (await window.Ciudades.resolverAsync(escrito)).ciudad; }
+  catch(e){
+    if(solicitud!==solicitudCartaMomento)return;
+    if(entrada){ entrada.setCustomValidity(e.message || "No se pudo cargar el catálogo. Inténtalo de nuevo."); entrada.reportValidity(); }
+    return;
+  }
+  if(solicitud!==solicitudCartaMomento || (entrada?.value || document.getElementById("nLugar")?.value || "").trim()!==escrito)return;
 
   if(entrada) entrada.classList.remove("falta-ciudad");
   const lugar = document.getElementById("nLugar");
@@ -1569,7 +1582,8 @@ document.getElementById("btnCartaMomento").addEventListener("click", () => {
   if(veloNatal) veloNatal.classList.add("visible");
   const cancelar = document.getElementById("nCancelar");
   if(cancelar) cancelar.hidden = false;
-  setTimeout(() => document.getElementById("natalForm")?.requestSubmit(), 0);
+  const solicitudFormulario=solicitudNatal;
+  setTimeout(() => {if(solicitudFormulario===solicitudNatal && veloNatal?.classList.contains("visible"))document.getElementById("natalForm")?.requestSubmit();}, 0);
 });
 
 const fmtFecha = new Intl.DateTimeFormat("es-MX",{dateStyle:"long",timeStyle:"short"});
@@ -2020,6 +2034,7 @@ document.getElementById("btnOrbitas").addEventListener("click", () => cambiaVist
 document.getElementById("btnRueda").addEventListener("click", () => cambiaVista("rueda"));
 document.getElementById("btnNatal").addEventListener("click", () => cambiaVista("natal"));
 function cambiaVista(v){
+  cancelaCalculoNatal();solicitudCartaMomento++;solicitudLugarRS++;
   if(v === "zodiaco") v = "rueda";
   vista = v; zoom = 1;
   if(v === "natal"){ natalPan.x=0; natalPan.y=0; }
@@ -2602,7 +2617,6 @@ const gradoMin = d => {
 };
 
 /* --- ciudades: nombre | región | lat | lon | zona horaria IANA --- */
-const CIUDADES = window.Efem.CIUDADES;
 const resolverCiudad = texto => window.Ciudades.resolver(texto);
 
 /* --- zona horaria: el navegador trae la base histórica (incluye horarios de verano) --- */
@@ -4442,6 +4456,7 @@ function bloqueProfeccion(ms, cuspRS, cuerposRS, edadForzada){
       <a href="/calculadora-profecciones" target="_blank" rel="noopener">ver el año mes a mes</a>.</p>`;
 }
 function pintaRevolucion(){
+  solicitudLugarRS++;
   if(!carta) return;
   const hoja = document.getElementById("hojaRevolucion");
   if(!carta.datos.horaConocida){
@@ -4489,6 +4504,7 @@ function pintaRevolucion(){
       <div class="campo" id="rsCampoLugar" ${L.propio ? "hidden" : ""}>
         <label for="rsLugar">Ciudad</label>
         <input id="rsLugar" list="ciudades" placeholder="Escribe y elige de la lista" value="${(estadoRS.lugarTexto||"").replace(/"/g,"&quot;")}">
+        <small id="rsCiudadEstado" aria-live="polite"></small>
       </div>
     </div>
 
@@ -4580,14 +4596,21 @@ function pintaRevolucion(){
     if(ev.target.value === "natal"){ rep(); }
   });
   const inp = document.getElementById("rsLugar");
-  if(inp) inp.addEventListener("change", ev => {
+  if(inp) inp.addEventListener("change", async ev => {
+    const solicitud=++solicitudLugarRS;
     const escrito = ev.target.value.trim();
-    const c = resolverCiudad(escrito).ciudad;
-    if(!c) return;
-    estadoRS.lat = c.lat; estadoRS.lon = c.lon; estadoRS.tz = c.tz;
-    estadoRS.lugarTexto = c.etiqueta; estadoRS.donde = "otro";
-    rep();
+    const estado = document.getElementById("rsCiudadEstado");
+    if(estado)estado.textContent="Buscando la localidad…";
+    try {
+      const r = await window.Ciudades.resolverAsync(escrito), c=r.ciudad;
+      if(solicitud!==solicitudLugarRS || !inp.isConnected || inp.value.trim()!==escrito || !revolucionActivo)return;
+      if(!c){if(estado)estado.textContent=r.ambiguas?"Hay varias localidades con ese nombre. Elige ciudad, región y país.":"Elige una localidad completa de la lista.";return;}
+      estadoRS.lat = c.lat; estadoRS.lon = c.lon; estadoRS.tz = c.tz;
+      estadoRS.lugarTexto = c.etiqueta; estadoRS.donde = "otro";
+      rep();
+    }catch(e){if(solicitud===solicitudLugarRS && estado && inp.isConnected)estado.textContent=e.message || "No se pudo cargar el catálogo. Inténtalo de nuevo.";}
   });
+  if(inp)inp.addEventListener("input",()=>solicitudLugarRS++);
 }
 
 
@@ -5133,24 +5156,30 @@ function pintaCompuesta(){
 /* --- formulario --- */
 const velo = document.getElementById("velo");
 const formulario = document.getElementById("natalForm");
-const dl = document.getElementById("ciudades");
-let filtroCiudadesActual = null;
-function actualizaOpcionesCiudades(texto){
-  const q=window.Ciudades.normaliza(texto);if(q===filtroCiudadesActual)return;filtroCiudadesActual=q;
-  if(!q){dl.replaceChildren();return}
-  const candidatas=CIUDADES.filter(c=>window.Ciudades.normaliza(c.n).startsWith(q)||window.Ciudades.normaliza(c.etiqueta).includes(q)).sort((a,b)=>Number(!window.Ciudades.normaliza(a.n).startsWith(q))-Number(!window.Ciudades.normaliza(b.n).startsWith(q))).slice(0,80);
-  const opciones=document.createDocumentFragment();for(const c of candidatas){const o=document.createElement("option");o.value=c.etiqueta;opciones.appendChild(o)}dl.replaceChildren(opciones);
+if(window.CiudadesBuscador)window.CiudadesBuscador.conecta("ciudades");
+let lugarNatalGuardado=null, lugarNatalManual=false, solicitudNatal=0;
+function cancelaCalculoNatal(){
+  solicitudNatal++;solicitudCartaMomento++;
+  const err=document.getElementById("nError");
+  if(err.textContent==="Buscando la localidad…")err.hidden=true;
 }
-document.addEventListener("input",e=>{if(e.target.matches?.('input[list="ciudades"]'))actualizaOpcionesCiudades(e.target.value)});
-document.addEventListener("focusin",e=>{if(e.target.matches?.('input[list="ciudades"]'))actualizaOpcionesCiudades(e.target.value)});
+formulario.addEventListener("input",cancelaCalculoNatal,true);
+formulario.addEventListener("change",cancelaCalculoNatal,true);
+document.getElementById("ciudadCartaMomento").addEventListener("input",e=>{solicitudCartaMomento++;e.target.setCustomValidity("");});
+for(const evento of ["input","change"])document.addEventListener(evento,e=>{if(e.target.id?.startsWith("rs"))solicitudLugarRS++;},true);
 const zonaSel = document.getElementById("nZona");
 (() => {
   let zonas = [];
   try { zonas = Intl.supportedValuesOf("timeZone"); } catch(e){ zonas = []; }
-  if(!zonas.length) zonas = [...new Set(CIUDADES.map(c => c.tz))].sort();
+  if(!zonas.length) zonas = [...new Set([Intl.DateTimeFormat().resolvedOptions().timeZone,"America/Mexico_City","UTC"])].sort();
   zonaSel.innerHTML = zonas.map(z => `<option value="${z}">${z}</option>`).join("");
   zonaSel.value = zonas.includes("America/Mexico_City") ? "America/Mexico_City" : zonas[0];
 })();
+function fijaZonaManual(tz){
+  if(!tz)return;
+  if(![...zonaSel.options].some(o=>o.value===tz)){const o=document.createElement("option");o.value=tz;o.textContent=tz;zonaSel.appendChild(o);}
+  zonaSel.value=tz;
+}
 
 const sinHora = document.getElementById("nSinHora");
 sinHora.addEventListener("change", () => {
@@ -5158,9 +5187,12 @@ sinHora.addEventListener("change", () => {
   document.getElementById("nAvisoHora").hidden = !sinHora.checked;
 });
 document.getElementById("nLugar").addEventListener("input", e => {
+  lugarNatalGuardado=null;lugarNatalManual=false;solicitudNatal++;
+  document.getElementById("nLat").value="";document.getElementById("nLon").value="";
   const hay = Boolean(resolverCiudad(e.target.value).ciudad);
   document.getElementById("manual").classList.toggle("visible", !hay && e.target.value.trim().length > 2);
 });
+for(const id of ["nLat","nLon","nZona"]){document.getElementById(id).addEventListener("input",()=>{lugarNatalGuardado=null;lugarNatalManual=true;solicitudNatal++;});}
 for(const id of ["nFecha","nHora","nLugar"]){
   const e=document.getElementById(id);
   if(e) e.addEventListener("input",()=>{ document.getElementById("campoOcurrencia").hidden=true; });
@@ -5170,13 +5202,15 @@ document.getElementById("nEjemplo").addEventListener("click", () => {
   document.getElementById("nFecha").value = "1990-03-21";
   document.getElementById("nHora").value = "06:30";
   document.getElementById("nLugar").value = "Ciudad de México, México";
+  lugarNatalGuardado=null;lugarNatalManual=false;solicitudNatal++;
   document.getElementById("manual").classList.remove("visible");
 });
-document.getElementById("nCancelar").addEventListener("click", () => velo.classList.remove("visible"));
+document.getElementById("nCancelar").addEventListener("click", () => {cancelaCalculoNatal();solicitudCartaMomento++;velo.classList.remove("visible");});
 
 const mesesEs = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
-formulario.addEventListener("submit", ev => {
+formulario.addEventListener("submit", async ev => {
   ev.preventDefault();
+  const solicitud=++solicitudNatal;
   const err = document.getElementById("nError");
   err.hidden = true;
   const f = document.getElementById("nFecha").value;
@@ -5187,7 +5221,16 @@ formulario.addEventListener("submit", ev => {
   const [hora, min] = (horaConocida ? document.getElementById("nHora").value : "12:00").split(":").map(Number);
 
   const escrito = document.getElementById("nLugar").value.trim();
-  const resultadoCiudad=resolverCiudad(escrito),ciudad=resultadoCiudad.ciudad;
+  let resultadoCiudad;
+  if(!lugarNatalGuardado && !lugarNatalManual){err.textContent="Buscando la localidad…";err.hidden=false;}
+  try {
+    resultadoCiudad=lugarNatalGuardado && lugarNatalGuardado.etiqueta===escrito
+      ? {ciudad:lugarNatalGuardado}
+      : lugarNatalManual ? {ciudad:null} : await window.Ciudades.resolverAsync(escrito);
+  }catch(e){if(solicitud===solicitudNatal){err.textContent=e.message || "No se pudo cargar el catálogo. Inténtalo de nuevo.";err.hidden=false;}return;}
+  if(solicitud!==solicitudNatal)return;
+  err.hidden=true;
+  const ciudad=resultadoCiudad.ciudad;
   if(resultadoCiudad.ambiguas){err.textContent="Hay varias ciudades con ese nombre. Elige la ciudad, región y país de la lista.";err.hidden=false;return;}
   let lat, lon, tz, lugarTexto;
   if(ciudad){ lat = ciudad.lat; lon = ciudad.lon; tz = ciudad.tz; lugarTexto = ciudad.etiqueta; }
@@ -5324,6 +5367,7 @@ function aplicaCarta(datos){
   }
 }
 function llenaFormulario(d){
+  lugarNatalGuardado={lat:d.lat,lon:d.lon,tz:d.tz,etiqueta:d.lugarTexto||""};lugarNatalManual=false;solicitudNatal++;
   document.getElementById("nOcurrencia").value=d.desambiguacion||"reject";
   document.getElementById("campoOcurrencia").hidden = !d.desambiguacion || d.desambiguacion==="reject";
   document.getElementById("nNombre").value = d.nombre || "";
@@ -5337,11 +5381,9 @@ function llenaFormulario(d){
   if(sh.checked !== !d.horaConocida){ sh.checked = !d.horaConocida; sh.dispatchEvent(new Event("change")); }
   const enLista = Boolean(resolverCiudad(d.lugarTexto).ciudad);
   document.getElementById("manual").classList.toggle("visible", !enLista);
-  if(!enLista){
-    document.getElementById("nLat").value = d.lat;
-    document.getElementById("nLon").value = d.lon;
-    if(d.tz) zonaSel.value = d.tz;
-  }
+  document.getElementById("nLat").value = d.lat;
+  document.getElementById("nLon").value = d.lon;
+  fijaZonaManual(d.tz);
 }
 
 /* exportar e importar, para pasar cartas entre computadoras o alumnos */
@@ -5748,6 +5790,7 @@ const pestañas = [["tabResumen","hojaResumen"],["tabPos","hojaPos"],["tabBalanc
                   ["tabSinastria","hojaSinastria"]];
 for(const [b,h] of pestañas){
   document.getElementById(b).addEventListener("click", () => {
+    solicitudLugarRS++;
     for(const [bb,hh] of pestañas){
       document.getElementById(bb).setAttribute("aria-selected", String(bb===b));
       document.getElementById(hh).hidden = hh !== h;
@@ -5819,6 +5862,7 @@ document.getElementById("gArchivo").addEventListener("change", ev => {
 
 (() => {                                   // recupera los últimos datos escritos en este navegador
   const d = recuperaUltima(); if(!d) return;
+  lugarNatalGuardado={lat:d.lat,lon:d.lon,tz:d.tz,etiqueta:d.lugarTexto||""};lugarNatalManual=false;
   document.getElementById("nOcurrencia").value=d.desambiguacion||"reject";
   document.getElementById("campoOcurrencia").hidden = !d.desambiguacion || d.desambiguacion==="reject";
   document.getElementById("nNombre").value = d.nombre || "";
@@ -5832,7 +5876,7 @@ document.getElementById("gArchivo").addEventListener("change", ev => {
     document.getElementById("manual").classList.add("visible");
     document.getElementById("nLat").value = d.lat;
     document.getElementById("nLon").value = d.lon;
-    if([...zonaSel.options].some(o => o.value === d.tz)) zonaSel.value = d.tz;
+    fijaZonaManual(d.tz);
   }
   if(!d.horaConocida){ sinHora.checked = true; sinHora.dispatchEvent(new Event("change")); }
 })();

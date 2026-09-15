@@ -3,23 +3,23 @@
 "use strict";
 const E=window.Efem,P=window.Profecciones,D=window.Dignidades||null,$=id=>document.getElementById(id),CARTAS="astroplanetario-cartas";
 if(!E||!P){document.body.textContent="No se pudo cargar el motor de profecciones.";return}
-let fuente="guardada",carta=null,resultado=null;
+let fuente="guardada",carta=null,resultado=null,solicitudCalculo=0;
 const meses=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 const esc=s=>E.escaparHTML(String(s==null?"":s));
 
 function leerCartas(){try{const a=JSON.parse(localStorage.getItem(CARTAS)||"[]");return Array.isArray(a)?a.filter(c=>c&&typeof c.id==="string"&&E.cartaValida(c.datos)):[]}catch(e){return[]}}
 function normal(s){return(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim()}
-function ciudadDe(texto){const ex=E.CIUDADES.filter(c=>normal(c.etiqueta)===normal(texto));if(ex.length===1)return ex[0];const n=E.CIUDADES.filter(c=>normal(c.n)===normal(texto));return n.length===1?n[0]:null}
+async function ciudadDe(texto){const r=await window.Ciudades.resolverAsync(texto);if(r.ambiguas)throw new Error("Hay varias localidades con ese nombre. Elige la ciudad, región y país de la lista.");return r.ciudad}
 function fechaLarga(ms,tz,hora){return new Intl.DateTimeFormat("es-MX",{timeZone:tz,day:"numeric",month:"short",year:"numeric",...(hora?{hour:"2-digit",minute:"2-digit"}:{})}).format(new Date(ms))}
 function fechaCorta(ms,tz){return new Intl.DateTimeFormat("es-MX",{timeZone:tz,day:"2-digit",month:"short",year:"numeric"}).format(new Date(ms))}
 function isoLocal(ms,tz){const p=Object.fromEntries(new Intl.DateTimeFormat("en-CA",{timeZone:tz,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date(ms)).map(x=>[x.type,x.value]));return{fecha:`${p.year}-${p.month}-${p.day}`,hora:`${p.hour}:${p.minute}`}}
 const posZod=lon=>{const p=E.posZod(lon);return`${p.signo.g} ${p.texto}`};
 
-function datosManuales(){
+async function datosManuales(){
   const f=$("nFecha").value,t=$("nHora").value,lugar=$("nLugar").value.trim();
   if(!f)throw new Error("Falta la fecha de nacimiento.");
   if(!t)throw new Error("Falta la hora exacta de nacimiento.");
-  const ciudad=ciudadDe(lugar);
+  const ciudad=await ciudadDe(lugar);
   if(!ciudad)throw new Error("Elige una ciudad completa de la lista para aplicar sus coordenadas y zona horaria.");
   const[anio,mes,dia]=f.split("-").map(Number),[hora,min]=t.split(":").map(Number);
   return{nombre:$("nNombre").value.trim()||"Carta sin nombre",anio,mes,dia,hora,min,horaConocida:true,
@@ -43,16 +43,18 @@ function mostrarError(e){
   $("estado").className="estado error";$("estado").textContent=e.message||String(e);$("salida").hidden=true;
   if(/dos veces/.test(e.message||"")){$("campoOcurrencia").hidden=false;$("nOcurrencia").focus()}
 }
-function calcular(nueva){
+async function calcular(nueva){
+  const solicitud=++solicitudCalculo;
+  if(fuente==="manual"){$("estado").className="estado";$("estado").textContent="Resolviendo la localidad…";}
   try{
-    if(nueva!==false)carta=P.prepararCarta(cartaElegida(),E);
+    if(nueva!==false){const datos=await cartaElegida();if(solicitud!==solicitudCalculo)return;carta=P.prepararCarta(datos,E);}
     if(!carta)throw new Error("Selecciona los datos de nacimiento.");
     const ms=fechaObjetivo(carta.datos.tz);
     resultado=P.calcular(carta,ms,{E,alinearRevolucion:$("alinear").checked});
     $("estado").className="estado";
     $("estado").textContent="Profección calculada con el criterio indicado al final de la página.";
     render();
-  }catch(e){mostrarError(e)}
+  }catch(e){if(solicitud===solicitudCalculo)mostrarError(e)}
 }
 function irA(ms){
   const p=isoLocal(ms,carta.datos.tz);$("fechaObjetivo").value=p.fecha;$("horaObjetivo").value=p.hora;
@@ -126,12 +128,13 @@ function renderVida(){
 function render(){renderResumen();renderAnillo();renderAno();renderActivados();renderMeses();renderVida();$("salida").hidden=false}
 
 /* ---------- arranque ---------- */
-function cambiarFuente(n){
+function cambiarFuente(n){solicitudCalculo++;
   fuente=n;
   document.querySelectorAll("[data-fuente]").forEach(b=>b.classList.toggle("activo",b.dataset.fuente===n));
   $("panelGuardada").hidden=n!=="guardada";$("panelManual").hidden=n!=="manual";
 }
 function iniciar(){
+  for(const evento of ["input","change"])document.addEventListener(evento,()=>solicitudCalculo++,true);
   if(window.CiudadesBuscador)window.CiudadesBuscador.conecta("ciudades");
   const hoy=new Date();
   $("fechaObjetivo").value=`${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,"0")}-${String(hoy.getDate()).padStart(2,"0")}`;
@@ -146,7 +149,7 @@ function iniciar(){
   $("calcular").addEventListener("click",()=>calcular(true));
   $("cartaSelect").addEventListener("change",()=>calcular(true));
   $("alinear").addEventListener("change",()=>carta&&calcular(false));
-  $("nEjemplo").addEventListener("click",()=>{
+  $("nEjemplo").addEventListener("click",()=>{solicitudCalculo++;
     $("nNombre").value="Ejemplo de exploración";$("nFecha").value="1990-03-21";$("nHora").value="06:30";$("nLugar").value="Ciudad de México, México";});
   $("salida").addEventListener("click",e=>{
     const ir=e.target.closest("[data-ir]");if(ir){irA(Number(ir.dataset.ir));return}

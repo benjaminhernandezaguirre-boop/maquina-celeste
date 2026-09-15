@@ -161,7 +161,7 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
 <section class="panel">
   <p class="rot">Alcance del cálculo</p>
   <p class="lead">Modelo astronómico aproximado para 1800–2050, con horizonte geométrico geocéntrico. No incluye refracción, relieve ni paralaje del observador. La precisión depende del astro y la fecha, y disminuye cerca de las tangencias polares. No se garantiza precisión de segundos de arco.</p>
-  <p class="pie">Distancias mínimas sobre una Tierra esférica a cada línea, incluidos sus extremos. Las ciudades son una selección de 195 lugares. Las zonas históricas dependen de la base de datos del navegador. UTC aproxima UT1; ΔT usa polinomios históricos y predictivos.</p>
+  <p class="pie">Distancias mínimas sobre una Tierra esférica a cada línea, incluidos sus extremos. Catálogo mundial de localidades · GeoNames CC BY 4.0. Las zonas históricas dependen de la base de datos del navegador. UTC aproxima UT1; ΔT usa polinomios históricos y predictivos.</p>
   <p class="rot" style="margin-top:1rem">Cómo se lee</p>
   <p class="lead">Una carta natal es el cielo de un instante visto desde un punto de la Tierra. Cambia el punto y el cielo es
     el mismo, pero cambian los ángulos: lo que en tu ciudad estaba saliendo, en otra estaba culminando. La astrocartografía
@@ -191,7 +191,7 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
   </div>
 </section>
 </div>
-<script src="app/ciudades-buscador.js"></script><script src="app/efemerides.js"></script>
+<script src="app/ciudades.js?v=20260915"></script><script src="app/ciudades-buscador.js?v=20260915"></script><script src="app/efemerides.js"></script>
 <script src="app/astrocartografia.js"></script>
 <script>
 /* Contorno del mundo (Natural Earth 110m, simplificado y codificado como
@@ -436,34 +436,35 @@ function pintaTablaLugar(nombre, lat, lon){
         <td class="m">${Math.round(f.km)} km</td></tr>`).join("")
     : `<tr><td colspan="4" style="color:#9993a4">No hay líneas visibles a menos de ${orbe} km de este punto.</td></tr>`);
 }
-function pintaTablaLinea(){
+let solicitudLinea=0, consultaLineaActual=null;
+async function pintaTablaLinea(){
+  const solicitud=++solicitudLinea;
   const cuerpo=document.querySelector("#tablaLinea tbody");
   if(!carta){ cuerpo.innerHTML="<tr><td>Primero dibuja un mapa.</td></tr>"; return; }
   const id=document.getElementById("lnAstro").value, eje=document.getElementById("lnEje").value;
   const a=datosAstros().find(x=>x.id===id);
   if(!astrosOn.has(id) || !ejesOn.has(eje)){ cuerpo.innerHTML="<tr><td>Esta línea está oculta. Actívala en los filtros para consultar sus ciudades.</td></tr>"; return; }
-  if(!E.CIUDADES.length){
-    cuerpo.innerHTML="<tr><td>Cargando el catálogo de ciudades…</td></tr>";
-    if(window.CiudadesBuscador)window.CiudadesBuscador.carga().then(pintaTablaLinea).catch(()=>{
-      cuerpo.innerHTML="<tr><td>No se pudo cargar el catálogo de ciudades.</td></tr>"});
-    return;
-  }
-  const cerca=E.CIUDADES.map(c=>({c,...Geo.distancia(a,eje,c.lat,c.lon)})).sort((a,b)=>a.km-b.km);
-  cuerpo.innerHTML='<tr><th colspan="3">'+a.n+' '+eje+' · Ciudades del catálogo más cercanas</th></tr>'+
-    cerca.slice(0,12).map(f=>'<tr><td>'+E.escaparHTML(f.c.etiqueta)+'</td><td class="m">'+f.grados.toFixed(2)+'°</td><td class="m">'+Math.round(f.km)+' km</td></tr>').join('');
+  cuerpo.innerHTML="<tr><td>Buscando localidades cercanas a la línea…</td></tr>";
+  try {
+    const clave=[a.lonMC,a.dec,eje].join('|');
+    if(!consultaLineaActual || consultaLineaActual.clave!==clave){
+      const consulta={clave,promesa:window.Ciudades.cercanasLinea(a,eje)};
+      consulta.promesa.catch(()=>{if(consultaLineaActual===consulta)consultaLineaActual=null;});
+      consultaLineaActual=consulta;
+    }
+    const cerca=await consultaLineaActual.promesa;
+    if(solicitud!==solicitudLinea)return;
+    cuerpo.innerHTML='<tr><th colspan="3">'+a.n+' '+eje+' · Localidades del catálogo más cercanas</th></tr>'+
+      cerca.map(f=>'<tr><td>'+E.escaparHTML(f.c.etiqueta)+'</td><td class="m">'+f.grados.toFixed(2)+'°</td><td class="m">'+Math.round(f.km)+' km</td></tr>').join('');
+  }catch(e){if(solicitud===solicitudLinea)cuerpo.innerHTML='<tr><td>'+E.escaparHTML(e.message || 'No se pudo cargar el catálogo. Inténtalo de nuevo.')+'</td></tr>';}
 }
 
 /* ===================== Datos de entrada ===================== */
 const $ = id => document.getElementById(id);
 const dl = $("ciudades");
 if(window.CiudadesBuscador)window.CiudadesBuscador.conecta("ciudades");
-const buscaCiudad = t => {
-  const s = (t || "").trim().toLowerCase();
-  const exacta=E.CIUDADES.find(c=>c.etiqueta.toLowerCase()===s);
-  if(exacta) return exacta;
-  const coincidencias=E.CIUDADES.filter(c=>c.n.toLowerCase()===s);
-  return coincidencias.length===1 ? coincidencias[0] : null;
-};
+const buscaCiudad = t => window.Ciudades.resolver(t).ciudad;
+let solicitudMapa=0, solicitudLugar=0;
 
 function guardadas(){
   try { const a=JSON.parse(localStorage.getItem("astroplanetario-cartas")||"[]");
@@ -482,14 +483,17 @@ for(const reg of guardadas()){
 
 function avisa(t){ const a = $("aviso"); a.hidden = !t; a.textContent = t || ""; }
 
-function levanta(){
+async function levanta(){
+  const solicitud=++solicitudMapa;
   try {
-    const f=$("fecha").value, h=$("hora").value, c=usarManual?null:(lugarGuardado||buscaCiudad($("lugar").value));
+    const f=$("fecha").value, h=$("hora").value;
     if(!f) throw Error("Falta la fecha.");
     if(!h) throw Error("La astrocartografía necesita la hora de nacimiento. No se puede sustituir por mediodía.");
     const [anio,mes,dia]=f.split("-").map(Number), [hora,min]=h.split(":").map(Number);
-    const ambiguas=E.CIUDADES.filter(c=>c.n.toLowerCase()===$("lugar").value.trim().toLowerCase());
-    if(!c && !usarManual && ambiguas.length>1) throw Error("Hay varias ciudades con ese nombre. Elige la ciudad y país de la lista.");
+    const r=usarManual ? {ciudad:null} : lugarGuardado ? {ciudad:lugarGuardado} : await window.Ciudades.resolverAsync($("lugar").value);
+    if(solicitud!==solicitudMapa)return;
+    const c=r.ciudad;
+    if(r.ambiguas) throw Error("Hay varias ciudades con ese nombre. Elige la ciudad, región y país de la lista.");
     if(!c && (!$("latManual").value || !$("lonManual").value || !$("zonaManual").value)) throw Error("Elige una ciudad de la lista o completa sus coordenadas y zona horaria.");
     const d={nombre:nombreEditor,anio,mes,dia,hora,min,horaConocida:true,
       lat:c?c.lat:Number($("latManual").value),lon:c?c.lon:Number($("lonManual").value),
@@ -507,6 +511,7 @@ function levanta(){
     marca=consulta.natal?null:{lat:consulta.lat,lon:consulta.lon};
     actualiza();
   } catch(e){
+    if(solicitud!==solicitudMapa)return;
     carta=null;datosCache=null;$("resumen").hidden=true;avisa(e.message);actualiza();
   }
 }
@@ -548,6 +553,7 @@ $("dibujar").addEventListener("click",levanta);
 sel.addEventListener("change",()=>{if(sel.value)cargaGuardada();});
 for(const id of ["fecha","hora","lugar","ocurrencia","latManual","lonManual","zonaManual"]){
   $(id).addEventListener("input",()=>{
+    solicitudMapa++;
     if(id==="lugar"){
       lugarGuardado=null;usarManual=false;
       for(const campo of ["latManual","lonManual","zonaManual"]) $(campo).value="";
@@ -556,14 +562,20 @@ for(const id of ["fecha","hora","lugar","ocurrencia","latManual","lonManual","zo
   });
 }
 $("orbe").addEventListener("change",actualiza);
-$("ciudad").addEventListener("change",ev=>{
-  const c=buscaCiudad(ev.target.value);
-  if(!c){avisa("Elige una ciudad con su país en la lista para consultarla.");return;}
-  consulta={nombre:c.etiqueta,lat:c.lat,lon:c.lon};marca={lat:c.lat,lon:c.lon};avisa("");actualiza();
+$("ciudad").addEventListener("input",()=>{solicitudLugar++;});
+$("ciudad").addEventListener("change",async ev=>{
+  const solicitud=++solicitudLugar;
+  try {
+    const r=await window.Ciudades.resolverAsync(ev.target.value),c=r.ciudad;
+    if(solicitud!==solicitudLugar)return;
+    if(!c){avisa(r.ambiguas?"Hay varias localidades con ese nombre. Elige ciudad, región y país.":"Elige una ciudad con su país en la lista para consultarla.");return;}
+    consulta={nombre:c.etiqueta,lat:c.lat,lon:c.lon};marca={lat:c.lat,lon:c.lon};avisa("");actualiza();
+  }catch(e){if(solicitud===solicitudLugar)avisa(e.message || "No se pudo cargar el catálogo. Inténtalo de nuevo.");}
 });
 for(const id of ["lnAstro","lnEje"]) $(id).addEventListener("change",pintaTablaLinea);
 cv.addEventListener("click",ev=>{
   if(!carta)return;
+  solicitudLugar++;
   const r=cv.getBoundingClientRect(), ancho=cv.clientWidth, alto=cv.clientHeight;
   const x=(ev.clientX-r.left)*cv.offsetWidth/r.width-cv.clientLeft;
   const y=(ev.clientY-r.top)*cv.offsetHeight/r.height-cv.clientTop;

@@ -1,76 +1,94 @@
-# Buscador de ciudades y carga diferida
+# Buscador mundial de ciudades
 
-Paquete del 14 de septiembre de 2026. Incluye el arreglo de la regresión del
-catálogo y prepara el terreno para un catálogo mucho más grande.
+Implementación del 15 de septiembre de 2026 sobre GeoNames cities500.
 
-## Qué cambia
+## Cobertura y origen
 
-**1. El desplegable ya no se llena entero.** Antes cada calculadora metía las
-2 921 ciudades en el `<datalist>` al abrir la página. Ahora se pintan como mucho
-**40 coincidencias**, y solo cuando escribes. ChatGPT ya lo había hecho así en
-`astroplanetario.html`; esto lo extiende a las otras seis páginas y le pone tope
-también allí, porque sin tope una sola letra puede meter miles de opciones.
+La instantánea incluye 235,808 registros oficiales de 246 países y territorios,
+394 zonas IANA y dos localidades conservadas por compatibilidad (235,810 en total).
+No se aplican umbrales regionales adicionales. Se conservan las coordenadas WGS84,
+los identificadores GeoNames y la zona IANA de cada registro. Los homónimos incluyen
+región/país; cuando es necesario, municipio e identificador para distinguirlos.
 
-**2. El catálogo se descarga solo cuando hace falta.** `app/ciudades.js` ya no se
-carga al abrir. Llega la primera vez que alguien toca un campo de ciudad. Quien
-entra a leer una guía, o abre una carta guardada, no baja ni un byte de ciudades.
+Fuente: https://download.geonames.org/export/dump/readme.txt
+Licencia: Creative Commons Attribution 4.0, https://creativecommons.org/licenses/by/4.0/.
+GeoNames distribuye datos sin garantía de exactitud/completitud. Los archivos se
+transformaron a filas compactas con diccionarios de regiones y zonas; los nombres
+de países se muestran en español. Se incluyen nombre principal, transliteración
+ASCII y aliases del catálogo anterior, no todos los nombres alternativos de GeoNames.
 
-**3. El motor lee el catálogo en vivo.** `Efem.CIUDADES` era una copia tomada al
-cargar, y por eso bastaba con que `ciudades.js` llegara tarde para que quedara
-vacía — que es exactamente lo que rompió cuatro calculadoras. Ahora es un getter:
-refleja el catálogo esté donde esté y llegue cuando llegue. **Ese fallo no puede
-volver a ocurrir.**
+## Cómo funciona
 
-## Archivos
+- `app/ciudades.js`: fachada ligera. Al abrir la página no inicia Worker ni descarga datos.
+- `app/ciudades-buscador.js`: inicia carga al tocar un campo, espera 140 ms entre
+  pulsaciones y muestra hasta 40 opciones. Informa carga/error y permite reintentar.
+- `app/ciudades-worker.js`: consulta el manifiesto y descarga una sola copia del
+  catálogo por página. La carga, el índice y las búsquedas corren en segundo plano.
+- `app/ciudades-motor.js`: resolución global de nombres/etiquetas, ranking por
+  coincidencia y población, búsqueda sin acentos y consulta de cercanía a líneas.
+- `app/datos/ciudades-manifest.json`: fecha, conteos, pesos y SHA-256 de la fuente
+  y del catálogo. Archivo pequeño que se revalida; el JSON fechado se puede cachear.
 
-    app/ciudades-buscador.js   NUEVO · filtrado, tope y carga diferida
-    app/efemerides.js          CIUDADES pasa a getter vivo
-    app/profecciones-ui.js     usa el buscador
-    app/dignidades-ui.js       usa el buscador
-    app/liberacion-zodiacal-ui.js  usa el buscador
-    astrocarto.html            usa el buscador; las «ciudades cercanas» esperan al catálogo
-    astroplanetario.html       tope de 40 opciones en su buscador
-    luna.html, lotes-arabigos-calculadora.html, *-calculadora.html  carga diferida
-    tests/astrocartografia-ui.test.cjs  carga el catálogo; 'Madrid' → 'Madrid, España'
-    vercel.json                cabeceras de caché
+`Ciudades.resolverAsync(texto)` devuelve `{ciudad, ambiguas, coincidencias, total}`.
+Una entrada ambigua no selecciona automáticamente la ciudad más poblada. La búsqueda
+limita resultados, pero la resolución cuenta coincidencias en el catálogo completo.
 
-114 de 114 pruebas pasan. Las 17 páginas cargan sin errores.
+`Ciudades.lista` / `Efem.CIUDADES` ahora contienen sólo hasta 256 resultados recientes.
+No deben recorrerse como si representaran el mundo. `resolver(texto)` consulta esa
+caché; sólo sirve para presentación. Toda entrada que determine coordenadas utiliza
+`resolverAsync`. La fachada conserva además hasta 64 respuestas recientes, cada una
+con un máximo de 40 coincidencias. Nunca recibe el catálogo completo desde el Worker.
 
-## Probado con un catálogo de 55 000 ciudades
+Astrocartografía utiliza `Ciudades.cercanasLinea(astro,eje)` para buscar las 12
+localidades más próximas entre todos los registros con la misma geometría esférica
+que el mapa. Respuestas antiguas no reemplazan una consulta más reciente.
 
-Se generó un catálogo sintético de 55 000 ciudades (8.1 MB en crudo, 1.6 MB
-comprimido) y se midió la calculadora de profecciones con él:
+## Zonas horarias y cartas guardadas
 
-    abrir la página          919 ms   (0 opciones, catálogo aún sin bajar)
-    cargar el catálogo       746 ms   desde la primera letra escrita
-    opciones pintadas         40      de 55 000
-    escribir letra a letra   3–25 ms
-    calcular                 correcto
+Se conservan identificadores IANA, nunca offsets fijos. `Efem.localAUTC` utiliza
+las reglas históricas disponibles en Intl del navegador; se rechazan horas
+inexistentes y se requiere elegir la ocurrencia si la hora se repite. Luna usa
+ahora esa misma conversión; su formulario directo rechaza horas ambiguas y una
+carta guardada puede suministrar la ocurrencia elegida en la carta natal.
 
-Con el desplegable antiguo, 55 000 ciudades habrían tardado ~690 ms en construirse
-en escritorio y cerca de tres segundos en un celular, cada vez que se abre la página.
+Las cartas guardadas mantienen sus coordenadas, zona y ocurrencia originales al
+abrirse o editar la hora; no se sustituyen por las coordenadas del catálogo nuevo.
+2,919 etiquetas anteriores se reconocen como aliases y dos localidades se conservan.
+Si un navegador no reconoce una zona nueva, el cálculo informa el error: no la
+sustituye por UTC ni por una ciudad cercana. Las reglas históricas dependen del tzdb
+del navegador; ampliar ciudades no hace exacta la hora civil de toda época histórica.
 
-## Para meter el catálogo grande
+## Mediciones locales
 
-Ya no hace falta tocar código. Basta reemplazar `app/ciudades.js` conservando su
-forma:
+Con el catálogo real, Node 24.19 y recolección de basura explícita:
 
-    root.Ciudades = { lista, normaliza, resolver, version, fuente }
+- JSON preparado: 14,143,616 bytes; gzip nivel 9: 4,927,414 bytes.
+- Memoria retenida adicional (datos e índice): aproximadamente 53.9 MiB.
+- Lectura, parseo e índice: 522 ms.
+- Diez consultas de prueba: 29–55 ms por consulta; hasta 40 resultados.
 
-donde cada ciudad es `{n, r, lat, lon, tz, etiqueta}`.
+Estas cifras corresponden al motor en Node sobre este equipo, no a una medición
+RAM de un teléfono ni al consumo total de la página. El navegador puede consumir
+más memoria durante parseo/búsquedas. Vercel decide la compresión HTTP efectiva.
+La caché del navegador es reutilizable, pero puede ser desalojada y no constituye
+una garantía de funcionamiento sin conexión.
 
-Recomendación para tus alumnos: en vez de volcar el mundo entero, baja el umbral
-de población de México y Latinoamérica (de 15 000 a 1 000 habitantes) y deja el
-resto del mundo como está. La gente nace en pueblos chicos, y tus alumnos nacen en
-pueblos chicos mexicanos. Eso da mucha más cobertura útil por kilobyte.
+## Actualizar la instantánea
 
-GeoNames no es alcanzable desde mi entorno, así que la descarga del catálogo
-(`cities5000.zip` o `cities1000.zip` de download.geonames.org) tendrás que hacerla
-tú o pedírsela a ChatGPT.
+1. Descargar desde el directorio oficial `cities500.zip`, `admin1CodesASCII.txt` y
+   `admin2Codes.txt`; descomprimir cities500.txt en la misma carpeta.
+2. Ejecutar, desde la raíz del repositorio:
 
-## Nota
+   `node scripts/generar-ciudades.cjs RUTA_A_LA_CARPETA AAAA-MM-DD`
 
-71 de los 2 843 nombres del catálogo actual son ambiguos: Córdoba, León, Mérida y
-Toledo aparecen tres veces; Madrid, Santiago, Guadalajara y Valencia, dos. Con un
-catálogo mayor serán muchos más. El buscador lo resuelve mostrando siempre la
-etiqueta completa —«Mérida, Yucatán, MX»—, que es lo que hay que elegir.
+3. El generador valida registros/zonas, conserva `scripts/ciudades-compat.json`,
+   escribe el JSON fechado y actualiza el manifiesto. Si un ID de compatibilidad
+   desaparece, se detiene para revisar el alias en vez de trasladarlo por cercanía.
+4. Ejecutar `node --test tests/*.test.cjs` y comprobar ciudad/fecha/UTC en navegador.
+5. Publicar juntos JSON y manifiesto. El Worker lee el archivo indicado por el
+   manifiesto; no es necesario modificar rutas de datos en JavaScript. Si cambia
+   el código del Worker/motor, incrementar sus versiones de URL.
+
+No se necesita usuario GeoNames ni una API pública en tiempo de ejecución. La
+primera descarga requiere conexión; coordenadas manuales y cartas guardadas siguen
+operativas si el catálogo no está disponible.

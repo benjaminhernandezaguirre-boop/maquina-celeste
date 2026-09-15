@@ -1,0 +1,16 @@
+{
+  "version": "2026-09-15",
+  "archivo": "ciudades-2026-09-15.json",
+  "fuente": "GeoNames cities500",
+  "licencia": "CC BY 4.0",
+  "url": "https://download.geonames.org/export/dump/",
+  "geonames": 235808,
+  "compatibilidad": 2,
+  "total": 235810,
+  "paises": 246,
+  "zonas": 394,
+  "bytes": 14143616,
+  "gzipBytes": 4927414,
+  "sha256": "6e6c02f7bc66c687a8eca5939866994292c27faef44c3e5a2cab7144ea2c2116",
+  "origenSHA256": "4ecdabc0855674f5a29db1d6766318d63be6a19ed3c43ea87de368c6ec64972f"
+}
