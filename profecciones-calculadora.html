@@ -41,8 +41,10 @@ table.t tr.ahora td{font-weight:600}
 @media(max-width:980px){.tablero{grid-template-columns:1fr}.meses{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:680px){.anillo{width:min(88vw,340px)}.anillo .nodo{width:46px;height:46px;transform:translate(-50%,-50%) rotate(var(--a)) translateY(-37vw) rotate(calc(-1*var(--a)))}.meses{grid-template-columns:repeat(3,1fr)}}
 </style>
+<link rel="stylesheet" href="/app/estudio-comun.css?v=20260915">
+<link rel="stylesheet" href="/app/navegacion.css?v=20260915">
 </head>
-<body><div class="fondo"></div>
+<body data-estudio="profecciones"><div class="fondo"></div>
 <header class="ancho cabecera">
   <a class="marca" href="/">Astroplanetario <span>Máquina Celeste</span></a>
   <nav class="nav" aria-label="Navegación principal">
@@ -52,8 +54,8 @@ table.t tr.ahora td{font-weight:600}
 </header>
 <main class="ancho">
 
-<section class="hero" data-glifo="♃">
-  <p class="ceja">Júpiter · Calculadora anual</p>
+<section class="hero" data-glifo="♂">
+  <p class="ceja">Marte · Calculadora anual</p>
   <h1>Tu profección del año</h1>
   <p>El signo al que se profecta tu carta este año, la casa que activa, el señor del año con su condición natal, y la tabla completa de tu vida año por año.</p>
 </section>
@@ -66,7 +68,7 @@ table.t tr.ahora td{font-weight:600}
   </div>
   <div class="fuente-panel" id="panelGuardada">
     <div class="campo"><label for="cartaSelect">Carta natal guardada</label><select id="cartaSelect"></select></div>
-    <a class="boton sec" href="/astroplanetario.html?view=natal">Crear otra carta</a>
+    <a class="boton sec" href="/astroplanetario.html?view=natal&amp;returnTo=%2Fcalculadora-profecciones">Crear carta y continuar</a>
   </div>
   <div id="panelManual" hidden>
     <div class="manual-grid">
@@ -128,4 +130,6 @@ table.t tr.ahora td{font-weight:600}
 <script src="/app/dignidades.js"></script>
 <script src="/app/profecciones.js"></script>
 <script src="/app/profecciones-ui.js"></script>
+<script src="/app/estudio-comun.js?v=20260915" defer></script>
+<script src="/app/navegacion.js?v=20260915" defer></script>
 </body></html>

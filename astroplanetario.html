@@ -44,6 +44,9 @@
 </style>
 <link rel="stylesheet" href="app/studio-theme.css?v=20260911">
 <script src="app/studio-theme.js"></script>
+<link rel="stylesheet" href="/app/navegacion.css?v=20260915">
+<script src="/app/navegacion.js?v=20260915" defer></script>
+<script src="/app/continuar-carta.js?v=20260915" defer></script>
 </head>
 <body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -992,7 +995,7 @@
       <span id="relojFecha">—</span>
       <span id="relojZona">Hora local</span>
     </div>
-  </header>
+  <a class="astro-tools-fallback" href="/herramientas">Todas las herramientas</a></header>
 
   <div id="barraNatal">
     <div id="barraDatos"></div>
@@ -5555,7 +5558,7 @@ function aplicaCarta(datos){
   estadoTransitos.fecha = null;
   levantarCarta(datos);
   guardaUltima(datos);
-  guardaEnLista(datos);
+  const idGuardada=guardaEnLista(datos);
   velo.classList.remove("visible");
   document.getElementById("cartaPanel").classList.add("abierto");
   document.getElementById("nCancelar").hidden = false;
@@ -5569,6 +5572,7 @@ function aplicaCarta(datos){
     const bot = document.getElementById("tabSinastria");
     if(bot) setTimeout(() => bot.click(), 60);
   }
+  document.dispatchEvent(new CustomEvent('astro:carta-lista',{detail:{guardada:leerCartas().some(c=>c.id===idGuardada)}}));
 }
 function llenaFormulario(d){
   lugarNatalGuardado={lat:d.lat,lon:d.lon,tz:d.tz,etiqueta:d.lugarTexto||""};lugarNatalManual=false;solicitudNatal++;

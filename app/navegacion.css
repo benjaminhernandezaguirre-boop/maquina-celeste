@@ -1,0 +1,24 @@
+/* Navegación común; independiente del motor y del tema de cada calculadora. */
+.astro-nav-host{position:relative;z-index:60;overflow:visible!important;gap:.7rem;flex-wrap:wrap;height:auto!important;min-height:64px;padding-block:.6rem}
+.astro-site-nav{--an-panel:#fffdf8;--an-text:#243e40;--an-muted:#687678;--an-line:#d9d5c8;display:flex;gap:.4rem;align-items:center;flex:0 0 auto;position:relative;font:500 11px/1.4 "IBM Plex Mono",monospace;letter-spacing:.01em;text-transform:none}
+html[data-studio-theme="dark"] .astro-site-nav,#navegacionPortada{--an-panel:#101c2b;--an-text:#eee7d6;--an-muted:#b1c0cd;--an-line:#40516a}
+.astro-site-nav>a,.astro-nav-menu>summary,.astro-tools-fallback{display:inline-flex!important;align-items:center;justify-content:center;gap:.5rem;min-height:40px;padding:.55rem .8rem;border:1px solid var(--an-line,#d9d5c8);border-radius:999px;color:var(--an-text,#243e40)!important;background:var(--an-panel,#fffdf8);text-decoration:none!important;white-space:nowrap;font:inherit;cursor:pointer}
+.astro-site-nav>a:hover,.astro-nav-menu>summary:hover{border-color:currentColor}
+.astro-site-nav :focus-visible{outline:2px solid #ac8230;outline-offset:3px}
+.astro-nav-menu{position:relative;padding:0!important;border:0!important;margin:0!important}
+.astro-nav-menu>summary{list-style:none!important}
+.astro-nav-menu>summary::-webkit-details-marker{display:none}
+.astro-nav-menu>summary:after{content:none!important}
+.astro-nav-panel{position:absolute;right:0;top:calc(100% + .6rem);width:min(330px,calc(100vw - 24px));max-height:calc(100dvh - 145px);overflow:auto;padding:.75rem;border:1px solid var(--an-line);border-radius:16px;background:var(--an-panel);box-shadow:0 18px 50px #0003;z-index:120;text-align:left}
+.astro-nav-panel>p{font:500 9px/1.5 "IBM Plex Mono",monospace!important;letter-spacing:.1em;text-transform:uppercase;color:var(--an-muted)!important;margin:.3rem .55rem .6rem!important}
+.astro-nav-panel>a{display:block!important;padding:.65rem .6rem;border-radius:9px;color:var(--an-text)!important;text-decoration:none!important;font:500 13px/1.4 "IBM Plex Mono",monospace;text-transform:none;white-space:normal}
+.astro-nav-panel>a:hover{background:color-mix(in srgb,var(--an-muted) 12%,transparent)}
+.astro-nav-panel>a>span{display:block;margin-top:.17rem;color:var(--an-muted);font:400 12px/1.4 Spectral,Georgia,serif;letter-spacing:0}
+.astro-retorno{border:1px solid #bba46a;border-radius:10px;padding:.75rem 1rem;margin:.5rem 0 1rem;background:#f4efdf;color:#4c442e;font:400 14px/1.45 Spectral,Georgia,serif}
+.astro-retorno a{color:inherit;text-decoration:underline}.astro-retorno b{display:block}
+html[data-studio-theme="dark"] .astro-retorno{background:#222b39;color:#e9dcc0}
+#navegacionPortada{position:fixed;top:16px;right:20px;z-index:80}
+#navegacionPortada a{background:#101c2be6}
+#app header .astro-nav-predicciones{display:none!important}
+@media(max-width:1050px){.astro-site-nav .astro-nav-predicciones{display:none!important}.astro-nav-host{justify-content:space-between}}
+@media(max-width:620px){.astro-site-nav{font-size:10px;gap:.3rem}.astro-site-nav>a,.astro-nav-menu>summary{min-height:42px;padding:.45rem .65rem}.astro-nav-host{min-height:64px}.astro-site-nav{margin-left:auto}.astro-nav-panel{position:fixed;right:12px;top:135px;max-height:calc(100dvh - 150px)}#navegacionPortada{left:12px;right:12px;top:12px;justify-content:space-between}#navegacionPortada .astro-nav-panel{top:66px}#app header .astro-nav-directo{display:none!important}}

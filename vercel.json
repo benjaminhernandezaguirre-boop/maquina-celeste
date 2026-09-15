@@ -79,6 +79,30 @@
     {
       "source": "/calculadora-dignidades/",
       "destination": "/dignidades-calculadora.html"
+    },
+    {
+      "source": "/herramientas",
+      "destination": "/herramientas.html"
+    },
+    {
+      "source": "/herramientas/",
+      "destination": "/herramientas.html"
+    },
+    {
+      "source": "/predicciones",
+      "destination": "/predicciones.html"
+    },
+    {
+      "source": "/predicciones/",
+      "destination": "/predicciones.html"
+    },
+    {
+      "source": "/astrologia-horaria",
+      "destination": "/astrologia-horaria.html"
+    },
+    {
+      "source": "/astrologia-horaria/",
+      "destination": "/astrologia-horaria.html"
     }
   ],
   "headers": [
