@@ -82,7 +82,7 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
   font-size:.78rem;opacity:.8}
 </style>
 <link rel="stylesheet" href="app/studio-theme.css">
-<link rel="stylesheet" href="app/astrocarto-estudio.css?v=20260915">
+<link rel="stylesheet" href="app/astrocarto-estudio.css?v=20260915-localidades">
 <script src="app/studio-theme.js"></script>
 </head>
 <body class="astro-studio geo-estudio">
@@ -173,7 +173,7 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
   <div class="tabla-caja"><table id="tablaLugar"><tbody></tbody></table></div>
 </section>
 
-<section class="panel">
+<section class="panel geo-localidades">
   <p class="rot">Por dónde pasa una línea</p>
   <div class="campos">
     <div class="campo"><label for="lnAstro">Astro</label><select id="lnAstro"></select></div>
@@ -181,8 +181,15 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
       <select id="lnEje"><option value="AC">AC · sale</option><option value="MC" selected>MC · culmina</option><option value="DC">DC · se pone</option><option value="IC">IC · fondo del cielo</option></select></div>
     <button class="bot" id="buscarLocalidades">Buscar localidades</button>
   </div>
-  <p class="pie">Las 12 localidades del catálogo más cercanas a esta línea. La búsqueda se carga cuando la solicitas.</p>
-  <div class="tabla-caja"><table id="tablaLinea"><tbody></tbody></table></div>
+  <p class="pie">Explora localidades a lo largo del recorrido mundial o elige un país. La distancia indica qué tan cerca están de la línea.</p>
+  <div class="campos geo-localidades-filtros">
+    <div class="campo ancho"><label for="localidadesPais">País</label><select id="localidadesPais" disabled><option value="">Todos los países · recorrido mundial</option></select></div>
+    <div class="campo ancho" id="localidadesRegionCampo" hidden><label for="localidadesRegion">Región del país</label><select id="localidadesRegion" disabled><option value="">Todas las regiones</option></select></div>
+    <div class="campo ancho"><label for="localidadesRadio">Distancia máxima a la línea</label><select id="localidadesRadio"><option value="100">100 km</option><option value="300" selected>300 km</option><option value="1000">1000 km</option><option value="todos">Sin límite de distancia</option></select></div>
+  </div>
+  <p id="localidadesEstado" class="pie geo-localidades-estado" role="status">Pulsa Buscar localidades para cargar los países disponibles.</p>
+  <div class="tabla-caja" id="localidadesResultados"><table id="tablaLinea"><tbody></tbody></table></div>
+  <div class="geo-localidades-paginacion" aria-label="Páginas de localidades"><button class="bot" id="localidadesAnterior" disabled>Anterior</button><span id="localidadesPagina">Página 1</span><button class="bot" id="localidadesSiguiente" disabled>Siguiente</button></div>
 </section>
 </aside>
 </div>
@@ -220,7 +227,7 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
   </div>
 </section>
 </div>
-<script src="app/ciudades.js?v=20260915"></script><script src="app/ciudades-buscador.js?v=20260915"></script><script src="app/efemerides.js"></script>
+<script src="app/ciudades.js?v=20260915-localidades"></script><script src="app/ciudades-buscador.js?v=20260915"></script><script src="app/efemerides.js"></script>
 <script src="app/astrocartografia.js"></script>
 <script src="app/astrocarto-vista.js?v=20260915"></script>
 <script src="app/astrocarto-pintor.js?v=20260915"></script>
@@ -330,6 +337,7 @@ const TIERRA = MAPA.tierra.map(descodifica), FRONTERAS = MAPA.fronteras.map(desc
 const vista = window.AstroVista.crear(cv.clientWidth || 1080, cv.clientHeight || 540);
 const pintor = window.AstroMapa.crear(cv,vista,{tierra:TIERRA,fronteras:FRONTERAS,geo:Geo,trazaPluton});
 let lineaSeleccionada=null, listaLineasAbierta=false, localidadesMostradas=[], ampliado=false;
+let paginaLocalidades=1, firmaLocalidades='';
 let firmaSelector="", ultimoMapa=null, focoAnterior=null, overflowAnterior="";
 function mapaClaro(){ return document.documentElement.dataset.studioTheme === "light"; }
 function tintaMapa(color){
@@ -400,6 +408,10 @@ function consultarDestino(q,centrar=true){
 function reiniciaExploracion(){
   lineaSeleccionada=null;listaLineasAbierta=false;localidadesMostradas=[];ultimoMapa=null;
   consultaLineaActual=null;solicitudLinea++;vista.mundo();
+  paginaLocalidades=1;firmaLocalidades='';
+  document.getElementById('localidadesPais').value='';
+  document.getElementById('localidadesRegion').value='';
+  document.getElementById('localidadesRegionCampo').hidden=true;
   for(const id of ['latDestino','lonDestino'])document.getElementById(id).value='';
   avisoDestino('');document.getElementById('editorCarta').open=true;
 }
@@ -443,26 +455,57 @@ let solicitudLinea=0, consultaLineaActual=null;
 async function pintaTablaLinea(){
   const solicitud=++solicitudLinea;
   const cuerpo=document.querySelector("#tablaLinea tbody");
+  const paisControl=document.getElementById('localidadesPais'),regionControl=document.getElementById('localidadesRegion');
+  const anterior=document.getElementById('localidadesAnterior'),siguiente=document.getElementById('localidadesSiguiente');
+  const estado=document.getElementById('localidadesEstado'),pagina=document.getElementById('localidadesPagina');
+  const resultados=document.getElementById('localidadesResultados');
+  anterior.disabled=true;siguiente.disabled=true;
   localidadesMostradas=[];
-  if(!carta){ cuerpo.innerHTML="<tr><td>Primero dibuja un mapa.</td></tr>"; return; }
-  if(!listaLineasAbierta){cuerpo.innerHTML="<tr><td>Elige una línea y pulsa Buscar localidades para explorar sus destinos.</td></tr>";return;}
+  if(!carta||!listaLineasAbierta){
+    resultados.style.minHeight='';
+    paisControl.disabled=true;regionControl.disabled=true;
+    estado.textContent='Pulsa Buscar localidades para cargar los países disponibles.';pagina.textContent='Página 1';
+    cuerpo.innerHTML=!carta?"<tr><td>Primero dibuja un mapa.</td></tr>":"<tr><td>Elige una línea y pulsa Buscar localidades para explorar sus destinos.</td></tr>";return;
+  }
   const id=document.getElementById("lnAstro").value, eje=document.getElementById("lnEje").value;
   const a=datosAstros().find(x=>x.id===id);
-  if(!astrosOn.has(id) || !ejesOn.has(eje)){ cuerpo.innerHTML="<tr><td>Esta línea está oculta. Actívala en los filtros para consultar sus ciudades.</td></tr>"; return; }
+  if(!a||!astrosOn.has(id) || !ejesOn.has(eje)){ resultados.style.minHeight='';estado.textContent='Esta línea está oculta.';pagina.textContent='';cuerpo.innerHTML="<tr><td>Esta línea está oculta. Actívala en los filtros para consultar sus ciudades.</td></tr>"; return; }
+  const pais=paisControl.value,region=regionControl.value;
+  const radio=document.getElementById('localidadesRadio').value,radioKm=radio==='todos'?null:Number(radio);
+  const firma=[id,a.lonMC,a.dec,eje,pais,region,radio].join('|');
+  if(firmaLocalidades!==firma){paginaLocalidades=1;firmaLocalidades=firma;}
+  // Mantener el alto mientras responde el worker evita saltos de la página
+  // cuando se sustituyen temporalmente las filas por el mensaje de carga.
+  resultados.style.minHeight=(resultados.clientHeight||0)+'px';
+  estado.textContent='Consultando el recorrido y sus países…';
   cuerpo.innerHTML="<tr><td>Buscando localidades cercanas a la línea…</td></tr>";
   try {
-    const clave=[a.lonMC,a.dec,eje].join('|');
-    if(!consultaLineaActual || consultaLineaActual.clave!==clave){
-      const consulta={clave,promesa:window.Ciudades.cercanasLinea(a,eje)};
+    const clave=firma+'|'+paginaLocalidades;
+    const cambiaConsulta=!consultaLineaActual || consultaLineaActual.clave!==clave;
+    if(cambiaConsulta){
+      const consulta={clave,promesa:window.Ciudades.explorarLinea(a,eje,{pais,region,radioKm,pagina:paginaLocalidades,limite:24})};
       consulta.promesa.catch(()=>{if(consultaLineaActual===consulta)consultaLineaActual=null;});
       consultaLineaActual=consulta;
     }
-    const cerca=await consultaLineaActual.promesa;
+    const resultado=await consultaLineaActual.promesa,cerca=resultado.filas;
     if(solicitud!==solicitudLinea)return;
+    paisControl.innerHTML='<option value="">Todos los países · recorrido mundial</option>'+resultado.paises.map(p=>'<option value="'+E.escaparHTML(p.codigo)+'">'+E.escaparHTML(p.nombre)+' ('+p.total.toLocaleString('es')+')</option>').join('');
+    paisControl.value=pais;paisControl.disabled=false;
+    regionControl.innerHTML='<option value="">Todas las regiones</option>'+resultado.regiones.map(r=>'<option value="'+E.escaparHTML(r.id)+'">'+E.escaparHTML(r.nombre)+' ('+r.total.toLocaleString('es')+')</option>').join('');
+    regionControl.value=region;regionControl.disabled=!pais;
+    document.getElementById('localidadesRegionCampo').hidden=!pais;
+    paginaLocalidades=resultado.pagina;
+    pagina.textContent=resultado.total?'Página '+resultado.pagina+' de '+resultado.paginas:'Sin resultados';
+    anterior.disabled=resultado.pagina<=1;siguiente.disabled=resultado.pagina>=resultado.paginas;
+    const paisesConResultados=resultado.paises.filter(p=>p.total>0).length;
+    estado.textContent=resultado.total.toLocaleString('es')+' localidades'+(!pais?' en '+paisesConResultados+' países':'')+(radioKm===null?' · sin límite de distancia.':' a '+radioKm+' km o menos de la línea.')+(pais?' Ordenadas de menor a mayor distancia.':' Vista mundial: se alternan países para explorar todo el recorrido.');
     localidadesMostradas=cerca;
-    cuerpo.innerHTML='<tr><th colspan="2">'+a.n+' '+eje+' · Localidades del catálogo más cercanas</th></tr>'+
-      cerca.map((f,i)=>'<tr><td><button class="geo-tabla-linea" data-localidad="'+i+'" aria-label="Ver '+E.escaparHTML(f.c.etiqueta)+' en el mapa">'+E.escaparHTML(f.c.etiqueta)+'</button></td><td class="m">'+distanciaTexto(f.km)+'</td></tr>').join('');
-  }catch(e){if(solicitud===solicitudLinea)cuerpo.innerHTML='<tr><td>'+E.escaparHTML(e.message || 'No se pudo cargar el catálogo. Inténtalo de nuevo.')+'</td></tr>';}
+    cuerpo.innerHTML='<tr><th>'+a.n+' '+eje+' · Localidad</th><th>Distancia</th></tr>'+(cerca.length?
+      cerca.map((f,i)=>'<tr><td><button class="geo-tabla-linea" data-localidad="'+i+'" aria-label="Ver '+E.escaparHTML(f.c.etiqueta)+' en el mapa">'+E.escaparHTML(f.c.etiqueta)+'</button></td><td class="m">'+distanciaTexto(f.km)+'</td></tr>').join(''):
+      '<tr><td colspan="2">No hay localidades del catálogo con estos filtros. Amplía la distancia o elige otro país o región.</td></tr>');
+    resultados.style.minHeight='';
+    if(cambiaConsulta)resultados.scrollTop=0;
+  }catch(e){if(solicitud===solicitudLinea){resultados.style.minHeight='';estado.textContent='No se pudo completar la búsqueda. Pulsa Buscar localidades para volver a intentarlo.';pagina.textContent='';cuerpo.innerHTML='<tr><td>'+E.escaparHTML(e.message || 'No se pudo cargar el catálogo. Inténtalo de nuevo.')+'</td></tr>';}}
 }
 
 /* ===================== Datos de entrada ===================== */
@@ -606,6 +649,10 @@ $("ciudad").addEventListener("change",async ev=>{
 });
 for(const id of ["lnAstro","lnEje"]) $(id).addEventListener("change",()=>destacaLinea($("lnAstro").value+'|'+$("lnEje").value));
 $("buscarLocalidades").addEventListener("click",()=>{listaLineasAbierta=true;destacaLinea($("lnAstro").value+'|'+$("lnEje").value);});
+$("localidadesPais").addEventListener("change",()=>{$("localidadesRegion").value='';$("localidadesRegion").disabled=true;$("localidadesRegionCampo").hidden=!$("localidadesPais").value;pintaTablaLinea();});
+for(const id of ["localidadesRegion","localidadesRadio"]) $(id).addEventListener("change",pintaTablaLinea);
+$("localidadesAnterior").addEventListener("click",()=>{if(paginaLocalidades>1){paginaLocalidades--;pintaTablaLinea();}});
+$("localidadesSiguiente").addEventListener("click",()=>{paginaLocalidades++;pintaTablaLinea();});
 $("seleccionLinea").addEventListener("change",ev=>destacaLinea(ev.target.value));
 $("tablaLugar").addEventListener("click",ev=>{const b=ev.target.closest('[data-linea]');if(b)destacaLinea(b.dataset.linea);});
 $("tablaLinea").addEventListener("click",ev=>{

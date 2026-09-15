@@ -3,7 +3,7 @@
    entrada escrita contra el catálogo mundial, no contra esta caché parcial. */
 (function(root){
 'use strict';
-const VERSION='20260915';
+const VERSION='20260915-localidades';
 const normaliza=t=>String(t||'').normalize('NFD').replace(/\p{M}/gu,'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
 const base=new URL('.',document.currentScript?.src||new URL('/app/ciudades.js',document.baseURI));
 const lista=[],etiquetas=new Map(),consultas=new Map(),pendientes=new Map();
@@ -48,5 +48,10 @@ async function resolverAsync(texto){
 }
 async function buscar(texto){if(!normaliza(texto))return [];await carga();const r=await peticion('buscar',{texto:String(texto)});recuerda(r);return r;}
 async function cercanasLinea(a,eje){await carga();const r=await peticion('cercanasLinea',{a:{lonMC:a.lonMC,dec:a.dec},eje});recuerda(r.map(x=>x.c));return r;}
-root.Ciudades={lista,normaliza,resolver,resolverAsync,buscar,carga,cercanasLinea,listo:()=>!!meta,version:'2026-09-15',fuente:'GeoNames cities500'};
+async function explorarLinea(a,eje,opciones={}){
+  await carga();const o=opciones&&typeof opciones==='object'?opciones:{};
+  const r=await peticion('explorarLinea',{a:{lonMC:a?.lonMC,dec:a?.dec},eje,opciones:{pais:o.pais,region:o.region,radioKm:o.radioKm,pagina:o.pagina,limite:o.limite}});
+  recuerda(r.filas.map(x=>x.c));return r;
+}
+root.Ciudades={lista,normaliza,resolver,resolverAsync,buscar,carga,cercanasLinea,explorarLinea,listo:()=>!!meta,version:'2026-09-15',fuente:'GeoNames cities500'};
 })(typeof window!=='undefined'?window:globalThis);

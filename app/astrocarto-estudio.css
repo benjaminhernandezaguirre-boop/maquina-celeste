@@ -68,6 +68,13 @@
 .geo-estudio td.g{font-size:1.5rem;padding-right:.4rem}
 .geo-tabla-linea{background:none;border:0;color:var(--studio-text);text-align:left;padding:0;font:inherit;cursor:pointer;text-decoration:underline;text-decoration-color:var(--studio-line);text-underline-offset:3px;min-height:0!important}
 .geo-estudio .geo-posicion{color:var(--studio-muted);font-size:.75rem}
+.geo-localidades-filtros{border-top:1px solid var(--studio-line);padding-top:.8rem}
+.geo-localidades .tabla-caja{max-height:32rem;overflow:auto;overscroll-behavior:contain}
+.geo-localidades th{position:sticky;top:0;background:var(--studio-panel);z-index:1}
+.geo-localidades td:first-child{width:75%;overflow-wrap:anywhere}
+.geo-localidades-estado{color:var(--studio-muted);min-height:2.5em}
+.geo-localidades-paginacion{display:flex;align-items:center;justify-content:space-between;gap:.5rem;border-top:1px solid var(--studio-line);padding-top:.75rem;margin-top:.75rem}
+.geo-localidades-paginacion span{font:500 .65rem 'IBM Plex Mono',monospace;color:var(--studio-muted);text-align:center}
 .geo-estudio .geo-map-panel.expandido{position:fixed;inset:12px;z-index:1000;max-width:none;margin:0;overflow:auto;background:var(--studio-panel);box-shadow:0 0 0 100vmax #000b}
 .geo-map-panel.expandido #mapa{height:max(260px,calc(100dvh - 300px))}
 .geo-map-panel.expandido .geo-filtros[open]+.geo-toolbar+.mapa-caja #mapa{height:max(260px,calc(100dvh - 440px))}

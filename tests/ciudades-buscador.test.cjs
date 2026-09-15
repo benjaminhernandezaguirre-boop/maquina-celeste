@@ -49,6 +49,28 @@ test('la fachada inicia vacía y comparte una sola carga entre primeras consulta
   assert.equal(C.lista.length,2);assert.equal(timers.size,0);
 });
 
+test('explorar una línea carga bajo demanda y conserva filtros, paginación y metadatos del Worker',async()=>{
+  const {C,workers,timers}=facade();
+  assert.equal(workers.length,0);
+  const opciones={pais:'ES',region:'2855',radioKm:null,pagina:2,limite:24};
+  const exploracion=C.explorarLinea({lonMC:-5.69,dec:0.3},'MC',opciones);
+  assert.equal(workers.length,1);
+  const w=workers[0];assert.equal(w.messages[0].tipo,'carga');
+  w.respond(w.messages[0],{total:235810});await turno();
+  const peticion=w.messages.find(m=>m.tipo==='explorarLinea');
+  assert.ok(peticion);
+  assert.deepEqual(JSON.parse(JSON.stringify(peticion.opciones)),opciones);
+  assert.deepEqual(JSON.parse(JSON.stringify(peticion.a)),{lonMC:-5.69,dec:0.3});
+  assert.equal(peticion.eje,'MC');
+  const c=ciudad(70),resultado={filas:[{c,grados:0.05,km:5.6}],total:25,pagina:2,paginas:2,limite:24,
+    paises:[{codigo:'ES',nombre:'España',total:25}],regiones:[{id:'2855',nombre:'Madrid',total:25}],radioKm:null};
+  w.respond(peticion,resultado);
+  assert.equal(await exploracion,resultado,'la fachada conserva filas y metadatos de navegación');
+  assert.equal(C.resolver(c.etiqueta).ciudad.id,70,'una localidad mostrada queda disponible para elegirla');
+  assert.equal(C.lista.length,1,'la fachada recuerda la página recibida, no todo el catálogo');
+  assert.equal(timers.size,0);
+});
+
 test('un fallo de descarga rechaza todas las consultas iniciales y permite reintento',async()=>{
   const {C,workers,timers}=facade();
   const a=C.buscar('A'),b=C.resolverAsync('B');
