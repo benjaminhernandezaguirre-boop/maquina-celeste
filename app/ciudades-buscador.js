@@ -1,93 +1,43 @@
-/* ===================== Buscador de ciudades =====================
-   Sustituye el desplegable completo por un filtrado en memoria que
-   pinta solo las coincidencias. Con esto el tamaño del catálogo deja
-   de importar para la interfaz: 3 000 o 300 000 ciudades cuestan lo
-   mismo en pantalla.
-
-   Además carga app/ciudades.js solo cuando hace falta, la primera vez
-   que alguien toca un campo de ciudad.
-
-   Funciona con el marcado que ya existe, sin cambiarlo:
-       <input list="ciudades"> + <datalist id="ciudades">
-
-   Se expone como window.CiudadesBuscador. */
+/* Datalist compartido: carga al usarlo, búsqueda en Worker, hasta 40 resultados
+   y descarte de respuestas antiguas. */
 (function(root){
-"use strict";
-
-const TOPE = 40;                 // cuántas opciones se pintan como mucho
-const MINIMO = 1;                // letras antes de empezar a buscar
-const RUTA = "/app/ciudades.js";
-
-let promesa = null, ultimo = null;
-
-const normaliza = t => (root.Ciudades && root.Ciudades.normaliza)
-  ? root.Ciudades.normaliza(t)
-  : String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
-
-const listo = () => !!(root.Ciudades && root.Ciudades.lista && root.Ciudades.lista.length);
-
-/* Carga el catálogo una sola vez. Devuelve siempre la misma promesa. */
-function carga(){
-  if (listo()) return Promise.resolve(root.Ciudades.lista);
-  if (promesa) return promesa;
-  promesa = new Promise(function(resuelve, rechaza){
-    const ya = document.querySelector('script[data-ciudades]');
-    if (ya){ ya.addEventListener("load", () => resuelve(root.Ciudades && root.Ciudades.lista)); return; }
-    const s = document.createElement("script");
-    s.src = RUTA; s.async = true; s.dataset.ciudades = "1";
-    s.onload = () => resuelve(root.Ciudades && root.Ciudades.lista);
-    s.onerror = () => { promesa = null; rechaza(new Error("No se pudo cargar el catálogo de ciudades.")); };
-    document.head.appendChild(s);
-  });
-  return promesa;
-}
-
-/* Ordena poniendo delante lo que empieza por lo escrito. */
-function coincidencias(texto){
-  const q = normaliza(texto);
-  if (!listo() || q.length < MINIMO) return [];
-  const lista = root.Ciudades.lista, porNombre = [], porEtiqueta = [];
-  for (let i = 0; i < lista.length; i++){
-    const c = lista[i];
-    if (normaliza(c.n).startsWith(q)) { porNombre.push(c); if (porNombre.length >= TOPE) break; }
-    else if (porEtiqueta.length < TOPE && normaliza(c.etiqueta).includes(q)) porEtiqueta.push(c);
-  }
-  return porNombre.concat(porEtiqueta).slice(0, TOPE);
-}
-
-function pinta(datalist, texto){
-  const q = normaliza(texto);
-  if (q === ultimo) return;
-  ultimo = q;
-  if (!q){ datalist.replaceChildren(); return; }
-  const frag = document.createDocumentFragment();
-  for (const c of coincidencias(texto)){
-    const o = document.createElement("option");
-    o.value = c.etiqueta;
-    frag.appendChild(o);
-  }
-  datalist.replaceChildren(frag);
-}
-
-/* Conecta todos los campos que apuntan a un datalist, presentes y futuros.
-   idDatalist por omisión: "ciudades". */
-function conecta(idDatalist){
-  const id = idDatalist || "ciudades";
-  const selector = 'input[list="' + id + '"]';
-
-  function atiende(destino){
-    const datalist = document.getElementById(id);
-    if (!datalist) return;
-    if (!listo()){
-      carga().then(function(){ ultimo = null; pinta(datalist, destino.value); })
-             .catch(function(){ /* el campo sigue usable escribiendo la etiqueta completa */ });
-      return;
+'use strict';
+const TOPE=40,MINIMO=1,conectados=new Set(),estados=new WeakMap();
+const C=()=>root.Ciudades;
+const normaliza=t=>C().normaliza(t);
+function conecta(id='ciudades'){
+  if(conectados.has(id))return;conectados.add(id);
+  const selector='input[list="'+id+'"]';let version=0,temporizador,activo=null;
+  function estado(input,texto){
+    let nodo=estados.get(input);
+    if(!nodo){
+      nodo=document.createElement('small');nodo.id='ciudad-estado-'+id+'-'+(document.querySelectorAll('[data-ciudad-estado]').length+1);
+      nodo.dataset.ciudadEstado='';nodo.setAttribute('role','status');nodo.setAttribute('aria-live','polite');
+      nodo.style.cssText='display:block;font-size:.75rem;line-height:1.4;margin-top:.3rem;color:inherit';
+      input.insertAdjacentElement('afterend',nodo);estados.set(input,nodo);
+      input.setAttribute('aria-describedby',((input.getAttribute('aria-describedby')||'')+' '+nodo.id).trim());
     }
-    pinta(datalist, destino.value);
+    nodo.textContent=texto;input.setAttribute('aria-busy',String(texto.startsWith('Cargando')||texto==='Buscando…'));
   }
-  document.addEventListener("input",   e => { if (e.target.matches && e.target.matches(selector)) atiende(e.target); });
-  document.addEventListener("focusin", e => { if (e.target.matches && e.target.matches(selector)) atiende(e.target); });
+  function atiende(input,alFoco){
+    const dl=document.getElementById(id);if(!dl)return;
+    if(activo&&activo!==input)estado(activo,'');activo=input;
+    const turno=++version;clearTimeout(temporizador);dl.replaceChildren();
+    estado(input,C().listo()?'':'Cargando ciudades del mundo…');
+    const consulta=async()=>{
+      try{
+        await C().carga();if(turno!==version)return;
+        const texto=input.value;if(normaliza(texto).length<MINIMO){estado(input,'Escribe una ciudad; puedes añadir región o país.');return;}
+        estado(input,'Buscando…');const resultados=await C().buscar(texto);
+        if(turno!==version||texto!==input.value)return;
+        const frag=document.createDocumentFragment();for(const c of resultados.slice(0,TOPE)){const o=document.createElement('option');o.value=c.etiqueta;frag.appendChild(o);}dl.replaceChildren(frag);
+        estado(input,resultados.length?'Elige la ciudad con su región y país.':'No se encontraron coincidencias. Prueba otro nombre o usa coordenadas manuales.');
+      }catch(e){if(turno===version){dl.replaceChildren();estado(input,e.message+' Toca el campo para reintentar.');}}
+    };
+    if(alFoco)consulta();else temporizador=setTimeout(consulta,140);
+  }
+  document.addEventListener('input',e=>{if(e.target.matches?.(selector))atiende(e.target,false);});
+  document.addEventListener('focusin',e=>{if(e.target.matches?.(selector))atiende(e.target,true);});
 }
-
-root.CiudadesBuscador = { TOPE, MINIMO, carga, listo, coincidencias, conecta, normaliza };
-})(typeof window !== "undefined" ? window : globalThis);
+root.CiudadesBuscador={TOPE,MINIMO,carga:()=>C().carga(),listo:()=>C().listo(),coincidencias:t=>C().buscar(t),normaliza,conecta};
+})(typeof window!=='undefined'?window:globalThis);

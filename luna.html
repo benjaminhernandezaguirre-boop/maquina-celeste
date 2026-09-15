@@ -153,7 +153,7 @@
 <p class="footer-note">Astroplanetario calcula estas herramientas localmente en tu navegador con un modelo astronómico aproximado coherente con el resto del proyecto. Para trabajos profesionales que exijan precisión de efeméride al segundo, eclipses exactos o fechas muy fuera de 1800–2050, conviene conectar después una efeméride de alta precisión como Swiss Ephemeris/JPL. Las interpretaciones astrológicas son simbólicas y no deben usarse como consejo médico.<br><span class="firma-instituto">Un proyecto del <a href="https://tarot-academy-theta.vercel.app/" target="_blank" rel="noopener">Instituto de Artes Esotéricas y Saberes Ancestrales</a> · Datos de ciudades: <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> · CC BY 4.0</span></p>
 </main>
 </div>
-<script src="app/ciudades-buscador.js"></script><script src="app/efemerides.js"></script>
+<script src="app/ciudades.js?v=20260915"></script><script src="app/ciudades-buscador.js?v=20260915"></script><script src="app/efemerides.js"></script>
 <script>
 (()=>{'use strict';
 const RAD=Math.PI/180, DEG=180/Math.PI, DAY=86400000, SYN=29.530588853;
@@ -228,16 +228,29 @@ function drawMoon(angle){
   [[.32,.32,.09],[.62,.43,.065],[.44,.66,.075],[.7,.68,.045],[.28,.58,.04]].forEach(([px,py,rr])=>{g.beginPath();g.arc(cx+(px-.5)*R*1.6,cy+(py-.5)*R*1.6,R*rr,0,7);g.fill()});
   g.restore();
 }
-let cities=[];const fallback=[['Ciudad de México','México',19.4326,-99.1332,'America/Mexico_City'],['Xalapa','Veracruz, MX',19.5438,-96.9102,'America/Mexico_City'],['Coatzacoalcos','Veracruz, MX',18.1345,-94.459,'America/Mexico_City'],['Madrid','España',40.4168,-3.7038,'Europe/Madrid'],['Buenos Aires','Argentina',-34.6037,-58.3816,'America/Argentina/Buenos_Aires'],['Bogotá','Colombia',4.711,-74.0721,'America/Bogota'],['Lima','Perú',-12.0464,-77.0428,'America/Lima'],['Nueva York','Estados Unidos',40.7128,-74.006,'America/New_York']].map(p=>({n:p[0],r:p[1],lat:p[2],lon:p[3],tz:p[4],etiqueta:`${p[0]}, ${p[1]}`}));
-async function loadCities(){if(window.Efem&&Efem.CIUDADES&&Efem.CIUDADES.length)cities=Efem.CIUDADES;else cities=fallback;cityList.innerHTML=cities.map(c=>`<option value="${c.etiqueta}"></option>`).join('')}
-const norm=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();function cityFind(s){return cities.find(c=>norm(c.etiqueta)===norm(s))||cities.find(c=>norm(c.n)===norm(s))}
-function utcMs(y,mo,d,h,mi){const t=Date.UTC(y,mo-1,d,h,mi,0);if(y>=0&&y<100){const f=new Date(t);f.setUTCFullYear(y);return f.getTime()}return t}
-function offsetTZ(tz,ms){const dtf=new Intl.DateTimeFormat('en-US',{timeZone:tz,hourCycle:'h23',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}),p=Object.fromEntries(dtf.formatToParts(new Date(ms)).map(o=>[o.type,o.value]));return utcMs(+p.year,+p.month,+p.day,+p.hour,+p.minute)+(+p.second)*1000-ms}
-function localToUTC(y,mo,d,h,mi,tz){const base=utcMs(y,mo,d,h,mi);let t=base;for(let i=0;i<4;i++)t=base-offsetTZ(tz,t);return t}
-function birthFromInputs(){const ds=birthDate.value,ts=birthTime.value||'12:00',c=cityFind(birthCity.value);if(!ds||!c)return null;const[Y,M,D]=ds.split('-').map(Number),[h,m]=ts.split(':').map(Number);return{ms:localToUTC(Y,M,D,h||0,m||0,c.tz),city:c,date:ds,time:ts}}
+async function cityFind(texto){
+  const d=savedData();
+  if(d && texto.trim()===d.lugarTexto && Number.isFinite(d.lat) && Number.isFinite(d.lon) && d.tz){
+    new Intl.DateTimeFormat('es',{timeZone:d.tz});
+    return{lat:d.lat,lon:d.lon,tz:d.tz,etiqueta:d.lugarTexto};
+  }
+  const r=await window.Ciudades.resolverAsync(texto);
+  if(r.ambiguas)throw new Error('Hay varias localidades con ese nombre. Elige la ciudad, región y país de la lista.');
+  return r.ciudad;
+}
+let solicitudRetorno=0,solicitudProgresada=0;
+function cityError(panel,e){const p=document.createElement('p');p.className='notice';p.textContent=e.message||'No se pudo cargar el catálogo. Inténtalo de nuevo.';panel.replaceChildren(p);}
+function localToUTC(y,mo,d,h,mi,tz,desambiguacion='reject'){return window.Efem.localAUTC(y,mo,d,h,mi,tz,desambiguacion)}
+function savedOccurrence(ds,ts,city){
+  const d=savedData();
+  if(!d)return'reject';
+  const fecha=`${d.anio}-${String(d.mes).padStart(2,'0')}-${String(d.dia).padStart(2,'0')}`,hora=`${String(d.hora??0).padStart(2,'0')}:${String(d.min??0).padStart(2,'0')}`;
+  return ds===fecha && ts===hora && city.tz===d.tz ? d.desambiguacion||'reject' : 'reject';
+}
+async function birthFromInputs(){const ds=birthDate.value,ts=birthTime.value;if(!ds||!ts)return null;const c=await cityFind(birthCity.value);if(!c)return null;const[Y,M,D]=ds.split('-').map(Number),[h,m]=ts.split(':').map(Number);return{ms:localToUTC(Y,M,D,h,m,c.tz,savedOccurrence(ds,ts,c)),city:c,date:ds,time:ts}}
 function savedData(){try{return JSON.parse(localStorage.getItem('maquina-celeste-carta')||'null')}catch(e){return null}}
-function useSavedBirth(){const d=savedData();if(!d||!d.anio)return false;birthDate.value=`${d.anio}-${String(d.mes).padStart(2,'0')}-${String(d.dia).padStart(2,'0')}`;birthTime.value=`${String(d.hora||0).padStart(2,'0')}:${String(d.min||0).padStart(2,'0')}`;birthCity.value=d.lugarTexto||'';if(!returnCity.value)returnCity.value=d.lugarTexto||'';return true}
-function natalPositions(d){if(!d||!d.anio||!d.tz)return null;const ms=localToUTC(d.anio,d.mes,d.dia,d.hora||12,d.min||0,d.tz),T=siglos(julian(ms)),ids=['sol','luna','mercurio','venus','marte','jupiter','saturno','urano','neptuno','pluton'];return{ms,items:ids.map(id=>({id,lon:lonGeo(id,T)}))}}
+function useSavedBirth(){const d=savedData();if(!d||!d.anio)return false;solicitudRetorno++;birthDate.value=`${d.anio}-${String(d.mes).padStart(2,'0')}-${String(d.dia).padStart(2,'0')}`;birthTime.value=d.horaConocida===false?'':`${String(d.hora??0).padStart(2,'0')}:${String(d.min??0).padStart(2,'0')}`;birthCity.value=d.lugarTexto||'';if(!returnCity.value)returnCity.value=d.lugarTexto||'';return true}
+function natalPositions(d){if(!d||!d.anio||!d.tz||d.horaConocida===false)return null;try{const ms=localToUTC(d.anio,d.mes,d.dia,d.hora??12,d.min??0,d.tz,d.desambiguacion||'reject'),T=siglos(julian(ms)),ids=['sol','luna','mercurio','venus','marte','jupiter','saturno','urano','neptuno','pluton'];return{ms,items:ids.map(id=>({id,lon:lonGeo(id,T)}))}}catch(e){return null}}
 const ASPECT_NAMES=[[0,'conjunción'],[60,'sextil'],[90,'cuadratura'],[120,'trígono'],[180,'oposición']];function impactText(ev){const d=savedData(),np=natalPositions(d);if(!np)return'';let best=[];for(const p of np.items){const delta=adiff(ev.lon,p.lon);let hit=null;for(const[a,n]of ASPECT_NAMES){const orb=Math.abs(delta-a);if(orb<=3&&(!hit||orb<hit.orb))hit={a,n,orb}}if(hit)best.push({...hit,id:p.id})}best.sort((a,b)=>a.orb-b.orb);const names={sol:'Sol',luna:'Luna',mercurio:'Mercurio',venus:'Venus',marte:'Marte',jupiter:'Júpiter',saturno:'Saturno',urano:'Urano',neptuno:'Neptuno',pluton:'Plutón'};return best.slice(0,2).map(h=>`${h.n} a ${names[h.id]} natal · orbe ${h.orb.toFixed(1)}°`).join(' · ')}
 function eventHTML(ev,tz){const z=zpos(ev.lon),imp=impactText(ev),T=siglos(julian(ev.ms)),node=nodoNorte(T),nod=Math.min(adiff(ev.lon,node),adiff(ev.lon,mod360(node+180))),nodal=(ev.a===0||ev.a===180)&&nod<18?` · eje nodal ${nod.toFixed(1)}°`:'';return`<div class="event"><div class="g">${ev.g}</div><div><div class="n">${ev.n}</div><div class="d">${fmtLocal(ev.ms,tz)} · ${z.glyph} ${z.text}${nodal}</div>${imp?`<span class="impact">${imp}</span>`:''}</div><div class="r">${z.n}</div></div>`}
 function updateSummary(){
@@ -256,7 +269,7 @@ function updateSummary(){
   if(next){nextPhaseName.textContent=next.n;nextPhaseDate.textContent=fmtLocal(next.ms)}
 }
 function renderLunations(){const ms=selectedMs(),n=+lunationCount.value||12,filter=lunationFilter.value,evs=phaseEvents(ms-6*3600000,2,180).filter(e=>e.ms>=ms-60000).filter(e=>filter==='all'||e.a===0||e.a===180).slice(0,n);lunationList.innerHTML=evs.map(e=>eventHTML(e)).join('')||'<p class="small">No se encontraron eventos en el rango.</p>'}
-function calculateReturn(){const b=birthFromInputs(),rc=cityFind(returnCity.value),ref=returnRef.value?new Date(`${returnRef.value}T12:00:00`).getTime():selectedMs();if(!b){returnResult.innerHTML='<p class="notice">Elige una fecha, hora y una ciudad natal de la lista.</p>';return}if(!rc){returnResult.innerHTML='<p class="notice">Elige también la ciudad donde quieres levantar la revolución lunar.</p>';return}const natalLon=lunaLon(b.ms),roots=moonTargetRoots(natalLon,ref-40*DAY,ref+95*DAY).sort((a,b)=>a-b),prev=[...roots].filter(x=>x<ref).pop(),nexts=roots.filter(x=>x>=ref).slice(0,3),zp=zpos(natalLon);let html=`<p><span class="tag">Luna natal</span></p><h3 style="margin-top:.45rem">${zp.glyph} ${zp.text} ${zp.n}</h3><p class="small">Cada retorno se obtiene resolviendo numéricamente cuándo la longitud eclíptica de la Luna en tránsito vuelve a este grado.</p><div class="return-grid">`;const cards=[];if(prev)cards.push({ms:prev,label:'Retorno anterior'});nexts.forEach((ms,i)=>cards.push({ms,label:i?'Siguiente +'+i:'Próximo retorno'}));html+=cards.map((r,i)=>{const pz=zpos(lunaLon(r.ms));return`<div class="return-card"><div class="when">${r.label}</div><div class="meta">${fmtLocal(r.ms,rc.tz)}<br>${pz.glyph} ${pz.text} ${pz.n}</div><button class="ghost open-return" data-ms="${Math.round(r.ms)}">Abrir carta de revolución</button></div>`}).join('')+'</div>';returnResult.innerHTML=html;returnResult.querySelectorAll('.open-return').forEach(btn=>btn.addEventListener('click',()=>openReturn(+btn.dataset.ms,rc)))}
+async function calculateReturn(){const solicitud=++solicitudRetorno;try{const b=await birthFromInputs(),rc=await cityFind(returnCity.value);if(solicitud!==solicitudRetorno)return;const ref=returnRef.value?new Date(`${returnRef.value}T12:00:00`).getTime():selectedMs();if(!b){returnResult.innerHTML='<p class="notice">Elige una fecha, hora y una ciudad natal de la lista.</p>';return}if(!rc){returnResult.innerHTML='<p class="notice">Elige también la ciudad donde quieres levantar la revolución lunar.</p>';return}const natalLon=lunaLon(b.ms),roots=moonTargetRoots(natalLon,ref-40*DAY,ref+95*DAY).sort((a,b)=>a-b),prev=[...roots].filter(x=>x<ref).pop(),nexts=roots.filter(x=>x>=ref).slice(0,3),zp=zpos(natalLon);let html=`<p><span class="tag">Luna natal</span></p><h3 style="margin-top:.45rem">${zp.glyph} ${zp.text} ${zp.n}</h3><p class="small">Cada retorno se obtiene resolviendo numéricamente cuándo la longitud eclíptica de la Luna en tránsito vuelve a este grado.</p><div class="return-grid">`;const cards=[];if(prev)cards.push({ms:prev,label:'Retorno anterior'});nexts.forEach((ms,i)=>cards.push({ms,label:i?'Siguiente +'+i:'Próximo retorno'}));html+=cards.map((r,i)=>{const pz=zpos(lunaLon(r.ms));return`<div class="return-card"><div class="when">${r.label}</div><div class="meta">${fmtLocal(r.ms,rc.tz)}<br>${pz.glyph} ${pz.text} ${pz.n}</div><button class="ghost open-return" data-ms="${Math.round(r.ms)}">Abrir carta de revolución</button></div>`}).join('')+'</div>';returnResult.innerHTML=html;returnResult.querySelectorAll('.open-return').forEach(btn=>btn.addEventListener('click',()=>openReturn(+btn.dataset.ms,rc)))}catch(e){if(solicitud===solicitudRetorno)cityError(returnResult,e);}}
 function partsInZone(ms,tz){const f=new Intl.DateTimeFormat('en-CA',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}),p=Object.fromEntries(f.formatToParts(new Date(ms)).map(x=>[x.type,x.value]));return{Y:+p.year,M:+p.month,D:+p.day,h:+p.hour,m:+p.minute}}
 function openReturn(ms,city){const p=partsInZone(ms,city.tz),meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'],d={nombre:'Revolución lunar',anio:p.Y,mes:p.M,dia:p.D,hora:p.h,min:p.m,horaConocida:true,lat:city.lat,lon:city.lon,tz:city.tz,lugarTexto:city.etiqueta,sistema:'placidio',factorOrbe:1,resumenFecha:`${p.D} de ${meses[p.M-1]} de ${p.Y} · ${String(p.h).padStart(2,'0')}:${String(p.m).padStart(2,'0')}`};try{localStorage.setItem('maquina-celeste-carta',JSON.stringify(d));localStorage.setItem('astroplanetario-return','lunar')}catch(e){}location.href='./?view=natal&auto=1&source=lunar-return'}
 function moonBoundaryTime(ms,degForward){const startLon=lunaLon(ms),target=mod360(startLon+degForward),max=Math.max(2.5,degForward/11.5+1)*DAY,rs=moonTargetRoots(target,ms+60000,ms+max);return rs[0]||null}
@@ -265,14 +278,15 @@ const VOC_PLANETS=['sol','mercurio','venus','marte','jupiter','saturno','urano',
 function aspectEvents(start,end){const out=[],step=3600000;for(const id of VOC_PLANETS){for(const a of VOC_ASP){const ors=(a===0||a===180)?[a]:[a,-a];for(const orient of ors){const fn=ms=>{const T=siglos(julian(ms));return wrap180(lonGeo('luna',T)-lonGeo(id,T)-orient)};const rs=findRoots(fn,start,end,step);for(const ms of rs)out.push({ms,id,a})}}}return out.sort((a,b)=>a.ms-b.ms).filter((e,i,arr)=>!i||Math.abs(e.ms-arr[i-1].ms)>15*60000||e.id!==arr[i-1].id)}
 function calcVOC(){const ms=selectedMs(),method=vocMethod.value;let end,label;if(method==='modern'){end=nextSignIngress(ms);label='hasta el próximo cambio de signo'}else{const deg=method==='13'?13:30;end=moonBoundaryTime(ms,deg);label=`dentro de los próximos ${deg}° de movimiento lunar`}if(!end){vocResult.innerHTML='<p class="notice">No pude resolver el horizonte lunar en este rango.</p>';return}const future=aspectEvents(ms+1000,end),isVOC=!future.length;let html=`<div class="voc-state ${isVOC?'on':''}"><span class="voc-dot"></span><div><strong>${isVOC?'Luna vacía de curso':'Luna con aspecto aplicante'}</strong><div class="small">Método: ${vocMethod.options[vocMethod.selectedIndex].text}</div></div></div>`;if(isVOC){html+=`<p>Desde este instante no aparece otro aspecto ptolemaico exacto ${label}. El horizonte calculado termina ${fmtLocal(end)}.</p>`}else{const e=future[0],names={sol:'Sol',mercurio:'Mercurio',venus:'Venus',marte:'Marte',jupiter:'Júpiter',saturno:'Saturno',urano:'Urano',neptuno:'Neptuno',pluton:'Plutón'},an={0:'conjunción',60:'sextil',90:'cuadratura',120:'trígono',180:'oposición'};html+=`<p>El siguiente aspecto exacto es ${an[e.a]} con ${names[e.id]} el ${fmtLocal(e.ms)}. Por este método, la Luna todavía no está vacía.</p>`}vocResult.innerHTML=html}
 let activeBirth=null;
-function progressedBirthFromInputs(){
+async function progressedBirthFromInputs(){
   const ds=progBirthDate.value,ts=progBirthTime.value.trim(),written=progBirthCity.value.trim();
   if(!ds||!ts||!written)return null;
-  const c=cityFind(written);if(!c)return null;
+  const c=await cityFind(written);if(!c)return null;
   const[Y,M,D]=ds.split('-').map(Number),[h,m]=ts.split(':').map(Number);
-  return{ms:localToUTC(Y,M,D,h,m,c.tz),city:c,date:ds,time:ts};
+  return{ms:localToUTC(Y,M,D,h,m,c.tz,savedOccurrence(ds,ts,c)),city:c,date:ds,time:ts};
 }
 function useSavedProgressedBirth(){
+  solicitudProgresada++;
   const d=savedData();
   if(!d||!d.anio)return false;
   progBirthDate.value=`${d.anio}-${String(d.mes).padStart(2,'0')}-${String(d.dia).padStart(2,'0')}`;
@@ -285,14 +299,16 @@ function useSavedProgressedBirth(){
   progBirthTime.value=`${String(d.hora??0).padStart(2,'0')}:${String(d.min??0).padStart(2,'0')}`;
   return true;
 }
-function calcProgressed(){
+async function calcProgressed(){
+  const solicitud=++solicitudProgresada;
+  try {
   const ds=progBirthDate.value,ts=progBirthTime.value.trim(),written=progBirthCity.value.trim();
   if(!ds){progResult.innerHTML='<p class="notice">Falta la fecha natal.</p>';return}
   if(!ts){progResult.innerHTML='<p class="notice">Falta la hora natal exacta. Astroplanetario no asumirá 12:00 para este cálculo.</p>';return}
   if(!written){progResult.innerHTML='<p class="notice">Falta la ciudad natal para resolver correctamente la zona horaria.</p>';return}
-  const c=cityFind(written);
-  if(!c){progResult.innerHTML='<p class="notice">No reconozco esa ciudad en la base actual. Elige una sugerencia de la lista para poder aplicar su zona horaria.</p>';return}
-  const b=progressedBirthFromInputs();if(!b)return;
+  const b=await progressedBirthFromInputs();
+  if(solicitud!==solicitudProgresada)return;
+  if(!b){progResult.innerHTML='<p class="notice">Elige una localidad completa de la lista para poder aplicar su zona horaria.</p>';return}
   if(!progRef.value){progResult.innerHTML='<p class="notice">Falta la fecha que quieres estudiar.</p>';return}
   const rt=progRefTime.value||'12:00',[Y,M,D]=progRef.value.split('-').map(Number),[hh,mm]=rt.split(':').map(Number);
   const ref=localToUTC(Y,M,D,hh||0,mm||0,b.city.tz);
@@ -306,6 +322,7 @@ function calcProgressed(){
     <p><b>Datos usados.</b> Nacimiento: ${birthMoment} · ${b.city.etiqueta} · ${b.city.tz}. Fecha estudiada: ${studyMoment}.</p>
     <p>La efeméride simbólica corresponde a ${years.toFixed(4)} días después del nacimiento: ${progressedDate}. La Luna natal estaba en ${natal.glyph} ${natal.text} ${natal.n}.</p>
     <p class="small">Método: progresiones secundarias, 1 día de efemérides = 1 año tropical de vida (365,2422 días). La posición lunar procede del motor astronómico aproximado de Astroplanetario; para validación profesional se contrastará con efemérides de mayor precisión.</p>`;
+  }catch(e){if(solicitud===solicitudProgresada)cityError(progResult,e);}
 }
 function updateAll(){updateSummary();renderLunations();if(!document.getElementById('panel-voc').classList.contains('on'))return;calcVOC()}
 const selDate=document.getElementById('selDate'),selTime=document.getElementById('selTime'),phaseNameEl=document.getElementById('phaseName'),phaseLead=document.getElementById('phaseLead'),illum=document.getElementById('illum'),waxing=document.getElementById('waxing'),moonSign=document.getElementById('moonSign'),moonDegree=document.getElementById('moonDegree'),moonAge=document.getElementById('moonAge'),moonDist=document.getElementById('moonDist'),phaseProgress=document.getElementById('phaseProgress'),cycleTextEl=document.getElementById('cycleText'),prevPhaseName=document.getElementById('prevPhaseName'),prevPhaseDate=document.getElementById('prevPhaseDate'),nextPhaseName=document.getElementById('nextPhaseName'),nextPhaseDate=document.getElementById('nextPhaseDate'),nodeState=document.getElementById('nodeState'),nodeText=document.getElementById('nodeText'),lunationCount=document.getElementById('lunationCount'),lunationFilter=document.getElementById('lunationFilter'),lunationList=document.getElementById('lunationList'),birthDate=document.getElementById('birthDate'),birthTime=document.getElementById('birthTime'),birthCity=document.getElementById('birthCity'),returnCity=document.getElementById('returnCity'),returnRef=document.getElementById('returnRef'),returnResult=document.getElementById('returnResult'),cityList=document.getElementById('cityList'),vocMethod=document.getElementById('vocMethod'),vocResult=document.getElementById('vocResult'),progRef=document.getElementById('progRef'),progResult=document.getElementById('progResult');
@@ -313,10 +330,12 @@ const progBirthDate=document.getElementById('progBirthDate'),progBirthTime=docum
 const heroZodiacGlyph=document.getElementById('heroZodiacGlyph'),heroZodiacSign=document.getElementById('heroZodiacSign'),heroZodiacDegree=document.getElementById('heroZodiacDegree');
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',String(x===b)));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id===`panel-${b.dataset.tab}`));if(b.dataset.tab==='voc')calcVOC()}));
 selDate.addEventListener('change',updateAll);selTime.addEventListener('change',updateAll);document.getElementById('btnNow').addEventListener('click',()=>setSelected(Date.now()));document.getElementById('refreshLunations').addEventListener('click',renderLunations);lunationCount.addEventListener('change',renderLunations);lunationFilter.addEventListener('change',renderLunations);document.getElementById('calcReturn').addEventListener('click',calculateReturn);document.getElementById('useSaved').addEventListener('click',()=>{if(!useSavedBirth())returnResult.innerHTML='<p class="notice">Todavía no hay una carta natal guardada en este navegador.</p>'});document.getElementById('calcVoc').addEventListener('click',calcVOC);document.getElementById('calcProgressed').addEventListener('click',calcProgressed);document.getElementById('progUseSaved').addEventListener('click',()=>{if(useSavedProgressedBirth()){progResult.innerHTML='<p class="small">Datos natales exactos cargados desde la última carta. Revisa la fecha y hora a estudiar y calcula.</p>'}else if(!savedData())progResult.innerHTML='<p class="notice">No encontré una carta guardada.</p>'});
-(async()=>{await loadCities();const now=Date.now(),p=isoLocal(now);selDate.value=p.date;selTime.value=p.time;returnRef.value=p.date;progRef.value=p.date;progRefTime.value=p.time;useSavedBirth();useSavedProgressedBirth();updateAll()})();
+if(window.CiudadesBuscador)window.CiudadesBuscador.conecta('cityList');
+for(const input of [birthDate,birthTime,birthCity,returnCity,returnRef])input.addEventListener('input',()=>solicitudRetorno++);
+for(const input of [progBirthDate,progBirthTime,progBirthCity,progRef,progRefTime])input.addEventListener('input',()=>solicitudProgresada++);
+(()=>{const now=Date.now(),p=isoLocal(now);selDate.value=p.date;selTime.value=p.time;returnRef.value=p.date;progRef.value=p.date;progRefTime.value=p.time;useSavedBirth();useSavedProgressedBirth();updateAll()})();
 })();
 </script>
 <script src="app/lunar-zodiac-v2.js?v=5"></script>
 </body>
 </html>
-

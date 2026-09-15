@@ -2,12 +2,12 @@
 "use strict";
 const E=window.Efem,Z=window.LiberacionZodiacal,$=id=>document.getElementById(id),CARTAS="astroplanetario-cartas";
 if(!E||!Z){document.body.textContent="No se pudo cargar el motor de liberación zodiacal.";return}
-let fuente="guardada",carta=null,resultado=null;
+let fuente="guardada",carta=null,resultado=null,solicitudCalculo=0;
 const meses=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 
 function leerCartas(){try{const a=JSON.parse(localStorage.getItem(CARTAS)||"[]");return Array.isArray(a)?a.filter(c=>c&&typeof c.id==="string"&&E.cartaValida(c.datos)):[]}catch(e){return[]}}
 function normal(s){return(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim()}
-function ciudadDe(texto){const exactas=E.CIUDADES.filter(c=>normal(c.etiqueta)===normal(texto));if(exactas.length===1)return exactas[0];const nombre=E.CIUDADES.filter(c=>normal(c.n)===normal(texto));return nombre.length===1?nombre[0]:null}
+async function ciudadDe(texto){const r=await window.Ciudades.resolverAsync(texto);if(r.ambiguas)throw new Error("Hay varias localidades con ese nombre. Elige la ciudad, región y país de la lista.");return r.ciudad}
 function isoLocal(ms,tz){const p=Object.fromEntries(new Intl.DateTimeFormat("en-CA",{timeZone:tz,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(new Date(ms)).map(x=>[x.type,x.value]));return{fecha:`${p.year}-${p.month}-${p.day}`,hora:`${p.hour}:${p.minute}`}}
 function fechaLarga(ms,tz,hora=false){return new Intl.DateTimeFormat("es-MX",{timeZone:tz,day:"numeric",month:"short",year:"numeric",...(hora?{hour:"2-digit",minute:"2-digit"}:{})}).format(new Date(ms))}
 function fechaCorta(ms,tz){return new Intl.DateTimeFormat("es-MX",{timeZone:tz,day:"2-digit",month:"short",year:"numeric"}).format(new Date(ms))}
@@ -17,10 +17,10 @@ function porcentaje(p,ms){return Math.max(0,Math.min(100,(ms-p.inicio)/(p.fin-p.
 function etiquetaNivel(n){return["","Capítulo mayor","Temporada","Ventana breve","Detalle fino"][n]}
 function unidadNivel(n){return["","años","meses simbólicos","unidades de 2½ días","unidades de 5 horas"][n]}
 
-function datosManuales(){
+async function datosManuales(){
   const f=$("nFecha").value,t=$("nHora").value,lugar=$("nLugar").value.trim();
   if(!f)throw new Error("Falta la fecha de nacimiento.");if(!t)throw new Error("Falta la hora exacta de nacimiento.");
-  const ciudad=ciudadDe(lugar);if(!ciudad)throw new Error("Elige una ciudad completa de la lista para aplicar sus coordenadas y zona horaria.");
+  const ciudad=await ciudadDe(lugar);if(!ciudad)throw new Error("Elige una ciudad completa de la lista para aplicar sus coordenadas y zona horaria.");
   const[anio,mes,dia]=f.split("-").map(Number),[hora,min]=t.split(":").map(Number),des=$("nOcurrencia").value;
   return{nombre:$("nNombre").value.trim()||"Carta sin nombre",anio,mes,dia,hora,min,horaConocida:true,lat:ciudad.lat,lon:ciudad.lon,tz:ciudad.tz,lugarTexto:ciudad.etiqueta,sistema:"signos",factorOrbe:1,desambiguacion:des,resumenFecha:`${dia} de ${meses[mes-1]} de ${anio} · ${String(hora).padStart(2,"0")}:${String(min).padStart(2,"0")}`};
 }
@@ -36,13 +36,15 @@ function mostrarError(e){
   $("estado").className="estado error";$("estado").textContent=e.message||String(e);$("salida").hidden=true;
   if(/dos veces/.test(e.message||"")){$("campoOcurrencia").hidden=false;$("nOcurrencia").focus()}
 }
-function calcular(nuevaCarta=true){
+async function calcular(nuevaCarta=true){
+  const solicitud=++solicitudCalculo;
+  if(fuente==="manual"){$("estado").className="estado";$("estado").textContent="Resolviendo la localidad…";}
   try{
-    if(nuevaCarta)carta=Z.prepararCarta(cartaElegida(),E);
+    if(nuevaCarta){const datos=await cartaElegida();if(solicitud!==solicitudCalculo)return;carta=Z.prepararCarta(datos,E);}
     if(!carta)throw new Error("Selecciona los datos de nacimiento.");
     const ms=fechaObjetivo(carta.datos.tz),lote=document.querySelector('[name="loteInicio"]:checked').value;
     resultado=Z.calcular(carta,lote,ms);$("estado").className="estado";$("estado").textContent="Cronología calculada con el método indicado al final de la página.";render();
-  }catch(e){mostrarError(e)}
+  }catch(e){if(solicitud===solicitudCalculo)mostrarError(e)}
 }
 function irA(ms){const p=isoLocal(ms,carta.datos.tz);$("fechaObjetivo").value=p.fecha;$("horaObjetivo").value=p.hora;calcular(false);$("salida").scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})}
 
@@ -77,16 +79,17 @@ function renderTransiciones(){
 }
 function render(){renderResumen();renderPila();renderRueda();renderPrincipales();renderSubperiodos();renderLectura();renderTransiciones();$("salida").hidden=false}
 
-function cambiarFuente(nueva){fuente=nueva;document.querySelectorAll("[data-fuente]").forEach(b=>b.classList.toggle("activo",b.dataset.fuente===nueva));$("panelGuardada").hidden=nueva!=="guardada";$("panelManual").hidden=nueva!=="manual"}
+function cambiarFuente(nueva){solicitudCalculo++;fuente=nueva;document.querySelectorAll("[data-fuente]").forEach(b=>b.classList.toggle("activo",b.dataset.fuente===nueva));$("panelGuardada").hidden=nueva!=="guardada";$("panelManual").hidden=nueva!=="manual"}
 function iniciarTema(){const k="astro-studio-theme",r=document.documentElement,b=$("themeToggle");let t="light";try{const s=localStorage.getItem(k);if(s==="light"||s==="dark")t=s}catch(e){}function set(v){r.dataset.studioTheme=v;b.textContent=v==="dark"?"☀ Modo claro":"☾ Modo oscuro"}set(t);b.addEventListener("click",()=>{t=r.dataset.studioTheme==="dark"?"light":"dark";set(t);try{localStorage.setItem(k,t)}catch(e){}})}
 function iniciar(){
+  for(const evento of ["input","change"])document.addEventListener(evento,()=>solicitudCalculo++,true);
   iniciarTema();if(window.CiudadesBuscador)window.CiudadesBuscador.conecta("ciudades");
   const hoy=new Date(),iso=`${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,"0")}-${String(hoy.getDate()).padStart(2,"0")}`;$("fechaObjetivo").value=iso;$("horaObjetivo").value="12:00";
   const cartas=leerCartas();$("cartaSelect").innerHTML=cartas.length?cartas.map(c=>`<option value="${c.id}">${escapar(c.datos.nombre||"Carta sin nombre")} · ${escapar(c.datos.resumenFecha||"")}</option>`).join(""):"<option>Sin cartas guardadas</option>";
   if(!cartas.length){document.querySelector('[data-fuente="guardada"]').disabled=true;cambiarFuente("manual")}else calcular(true);
   document.querySelectorAll("[data-fuente]").forEach(b=>b.addEventListener("click",()=>cambiarFuente(b.dataset.fuente)));
   $("calcular").addEventListener("click",()=>calcular(true));$("cartaSelect").addEventListener("change",()=>calcular(true));document.querySelectorAll('[name="loteInicio"]').forEach(r=>r.addEventListener("change",()=>carta&&calcular(false)));
-  $("nEjemplo").addEventListener("click",()=>{$("nNombre").value="Ejemplo de exploración";$("nFecha").value="1990-03-21";$("nHora").value="06:30";$("nLugar").value="Ciudad de México, México"});
+  $("nEjemplo").addEventListener("click",()=>{solicitudCalculo++;$("nNombre").value="Ejemplo de exploración";$("nFecha").value="1990-03-21";$("nHora").value="06:30";$("nLugar").value="Ciudad de México, México"});
   $("salida").addEventListener("click",e=>{const b=e.target.closest("[data-ir]");if(b)irA(Number(b.dataset.ir))});
 }
 iniciar();
