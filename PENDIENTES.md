@@ -7,6 +7,8 @@ El tamaño es orientativo: **chico** es una tarde, **mediano** son varios días,
 
 ## 1. Arreglos pendientes
 
+- [x] **Ruedas comparadas con casas independientes.** Sinastría, retorno solar, progresiones y cúspides dirigidas en atacires/arco solar; graduación de 1°, ejes A/B y PDF de comparación. Convenciones en `BIRRUEDA.md`.
+
 No hay errores visuales o de estructura conocidos con prioridad alta. El módulo Luna ya utiliza las
 doce ilustraciones zodiacales reales, reserva espacio para su ficha y obtiene las ciudades del motor
 compartido.
@@ -142,4 +144,3 @@ Carta natal con cuatro sistemas de casas, aspectos con orbes ajustables, nodos, 
 Fortuna · Significados de planeta en signo y en casa, Ascendente y aspectos · Atacires con veintiséis
 claves agrupadas, rueda doble y calendario de contactos · Descarga de la rueda sola y de la hoja
 completa · Módulo de Luna con fases, lunaciones, revolución lunar, luna vacía y luna progresada.
-
