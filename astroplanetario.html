@@ -364,6 +364,26 @@
   .pest button[aria-selected="true"]{color:var(--laton);border-bottom-color:var(--laton)}
   .hoja{overflow-y:auto;overflow-x:hidden;padding:.2rem 1.1rem 2rem;flex:1;scrollbar-width:thin}
   .hoja[hidden]{display:none}
+  .birrueda-info{border:1px solid var(--studio-line,var(--linea));border-radius:12px;padding:.8rem;margin:.6rem 0 1rem}
+  .birrueda-info p{font-size:.8rem;line-height:1.5;margin:.4rem 0}
+  .birrueda-info .anillos{display:grid;gap:.3rem;font-size:.8rem;overflow-wrap:anywhere}
+  .birrueda-info .anillo-a{color:#225e83}.birrueda-info .anillo-b{color:#975021}
+  [data-studio-theme="dark"] .birrueda-info .anillo-a{color:#91c8ee}
+  [data-studio-theme="dark"] .birrueda-info .anillo-b{color:#efb284}
+  .birrueda-info select{width:100%;min-width:0;margin:.5rem 0;padding:.55rem;color:var(--studio-text);background:var(--studio-panel);border:1px solid var(--studio-line);border-radius:8px}
+  .birrueda-info summary{cursor:pointer;font-size:.8rem;margin:.5rem 0}
+  #detalleComparado{border-left:3px solid var(--studio-accent,#977334);padding:.75rem;margin:.6rem 0;background:var(--studio-panel);border-radius:8px}
+  #detalleComparado h3{font-size:1.1rem;margin:.2rem 0}#detalleComparado p,#detalleComparado li{font-size:.85rem;line-height:1.5}
+  #ampliarBirrueda{display:none}
+  @media(max-width:620px){
+    html[data-studio-theme] #app.natal.con-birrueda #cartaPanel{height:44dvh}
+    html[data-studio-theme] #app.natal.con-birrueda #cartaPanel.expandido{height:82dvh}
+    html[data-studio-theme] #app.natal.con-birrueda #cartaPanel.plegado{height:3.35rem}
+    #app.natal.con-birrueda #controlesRueda{bottom:calc(44dvh + .6rem)}
+    #app.natal.con-birrueda #escena:has(#cartaPanel.plegado) #controlesRueda{bottom:4rem}
+    #app.natal.con-birrueda #escena:has(#cartaPanel.expandido) #controlesRueda{bottom:calc(82dvh + .6rem)}
+    #ampliarBirrueda{display:inline-block;margin-top:.4rem}
+  }
 
   table.posiciones{width:100%;border-collapse:collapse;font-size:.88rem;color:var(--pergamino)}
   table.posiciones th{
@@ -1106,8 +1126,8 @@
         <p class="aviso" id="nAvisoHora" hidden>Sin hora no hay Ascendente ni casas: la carta se levanta al mediodía y solo muestra los signos. La Luna puede moverse hasta 6° en el día.</p>
 
         <div class="campos" id="manual">
-          <div class="campo"><label for="nLat">Latitud</label><input id="nLat" type="number" step="0.0001" placeholder="19.4326"></div>
-          <div class="campo"><label for="nLon">Longitud</label><input id="nLon" type="number" step="0.0001" placeholder="-99.1332"></div>
+          <div class="campo"><label for="nLat">Latitud</label><input id="nLat" type="number" step="any" min="-90" max="90" placeholder="19.4326"></div>
+          <div class="campo"><label for="nLon">Longitud</label><input id="nLon" type="number" step="any" min="-180" max="180" placeholder="-99.1332"></div>
           <div class="campo"><label for="nZona">Zona horaria</label><select id="nZona"></select></div>
           <p class="aviso ancho">Latitud positiva al norte, longitud negativa al oeste. Toma las coordenadas de un mapa si el pueblo no aparece en la lista.</p>
         </div>
@@ -1245,6 +1265,8 @@
 <script src="app/casas.js"></script>
 <script src="app/escuelas.js"></script>
 <script src="app/natal-lectura.js"></script>
+<script src="app/natal-capas.js"></script>
+<script src="app/natal-birrueda.js"></script>
 <script src="app/natal-gobierno.js"></script>
 <script src="app/natal-profesional.js?v=profesional-1-20260913-2"></script>
 <script src="app/natal-regencias.js?v=profesional-2-20260913"></script>
@@ -1600,6 +1622,7 @@ let mostrarMenoresRueda = false;
 let arrastreNatal = null, suprimirClickNatal = false;
 const blancos = [];                  // zonas sensibles del último fotograma
 let seleccion = null, sobre = null;
+let seleccionComparada = null, sobreComparada = null;
 
 function medir(){
   const c = lienzo.parentElement.getBoundingClientRect();
@@ -1982,14 +2005,17 @@ lienzo.addEventListener("pointermove", ev => {
 
   const b = enPunto(ev);
   sobre = b ? b.id : null;
+  sobreComparada = b?.capa ? `${b.capa}:${b.id}` : null;
   lienzo.style.cursor = vista === "natal" ? (b ? "pointer" : "grab") : (b ? "pointer" : "crosshair");
   if(b){
     let html = "";
     if(vista === "natal" && carta){
-      const c = carta.cuerpos.concat(carta.puntos).find(o => o.id === b.id);
+      const c = b.cuerpo || carta.cuerpos.concat(carta.puntos).find(o => o.id === b.id);
       if(c){
         const z = posZod(c.lon), casa = carta.cusp ? casaDe(c.lon, carta.cusp) : null;
-        html = `<b>${gh(c.glifo)} ${c.nombre}</b> — ${z.texto} ${z.signo.n}${casa ? ` · casa ${ROMANOS[casa]}` : ""}`;
+        const capa=capaExterior(), exterior=b.capa==='exterior';
+        const propia=exterior && capa?.casas ? casaDe(c.lon,capa.casas.cusp) : null;
+        html = `<b>${gh(c.glifo)} ${escaparHTML(c.nombre)}</b> — ${z.texto} ${z.signo.n}${b.capa ? ` · ${exterior?'B · exterior':'A · interior'}`:''}${propia?` · casa B ${ROMANOS[propia]}`:''}${casa ? ` · casa A ${ROMANOS[casa]}` : ""}`;
       }
     }
     if(!html){
@@ -2014,7 +2040,7 @@ function terminaArrastreNatal(ev){
 lienzo.addEventListener("pointerup", terminaArrastreNatal);
 lienzo.addEventListener("pointercancel", terminaArrastreNatal);
 lienzo.addEventListener("pointerleave", () => {
-  sobre=null; globo.style.opacity="0";
+  sobre=null; sobreComparada=null; globo.style.opacity="0";
   if(!arrastreNatal) lienzo.style.cursor = vista === "natal" ? "grab" : "crosshair";
 });
 lienzo.addEventListener("dblclick", ev => {
@@ -2026,7 +2052,10 @@ lienzo.addEventListener("dblclick", ev => {
 lienzo.addEventListener("click", ev => {
   if(vista === "natal" && suprimirClickNatal){ suprimirClickNatal=false; return; }
   const b = enPunto(ev);
-  if(vista === "natal"){ if(b) marcaFila(b.id, true); return; }
+  if(vista === "natal"){
+    if(b?.capa){ muestraPuntoComparado(b); return; }
+    if(b) marcaFila(b.id, true); return;
+  }
   if(b) abrirFicha(b.id); else cerrarFicha();
 });
 
@@ -2695,9 +2724,9 @@ window.addEventListener("astro-theme-change",()=>{ PAPEL = document.documentElem
    las bisecciones de los tránsitos. */
 function firmaCapa(){
   if(!carta) return "nada";
-  const b = huellaCarta(carta.datos);
+  const b = huellaCarta(carta.datos) + '|' + JSON.stringify(lecturaResuelta());
   if(sinastriaActivo && compuestaActiva) return "comp|" + b;
-  if(atacirActivo)    return ["atacir", b, claveActual().id, estadoAtacir.fecha].join("|");
+  if(atacirActivo)    return ["atacir", b, claveActual().id, claveActual().dias, estadoAtacir.fecha ?? Math.floor(Date.now()/60000)].join("|");
   if(transitosActivo) return ["tran", b, estadoTransitos.fecha == null ? Math.floor(Date.now()/60000)
                                        : estadoTransitos.fecha, estadoTransitos.orbe].join("|");
   if(revolucionActivo)return ["rs", b, estadoRS.anio, estadoRS.donde, estadoRS.lat, estadoRS.lon].join("|");
@@ -2717,7 +2746,12 @@ function construyeCapa(){
 let _capaFirma = null, _capaVal = null;
 function capaExterior(){
   const f = firmaCapa();
-  if(f !== _capaFirma){ _capaFirma = f; _capaVal = construyeCapa(); }
+  if(f !== _capaFirma){
+    _capaFirma = f;
+    _capaVal = window.NatalCapas.filtrar(construyeCapa(),lecturaResuelta());
+    seleccionComparada=null;
+    document.getElementById('detalleComparado')?.remove();
+  }
   return _capaVal;
 }
 let _ruedaFirma = null, _ruedaVal = null;
@@ -2731,18 +2765,85 @@ function cartaEnRueda(){
 }
 function dibujaNatal(){
   if(!carta){ return; }
+  const capa=capaExterior();
+  document.getElementById('app').classList.toggle('con-birrueda',!!capa);
   const panelEl = document.getElementById("cartaPanel");
   const puesto = panelEl.classList.contains("abierto") ? panelEl.getBoundingClientRect() : null;
   const abajo = W <= 620 && puesto;
   const altoLibre = abajo ? Math.max(160, H - puesto.height) : H;
   const anchoLibre = abajo ? W : Math.max(260, W - (puesto ? puesto.width : 0));
   const [cx, cy] = [anchoLibre/2 + natalPan.x, altoLibre/2 + natalPan.y];
-  const R = Math.min(anchoLibre, altoLibre)/2 * (abajo ? 0.9 : 0.94) * zoom;
-  pintaRueda(ctx, cx, cy, R, true, capaExterior(), cartaEnRueda());
+  const R = Math.min(anchoLibre, altoLibre)/2 * (capa ? .91 : abajo ? .9 : .94) * zoom;
+  pintaRueda(ctx, cx, cy, R, true, capa, cartaEnRueda());
+  pintaGuiaComparada(capa);
+}
+
+function puntosComparados(capa){
+  const base=cartaEnRueda(),listas=[];
+  for(const [lado,puntos,casas] of [['base',base.cuerpos.concat(base.puntos),window.NatalCapas.casasDe(base)],['exterior',capa.movidos,capa.casas]]){
+    const lista=puntos.filter(p=>!['asc','mc','dsc','ic'].includes(p.id));
+    if(casas)for(const [id,nombre,lon] of [['asc','Ascendente',casas.ang.asc],['mc','Medio Cielo',casas.ang.mc],['dsc','Descendente',mod360(casas.ang.asc+180)],['ic','Fondo del Cielo',mod360(casas.ang.mc+180)]])lista.push({id,nombre,glifo:id.toUpperCase(),lon,tipo:'angulo'});
+    listas.push(...lista.map(cuerpo=>({id:cuerpo.id,capa:lado,cuerpo})));
+  }
+  return listas;
+}
+function pintaGuiaComparada(capa){
+  const hoja=document.querySelector('#cartaPanel .hoja:not([hidden])');
+  if(!hoja)return;
+  if(!capa){document.getElementById('guiaComparada')?.remove();return;}
+  const actual=document.getElementById('guiaComparada');
+  if(actual?.parentElement===hoja && actual.dataset.firma===_capaFirma)return;
+  actual?.remove();
+  const caja=document.createElement('section');caja.id='guiaComparada';caja.className='birrueda-info';caja.dataset.firma=_capaFirma;
+  const base=cartaEnRueda(),avisoA=base.aviso,avisoB=capa.casas?.aviso;
+  caja.innerHTML=`<div class="anillos"><strong class="anillo-a">A · Interior · ${escaparHTML(capa.etiquetaBase||'Natal')}</strong><strong class="anillo-b">B · Exterior · ${escaparHTML(capa.etiqueta||capa.clave.n)}</strong></div>
+    <details><summary>Casas, ángulos y graduación</summary><p>${escaparHTML(capa.nota||'')}</p><p>${base.cusp?'A conserva sus doce casas.':'A sin hora: no se dibujan sus casas ni ángulos.'} ${capa.casas?'B conserva su propio juego de casas y ejes.':'B se representa sin casas.'}</p><p>Marcas de 1°, destacadas cada 5° y 10°. Cada signo abarca 30°; las casas conservan el tamaño de su cálculo.</p><p>Zodiaco común de referencia: ${escaparHTML(zodiacoDe().n)}${desfaseZodiaco()?' · origen de la carta A':''}.</p>${avisoA?`<p>A: ${escaparHTML(avisoA)}</p>`:''}${avisoB?`<p>B: ${escaparHTML(avisoB)}</p>`:''}</details>
+    ${capa.movidos.some(p=>p.complementario)?'<p>† Complementarios: visibles como referencia, fuera de los aspectos de la escuela.</p>':''}
+    <label for="puntoComparado">Consultar un planeta o eje</label><select id="puntoComparado"><option value="">Elige A o B…</option>${puntosComparados(capa).map(b=>`<option value="${b.capa}:${b.id}">${b.capa==='base'?'A · Interior':'B · Exterior'} · ${escaparHTML(b.cuerpo.nombre)}${b.cuerpo.complementario?' † complementario':''}</option>`).join('')}</select>
+    <button type="button" class="secundario" id="pdfComparado">Descargar comparación en PDF</button>
+    <button type="button" class="secundario" id="ampliarBirrueda">Ver rueda completa</button>`;
+  hoja.prepend(caja);
+  caja.querySelector('select').addEventListener('change',ev=>{
+    const b=puntosComparados(capaExterior()).find(p=>`${p.capa}:${p.id}`===ev.target.value);
+    if(b)muestraPuntoComparado(b);
+  });
+  caja.querySelector('#pdfComparado').addEventListener('click',descargaComparacionPDF);
+  caja.querySelector('#ampliarBirrueda').addEventListener('click',()=>{
+    const panel=document.getElementById('cartaPanel');panel.classList.remove('expandido');panel.classList.add('plegado');
+    document.getElementById('plegar').textContent='▴';zoom=1;natalPan.x=0;natalPan.y=0;
+  });
+}
+function muestraPuntoComparado(b){
+  const capa=capaExterior();if(!capa)return;
+  seleccionComparada=`${b.capa}:${b.id}`;
+  pintaGuiaComparada(capa);
+  const guia=document.getElementById('guiaComparada');if(!guia)return;
+  document.getElementById('detalleComparado')?.remove();
+  const c=b.cuerpo,z=posZod(c.lon),base=cartaEnRueda();
+  const casaA=base.cusp?casaDe(c.lon,base.cusp):null,casaB=capa.casas?casaDe(c.lon,capa.casas.cusp):null;
+  const detalle=document.createElement('section');detalle.id='detalleComparado';detalle.setAttribute('aria-live','polite');
+  const esB=b.capa==='exterior',cruces=capa.cerca.filter(x=>(esB?x.P:x.N).id===b.id);
+  const lineas=cruces.slice(0,8).map(x=>{
+    const otro=esB?x.N:x.P,lonP=mod360(x.P.lon+capa.arco),dist=Math.abs(((lonP-x.N.lon+540)%360)-180);
+    const asp=x.asp;
+    return `<li>${escaparHTML(asp.n)} con ${esB?'A':'B'} · ${escaparHTML(otro.nombre)} · orbe ${gradoMin(Math.abs(dist-asp.a))}</li>`;
+  });
+  detalle.innerHTML=`<h3>${esB?'B · Exterior':'A · Interior'} · ${escaparHTML(c.nombre)}</h3><p>${z.texto} ${z.signo.n}${c.complementario?' · † Complementario, fuera de los aspectos principales':''}</p><p>Casa A: <strong>${casaA?ROMANOS[casaA]:'sin calcular'}</strong> · Casa B: <strong>${casaB?ROMANOS[casaB]:'sin calcular'}</strong></p>${lineas.length?`<ul>${lineas.join('')}</ul>`:'<p>Sin contactos dentro del orbe mostrado en la rueda.</p>'}<button type="button" class="secundario">Cerrar detalle</button>`;
+  guia.after(detalle);guia.querySelector('select').value=seleccionComparada;
+  detalle.querySelector('button').addEventListener('click',()=>{detalle.remove();seleccionComparada=null;guia.querySelector('select').value='';});
 }
 
 function pintaRueda(g, cx, cy, R, vivo, capa, ch){
   ch = ch || carta;
+  if(capa){
+    const objetivos=window.NatalBirrueda.pintar(g,{
+      cx,cy,R,base:ch,capa,desfase:desfaseZodiaco(),signos:SIGNOS,
+      papel:PAPEL,oscuro:PAPEL===PAPEL_OSCURO,pintaGlifo,
+      posicion:lon=>posZod(lon).corto,seleccion:seleccionComparada,sobre:sobreComparada,vivo,leyenda:!vivo
+    });
+    if(vivo)blancos.push(...objetivos);
+    return;
+  }
   const {ang, cusp, cuerpos, puntos, aspectos} = ch;
   const giro = ang ? ang.asc : 0;
   const aPant = lon => (180 - mod360(lon - giro)) * RAD;
@@ -2762,12 +2863,19 @@ function pintaRueda(g, cx, cy, R, vivo, capa, ch){
   }
   // grados
   g.strokeStyle = PAPEL.ticks;
-  for(let d=0; d<360; d+=5){
-    const a = aPant(d), l = d%30===0 ? R*0.045 : R*0.018;
+  for(let d=0; d<360; d++){
+    const a = aPant(d+desfaseZodiaco()), l = d%30===0 ? R*0.045 : d%10===0 ? R*0.032 : d%5===0 ? R*0.024 : R*0.011;
+    g.strokeStyle=d%5===0?PAPEL.suave:PAPEL.ticks;
+    g.lineWidth=d%10===0?1.15:.65;
     g.beginPath();
     g.moveTo(cx+Math.cos(a)*rInt, cy+Math.sin(a)*rInt);
     g.lineTo(cx+Math.cos(a)*(rInt-l), cy+Math.sin(a)*(rInt-l));
     g.stroke();
+    if(d%10===0 && R>190){
+      g.fillStyle=PAPEL.suave;g.textAlign='center';g.textBaseline='middle';
+      g.font=`${Math.max(8,Math.round(R*.023))}px "IBM Plex Mono", monospace`;
+      g.fillText(`${d%30}°`,cx+Math.cos(a)*(rInt-R*.058),cy+Math.sin(a)*(rInt-R*.058));
+    }
   }
 
   // casas
@@ -2937,6 +3045,8 @@ async function fabricaHoja(modo){
     g.fillText(d.nombre||'Carta natal',80,64,L-160);
     g.fillStyle=PAPEL.suave;g.font='24px Spectral, Georgia, serif';
     g.fillText(`${d.resumenFecha||''} · ${d.lugarTexto||''}`,80,106,L-160);
+    const capa=capaExterior();
+    if(capa){g.fillText(`${capa.clave.n} · ${fmtDia.format(capa.fecha)}`,80,148,L-160);}
     pintaRueda(g, L/2, 960, 750, false, capaExterior(), cartaEnRueda());
     return c;
   }
@@ -3020,6 +3130,54 @@ async function fabricaHoja(modo){
   g.textAlign = "left"; g.fillStyle = PAPEL.borde; g.font = '18px "IBM Plex Mono", monospace';
   g.fillText("Astroplanetario · "+zodiacoDe().n+" · posiciones geocéntricas", margen, alto - 26);
   return c;
+}
+function fabricaComparacionPDF(){
+  const capa=capaExterior(),base=cartaEnRueda();
+  if(!capa || !base)return null;
+  const c=document.createElement('canvas');c.width=1600;c.height=2263;
+  const g=c.getContext('2d'),anterior=PAPEL;PAPEL=PAPEL_CLARO;
+  try{
+    g.fillStyle=PAPEL.fondo;g.fillRect(0,0,c.width,c.height);
+    g.textAlign='left';g.textBaseline='alphabetic';g.fillStyle=PAPEL.tinta;
+    g.font='46px Cinzel, Georgia, serif';g.fillText(capa.clave.n,90,110,1420);
+    const linea=(texto,y,color=PAPEL.suave)=>{g.fillStyle=color;g.font='27px Spectral, Georgia, serif';g.textAlign='left';g.fillText(texto,90,y,1420);};
+    linea(`A · Interior · ${capa.etiquetaBase||base.datos.nombre||'Natal'}`,174,'#225e83');
+    linea(`${base.datos.resumenFecha||''} · ${base.datos.lugarTexto||''}`,216);
+    linea(`B · Exterior · ${capa.etiqueta||capa.clave.n} · ${fmtDia.format(capa.fechaConsulta??capa.fecha)}`,272,'#975021');
+    if(capa.datos){
+      const cuando=new Intl.DateTimeFormat('es-MX',{dateStyle:'medium',timeStyle:'short',timeZone:capa.datos.tz||'UTC'}).format(capa.fecha);
+      linea(`${capa.fechaConsulta?'Instante progresado: ':''}${cuando} · ${capa.datos.lugarTexto||''} · ${capa.datos.tz||'UTC'}`,316);
+    }
+    pintaRueda(g,800,1080,650,false,{...capa,nota:''},base);
+    g.textAlign='left';
+    let notaY=1816,renglon='';
+    g.font='27px Spectral, Georgia, serif';
+    for(const palabra of (capa.nota||'').split(/\s+/)){
+      if(renglon && g.measureText(renglon+' '+palabra).width>1420){linea(renglon,notaY);notaY+=36;renglon='';}
+      renglon+=(renglon?' ':'')+palabra;
+    }
+    if(renglon)linea(renglon,notaY);
+    const sistemaA=base.cusp?NOMBRE_SISTEMA[base.datos.sistemaReal||base.datos.sistema]||'calculadas':'sin casas';
+    const sistemaB=capa.casas?NOMBRE_SISTEMA[capa.casas.sistema]||'dirigidas':'sin casas';
+    linea(`Casas A: ${sistemaA} · Casas B: ${sistemaB}`,1890);
+    linea(`Zodiaco común: ${zodiacoDe().n}${desfaseZodiaco()?' · origen de A':''}`,1940);
+    linea('Graduación de 1° · marcas de 5° y 10° · cada signo abarca 30°',1990);
+    if(base.aviso)linea(`A: ${base.aviso}`,2040);
+    if(capa.casas?.aviso)linea(`B: ${capa.casas.aviso}`,2080);
+    linea('Astroplanetario · Comparación independiente del informe natal',2160);
+    g.textAlign='right';g.font='21px "IBM Plex Mono", monospace';g.fillText('1 / 1',1510,2210);
+    return c;
+  }finally{PAPEL=anterior;}
+}
+async function descargaComparacionPDF(){
+  const boton=document.getElementById('pdfComparado');if(boton)boton.disabled=true;
+  try{
+    await document.fonts.ready;
+    const pagina=fabricaComparacionPDF();if(!pagina)return;
+    const blob=pdfDeLienzos([pagina]),u=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=u;a.download='Astroplanetario - '+(capaExterior()?.etiqueta||'comparación').replace(/[^\wÁÉÍÓÚÑáéíóúñ -]/g,'')+'.pdf';
+    a.click();setTimeout(()=>URL.revokeObjectURL(u),5000);
+  }finally{if(boton)boton.disabled=false;}
 }
 function descargaHoja(modo){
   const carta=cartaParaRueda();
@@ -3907,7 +4065,7 @@ const vueltaAnios = clave => 360/porAnio(clave);
 function puntosMoviles(ch){
   ch = ch || carta;
   const l = ch.cuerpos.concat(ch.puntos)
-    .map(c => ({id:c.id, nombre:c.nombre, glifo:c.glifo, color:c.color, lon:c.lon}));
+    .map(c => ({id:c.id, nombre:c.nombre, glifo:c.glifo, color:c.color, lon:c.lon,retro:c.retro,tipo:c.tipo}));
   if(ch.ang){
     l.push({id:"asc", nombre:"Ascendente", glifo:PUNTOS.asc.glifo, color:PUNTOS.asc.color, lon:ch.ang.asc});
     l.push({id:"mc",  nombre:"Medio Cielo", glifo:PUNTOS.mc.glifo,  color:PUNTOS.mc.color,  lon:ch.ang.mc});
@@ -3963,7 +4121,9 @@ function capaAtacir(){
   const arco = arcoDe(fecha, clave);
   const movidos = puntosMoviles().map(p => Object.assign({}, p, {lonNatal:p.lon, lon:mod360(p.lon + arco)}));
   const cerca = contactosAtacir(clave, arco - ORBE_ATACIR, arco + ORBE_ATACIR);
-  return {clave, fecha, arco, movidos, cerca};
+  return {clave, fecha, arco, movidos, cerca,
+    casas:window.NatalCapas.casasDe(carta,arco),etiquetaBase:'Natal',etiqueta:clave.n,
+    nota:'Casas y ángulos dirigidos con el mismo arco que los planetas.'};
 }
 
 const fmtDia = new Intl.DateTimeFormat("es-MX", {day:"numeric", month:"long", year:"numeric"});
@@ -4187,7 +4347,8 @@ function capaTransitos(){
     lon: lonGeo(id, Tf), vel: velocidadDe(id, fecha)
   }));
   const cerca = transitosActivos(fecha, estadoTransitos.orbe);
-  return {clave:{n:"Tránsitos"}, fecha, arco:0, movidos, cerca};
+  return {clave:{n:"Tránsitos"}, fecha, arco:0, movidos, cerca,casas:null,
+    etiquetaBase:'Natal',etiqueta:'Tránsitos',nota:'Planetas en tránsito sobre las casas natales. Sin casas del evento.'};
 }
 
 function pintaTransitos(){
@@ -4342,7 +4503,7 @@ let _rsFirma = null, _rsVal = null;
 function laRevolucion(){
   if(!carta || !carta.datos.horaConocida) return null;
   const anio = anioRS(), L = lugarRS();
-  const firma = [huellaCarta(carta.datos), anio, L.lat, L.lon, L.tz].join("|");
+  const firma = [huellaCarta(carta.datos), anio, L.lat, L.lon, L.tz, JSON.stringify(lecturaResuelta())].join("|");
   if(firma === _rsFirma) return _rsVal;
   _rsFirma = firma;
   const ms = instanteRevolucion(anio);
@@ -4364,7 +4525,10 @@ function capaRevolucion(){
   const cruces = aspectosEntre(movidos, puntosMoviles(carta), carta.datos.factorOrbe || 1);
   return {
     clave:{n:`Revolución ${R.anio}`}, fecha:R.ms, arco:0, movidos,
-    cerca: cruces.filter(c => c.asp.mayor && c.dif <= 3).map(c => ({P:c.A, N:c.B, asp:{cl:c.asp.cl, mayor:true}}))
+    datos:R.datos,
+    casas:window.NatalCapas.casasDe(R),etiquetaBase:'Natal',etiqueta:`Revolución solar ${R.anio}`,
+    nota:'Casas de la revolución calculadas para el retorno solar y el lugar elegido.',
+    cerca: cruces.filter(c => c.asp.mayor && c.dif <= 3).map(c => ({P:c.A, N:c.B, asp:c.asp}))
   };
 }
 
@@ -4638,7 +4802,7 @@ function instanteProgresado(ms){
 let _progFirma = null, _progVal = null;
 function laProgresion(){
   if(!carta || !carta.datos.horaConocida) return null;
-  const firma = huellaCarta(carta.datos) + "|" + Math.round(fechaProg()/3600000);
+  const firma = [huellaCarta(carta.datos),fechaProg(),JSON.stringify(lecturaResuelta())].join('|');
   if(firma === _progFirma) return _progVal;
   _progFirma = firma;
   const d = carta.datos;
@@ -4661,8 +4825,10 @@ function laProgresion(){
       -(Math.sin(ramc*RAD)*Math.cos(eps*RAD) + Math.tan(lat*RAD)*Math.sin(eps*RAD)))*DEG);
     if(mod360(asc - mc) > 180) asc = mod360(asc + 180);
     P.ang = {mc, asc, ramc, eps, lat, lon:carta.datos.lon};
-    const r = cuspides(carta.datos.sistema || "placidio", P.ang);
+    const cfg=lecturaResuelta();
+    const r = window.Casas.cuspides(cfg.casas,P.ang,{ayanamsa:window.NatalLectura.ayanamsa(P,cfg)});
     P.cusp = r.c; P.aviso = r.aviso || null;
+    P.datos.sistemaReal=r.sistema;
     P.arcoAngulos = arco;
   }
   _progVal = P;
@@ -4670,11 +4836,13 @@ function laProgresion(){
 }
 
 function capaProgres(){
-  if(!carta) return null;
+  if(!carta || !carta.datos.horaConocida) return null;
   const fecha = fechaProg();
   if(estadoProg.modo === "arco"){
     const arco = arcoSolar(fecha);
     return {clave:{n:"Arco solar"}, fecha, arco,
+            casas:window.NatalCapas.casasDe(carta,arco),etiquetaBase:'Natal',etiqueta:'Arco solar',
+            nota:'Cúspides y ángulos dirigidos por el arco solar verdadero.',
             movidos: puntosMoviles().map(p => Object.assign({}, p, {lon: mod360(p.lon + arco)})),
             cerca: contactosAtacir(CLAVE_SOL, arco - ORBE_ATACIR, arco + ORBE_ATACIR)};
   }
@@ -4683,8 +4851,11 @@ function capaProgres(){
   const movidos = puntosMoviles(P);
   const cruces = aspectosEntre(movidos, puntosMoviles(carta), carta.datos.factorOrbe || 1);
   return {clave:{n:"Progresada"}, fecha:P.ms, arco:0, movidos,
+          datos:P.datos,fechaConsulta:fecha,
+          casas:window.NatalCapas.casasDe(P),etiquetaBase:'Natal',etiqueta:'Progresiones secundarias',
+          nota:'MC por arco solar; ASC y casas derivados del MC y la latitud natal.',
           cerca: cruces.filter(c => c.asp.mayor && c.dif <= 2)
-                       .map(c => ({P:c.A, N:c.B, asp:{cl:c.asp.cl, mayor:true}}))};
+                       .map(c => ({P:c.A, N:c.B, asp:c.asp}))};
 }
 
 /* cuándo cambia de signo un astro progresado, mirando hacia delante */
@@ -4857,13 +5028,14 @@ const estadoSin = {idB:null, factorOrbe:1, error:null};
 const cacheB = {};
 
 function cartaDeGuardada(id){
-  if(cacheB[id]) return cacheB[id];
   const reg = leerCartas().find(c => c.id === id);
   if(!reg) return null;
+  const firma=[id,huellaCarta(reg.datos),JSON.stringify(lecturaResuelta())].join('|');
+  if(cacheB[id]?.firma===firma)return cacheB[id].carta;
   let ch;
   try { ch = levantarCarta(reg.datos, false); estadoSin.error=null; }
   catch(e){ estadoSin.error=e.message+" Abre y corrige esa carta antes de compararla."; return null; }
-  cacheB[id] = ch;
+  cacheB[id] = {firma,carta:ch};
   return ch;
 }
 const PARA_REJA = new Set(ORDEN_EFEM.concat(["asc","mc","nodoN"]));
@@ -4890,9 +5062,13 @@ function capaSinastria(){
   return {
     clave:{n:`Sinastría · ${B.datos.nombre || "otra carta"}`},
     fecha: B.ms, arco: 0,
+    datos:B.datos,
+    casas:window.NatalCapas.casasDe(B),
+    etiquetaBase:carta.datos.nombre || 'Persona A',etiqueta:B.datos.nombre || 'Persona B',
+    nota:B.ang?'Cada anillo conserva las casas y los ángulos de su persona.':'Sin hora de B: se muestran sus planetas, sin casas ni ángulos.',
     movidos: puntosB,
     cerca: cruces.filter(c => c.asp.mayor && c.dif <= 4)
-                 .map(c => ({P:c.A, N:c.B, asp:{cl:c.asp.cl, mayor:true}}))
+                 .map(c => ({P:c.A, N:c.B, asp:c.asp}))
   };
 }
 
@@ -4981,7 +5157,6 @@ function pintaSinastria(){
     </div>
     <div id="bloqueCompuesta"></div>
     <div id="bloqueSinastria" ${compuestaActiva ? "hidden" : ""}>
-    <div class="studio-syn-legend"><span>A · ${escaparHTML(nombreA)} · interior</span><span>B · ${escaparHTML(nombreB)} · exterior</span></div>
     <div class="cuadro">
       <div><span class="k">Por dentro</span><span class="v">${nombreA.replace(/</g,"&lt;")}</span></div>
       <div><span class="k">Por fuera</span><span class="v">${nombreB.replace(/</g,"&lt;")}</span></div>
