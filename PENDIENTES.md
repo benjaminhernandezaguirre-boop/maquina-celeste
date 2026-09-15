@@ -123,7 +123,7 @@ quieras. Primera mejora descrita en `ASTROCARTOGRAFIA-ESTUDIO.md`:
 
 ## 6. Cimientos
 
-- [x] **Ciudades mundiales de GeoNames cities500.** 235,808 registros oficiales y dos de compatibilidad; búsqueda en Worker con carga diferida, 40 sugerencias, nombres ambiguos y zonas IANA. Integrado el 15 sep 2026 en las calculadoras y consultas de Astrocartografía. Detalles y actualización en `LEEME-BUSCADOR-DE-CIUDADES.md`.
+- [x] **Ciudades mundiales de GeoNames cities500.** 235,808 registros oficiales y dos de compatibilidad; consultas en servidor con 40 sugerencias, nombres ambiguos y zonas IANA. El Worker descarga el catálogo completo solo para explorar líneas de Astrocartografía. Integrado el 15 sep 2026. Detalles en `LEEME-BUSCADOR-DE-CIUDADES.md` y `CIUDADES-CONSULTA.md`.
 
 - [x] **Afinar la precisión del Sol.** Hoy andamos en fracciones de minuto de arco: de sobra para signos, casas y aspectos, pero corto para una revolución solar, donde medio minuto de arco mueve el instante del retorno unos diez minutos de reloj y corre el Ascendente dos o tres grados. Es trabajo acotado y conocido. *(mediano, bloquea la revolución solar)*  
   → hecho, y de paso apareció algo más gordo: faltaba la precesión de los equinoccios en todos los planetas, y ΔT. Ver ESTADO-DEL-PROYECTO.md.

@@ -1,5 +1,5 @@
-/* Datalist compartido: carga al usarlo, búsqueda en Worker, hasta 40 resultados
-   y descarte de respuestas antiguas. */
+/* Datalist compartido: consulta solo con texto, hasta 40 resultados y descarte
+   de respuestas antiguas. Una entrada vacía no inicia Worker ni red. */
 (function(root){
 'use strict';
 const TOPE=40,MINIMO=1,conectados=new Set(),estados=new WeakMap();
@@ -23,11 +23,17 @@ function conecta(id='ciudades'){
     const dl=document.getElementById(id);if(!dl)return;
     if(activo&&activo!==input)estado(activo,'');activo=input;
     const turno=++version;clearTimeout(temporizador);dl.replaceChildren();
-    estado(input,C().listo()?'':'Cargando ciudades del mundo…');
+    const texto=input.value;
+    if(normaliza(texto).length<MINIMO){estado(input,'Escribe una ciudad; puedes añadir región o país.');return;}
+    const seleccion=C().resolver?.(texto)?.ciudad;
+    if(seleccion&&normaliza(seleccion.etiqueta)===normaliza(texto)){
+      const opcion=document.createElement('option');opcion.value=seleccion.etiqueta;dl.appendChild(opcion);
+      estado(input,'Localidad seleccionada.');return;
+    }
+    estado(input,'Buscando…');
     const consulta=async()=>{
       try{
-        await C().carga();if(turno!==version)return;
-        const texto=input.value;if(normaliza(texto).length<MINIMO){estado(input,'Escribe una ciudad; puedes añadir región o país.');return;}
+        await C().carga();if(turno!==version||texto!==input.value)return;
         estado(input,'Buscando…');const resultados=await C().buscar(texto);
         if(turno!==version||texto!==input.value)return;
         const frag=document.createDocumentFragment();for(const c of resultados.slice(0,TOPE)){const o=document.createElement('option');o.value=c.etiqueta;frag.appendChild(o);}dl.replaceChildren(frag);
