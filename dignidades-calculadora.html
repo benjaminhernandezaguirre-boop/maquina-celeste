@@ -20,8 +20,10 @@ table.t th.g{border-left:1px solid var(--line)}
 table.t td.num.cero{color:var(--muted)}
 .leyenda{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.9rem;color:var(--muted);font-size:.8rem;align-items:center}
 </style>
+<link rel="stylesheet" href="/app/estudio-comun.css?v=20260915">
+<link rel="stylesheet" href="/app/navegacion.css?v=20260915">
 </head>
-<body><div class="fondo"></div>
+<body data-estudio="dignidades"><div class="fondo"></div>
 <header class="ancho cabecera">
   <a class="marca" href="/">Astroplanetario <span>Máquina Celeste</span></a>
   <nav class="nav" aria-label="Navegación principal">
@@ -45,7 +47,7 @@ table.t td.num.cero{color:var(--muted)}
   </div>
   <div class="fuente-panel" id="panelGuardada">
     <div class="campo"><label for="cartaSelect">Carta natal guardada</label><select id="cartaSelect"></select></div>
-    <a class="boton sec" href="/astroplanetario.html?view=natal">Crear otra carta</a>
+    <a class="boton sec" href="/astroplanetario.html?view=natal&amp;returnTo=%2Fcalculadora-dignidades">Crear carta y continuar</a>
   </div>
   <div id="panelManual" hidden>
     <div class="manual-grid">
@@ -123,4 +125,6 @@ table.t td.num.cero{color:var(--muted)}
 <script src="/app/profecciones.js"></script>
 <script src="/app/dignidades.js"></script>
 <script src="/app/dignidades-ui.js"></script>
+<script src="/app/estudio-comun.js?v=20260915" defer></script>
+<script src="/app/navegacion.js?v=20260915" defer></script>
 </body></html>

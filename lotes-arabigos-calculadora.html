@@ -39,8 +39,10 @@ html[data-studio-theme="dark"]{color-scheme:dark;--bg:#061525;--panel:#0d2434;--
   border-top:1px solid currentColor;border-top-color:color-mix(in srgb,currentColor 18%,transparent);
   font-size:.78rem;opacity:.8}
 </style>
+<link rel="stylesheet" href="/app/estudio-comun.css?v=20260915">
+<link rel="stylesheet" href="/app/navegacion.css?v=20260915">
 </head>
-<body>
+<body data-estudio="lotes">
 <header class="ancho cabecera"><a class="marca" href="/">Astroplanetario</a><nav class="nav"><a href="/lotes-arabigos">Guía de lotes</a><a href="/carta-natal">Carta natal</a><button class="tema" id="themeToggle" type="button"></button></nav></header>
 <main class="ancho">
 <section class="hero"><p class="ceja">Neptuno · Calculadora</p><h1>El mapa secreto de tu carta</h1><p>Explora 63 lotes arábigos organizados por grandes temas. Cada punto aparece sobre tu rueda natal con su signo, casa, regente, fórmula y los aspectos planetarios que recibe.</p></section>
@@ -68,9 +70,10 @@ html[data-studio-theme="dark"]{color-scheme:dark;--bg:#061525;--panel:#0d2434;--
 <div class="resultados" id="resultados" aria-live="polite"></div>
 <details class="panel formula-avanzada"><summary>2. Crea una fórmula personal</summary><div class="formula-contenido"><p class="aviso">Puedes combinar puntos sin escribir código. Si activas la inversión nocturna, intercambia los puntos que sumas y restas cuando el Sol está bajo el horizonte.</p><div class="personal"><div class="campo"><label for="nombreFormula">Nombre</label><input id="nombreFormula" maxlength="60" placeholder="Ej. Mi lote de estudio"></div><div class="campo"><label for="baseFormula">Base</label><select id="baseFormula"></select></div><div class="campo"><label for="sumaFormula">Sumar</label><select id="sumaFormula"></select></div><div class="campo"><label for="restaFormula">Restar</label><select id="restaFormula"></select></div><button class="boton sec" id="agregarFormula" type="button">Agregar</button></div><label class="check"><input id="invertirFormula" type="checkbox" checked> Invertir suma y resta en carta nocturna</label><div class="lista-personales resultados" id="personalizados"></div></div></details>
 </section>
-<section class="panel vacio" id="sinCartas" hidden><h2>Aún no hay cartas guardadas</h2><p>Primero calcula y guarda una carta natal; después vuelve a Neptuno.</p><a href="/astroplanetario.html?view=natal">Crear mi carta natal →</a></section>
+<section class="panel vacio" id="sinCartas" hidden><h2>Aún no hay cartas guardadas</h2><p>Crea tu carta natal y regresarás aquí con sus datos listos para explorar los lotes.</p><a href="/astroplanetario.html?view=natal&amp;returnTo=%2Fcalculadora-lotes-arabigos">Crear carta y continuar →</a></section>
 </main>
 <footer class="ancho pie"><span>Astroplanetario · Neptuno<span class="firma-instituto">Un proyecto del <a href="https://tarot-academy-theta.vercel.app/" target="_blank" rel="noopener">Instituto de Artes Esotéricas y Saberes Ancestrales</a></span> <span class="firma-instituto">Datos de ciudades: <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> · CC BY 4.0</span></span><a href="/lotes-arabigos">Cómo se calculan</a></footer>
 <script src="/app/ciudades.js?v=20260915"></script><script src="/app/ciudades-buscador.js?v=20260915"></script><script src="/app/efemerides.js"></script><script src="/app/lotes-arabigos.js"></script>
+<script src="/app/estudio-comun.js?v=20260915" defer></script>
+<script src="/app/navegacion.js?v=20260915" defer></script>
 </body></html>
-
