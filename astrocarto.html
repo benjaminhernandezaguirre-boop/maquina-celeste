@@ -82,9 +82,10 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
   font-size:.78rem;opacity:.8}
 </style>
 <link rel="stylesheet" href="app/studio-theme.css">
+<link rel="stylesheet" href="app/astrocarto-estudio.css?v=20260915">
 <script src="app/studio-theme.js"></script>
 </head>
-<body class="astro-studio">
+<body class="astro-studio geo-estudio">
 <div class="stars"></div>
 <div class="shell">
 <header>
@@ -92,11 +93,12 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
   <div class="brand"><p class="eyebrow">Mapa del mundo · líneas de ángulo</p><h1>Astrocartografía</h1></div>
 </header>
 
-<section class="panel">
-  <p class="rot">De quién es el mapa</p>
+<section class="panel geo-datos">
+  <details id="editorCarta" open><summary>Datos de nacimiento <span>Editar o elegir una carta</span></summary>
   <div class="campos">
     <div class="campo"><label for="guardada">Carta guardada</label>
       <select id="guardada"><option value="">— escribe los datos abajo —</option></select></div>
+    <div class="campo"><label for="nombre">Nombre de la carta</label><input id="nombre" maxlength="120" placeholder="Mi carta"></div>
     <div class="campo"><label for="fecha">Fecha</label><input id="fecha" type="date" min="1800-01-01" max="2050-12-31" required></div>
     <div class="campo"><label for="hora">Hora</label><input id="hora" type="time" step="60" required></div>
     <div class="campo ancho"><label for="lugar">Lugar de nacimiento</label>
@@ -104,6 +106,7 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
     <div class="campo"><label for="ocurrencia">Si la hora ocurrió dos veces</label>
       <select id="ocurrencia"><option value="reject">Pedir aclaración</option><option value="earlier">Primera ocurrencia</option><option value="later">Segunda ocurrencia</option></select></div>
     <button class="bot" id="dibujar">Dibujar</button>
+    <button class="bot" id="nuevaCarta" type="button">Nueva carta</button>
   </div>
   <details id="manualLugar" style="margin-top:.8rem"><summary>Coordenadas y zona para otro lugar</summary>
     <div class="campos" style="margin-top:.6rem">
@@ -112,12 +115,16 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
       <div class="campo"><label for="zonaManual">Zona horaria</label><input id="zonaManual" placeholder="America/Mexico_City"></div>
     </div>
   </details>
+  </details>
+  <p class="aviso geo-pendiente" id="datosPendientes" role="status" hidden></p>
   <p class="aviso" id="aviso" role="status" hidden></p>
   <div class="stats" id="resumen" hidden></div>
 </section>
 
-<section class="panel">
-  <p class="rot">El mapa</p>
+<div class="geo-workspace">
+<section class="panel geo-map-panel" id="panelMapa" aria-label="Explorador del mapa">
+  <div class="geo-map-heading"><div><p class="rot">Tu cielo, alrededor del mundo</p><h2>Explora tus líneas</h2></div><span class="chip" id="modoVisible">En mundo</span></div>
+  <details class="geo-filtros"><summary>Planetas y líneas <span id="cantidadLineas">40 visibles</span></summary>
   <div class="fichas" id="astros"></div>
   <div class="campos" style="margin-top:.8rem">
     <div class="campo"><label>Líneas</label><div class="fichas" id="ejes"></div></div>
@@ -127,17 +134,32 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
         <option value="zodiacal">Zodiacal · proyectado sobre la eclíptica</option>
       </select></div>
   </div>
-  <div class="mapa-caja"><canvas id="mapa" width="2160" height="1080"></canvas></div>
+  </details>
+  <div class="geo-toolbar" aria-label="Controles del mapa">
+    <div class="geo-zoom"><button class="bot" id="alejar" aria-label="Alejar mapa">−</button><output id="nivelZoom" aria-live="polite">1×</output><button class="bot" id="acercar" aria-label="Acercar mapa">+</button></div>
+    <button class="bot" id="mundo">Mundo</button><button class="bot" id="verNacimiento">Nacimiento</button><button class="bot" id="centrarLinea" disabled>Ver línea</button>
+    <button class="bot" id="ampliarMapa" aria-expanded="false">Ampliar mapa</button>
+  </div>
+  <div class="mapa-caja"><canvas id="mapa" width="2160" height="1080" tabindex="0" role="img" aria-label="Mapa astrocartográfico interactivo" aria-describedby="ayudaMapa"></canvas><div class="geo-vacio" id="mapaVacio">Dibuja una carta para explorar sus líneas.</div><span class="geo-escala" id="escalaMapa"></span></div>
   <div class="leyenda">
     <span><i style="border-top-style:solid"></i> AC · sale por el este</span>
     <span><i style="border-top-style:dashed"></i> DC · se pone por el oeste</span>
     <span><i style="border-top-style:solid;border-top-width:3px"></i> MC · culmina</span>
     <span><i style="border-top-style:dotted;border-top-width:3px"></i> IC · fondo del cielo</span>
   </div>
-  <p class="pie">Toca cualquier punto del mapa para consultar las líneas cercanas. Los filtros se aplican al mapa y a ambas tablas. El círculo dorado es el lugar de nacimiento.</p>
+  <p class="pie" id="ayudaMapa">Arrastra para explorar; pellizca o usa + y − para ampliar. Toca una línea para destacarla o un lugar para consultarlo. Con teclado: flechas, +, − e Inicio. Ctrl + rueda amplía; la rueda sola desplaza la página.</p>
+  <p class="geo-map-note">● Nacimiento <span>◇ Lugar consultado</span> · Las distancias se calculan sobre el modelo astronómico aproximado.</p>
+  <p id="mapaSeleccion" class="geo-map-note" role="status"></p>
 </section>
 
-<section class="panel">
+<aside class="geo-sidebar" aria-label="Consulta de líneas y lugares">
+<section class="panel geo-linea-panel">
+  <label class="rot" for="seleccionLinea">Línea destacada</label>
+  <select id="seleccionLinea"><option value="">Ver todas las líneas</option></select>
+  <div id="detalleLinea" aria-live="polite"><h2>Un lugar, distintas perspectivas</h2><p>Selecciona una línea en el mapa o en esta lista para conocer su planeta y su ángulo.</p></div>
+  <button class="bot" id="verPuntoLinea" hidden>Ver punto más cercano</button>
+</section>
+<section class="panel geo-destino">
   <p class="rot">Qué pasa por un lugar</p>
   <div class="campos">
     <div class="campo ancho"><label for="ciudad">Ciudad</label>
@@ -145,6 +167,9 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
     <div class="campo"><label for="orbe">Hasta</label>
       <select id="orbe"><option value="200">200 km</option><option value="550" selected>550 km</option><option value="1100">1100 km</option></select></div>
   </div>
+  <details class="geo-coordenadas"><summary>Consultar por coordenadas</summary><div class="campos"><div class="campo"><label for="latDestino">Latitud (norte +)</label><input id="latDestino" type="number" min="-90" max="90" step="any" placeholder="19.4326"></div><div class="campo"><label for="lonDestino">Longitud (este +)</label><input id="lonDestino" type="number" min="-180" max="180" step="any" placeholder="-99.1332"></div><button class="bot" id="consultarCoordenadas">Consultar punto</button></div></details>
+  <p id="avisoDestino" class="aviso" role="status" hidden></p>
+  <button class="bot geo-centrar" id="centrarDestino" hidden>Ver lugar en el mapa</button>
   <div class="tabla-caja"><table id="tablaLugar"><tbody></tbody></table></div>
 </section>
 
@@ -154,9 +179,13 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
     <div class="campo"><label for="lnAstro">Astro</label><select id="lnAstro"></select></div>
     <div class="campo"><label for="lnEje">Línea</label>
       <select id="lnEje"><option value="AC">AC · sale</option><option value="MC" selected>MC · culmina</option><option value="DC">DC · se pone</option><option value="IC">IC · fondo del cielo</option></select></div>
+    <button class="bot" id="buscarLocalidades">Buscar localidades</button>
   </div>
+  <p class="pie">Las 12 localidades del catálogo más cercanas a esta línea. La búsqueda se carga cuando la solicitas.</p>
   <div class="tabla-caja"><table id="tablaLinea"><tbody></tbody></table></div>
 </section>
+</aside>
+</div>
 
 <section class="panel">
   <p class="rot">Alcance del cálculo</p>
@@ -193,6 +222,8 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
 </div>
 <script src="app/ciudades.js?v=20260915"></script><script src="app/ciudades-buscador.js?v=20260915"></script><script src="app/efemerides.js"></script>
 <script src="app/astrocartografia.js"></script>
+<script src="app/astrocarto-vista.js?v=20260915"></script>
+<script src="app/astrocarto-pintor.js?v=20260915"></script>
 <script>
 /* Contorno del mundo (Natural Earth 110m, simplificado y codificado como
    polilínea delta a 0,05°). Va incrustado a propósito: la página tiene que
@@ -296,119 +327,92 @@ function descodifica(s){                            // polilínea, delta a 0,05�
 }
 const TIERRA = MAPA.tierra.map(descodifica), FRONTERAS = MAPA.fronteras.map(descodifica);
 
-/* dibuja una polilínea partiéndola donde cruza el antimeridiano */
-function traza(linea, cerrar){
-  let prev = null;
-  g.beginPath();
-  for(const [lo,la] of linea){
-    const X = px(lo), Y = py(la);
-    if(prev !== null && Math.abs(X - prev) > W/2){
-      if(cerrar){ g.closePath(); g.fill(); } else g.stroke();
-      g.beginPath(); g.moveTo(X,Y);
-    } else if(prev === null) g.moveTo(X,Y);
-    else g.lineTo(X,Y);
-    prev = X;
-  }
-  if(cerrar){ g.closePath(); g.fill(); } else g.stroke();
-}
-
+const vista = window.AstroVista.crear(cv.clientWidth || 1080, cv.clientHeight || 540);
+const pintor = window.AstroMapa.crear(cv,vista,{tierra:TIERRA,fronteras:FRONTERAS,geo:Geo,trazaPluton});
+let lineaSeleccionada=null, listaLineasAbierta=false, localidadesMostradas=[], ampliado=false;
+let firmaSelector="", ultimoMapa=null, focoAnterior=null, overflowAnterior="";
 function mapaClaro(){ return document.documentElement.dataset.studioTheme === "light"; }
 function tintaMapa(color){
   if(!mapaClaro() || !/^#[0-9a-f]{6}$/i.test(color)) return color;
   return '#'+color.slice(1).match(/../g).map(v=>Math.round(parseInt(v,16)*.58).toString(16).padStart(2,'0')).join('');
 }
-function pintaMapa(){
-  g.fillStyle = mapaClaro() ? "#e7edf0" : "#050b1a"; g.fillRect(0,0,W,H);            // océano
-  g.fillStyle = mapaClaro() ? "#cbd5ce" : "#1a2440";                                  // tierra
-  for(const anillo of TIERRA) traza(anillo, true);
-  g.strokeStyle = mapaClaro() ? "#97a9ae" : "#33415f"; g.lineWidth = 1.3; g.lineJoin = "round";
-  for(const linea of FRONTERAS) traza(linea, false);        // fronteras interiores
-  g.strokeStyle = mapaClaro() ? "#758b94" : "#5b7099"; g.lineWidth = 1.7;
-  for(const anillo of TIERRA) traza(anillo, false);         // costas, por encima
-  g.save(); g.strokeStyle = mapaClaro() ? "#20384a18" : "#ffffff0e"; g.lineWidth = 1.2;
-  for(let l = -150; l <= 150; l += 30){ g.beginPath(); g.moveTo(px(l),0); g.lineTo(px(l),H); g.stroke(); }
-  for(let l = -60; l <= 60; l += 30){ g.beginPath(); g.moveTo(0,py(l)); g.lineTo(W,py(l)); g.stroke(); }
-  g.setLineDash([5,9]); g.strokeStyle = mapaClaro() ? "#20384a22" : "#ffffff12";
-  for(const l of [23.44,-23.44,66.56,-66.56]){ g.beginPath(); g.moveTo(0,py(l)); g.lineTo(W,py(l)); g.stroke(); }
-  g.setLineDash([]); g.strokeStyle = mapaClaro() ? "#20384a44" : "#ffffff20"; g.lineWidth = 1.6;
-  g.beginPath(); g.moveTo(0,py(0)); g.lineTo(W,py(0)); g.stroke();
-  g.restore();
-  g.save(); g.font = "500 14px 'IBM Plex Mono', monospace"; g.fillStyle = mapaClaro() ? "#455b70" : "#ffffff33";
-  g.textAlign = "center"; g.textBaseline = "bottom";
-  for(let l = -150; l <= 150; l += 30) g.fillText(l < 0 ? Math.abs(l)+"O" : l > 0 ? l+"E" : "0", px(l), H-6);
-  g.textAlign = "left"; g.textBaseline = "middle";
-  for(let l = -60; l <= 60; l += 30) if(l) g.fillText(l < 0 ? Math.abs(l)+"S" : l+"N", 8, py(l));
-  g.restore();
+function distanciaTexto(km){ return km<1 ? 'Menos de 1 km' : Math.round(km).toLocaleString('es')+' km'; }
+function sincronizaSeleccion(){
+  if(lineaSeleccionada){const [id,eje]=lineaSeleccionada.split('|');if(!carta||!astrosOn.has(id)||!ejesOn.has(eje))lineaSeleccionada=null;}
+  const firma=[!!carta,...astrosOn,...ejesOn].join('|');
+  const s=document.getElementById('seleccionLinea');
+  if(firma!==firmaSelector){
+    firmaSelector=firma;
+    s.innerHTML='<option value="">Ver todas las líneas</option>'+(carta?ASTROS.filter(a=>astrosOn.has(a.id)).flatMap(a=>EJES.filter(e=>ejesOn.has(e.id)).map(e=>'<option value="'+a.id+'|'+e.id+'">'+a.n+' · '+e.id+'</option>')).join(''):'');
+  }
+  s.value=lineaSeleccionada||'';
+  document.getElementById('cantidadLineas').textContent=(astrosOn.size*ejesOn.size)+' visibles';
+  document.getElementById('modoVisible').textContent=modo==='mundo'?'En mundo':'Zodiacal';
+  document.getElementById('verNacimiento').disabled=!carta;
+  document.getElementById('centrarLinea').disabled=!lineaSeleccionada;
+  document.getElementById('mapaVacio').hidden=!!carta;
+  document.getElementById('centrarDestino').hidden=!carta||!consulta;
 }
+const TEMAS_ASTRO={sol:'Identidad, expresión y vitalidad',luna:'Emociones, pertenencia y hábitos',mercurio:'Comunicación, estudio e intercambio',venus:'Vínculos, disfrute y sentido estético',marte:'Iniciativa, afirmación y esfuerzo',jupiter:'Aprendizaje, expansión y perspectivas',saturno:'Responsabilidad, límites y constancia',urano:'Autonomía, cambios e innovación',neptuno:'Imaginación, sensibilidad e ideales',pluton:'Transformación, intensidad y poder personal'};
+const TEMAS_EJE={AC:'El horizonte de salida pone el énfasis en la forma de presentarte y comenzar experiencias.',MC:'La culminación orienta la lectura hacia la vocación, la proyección pública y lo que haces visible.',DC:'El horizonte de puesta sitúa el énfasis en los encuentros, las asociaciones y la relación con otras personas.',IC:'El fondo del cielo orienta la lectura hacia el hogar, las raíces y la vida privada.'};
+function seleccionActual(){
+  if(!carta||!lineaSeleccionada)return null;
+  const [id,eje]=lineaSeleccionada.split('|'),a=datosAstros().find(a=>a.id===id);
+  return a?{a,eje}:null;
+}
+function pintaFicha(){
+  const f=seleccionActual(),box=document.getElementById('detalleLinea');
+  document.getElementById('verPuntoLinea').hidden=!f||!consulta;
+  if(!f){box.innerHTML='<h2>Un lugar, distintas perspectivas</h2><p>'+(carta?'Selecciona una línea en el mapa o en la lista. Se destacará y podrás consultar su distancia al lugar elegido.':'Dibuja una carta para explorar sus líneas y elegir un destino.')+'</p>';return;}
+  const {a,eje}=f,distancia=consulta?Geo.puntoCercano(a,eje,consulta.lat,consulta.lon):null;
+  box.innerHTML='<div class="geo-linea-titulo"><span class="geo-linea-glifo" style="--linea-color:'+tintaMapa(a.c)+'">'+gh(a)+'</span><h2>'+a.n+' · '+eje+'</h2></div><p><strong>'+TEMAS_ASTRO[a.id]+'.</strong> '+TEMAS_EJE[eje]+'</p><p class="geo-posicion">'+a.z.texto+' '+a.z.signo.n+' · posición tropical. '+(modo==='mundo'?'Se conserva la latitud celeste del astro.':'Se proyecta el astro sobre la eclíptica.')+'</p>'+(distancia?'<div class="geo-linea-distancia"><strong>'+distanciaTexto(distancia.km)+'</strong><small>desde '+E.escaparHTML(consulta.nombre)+' hasta la línea</small><small>Punto más cercano: '+distancia.lat.toFixed(3)+'°, '+distancia.lon.toFixed(3)+'°</small></div>':'')+'<p class="pie">Lectura simbólica: se interpreta junto con la carta natal. La distancia se refiere al modelo aproximado, no a una garantía de acontecimientos.</p>';
+}
+function repinta(){
+  sincronizaSeleccion();
+  pintor.pintar({astros:carta?datosAstros().filter(a=>astrosOn.has(a.id)):[],ejes:[...ejesOn],carta,marca,seleccion:lineaSeleccionada,claro:mapaClaro()});
+  document.getElementById('nivelZoom').textContent=Number(vista.zoom.toFixed(1))+'×';
+  const centro=vista.aMapa(vista.width/2,vista.height/2),lat=centro?centro.lat:0;
+  const km=6371.0088*Math.PI/180*Math.cos(lat*RAD)/(6*vista.escala);
+  document.getElementById('escalaMapa').textContent='Escala horizontal · ≈ '+(km>=1?km.toFixed(0):km.toFixed(1))+' km/píxel';
+  const f=seleccionActual();
+  document.getElementById('mapaSeleccion').textContent=f?f.a.n+' '+f.eje+' destacada'+(consulta?' · '+distanciaTexto(Geo.distancia(f.a,f.eje,consulta.lat,consulta.lon).km)+' desde '+consulta.nombre:''):'';
+}
+function ajustaMapa(){
+  const w=cv.clientWidth,h=cv.clientHeight;
+  if(w>0&&h>0)vista.redimensionar(w,h);
+  repinta();
+}
+function destacaLinea(clave){
+  lineaSeleccionada=clave||null;sincronizaSeleccion();
+  if(lineaSeleccionada){const [id,eje]=lineaSeleccionada.split('|');document.getElementById('lnAstro').value=id;document.getElementById('lnEje').value=eje;}
+  repinta();pintaFicha();pintaTablaLinea();
+}
+function avisoDestino(texto){const n=document.getElementById('avisoDestino');n.textContent=texto||'';n.hidden=!texto;}
+function consultarDestino(q,centrar=true){
+  if(!carta){avisoDestino('Primero dibuja una carta.');return;}
+  solicitudLugar++;
+  consulta={nombre:q.nombre,lat:q.lat,lon:q.lon};marca={lat:q.lat,lon:q.lon};
+  document.getElementById('latDestino').value=q.lat;document.getElementById('lonDestino').value=q.lon;
+  avisoDestino('');
+  if(centrar)vista.centrar(q.lon,q.lat,Math.max(4,vista.zoom));
+  actualiza();
+}
+function reiniciaExploracion(){
+  lineaSeleccionada=null;listaLineasAbierta=false;localidadesMostradas=[];ultimoMapa=null;
+  consultaLineaActual=null;solicitudLinea++;vista.mundo();
+  for(const id of ['latDestino','lonDestino'])document.getElementById(id).value='';
+  avisoDestino('');document.getElementById('editorCarta').open=true;
+}
+function ampliarMapa(valor){
+  ampliado=valor;
+  const panel=document.getElementById('panelMapa'),boton=document.getElementById('ampliarMapa');
+  panel.classList.toggle('expandido',valor);boton.textContent=valor?'Cerrar mapa':'Ampliar mapa';boton.setAttribute('aria-expanded',String(valor));
+  if(valor){focoAnterior=document.activeElement;overflowAnterior=document.body.style.overflow;document.body.style.overflow='hidden';panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');boton.focus();}
+  else {document.body.style.overflow=overflowAnterior;panel.removeAttribute('role');panel.removeAttribute('aria-modal');if(focoAnterior&&focoAnterior.focus)focoAnterior.focus();}
+  ajustaMapa();
+}
+window.addEventListener('astro-theme-change',()=>{repinta();pintaFicha();const q=consulta;if(q)pintaTablaLugar(q.nombre,q.lat,q.lon);});
 
-/* las etiquetas se apilan para no encimarse; si no cabe, no se dibuja */
-let ocupados = [];
-function hueco(x, y0, w, h, dir){
-  for(let i = 0, y = y0; i < 14; i++, y += dir*(h+5)){
-    if(y < h/2 || y > H - h/2) break;
-    const c = [x-w/2, y-h/2, x+w/2, y+h/2];
-    if(!ocupados.some(o => c[0] < o[2]+5 && c[2] > o[0]-5 && c[1] < o[3]+5 && c[3] > o[1]-5)){
-      ocupados.push(c); return y;
-    }
-  }
-  return null;
-}
-
-const TRAZO = {AC:[[], 3.4], DC:[[13,9], 3.4], MC:[[], 5], IC:[[3,8], 5]};
-function pintaLineas(){
-  if(!carta) return;
-  ocupados = [];
-  const datos = datosAstros().filter(a => astrosOn.has(a.id));
-  for(const a of datos) for(const eje of ["AC","DC","MC","IC"]){
-    if(!ejesOn.has(eje)) continue;
-    const [guion, grosor] = TRAZO[eje];
-    g.save(); g.setLineDash(guion); g.strokeStyle = tintaMapa(a.c); g.lineWidth = grosor;
-    g.globalAlpha = (eje === "MC" || eje === "IC") ? 0.95 : 0.82;
-    for(const tramo of curva(a, eje)){
-      g.beginPath();
-      tramo.forEach(([lo,la], k) => k ? g.lineTo(px(lo),py(la)) : g.moveTo(px(lo),py(la)));
-      g.stroke();
-    }
-    g.restore();
-  }
-  for(const a of datos) for(const eje of ["MC","IC","AC","DC"]) if(ejesOn.has(eje)) etiqueta(a, eje);
-  if(carta.lat != null) punto(carta.lon, carta.lat, "#dfbd75", "nacimiento");
-  if(marca) punto(marca.lon, marca.lat, "#ffffff", null);
-}
-function etiqueta(a, eje){
-  let X, y0, dir;
-  if(eje === "MC" || eje === "IC"){ X = px(eje === "MC" ? a.lonMC : a.lonIC); y0 = 26; dir = 1; }
-  else {
-    const L = lonEnLatitud(a, eje, 0);
-    if(L === null) return;
-    X = px(L); y0 = py(0) + (eje === "AC" ? -24 : 24); dir = eje === "AC" ? -1 : 1;
-  }
-  const w = 56, h = 34; X = Math.max(w/2, Math.min(W-w/2,X));
-  const Y = hueco(X, y0, w, h, dir);
-  if(Y === null) return;
-  g.save();
-  g.fillStyle = mapaClaro() ? "#fffefaee" : "#050b1aee"; g.strokeStyle = tintaMapa(a.c); g.lineWidth = 1.5;
-  g.beginPath(); g.roundRect(X-w/2, Y-h/2, w, h, 7); g.fill(); g.stroke();
-  g.fillStyle = tintaMapa(a.c); g.textAlign = "center"; g.textBaseline = "middle";
-  if(a.id === "pluton") trazaPluton(g, X-12, Y, 19);
-  else { g.font = "20px Spectral, serif"; g.fillText(a.g, X-12, Y); }
-  g.font = "500 14px 'IBM Plex Mono', monospace"; g.fillText(eje, X+13, Y+1);
-  g.restore();
-}
-function punto(lon, lat, color, texto){
-  const X = px(lon), Y = py(lat);
-  g.save();
-  g.fillStyle = tintaMapa(color); g.strokeStyle = mapaClaro() ? "#e7edf0" : "#050b1a"; g.lineWidth = 3.5;
-  g.beginPath(); g.arc(X, Y, 8, 0, 7); g.fill(); g.stroke();
-  if(texto){
-    g.font = "500 15px 'IBM Plex Mono', monospace"; g.lineWidth = 4;
-    g.textAlign = "center"; g.strokeText(texto.toUpperCase(), X, Y - 16);
-    g.fillText(texto.toUpperCase(), X, Y - 16);
-  }
-  g.restore();
-}
-function repinta(){ pintaMapa(); pintaLineas(); }
-window.addEventListener("astro-theme-change",repinta);
 
 /* ===================== Tablas ===================== */
 
@@ -427,20 +431,21 @@ function pintaTablaLugar(nombre, lat, lon){
   const cuerpo = document.querySelector("#tablaLugar tbody");
   if(!carta){ cuerpo.innerHTML = `<tr><td>Primero dibuja un mapa.</td></tr>`; return; }
   const filas = lineasCerca(lat, lon, orbe);
-  cuerpo.innerHTML = `<tr><th colspan="4">${E.escaparHTML(nombre)} · ${lat.toFixed(2)}°, ${lon.toFixed(2)}°</th></tr>` + (filas.length
+  cuerpo.innerHTML = `<tr><th colspan="3">${E.escaparHTML(nombre)} · ${lat.toFixed(2)}°, ${lon.toFixed(2)}°</th></tr>` + (filas.length
     ? filas.map(f => `<tr>
-        <td class="g" style="color:${f.a.c}">${gh(f.a)}</td>
-        <td><strong>${f.a.n} ${f.eje}</strong> · ${f.a.n} ${SENTIDO[f.eje]}<br>
-          <span style="color:#9993a4;font-size:.84rem">${f.a.n} en ${f.a.z.texto} ${f.a.z.signo.n}</span></td>
-        <td class="m">${f.d.toFixed(2)}°</td>
-        <td class="m">${Math.round(f.km)} km</td></tr>`).join("")
-    : `<tr><td colspan="4" style="color:#9993a4">No hay líneas visibles a menos de ${orbe} km de este punto.</td></tr>`);
+        <td class="g" style="color:${tintaMapa(f.a.c)}">${gh(f.a)}</td>
+        <td><button class="geo-tabla-linea" data-linea="${f.a.id}|${f.eje}" aria-label="Destacar ${f.a.n} ${f.eje}"><strong>${f.a.n} ${f.eje}</strong></button><br>
+          <span class="geo-posicion">${f.a.z.texto} ${f.a.z.signo.n}</span></td>
+        <td class="m">${distanciaTexto(f.km)}</td></tr>`).join("")
+    : `<tr><td colspan="3">No hay líneas visibles a menos de ${orbe} km de este punto.</td></tr>`);
 }
 let solicitudLinea=0, consultaLineaActual=null;
 async function pintaTablaLinea(){
   const solicitud=++solicitudLinea;
   const cuerpo=document.querySelector("#tablaLinea tbody");
+  localidadesMostradas=[];
   if(!carta){ cuerpo.innerHTML="<tr><td>Primero dibuja un mapa.</td></tr>"; return; }
+  if(!listaLineasAbierta){cuerpo.innerHTML="<tr><td>Elige una línea y pulsa Buscar localidades para explorar sus destinos.</td></tr>";return;}
   const id=document.getElementById("lnAstro").value, eje=document.getElementById("lnEje").value;
   const a=datosAstros().find(x=>x.id===id);
   if(!astrosOn.has(id) || !ejesOn.has(eje)){ cuerpo.innerHTML="<tr><td>Esta línea está oculta. Actívala en los filtros para consultar sus ciudades.</td></tr>"; return; }
@@ -454,8 +459,9 @@ async function pintaTablaLinea(){
     }
     const cerca=await consultaLineaActual.promesa;
     if(solicitud!==solicitudLinea)return;
-    cuerpo.innerHTML='<tr><th colspan="3">'+a.n+' '+eje+' · Localidades del catálogo más cercanas</th></tr>'+
-      cerca.map(f=>'<tr><td>'+E.escaparHTML(f.c.etiqueta)+'</td><td class="m">'+f.grados.toFixed(2)+'°</td><td class="m">'+Math.round(f.km)+' km</td></tr>').join('');
+    localidadesMostradas=cerca;
+    cuerpo.innerHTML='<tr><th colspan="2">'+a.n+' '+eje+' · Localidades del catálogo más cercanas</th></tr>'+
+      cerca.map((f,i)=>'<tr><td><button class="geo-tabla-linea" data-localidad="'+i+'" aria-label="Ver '+E.escaparHTML(f.c.etiqueta)+' en el mapa">'+E.escaparHTML(f.c.etiqueta)+'</button></td><td class="m">'+distanciaTexto(f.km)+'</td></tr>').join('');
   }catch(e){if(solicitud===solicitudLinea)cuerpo.innerHTML='<tr><td>'+E.escaparHTML(e.message || 'No se pudo cargar el catálogo. Inténtalo de nuevo.')+'</td></tr>';}
 }
 
@@ -477,11 +483,28 @@ for(const reg of guardadas()){
   if(!d || !d.horaConocida) continue;
   const o = document.createElement("option");
   o.value = reg.id;
-  o.textContent = `${d.nombre || "Sin nombre"} · ${d.dia}/${d.mes}/${d.anio}`;
+  o.textContent = `${d.nombre || "Sin nombre"} · ${d.dia}/${d.mes}/${d.anio} · ${d.lugarTexto || "Coordenadas manuales"}`;
   sel.appendChild(o);
 }
 
 function avisa(t){ const a = $("aviso"); a.hidden = !t; a.textContent = t || ""; }
+function pendientes(t){ const a=$("datosPendientes"); a.hidden=!t; a.textContent=t||""; }
+function marcaDatosPendientes(){
+  pendientes(carta
+    ? `Datos modificados. El mapa visible y sus consultas siguen usando los datos anteriores de «${carta.nombre}». Pulsa Dibujar para actualizarlos.`
+    : "Datos sin calcular. Completa los datos y pulsa Dibujar para obtener el mapa.");
+}
+function nuevaCarta(){
+  solicitudMapa++; solicitudLugar++;
+  nombreEditor=""; lugarGuardado=null; usarManual=false;
+  carta=null; datosCache=null; consulta=null; marca=null;
+  reiniciaExploracion();
+  sel.value="";
+  for(const id of ["nombre","fecha","hora","lugar","latManual","lonManual","zonaManual","ciudad"]) $(id).value="";
+  $("ocurrencia").value="reject"; $("manualLugar").open=false;
+  $("resumen").hidden=true; $("resumen").innerHTML="";
+  avisa(""); pendientes(""); actualiza();
+}
 
 async function levanta(){
   const solicitud=++solicitudMapa;
@@ -495,13 +518,14 @@ async function levanta(){
     const c=r.ciudad;
     if(r.ambiguas) throw Error("Hay varias ciudades con ese nombre. Elige la ciudad, región y país de la lista.");
     if(!c && (!$("latManual").value || !$("lonManual").value || !$("zonaManual").value)) throw Error("Elige una ciudad de la lista o completa sus coordenadas y zona horaria.");
+    nombreEditor=$("nombre").value.trim();
     const d={nombre:nombreEditor,anio,mes,dia,hora,min,horaConocida:true,
       lat:c?c.lat:Number($("latManual").value),lon:c?c.lon:Number($("lonManual").value),
       tz:c?c.tz:$("zonaManual").value.trim(),lugarTexto:c?c.etiqueta:$("lugar").value.trim(),desambiguacion:$("ocurrencia").value};
     E.validaCarta(d);
     const ms=E.localAUTC(anio,mes,dia,hora,min,d.tz,d.desambiguacion);
     carta={nombre:d.nombre||"Esta carta",ms,lat:d.lat,lon:d.lon,lugarTexto:d.lugarTexto}; datosCache=null;
-    avisa(""); $("resumen").hidden=false;
+    avisa(""); pendientes(""); $("resumen").hidden=false;
     const z=E.posZod(E.lonGeo("sol",E.sigTT(ms)));
     $("resumen").innerHTML=[["Carta",carta.nombre],["Nacimiento",f+" · "+h],["Lugar",d.lugarTexto||"Coordenadas manuales"],
       ["Zona",d.tz+" · "+E.textoDesfase(d.tz,ms)],["Instante UTC",new Date(ms).toISOString().replace(".000Z","Z")],["Sol",z.texto+" "+z.signo.n]]
@@ -509,56 +533,64 @@ async function levanta(){
     if(!consulta) consulta={nombre:d.lugarTexto||"Lugar de nacimiento",lat:d.lat,lon:d.lon,natal:true};
     else if(consulta.natal) consulta={nombre:d.lugarTexto||"Lugar de nacimiento",lat:d.lat,lon:d.lon,natal:true};
     marca=consulta.natal?null:{lat:consulta.lat,lon:consulta.lon};
+    if(!ultimoMapa)vista.centrar(carta.lon,carta.lat,2);
+    ultimoMapa=carta;
+    $("editorCarta").open=false;
     actualiza();
   } catch(e){
     if(solicitud!==solicitudMapa)return;
-    carta=null;datosCache=null;$("resumen").hidden=true;avisa(e.message);actualiza();
+    carta=null;datosCache=null;$("resumen").hidden=true;marcaDatosPendientes();avisa(e.message);actualiza();
   }
 }
 function actualiza(){
-  repinta(); pintaTablaLinea();
+  repinta(); pintaFicha(); pintaTablaLinea();
   const q=consulta||{nombre:"",lat:0,lon:0}; pintaTablaLugar(q.nombre,q.lat,q.lon);
 }
 function cargaGuardada(){
-  const r=guardadas().find(r=>r.id===sel.value); if(!r) return;
+  const r=guardadas().find(r=>r.id===sel.value); if(!r){nuevaCarta();return;}
   const d=r.datos; nombreEditor=d.nombre||""; usarManual=false; lugarGuardado={lat:d.lat,lon:d.lon,tz:d.tz,etiqueta:d.lugarTexto||"Coordenadas guardadas"};
+  $("nombre").value=nombreEditor;
   $("fecha").value=d.anio+'-'+String(d.mes).padStart(2,'0')+'-'+String(d.dia).padStart(2,'0');
   $("hora").value=String(d.hora).padStart(2,'0')+':'+String(d.min).padStart(2,'0');
   $("lugar").value=d.lugarTexto||""; $("ocurrencia").value=d.desambiguacion||"reject";
   $("latManual").value=d.lat; $("lonManual").value=d.lon; $("zonaManual").value=d.tz;
-  $("manualLugar").open=!buscaCiudad(d.lugarTexto); levanta();
+  $("manualLugar").open=false; levanta();
 }
 
 /* ===================== Controles ===================== */
-$("astros").innerHTML = ASTROS.map(a => `<button class="astro-bot on" data-id="${a.id}">
+$("astros").innerHTML = ASTROS.map(a => `<button class="astro-bot on" data-id="${a.id}" aria-pressed="true" style="--astro-oscuro:${a.c};--astro-claro:${'#'+a.c.slice(1).match(/../g).map(v=>Math.round(parseInt(v,16)*.58).toString(16).padStart(2,'0')).join('')}">
   <span class="pt" style="background:${a.c}"></span><span class="gl" style="color:${a.c}">${gh(a)}</span>${a.n}</button>`).join("");
 $("astros").addEventListener("click", ev => {
   const b = ev.target.closest(".astro-bot"); if(!b) return;
   const id = b.dataset.id;
   astrosOn.has(id) ? astrosOn.delete(id) : astrosOn.add(id);
   b.classList.toggle("on", astrosOn.has(id));
+  b.setAttribute("aria-pressed",String(astrosOn.has(id)));
   actualiza();
 });
-$("ejes").innerHTML = EJES.map(e => `<button class="bot on" data-eje="${e.id}">${e.n}</button>`).join("");
+$("ejes").innerHTML = EJES.map(e => `<button class="bot on" data-eje="${e.id}" aria-pressed="true">${e.n}</button>`).join("");
 $("ejes").addEventListener("click", ev => {
   const b = ev.target.closest("[data-eje]"); if(!b) return;
   const id = b.dataset.eje;
   ejesOn.has(id) ? ejesOn.delete(id) : ejesOn.add(id);
   b.classList.toggle("on", ejesOn.has(id));
+  b.setAttribute("aria-pressed",String(ejesOn.has(id)));
   actualiza();
 });
 $("lnAstro").innerHTML = ASTROS.map(a => `<option value="${a.id}">${a.n}</option>`).join("");
 $("modo").addEventListener("change",ev=>{modo=ev.target.value;datosCache=null;actualiza();});
 $("dibujar").addEventListener("click",levanta);
-sel.addEventListener("change",()=>{if(sel.value)cargaGuardada();});
-for(const id of ["fecha","hora","lugar","ocurrencia","latManual","lonManual","zonaManual"]){
+$("nuevaCarta").addEventListener("click",nuevaCarta);
+sel.addEventListener("change",cargaGuardada);
+for(const id of ["nombre","fecha","hora","lugar","ocurrencia","latManual","lonManual","zonaManual"]){
   $(id).addEventListener("input",()=>{
     solicitudMapa++;
     if(id==="lugar"){
       lugarGuardado=null;usarManual=false;
       for(const campo of ["latManual","lonManual","zonaManual"]) $(campo).value="";
     } else if(["latManual","lonManual","zonaManual"].includes(id)){lugarGuardado=null;usarManual=true;}
-    sel.value="";avisa("Datos modificados. Pulsa Dibujar para actualizar el mapa.");
+    if(id==="nombre") nombreEditor=$("nombre").value.trim();
+    sel.value="";marcaDatosPendientes();
   });
 }
 $("orbe").addEventListener("change",actualiza);
@@ -568,27 +600,60 @@ $("ciudad").addEventListener("change",async ev=>{
   try {
     const r=await window.Ciudades.resolverAsync(ev.target.value),c=r.ciudad;
     if(solicitud!==solicitudLugar)return;
-    if(!c){avisa(r.ambiguas?"Hay varias localidades con ese nombre. Elige ciudad, región y país.":"Elige una ciudad con su país en la lista para consultarla.");return;}
-    consulta={nombre:c.etiqueta,lat:c.lat,lon:c.lon};marca={lat:c.lat,lon:c.lon};avisa("");actualiza();
-  }catch(e){if(solicitud===solicitudLugar)avisa(e.message || "No se pudo cargar el catálogo. Inténtalo de nuevo.");}
+    if(!c){avisoDestino(r.ambiguas?"Hay varias localidades con ese nombre. Elige ciudad, región y país.":"Elige una ciudad con su país en la lista para consultarla.");return;}
+    consultarDestino({nombre:c.etiqueta,lat:c.lat,lon:c.lon});
+  }catch(e){if(solicitud===solicitudLugar)avisoDestino(e.message || "No se pudo cargar el catálogo. Inténtalo de nuevo.");}
 });
-for(const id of ["lnAstro","lnEje"]) $(id).addEventListener("change",pintaTablaLinea);
-cv.addEventListener("click",ev=>{
+for(const id of ["lnAstro","lnEje"]) $(id).addEventListener("change",()=>destacaLinea($("lnAstro").value+'|'+$("lnEje").value));
+$("buscarLocalidades").addEventListener("click",()=>{listaLineasAbierta=true;destacaLinea($("lnAstro").value+'|'+$("lnEje").value);});
+$("seleccionLinea").addEventListener("change",ev=>destacaLinea(ev.target.value));
+$("tablaLugar").addEventListener("click",ev=>{const b=ev.target.closest('[data-linea]');if(b)destacaLinea(b.dataset.linea);});
+$("tablaLinea").addEventListener("click",ev=>{
+  const b=ev.target.closest('[data-localidad]');if(!b)return;
+  const f=localidadesMostradas[Number(b.dataset.localidad)];if(!f)return;
+  $("ciudad").value=f.c.etiqueta;consultarDestino({nombre:f.c.etiqueta,lat:f.c.lat,lon:f.c.lon});
+});
+$("consultarCoordenadas").addEventListener("click",()=>{
+  const rawLat=$("latDestino").value.trim(),rawLon=$("lonDestino").value.trim(),lat=Number(rawLat),lon=Number(rawLon);
+  if(!rawLat||!rawLon||!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180){avisoDestino('Introduce latitud entre −90 y 90 y longitud entre −180 y 180.');return;}
+  $("ciudad").value='';consultarDestino({nombre:'Coordenadas elegidas',lat,lon});
+});
+$("centrarDestino").addEventListener("click",()=>{if(carta&&consulta){vista.centrar(consulta.lon,consulta.lat,Math.max(4,vista.zoom));repinta();}});
+function centrarLinea(){const f=seleccionActual();if(f&&consulta){const q=Geo.puntoCercano(f.a,f.eje,consulta.lat,consulta.lon);vista.centrar(q.lon,q.lat,Math.max(4,vista.zoom));repinta();}}
+$("verPuntoLinea").addEventListener("click",centrarLinea);
+$("centrarLinea").addEventListener("click",centrarLinea);
+$("acercar").addEventListener("click",()=>{vista.acercar(1.6);repinta();});
+$("alejar").addEventListener("click",()=>{vista.acercar(1/1.6);repinta();});
+$("mundo").addEventListener("click",()=>{vista.mundo();repinta();});
+$("verNacimiento").addEventListener("click",()=>{if(carta){vista.centrar(carta.lon,carta.lat,3);repinta();}});
+$("ampliarMapa").addEventListener("click",()=>ampliarMapa(!ampliado));
+$("panelMapa").addEventListener("keydown",ev=>{
+  if(!ampliado)return;
+  if(ev.key==='Escape'){ev.preventDefault();ampliarMapa(false);return;}
+  if(ev.key==='Tab'){
+    const focos=[...$("panelMapa").querySelectorAll('button:not(:disabled),select,summary,[tabindex="0"]')].filter(e=>e.getClientRects().length);
+    const primero=focos[0],ultimo=focos[focos.length-1];
+    if(ev.shiftKey&&document.activeElement===primero){ev.preventDefault();ultimo.focus();}
+    else if(!ev.shiftKey&&document.activeElement===ultimo){ev.preventDefault();primero.focus();}
+  }
+});
+window.AstroVista.conectar(cv,vista,{cambio:repinta,seleccion(pantalla){
+  if(!carta)return false;
+  const linea=pintor.elegirLinea(pantalla.x,pantalla.y);
+  if(!linea)return false;
+  destacaLinea(linea.id+'|'+linea.eje);return true;
+},consulta(q){
   if(!carta)return;
-  solicitudLugar++;
-  const r=cv.getBoundingClientRect(), ancho=cv.clientWidth, alto=cv.clientHeight;
-  const x=(ev.clientX-r.left)*cv.offsetWidth/r.width-cv.clientLeft;
-  const y=(ev.clientY-r.top)*cv.offsetHeight/r.height-cv.clientTop;
-  if(x<0||x>ancho||y<0||y>alto)return;
-  const lon=desdeX(x/ancho*W),lat=desdeY(y/alto*H);
-  consulta={nombre:"El punto que tocaste",lat,lon};marca={lat,lon};$("ciudad").value="";
-  actualiza();$("tablaLugar").scrollIntoView({behavior:"smooth",block:"center"});
-});
+  $("ciudad").value='';consultarDestino({nombre:'El punto que tocaste',lat:q.lat,lon:q.lon},false);
+}});
+if(typeof ResizeObserver!=='undefined')new ResizeObserver(ajustaMapa).observe(cv);
+window.addEventListener('resize',ajustaMapa);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)ajustaMapa();});
 
-/* arranque: si hay cartas guardadas, la primera */
-pintaMapa();
+/* Arranque: usa la carta guardada sin descargar la lista mundial de destinos. */
+ajustaMapa();
 if(sel.options.length > 1){ sel.selectedIndex = 1; cargaGuardada(); }
-else { pintaTablaLugar("", 0, 0); pintaTablaLinea(); }
+else { actualiza(); }
 })();
 </script>
 

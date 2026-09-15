@@ -99,19 +99,19 @@ Lo que se le puede añadir después: enlazar el señor del año con la pestaña 
 los contactos dentro del año, y dar a las dignidades un lugar propio en el carrusel de la portada
 (hoy se llega desde el menú de las páginas de técnica y desde la tabla de posiciones).
 
-## 4 bis. Astrocartografía · hecha el 10 sep 2026
+## 4 bis. Astrocartografía · actualizada el 15 sep 2026
 
 `astrocarto.html`: mapa del mundo con las cuatro líneas de ángulo de cada planeta, cálculo en mundo o
 zodiacal, qué líneas pasan por una ciudad, y por dónde pasa una línea. Lo que se le puede añadir cuando
-quieras:
+quieras. Primera mejora descrita en `ASTROCARTOGRAFIA-ESTUDIO.md`:
 
-- [ ] **Paranes.** Los cruces entre dos líneas: dos planetas en ángulo a la vez en la misma latitud.
-      Es la parte más fina del método y sale de lo que ya está calculado. *(mediano)*
-- [ ] **Líneas de espacio local.** El azimut de cada planeta desde un punto: rectas que salen de la
-      ciudad en abanico, en vez de curvas sobre el mundo. Otra escuela, otro dibujo. *(mediano)*
-- [ ] **Reubicar la carta.** Levantar la carta natal completa para otra ciudad y comparar las dos
-      ruedas lado a lado. Media hora de trabajo y se entiende de golpe qué es una relocación. *(chico)*
-- [ ] **Zoom por continente.** Hoy el mapa es mundial; para una gira por Europa se querría acercar. *(mediano)*
+- [x] **Estado coherente de la carta.** Nombre, nueva carta y aviso natal pendiente independiente del destino.
+- [x] **Mapa interactivo.** Zoom, arrastre, pinza, teclado, ampliación, etiquetas legibles, selección de líneas y consulta por coordenadas. Localidades bajo demanda y vinculadas al mapa.
+- [ ] **Accesos por continente y filtros regionales.** El zoom ya permite explorar regiones; faltan atajos y filtros de país/población en la lista mundial.
+- [ ] **Carta relocalizada y comparación de destinos.** Conservar el instante UTC natal, recalcular casas/ejes para el lugar elegido y mostrar ambos marcos. *(mediano)*
+- [ ] **Precisión y reporte geográfico.** Ampliar contraste de efemérides, sensibilidad a la hora y PDF independiente del informe natal. *(mediano)*
+- [ ] **Paranes.** Simultaneidad de angularidades de dos cuerpos; definir la convención temporal y geográfica antes de implementar. No basta detectar cruces de píxeles. *(mediano)*
+- [ ] **Espacio local.** Azimuts desde un origen y su representación geográfica propia, con convenciones y pruebas independientes. *(mediano)*
 
 ## 5. Para dar clase
 
