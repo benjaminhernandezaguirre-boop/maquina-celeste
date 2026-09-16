@@ -86,14 +86,23 @@ td.g{font:1.15rem/1 Spectral,serif;width:1.6rem;text-align:center}
 <script src="app/studio-theme.js"></script>
 <link rel="stylesheet" href="/app/estudio-comun.css?v=20260915">
 <link rel="stylesheet" href="/app/navegacion.css?v=20260915">
+<link rel="stylesheet" href="/app/cumpleanos.css?v=20260915">
+<link rel="stylesheet" href="/app/cumpleanos-calculadoras.css?v=20260915">
+<script src="/app/cumpleanos.js?v=20260915" defer></script>
 </head>
 <body class="astro-studio geo-estudio" data-estudio="astrocarto">
 <div class="stars"></div>
 <div class="shell">
 <header>
   <a class="back" href="./">← Planetario</a>
-  <div class="brand"><p class="eyebrow">Mapa del mundo · líneas de ángulo</p><h1>Astrocartografía</h1></div>
+  
 </header>
+<section class="cumpleanos-fila cumpleanos-calculadora">
+<div class="cumpleanos-titulo">
+<div class="brand"><p class="eyebrow">Mapa del mundo · líneas de ángulo</p><h1>Astrocartografía</h1></div>
+</div>
+<div data-cumpleanos class="cumpleanos-banner"></div>
+</section>
 
 <section class="panel geo-datos">
   <details id="editorCarta" open><summary>Datos de nacimiento <span>Editar o elegir una carta</span></summary>
