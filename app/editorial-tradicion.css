@@ -1,0 +1,83 @@
+/* Adaptación editorial de las cuatro guías de astrología tradicional.
+   Los colores base y su variante oscura proceden de tema-editorial.css. */
+html[data-editorial]:is([data-editorial="lotes-arabigos"], [data-editorial="liberacion-zodiacal"], [data-editorial="profecciones"], [data-editorial="dignidades"]) {
+  --bg: var(--ed-base);
+  --paper: var(--ed-base);
+  --paper2: var(--ed-base);
+  --panel: var(--ed-paper);
+  --soft: var(--ed-sage);
+  --ink: var(--ed-ink);
+  --muted: var(--ed-muted);
+  --sea: var(--ed-ink);
+  --plum: var(--ed-ink);
+  --plum2: var(--ed-ink);
+  --deep: var(--ed-petrol);
+  --gold: var(--ed-gold-ink);
+  --gold2: var(--ed-gold);
+  --line: color-mix(in srgb, var(--ed-ink) 22%, transparent);
+}
+
+html[data-editorial="lotes-arabigos"] { --text: var(--ed-ink); }
+html[data-editorial][data-studio-theme="dark"]:is([data-editorial="lotes-arabigos"], [data-editorial="liberacion-zodiacal"], [data-editorial="profecciones"], [data-editorial="dignidades"]) { --gold: var(--ed-gold-ink); }
+
+html[data-editorial] .fondo { background: var(--ed-base); }
+html[data-editorial] .fondo::after { display: none; }
+html[data-editorial] .orbita {
+  box-shadow: inset 0 0 80px color-mix(in srgb, var(--ed-petrol) 7%, transparent), 0 0 60px color-mix(in srgb, var(--ed-petrol) 7%, transparent);
+}
+html[data-editorial] :is(.tarjeta, .lote, .nivel, .ecuacion, .dato, .escala div) {
+  background: var(--ed-paper);
+  border-color: var(--line);
+}
+html[data-editorial] :is(.tarjeta, .lote):nth-child(even) { background: var(--ed-sage); }
+html[data-editorial] .escala .menos { background: var(--ed-base); }
+html[data-editorial] .escala .menos b { color: var(--gold); }
+html[data-editorial] .nivel::before,
+html[data-editorial] .pasos li::before {
+  background: var(--ed-petrol);
+  color: var(--ed-cream);
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--ed-petrol) 8%, transparent);
+}
+html[data-editorial] .dato span { background: var(--ed-sage); color: var(--ed-ink); }
+html[data-editorial] :is(.hito, .aviso, .metodo) {
+  background: var(--ed-sage-deep);
+  color: var(--ed-ink);
+  border-color: var(--ed-gold);
+}
+html[data-editorial] .hito { border-radius: 0 12px 12px 0; }
+html[data-editorial] .aviso :is(h3, p, .mini) { color: var(--ed-ink); }
+html[data-editorial] .aviso .mini { color: var(--gold); }
+html[data-editorial] .metodo { border-radius: 0 0 14px 14px; }
+html[data-editorial] :is(.nota, .paso) { border-color: var(--ed-gold); }
+html[data-editorial] :is(.tabla, .tabla-envoltura, .periodos) {
+  background: var(--ed-paper);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+html[data-editorial] table.t caption { padding: .8rem .75rem 0; }
+html[data-editorial] :is(table.t, .tabla table, .periodos table) th {
+  background: var(--ed-sage-deep);
+  color: var(--ed-ink);
+}
+html[data-editorial] table.t td.sg { background: var(--ed-paper); }
+html[data-editorial] table.t tbody tr:hover td.sg { background: var(--ed-sage); }
+html[data-editorial] .boton.principal,
+html[data-editorial]:is([data-editorial="profecciones"], [data-editorial="dignidades"]) .boton {
+  background: var(--ed-petrol);
+  border-color: var(--ed-petrol);
+  color: var(--ed-cream);
+}
+html[data-editorial] .editorial-petroleo .estado {
+  color: var(--ed-cream);
+  border-color: color-mix(in srgb, var(--ed-cream) 45%, transparent);
+}
+html[data-editorial] .editorial-petroleo .boton {
+  background: var(--ed-gold);
+  border-color: var(--ed-gold);
+  color: #173f43;
+}
+html[data-editorial] .editorial-petroleo .boton + .boton {
+  background: transparent;
+  border-color: var(--ed-cream);
+  color: var(--ed-cream);
+}

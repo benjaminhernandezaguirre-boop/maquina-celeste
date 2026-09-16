@@ -1,0 +1,37 @@
+/* Distribución de la propuesta petróleo, salvia y oro en la guía natal. */
+html[data-editorial="natal"] .hero h1 em { color: var(--ed-ink); }
+html[data-editorial="natal"] .hero { padding-block: 3.5rem; }
+html[data-editorial="natal"] .guia-indice { margin-top: 0; }
+html[data-editorial="natal"] .temporada-caja { background: var(--ed-sage); }
+html[data-editorial="natal"] .editorial-escuelas {
+  margin-top: 2rem;
+  padding-block: 2rem 0;
+}
+html[data-editorial="natal"] .editorial-escuelas .escuelas { margin-top: 0; padding-top: 0; border-top: 0; }
+html[data-editorial="natal"] .editorial-escuelas .conceptos-profesionales { margin-bottom: 0; }
+html[data-editorial="natal"] .editorial-escuelas .escuela small { color: var(--ed-muted); }
+html[data-editorial="natal"] .descargas {
+  margin-top: 0;
+  padding-block: 3rem;
+  border-radius: 0;
+  border-block: 1px solid #73918a;
+  border-inline: 0;
+}
+html[data-editorial="natal"] .descargas .ceja { color: #e0c38a; }
+html[data-editorial="natal"] .hoja-mini {
+  --bg: #fff8ea;
+  --muted: #385853;
+  --line: #d8c6a2;
+  --gold: #745521;
+  background: #fff8ea;
+  color: #385853;
+  box-shadow: 4px 5px 0 #ffffff1a;
+}
+html[data-editorial="natal"] #elementos { padding-bottom: 3rem; }
+html[data-editorial="natal"] #preguntas { padding-bottom: 3rem; }
+html[data-editorial="natal"] .cierre { border-radius: 0; }
+html[data-editorial="natal"] .pie { margin-top: 0; padding-block: 2rem; }
+@media(max-width:540px) {
+  html[data-editorial="natal"] .hero { padding-block: 2.2rem; }
+  html[data-editorial="natal"] .descargas { padding-block: 2rem; }
+}

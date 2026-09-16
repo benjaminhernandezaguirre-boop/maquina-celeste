@@ -1,0 +1,147 @@
+/* Adaptaciones de los directorios y la guía de horaria.
+   La paleta y las franjas se definen en tema-editorial.css. */
+html:is([data-editorial="herramientas"], [data-editorial="predicciones"], [data-editorial="horaria"]) .hf-familias {
+  overflow: visible;
+  border-radius: 0;
+}
+
+html[data-editorial="herramientas"] .hf-familias a {
+  background: transparent;
+  color: inherit;
+  border-color: color-mix(in srgb, var(--ed-petrol) 25%, transparent);
+}
+
+html[data-editorial="herramientas"] .hf-familias a:hover {
+  background: color-mix(in srgb, var(--ed-cream) 30%, transparent);
+}
+
+html[data-editorial="herramientas"] .hf-familias span {
+  color: inherit;
+  opacity: .8;
+}
+
+html:is([data-editorial="herramientas"], [data-editorial="predicciones"], [data-editorial="horaria"]) .hf-indice a {
+  color: inherit;
+}
+
+html:is([data-editorial="herramientas"], [data-editorial="predicciones"], [data-editorial="horaria"]) .hf-seccion.editorial-salvia {
+  border: 0;
+  padding-block: clamp(2.5rem, 5vw, 3.5rem);
+}
+
+html[data-editorial="herramientas"] .hf-familia.editorial-salvia {
+  margin-top: 3.2rem;
+  padding-block: 3.2rem;
+}
+
+html:is([data-editorial="herramientas"], [data-editorial="predicciones"], [data-editorial="horaria"]) .hf-emblema {
+  background: color-mix(in srgb, var(--ed-sage) 45%, var(--panel));
+  border-color: color-mix(in srgb, var(--ed-gold) 60%, var(--line));
+}
+
+html:is([data-editorial="herramientas"], [data-editorial="predicciones"], [data-editorial="horaria"]) .hf-cierre {
+  border-radius: 0;
+  padding-inline: 0;
+}
+
+html[data-editorial="horaria"] .editorial-salvia .hf-ejemplo {
+  background: var(--panel);
+  border-left-color: var(--ed-gold);
+}
+
+/* El archivo conserva el planeta y los retratos; su fondo sigue ahora la
+   misma superficie editorial y el mismo selector de tema que las guías. */
+html[data-editorial="celebres"] .fondo {
+  display: none;
+}
+
+html[data-editorial="celebres"] main {
+  padding-bottom: 0;
+}
+
+html[data-editorial="celebres"] :is(.back, .theme) {
+  color: var(--ed-cream);
+  background: transparent;
+  border-color: color-mix(in srgb, var(--ed-cream) 45%, transparent);
+}
+
+html[data-editorial="celebres"] :is(.back, .theme):hover {
+  color: var(--ed-gold);
+  border-color: var(--ed-gold);
+}
+
+html[data-editorial="celebres"] .criterio {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  margin-bottom: 0;
+  padding: 2rem 0;
+}
+
+html[data-editorial="celebres"] .sello {
+  background: var(--ed-petrol);
+  color: var(--ed-cream);
+}
+
+html[data-editorial="celebres"] .controles {
+  padding-block: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+html[data-editorial="celebres"] .filtro {
+  color: var(--ed-petrol);
+  background: var(--ed-cream);
+  border-color: color-mix(in srgb, var(--ed-petrol) 35%, transparent);
+  min-height: 40px;
+}
+
+html[data-editorial="celebres"] :is(.filtro.on, .filtro:hover) {
+  color: var(--ed-cream);
+  background: var(--ed-petrol);
+  border-color: var(--ed-petrol);
+}
+
+html[data-editorial="celebres"] .card {
+  background: var(--panel);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--ed-petrol) 6%, transparent);
+}
+html[data-editorial="celebres"] .portrait figcaption {
+  background: #173f43;
+  color: #fff8ea;
+}
+html[data-editorial="celebres"] .portrait figcaption a { color: inherit; }
+
+html[data-editorial="celebres"] .rating {
+  color: var(--ed-cream);
+  border-color: var(--ed-sage-deep);
+  background: var(--ed-petrol);
+}
+
+html[data-editorial="celebres"] .abrir {
+  background: var(--ed-petrol);
+  color: var(--ed-cream);
+}
+
+html[data-editorial="celebres"] .abrir:hover {
+  background: var(--ed-gold);
+  color: var(--ed-petrol);
+}
+
+html[data-editorial="celebres"] .nota-final {
+  border: 0;
+  margin-bottom: 0;
+  padding: 2rem 0;
+}
+
+html[data-editorial="celebres"] .pie-instituto {
+  width: 100%;
+  margin-bottom: 0;
+  opacity: 1;
+}
+
+@media (max-width: 540px) {
+  html[data-editorial="herramientas"] .hf-familia.editorial-salvia {
+    margin-top: 2.5rem;
+    padding-block: 2.5rem;
+  }
+}
