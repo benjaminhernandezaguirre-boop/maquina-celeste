@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es-MX" data-studio-theme="light">
+<html lang="es-MX" data-studio-theme="light" data-editorial="celebres">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>(()=>{let t="light";try{const s=localStorage.getItem("astro-studio-theme");if(s==="light"||s==="dark")t=s}catch{}document.documentElement.dataset.studioTheme=t})()</script>
@@ -38,21 +38,23 @@ main{width:min(1180px,92vw);margin:auto;padding:2rem 0 5rem}.hero{display:grid;g
 <script src="/app/navegacion.js?v=20260915" defer></script>
 <link rel="stylesheet" href="/app/cumpleanos.css?v=20260915">
 <script src="/app/cumpleanos.js?v=20260915" defer></script>
+<link rel="stylesheet" href="/app/editorial-directorios.css?v=20260916">
+<link rel="stylesheet" href="/app/tema-editorial.css?v=20260916">
 </head>
 <body>
 <div class="fondo"></div>
-<header class="top"><a class="back" href="./">← Planetario</a><button class="theme" id="theme" type="button">☾ Modo oscuro</button><a class="astro-tools-fallback" href="/herramientas">Todas las herramientas</a></header>
+<header class="top editorial-cabecera editorial-franja"><a class="back" href="./">← Planetario</a><button class="theme" id="theme" type="button">☾ Modo oscuro</button><a class="astro-tools-fallback" href="/herramientas">Todas las herramientas</a></header>
 <main>
-  <section class="hero">
+  <section class="hero editorial-hero editorial-franja">
     <div><p class="eyebrow">Júpiter · archivo de vidas extraordinarias</p><h1>Cartas célebres</h1><p class="intro">Explora las cartas natales de personas que dejaron una huella en la historia, la ciencia, el arte y la cultura. Cada ficha identifica de dónde procede su hora de nacimiento.</p></div>
     <div class="cumpleanos-lateral"><div data-cumpleanos class="cumpleanos-banner"></div><div class="jupiter-art" data-planeta-textura="jupiter" aria-hidden="true"></div></div>
   </section>
-  <aside class="criterio"><div class="sello">AA</div><div><h2>Datos documentados</h2><p>Esta primera colección utiliza registros clasificados como <strong>Rodden AA</strong>: actas, registros civiles o documentos familiares. Es la evidencia de nacimiento más sólida disponible, aunque una fuente histórica siempre puede actualizarse. <a href="https://www.astro.com/astro-databank/Help%3ARR" target="_blank" rel="noopener">Conoce la clasificación</a>.</p></div></aside>
-  <nav class="controles" aria-label="Filtrar las cartas"><button class="filtro on" data-filter="todas">Todas</button><button class="filtro" data-filter="mexico">México</button><button class="filtro" data-filter="historia">Historia</button><button class="filtro" data-filter="ciencia">Ciencia</button><button class="filtro" data-filter="arte">Arte</button><button class="filtro" data-filter="musica">Música</button><button class="filtro" data-filter="cine">Cine</button><button class="filtro" data-filter="politica">Política</button><button class="filtro" data-filter="tecnologia">Tecnología</button><button class="filtro" data-filter="deporte">Deporte</button></nav>
+  <aside class="criterio editorial-salvia editorial-franja"><div class="sello">AA</div><div><h2>Datos documentados</h2><p>Esta primera colección utiliza registros clasificados como <strong>Rodden AA</strong>: actas, registros civiles o documentos familiares. Es la evidencia de nacimiento más sólida disponible, aunque una fuente histórica siempre puede actualizarse. <a href="https://www.astro.com/astro-databank/Help%3ARR" target="_blank" rel="noopener">Conoce la clasificación</a>.</p></div></aside>
+  <nav class="controles editorial-indice editorial-franja" aria-label="Filtrar las cartas"><button class="filtro on" data-filter="todas">Todas</button><button class="filtro" data-filter="mexico">México</button><button class="filtro" data-filter="historia">Historia</button><button class="filtro" data-filter="ciencia">Ciencia</button><button class="filtro" data-filter="arte">Arte</button><button class="filtro" data-filter="musica">Música</button><button class="filtro" data-filter="cine">Cine</button><button class="filtro" data-filter="politica">Política</button><button class="filtro" data-filter="tecnologia">Tecnología</button><button class="filtro" data-filter="deporte">Deporte</button></nav>
   <section class="grid" id="grid" aria-live="polite"></section><p class="vacio" id="vacio">No hay fichas en esta categoría todavía.</p>
-  <p class="nota-final"><strong>Lectura responsable:</strong> las cartas con horas contradictorias o desconocidas se incorporarán después en un archivo separado de casos en investigación. No se mostrará un Ascendente ni casas como si fueran datos confirmados.</p>
+  <p class="nota-final editorial-petroleo editorial-franja"><strong>Lectura responsable:</strong> las cartas con horas contradictorias o desconocidas se incorporarán después en un archivo separado de casos en investigación. No se mostrará un Ascendente ni casas como si fueran datos confirmados.</p>
 
-<footer class="pie-instituto"><span>Astroplanetario</span><span class="firma-instituto">Un proyecto del <a href="https://tarot-academy-theta.vercel.app/" target="_blank" rel="noopener">Instituto de Artes Esotéricas y Saberes Ancestrales</a></span></footer>
+<footer class="pie-instituto editorial-pie editorial-franja"><span>Astroplanetario</span><span class="firma-instituto">Un proyecto del <a href="https://tarot-academy-theta.vercel.app/" target="_blank" rel="noopener">Instituto de Artes Esotéricas y Saberes Ancestrales</a></span></footer>
 </main>
 <script src="app/planetas.js?v=planet-textures-2-20260912"></script>
 <script src="app/planeta-decorativo.js?v=1-20260912"></script>

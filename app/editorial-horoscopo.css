@@ -1,0 +1,71 @@
+/* Ajustes de la edición semanal sobre la paleta editorial compartida. */
+html[data-editorial="horoscopo"] .hs-hero h1 em {
+  color: var(--ed-ink);
+}
+html[data-editorial="horoscopo"] .hs-fechas,
+html[data-editorial="horoscopo"] .hs-cielo time,
+html[data-editorial="horoscopo"] .hs-evento time,
+html[data-editorial="horoscopo"] .hs-evento .hs-hora-utc,
+html[data-editorial="horoscopo"] .hs-ambito h2 span,
+html[data-editorial="horoscopo"] .hs-estado[data-estado="anterior"],
+html[data-editorial="horoscopo"] .hs-estado[data-estado="proxima"] {
+  color: var(--ed-muted);
+}
+html[data-editorial="horoscopo"] .hs-portada::before {
+  border-color: var(--ed-gold);
+  opacity: .8;
+}
+html[data-editorial="horoscopo"] .hs-portada img {
+  background: var(--ed-sage);
+}
+html[data-editorial="horoscopo"] .hs-cielo {
+  padding-block: 1.6rem;
+}
+html[data-editorial="horoscopo"] .hs-otras {
+  padding-block: 1.3rem;
+  margin-bottom: 3rem;
+}
+html[data-editorial="horoscopo"] .hs-otras a:hover {
+  background: var(--ed-sage-deep);
+}
+html[data-editorial="horoscopo"] .hs-otras a[aria-current="page"] {
+  background: var(--ed-petrol);
+  color: var(--ed-cream);
+  box-shadow: inset 0 -2px var(--ed-gold);
+}
+html[data-editorial="horoscopo"] .hs-signo .hs-elemento {
+  color: var(--ed-muted);
+}
+html[data-editorial="horoscopo"] .hs-signo h3 span {
+  color: var(--ed-gold);
+}
+html[data-editorial="horoscopo"] .hs-contexto,
+html[data-editorial="horoscopo"] .hs-reflexion {
+  background: var(--ed-sage);
+  border-radius: 6px;
+}
+html[data-editorial="horoscopo"] .hs-contexto {
+  border-top: 2px solid var(--ed-gold);
+}
+html[data-editorial="horoscopo"] .hs-reflexion {
+  border-left-color: var(--ed-gold);
+}
+html[data-editorial="horoscopo"] .hs-metodo {
+  padding-block: 2.7rem;
+  border-block: 1px solid var(--line);
+}
+html[data-editorial="horoscopo"] .hs-metodo + .hf-cierre {
+  margin-top: 0;
+}
+@media (max-width: 720px) {
+  html[data-editorial="horoscopo"] .hs-metodo {
+    padding-block: 2rem;
+  }
+}
+@media print {
+  html[data-editorial="horoscopo"] .hs-contexto,
+  html[data-editorial="horoscopo"] .hs-reflexion,
+  html[data-editorial="horoscopo"] .hs-metodo {
+    background: white;
+  }
+}

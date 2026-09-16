@@ -1,0 +1,131 @@
+/* Identidad de las páginas informativas. No se carga en las calculadoras. */
+html[data-editorial] {
+  --ed-base: #f0e8d8;
+  --ed-paper: #fbf5e8;
+  --ed-sage: #d5e2d5;
+  --ed-sage-deep: #bed2c4;
+  --ed-petrol: #173f43;
+  --ed-gold: #c6a56a;
+  --ed-ink: #183d3c;
+  --ed-muted: #385853;
+  --ed-cream: #fff8ea;
+  --ed-line: #b8c6b7;
+  --ed-gold-ink: #694c1e;
+  --bg: var(--ed-base);
+  --paper: var(--ed-paper);
+  --panel: var(--ed-paper);
+  --soft: var(--ed-sage);
+  --ink: var(--ed-ink);
+  --muted: var(--ed-muted);
+  --line: var(--ed-line);
+  --gold: var(--ed-gold-ink);
+  --blue: var(--ed-petrol);
+}
+html[data-editorial][data-studio-theme="dark"] {
+  --ed-base: #10282b;
+  --ed-paper: #1d3b3e;
+  --ed-sage: #294b47;
+  --ed-sage-deep: #36574b;
+  --ed-ink: #fff8ea;
+  --ed-muted: #cdddd2;
+  --ed-line: #56716a;
+  --ed-gold-ink: #e0c38a;
+  --blue: #badcca;
+}
+html[data-editorial] body {
+  background: var(--ed-base);
+  color: var(--ed-ink);
+}
+/* En las guías antiguas --text es una tipografía, no un color. */
+html:is([data-editorial="natal"], [data-editorial="herramientas"], [data-editorial="predicciones"], [data-editorial="horaria"], [data-editorial="celebres"], [data-editorial="horoscopo"], [data-editorial="lotes-arabigos"]) {
+  --text: var(--ed-ink);
+}
+html[data-editorial] .editorial-hero {
+  --ed-zone: var(--ed-sage);
+  background: var(--ed-zone);
+}
+html[data-editorial] .editorial-salvia {
+  --ed-zone: var(--ed-sage-deep);
+  background: var(--ed-zone);
+}
+html[data-editorial] .editorial-indice {
+  --ed-zone: var(--ed-gold);
+  --ink: #183d3c;
+  --muted: #183d3c;
+  --blue: #183d3c;
+  --gold: #183d3c;
+  color: #183d3c;
+  background: var(--ed-zone);
+  border-color: #a88850;
+}
+html[data-editorial] .editorial-indice a,
+html[data-editorial] .editorial-indice span { color: inherit; }
+html[data-editorial] :is(.editorial-cabecera, .editorial-petroleo, .editorial-pie) {
+  --ed-zone: var(--ed-petrol);
+  --ink: var(--ed-cream);
+  --muted: #d4e2d7;
+  --blue: var(--ed-cream);
+  --gold: #e0c38a;
+  --line: #61817d;
+  color: var(--ed-cream);
+  background: var(--ed-zone);
+  border-color: var(--line);
+}
+html:is([data-editorial="natal"], [data-editorial="herramientas"], [data-editorial="predicciones"], [data-editorial="horaria"], [data-editorial="celebres"], [data-editorial="horoscopo"], [data-editorial="lotes-arabigos"]) :is(.editorial-cabecera, .editorial-petroleo, .editorial-pie) {
+  --text: var(--ed-cream);
+}
+/* Extender solamente el fondo: conserva el ancho y las columnas de cada guía. */
+html[data-editorial] .editorial-franja:not(.editorial-cabecera) {
+  box-shadow: 0 0 0 100vmax var(--ed-zone, var(--ed-base));
+  clip-path: inset(0 -100vmax);
+}
+/* La cabecera mantiene libre el menú desplegable; se recorta sólo su fondo. */
+html[data-editorial] .editorial-cabecera {
+  position: relative;
+  isolation: isolate;
+}
+html[data-editorial] .editorial-cabecera::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--ed-zone);
+  box-shadow: 0 0 0 100vmax var(--ed-zone);
+  clip-path: inset(0 -100vmax);
+}
+html[data-editorial] .editorial-cabecera :is(.marca, .marca svg, .brand, .nav a) { color: var(--ed-cream); }
+html[data-editorial] .editorial-cabecera :is(.marca small, .brand small) { color: #d4e2d7; }
+html[data-editorial] .editorial-cabecera :is(.theme-toggle, .tema) {
+  color: #183d3c;
+  background: #fff8ea;
+  border-color: #d8c6a2;
+}
+html[data-editorial] .editorial-cabecera .astro-site-nav {
+  --an-panel: #173f43;
+  --an-text: #fff8ea;
+  --an-muted: #d4e2d7;
+  --an-line: #73918a;
+}
+html[data-editorial] .editorial-cabecera .astro-nav-panel { box-shadow: 0 14px 36px #071e2540; }
+html[data-editorial] :is(.editorial-cabecera, .editorial-petroleo, .editorial-pie) :focus-visible {
+  outline-color: #efd194;
+}
+html[data-editorial] .editorial-indice :focus-visible { outline-color: #173f43; }
+html[data-editorial] :is(.boton.principal, .hf-boton.principal) {
+  color: #fff8ea;
+  background: #173f43;
+  border-color: #173f43;
+}
+html[data-editorial] :is(.boton.principal, .hf-boton.principal):hover { background: #24585b; }
+html[data-editorial] .editorial-petroleo :is(.boton.principal, .hf-boton) {
+  color: #183d3c;
+  background: #e4cc9f;
+  border-color: #e4cc9f;
+}
+html[data-editorial] .editorial-petroleo :is(.boton.principal, .hf-boton):hover { background: #f2dfb9; }
+html[data-editorial] .editorial-pie a { color: #fff8ea; }
+@media print {
+  html[data-editorial] body { background: white; color: #183d3c; }
+  html[data-editorial] .editorial-franja { box-shadow: none; clip-path: none; }
+}
