@@ -1,0 +1,156 @@
+{
+  "id": "2026-09-13",
+  "start": "2026-09-13",
+  "end": "2026-09-19",
+  "publishedAt": "2026-09-16",
+  "timezone": "America/Mexico_City",
+  "title": "Horóscopo semanal · 13 al 19 de septiembre de 2026",
+  "intro": "Una semana para abrir conversaciones, llevar las ideas a la práctica y revisar los acuerdos que sostienen nuestros vínculos. Elige tu signo y explora una lectura de amor, trabajo y dinero conectada con los aspectos de estos días.",
+  "methodology": "Lecturas originales de astrología occidental tropical por signo solar. Para distribuir los temas usamos casas solares por signos enteros: el signo que lees se toma como casa 1. Son sectores simbólicos, no las casas calculadas de tu nacimiento. Las posiciones y los aspectos geocéntricos se distinguen de su interpretación astrológica. Las horas se expresan en Ciudad de México (UTC−06:00); las de los aspectos planetarios son aproximadas. Esta lectura general no asegura acontecimientos ni resultados económicos. La fecha de la edición no cambia automáticamente su contenido.",
+  "sources": [
+    {"label":"Astrodienst · Efemérides geocéntricas de 2026 (Swiss Ephemeris)","url":"https://www.astro.com/swisseph/ae/2000/ae_2026.pdf"},
+    {"label":"Astrodienst · Acontecimientos del cielo, septiembre de 2026","url":"https://www.astro.com/cgi/hk.cgi?date=20260913&muasp=1"},
+    {"label":"USNO · Fases lunares de septiembre de 2026, en UTC","url":"https://aa.usno.navy.mil/calculated/moon/phases?date=2026-09-01&nump=8"}
+  ],
+  "events": [
+    {"id":"mer-ura","date":"2026-09-13","utc":"2026-09-14T02:40:00Z","label":"Mercurio trígono Urano · 120°","detail":"13 de septiembre, alrededor de las 20:40 en Ciudad de México (14 de septiembre en UTC). Mercurio en Libra y Urano en Géminis, cerca de 5°42′. La lectura simbólica de este contacto propone explorar otras formas de conversar, aprender y resolver una cuestión."},
+    {"id":"sol-mar","date":"2026-09-14","utc":"2026-09-14T19:53:00Z","label":"Sol sextil Marte · 60°","detail":"14 de septiembre, alrededor de las 13:53 en Ciudad de México. Sol en Virgo y Marte en Cáncer, cerca de 22°01′. En esta edición lo interpretamos como una invitación a convertir una intención concreta en una acción útil."},
+    {"id":"ven-plu","date":"2026-09-15","utc":"2026-09-15T18:35:00Z","label":"Venus cuadratura Plutón · 90°","detail":"15 de septiembre, alrededor de las 12:35 en Ciudad de México. Venus en Escorpio y Plutón en Acuario, cerca de 3°17′. El tema interpretativo es revisar deseos, reciprocidad y límites, sin convertir la intensidad afectiva en control."},
+    {"id":"mer-sat","date":"2026-09-18","utc":"2026-09-18T10:01:00Z","label":"Mercurio oposición Saturno · 180°","detail":"18 de septiembre, alrededor de las 04:01 en Ciudad de México. Mercurio en Libra frente a Saturno en Aries, cerca de 12°32′. Como lectura simbólica, plantea contrastar las palabras con los compromisos, los plazos y la información disponible."},
+    {"id":"cuarto","date":"2026-09-18","utc":"2026-09-18T20:44:00Z","label":"Cuarto creciente · Luna y Sol a 90°","detail":"18 de septiembre, 14:44 en Ciudad de México (20:44 UTC, USNO). Luna en Sagitario y Sol en Virgo. En la lectura de la semana representa una pausa para valorar el avance de una intención y ajustar el siguiente paso."}
+  ],
+  "signs": [
+    {
+      "slug":"aries","name":"Aries","symbol":"♈","element":"fuego",
+      "headline":"Avanza con acuerdos que puedas sostener",
+      "summary":"La iniciativa encuentra una buena salida en lo cotidiano. El sextil del Sol con Marte conecta tus sectores solares de trabajo diario y hogar; la oposición de Mercurio con Saturno pone el foco en cómo negocias sin perder de vista tus propios límites.",
+      "love":"Mercurio en tu sector de pareja abre espacio para escuchar una propuesta distinta. Con Venus y Plutón en tensión, conversa sobre intimidad y expectativas sin exigir pruebas de afecto. Si estás conociendo a alguien, deja que la confianza crezca con hechos y tiempo.",
+      "work":"El contacto Sol–Marte sirve como tema para ordenar pendientes y mejorar tu espacio de trabajo. Elige una tarea concreta y termínala antes de sumar otra. Hacia el viernes, comprueba fechas y responsabilidades antes de aceptar una colaboración.",
+      "money":"Venus en el sector de recursos compartidos invita a aclarar qué aporta cada persona. Revisa gastos conjuntos y condiciones de un acuerdo. Evita asumir un compromiso solo para agradar: tu disponibilidad también cuenta.",
+      "reflection":"¿Qué acuerdo sería más justo si expresaras con claridad lo que sí puedes ofrecer?",
+      "eventIds":["mer-ura","sol-mar","ven-plu","mer-sat"],
+      "houses":["Sol en casa solar 6 · tareas y hábitos","Marte en casa solar 4 · hogar","Mercurio en casa solar 7 · acuerdos","Saturno en casa solar 1 · límites propios","Venus en casa solar 8 · recursos compartidos"]
+    },
+    {
+      "slug":"tauro","name":"Tauro","symbol":"♉","element":"tierra",
+      "headline":"Cuida el vínculo sin cargar con todo",
+      "summary":"Venus recorre tu sector solar de pareja y su cuadratura con Plutón propone observar cuánto espacio deja el trabajo para tus relaciones. El Sol en Virgo aporta un tema complementario: recuperar una actividad creativa que disfrutes por sí misma.",
+      "love":"Separa las expectativas de pareja de las exigencias de tu vida pública. Puedes hablar de una necesidad sin volverla un ultimátum. Si estás sin pareja, observa si una conexión te permite mostrarte con naturalidad y mantener tus propios tiempos.",
+      "work":"Mercurio en tu sector de tareas cotidianas favorece, como lectura de la semana, revisar métodos y probar una herramienta sencilla. Su oposición a Saturno recuerda poner un límite al trabajo invisible: una agenda con pausas también necesita respetarse.",
+      "money":"Pon por escrito los costes y las aportaciones de cualquier proyecto compartido. La tensión Venus–Plutón es un buen motivo para revisar si estás gastando por imagen, presión o deseo propio. No necesitas demostrar compromiso mediante una compra.",
+      "reflection":"¿Qué responsabilidad podrías compartir en lugar de asumirla por costumbre?",
+      "eventIds":["sol-mar","ven-plu","mer-sat"],
+      "houses":["Venus en casa solar 7 · pareja y acuerdos","Plutón en casa solar 10 · vida pública","Mercurio en casa solar 6 · organización","Saturno en casa solar 12 · pausa y retiro","Sol en casa solar 5 · creatividad"]
+    },
+    {
+      "slug":"geminis","name":"Géminis","symbol":"♊","element":"aire",
+      "headline":"Dale forma a una idea sin dispersarte",
+      "summary":"El trígono entre Mercurio y Urano conecta expresión personal y creatividad. Hacia el viernes, la oposición con Saturno propone contrastar esa inspiración con los acuerdos del grupo. Tu idea puede conservar su frescura y, al mismo tiempo, tener un alcance claro.",
+      "love":"Mercurio en tu sector solar de romance invita a expresarte de otra manera: una conversación, un paseo o una invitación sencilla. Evita medir una relación por la opinión de tus amistades. El cuarto creciente permite preguntarte qué espacio real hay para compartir.",
+      "work":"Prueba una idea en pequeño antes de convertirla en un gran proyecto. Venus en el sector de rutina, en tensión con Plutón, sugiere revisar si un método que defiendes todavía te sirve. Explica tus necesidades al equipo sin prometer disponibilidad ilimitada.",
+      "money":"El Sol y Marte enlazan hogar y recursos propios. Ordena un gasto doméstico o calcula qué necesitas para mejorar tu espacio. Si una afición requiere dinero, distingue el entusiasmo inicial de los costes que mantendrás después.",
+      "reflection":"¿Qué idea merece una primera prueba concreta esta semana?",
+      "eventIds":["mer-ura","sol-mar","ven-plu","mer-sat","cuarto"],
+      "houses":["Mercurio en casa solar 5 · expresión y romance","Urano en casa solar 1 · iniciativa personal","Saturno en casa solar 11 · grupos","Sol en casa solar 4 · hogar","Marte en casa solar 2 · recursos propios"]
+    },
+    {
+      "slug":"cancer","name":"Cáncer","symbol":"♋","element":"agua",
+      "headline":"Di lo que necesitas y concreta el siguiente paso",
+      "summary":"Marte en tu signo recibe el sextil del Sol en tu sector solar de comunicación. Esta combinación sirve para enfocar la iniciativa en una conversación o gestión concreta. Mercurio frente a Saturno lleva después la atención al equilibrio entre hogar y responsabilidades públicas.",
+      "love":"Venus en tu sector de romance propone disfrutar sin convertir la cercanía en una obligación. Su cuadratura con Plutón señala, dentro de esta lectura, la importancia de hablar sobre intimidad, expectativas y gastos compartidos sin usar el afecto como moneda de cambio.",
+      "work":"Prepara lo que quieres explicar y ve al punto. Puede ser una propuesta, una tarea pendiente o un límite de horario. El viernes, contrasta lo que te piden con las obligaciones que ya tienes antes de comprometer una fecha.",
+      "money":"Revisa cómo se reparten los gastos del hogar y qué parte depende de tus ingresos. Una conversación sobre dinero funciona mejor con cantidades y plazos concretos. Elige un ajuste manejable, sin interpretar una tensión momentánea como una urgencia para gastar.",
+      "reflection":"¿Qué conversación sería más sencilla si empezaras por un dato concreto?",
+      "eventIds":["sol-mar","ven-plu","mer-sat"],
+      "houses":["Marte en casa solar 1 · iniciativa","Sol en casa solar 3 · comunicación","Venus en casa solar 5 · romance","Mercurio en casa solar 4 · hogar","Saturno en casa solar 10 · responsabilidades"]
+    },
+    {
+      "slug":"leo","name":"Leo","symbol":"♌","element":"fuego",
+      "headline":"Reconoce tu valor y expresa tus condiciones",
+      "summary":"El Sol, tu regente, transita el sector solar de recursos y enlaza con Marte. La semana ofrece un marco para revisar dónde inviertes tiempo y energía. Venus y Plutón llevan la reflexión afectiva a los acuerdos entre tu hogar y tus relaciones.",
+      "love":"Habla de convivencia, espacio y expectativas antes de dar algo por supuesto. Venus en tensión con Plutón puede leerse como una invitación a soltar el pulso por tener la última palabra. Una necesidad clara comunica más que una prueba de lealtad.",
+      "work":"El trígono Mercurio–Urano inspira nuevas conversaciones con amistades o equipos. Anota la idea y comprueba su viabilidad. Cerca del viernes, revisa requisitos, instrucciones o documentación si una propuesta implica formación, publicaciones o desplazamientos.",
+      "money":"Pon atención a los gastos pequeños que quedan fuera de tu registro. El eje de recursos y asuntos pendientes sugiere cerrar una cuenta o aclarar un coste antes de añadir otro. Tu valoración personal no necesita depender de cuánto consumes.",
+      "reflection":"¿Qué condición necesitas expresar para que tu esfuerzo esté mejor reconocido?",
+      "eventIds":["mer-ura","sol-mar","ven-plu","mer-sat"],
+      "houses":["Sol en casa solar 2 · recursos y valoración","Marte en casa solar 12 · asuntos pendientes","Venus en casa solar 4 · hogar","Plutón en casa solar 7 · relaciones","Mercurio en casa solar 3 · intercambios"]
+    },
+    {
+      "slug":"virgo","name":"Virgo","symbol":"♍","element":"tierra",
+      "headline":"Tu temporada: elegir, ordenar y avanzar",
+      "summary":"¡Feliz cumpleaños, Virgo! El Sol en tu signo forma un sextil con Marte en tu sector solar de amistades y proyectos colectivos. Es el hilo de una semana para reconocer lo que quieres construir y elegir con quién compartir el esfuerzo, sin exigirte resolverlo todo.",
+      "love":"Venus en tu sector de comunicación propone dar espacio a una conversación sincera. Su tensión con Plutón recuerda que los horarios, las tareas y la forma de pedir las cosas influyen en el vínculo. Expresa una necesidad concreta y deja lugar a la respuesta.",
+      "work":"Acerca una propuesta a alguien con quien puedas colaborar. El Sol y Marte invitan a repartir funciones y pasar de la lista de ideas a una acción posible. El trígono de Mercurio con Urano permite explorar otra manera de presentar tus habilidades, sin asegurar resultados.",
+      "money":"Mercurio en tu sector de ingresos frente a Saturno en el de recursos compartidos pide una revisión cuidadosa de acuerdos, pagos y aportaciones. Distingue tu presupuesto de las expectativas ajenas. Si falta información, pide que las condiciones queden claras antes de decidir.",
+      "reflection":"¿Qué quieres sostener en tu nuevo año personal y qué puedes dejar de cargar?",
+      "eventIds":["mer-ura","sol-mar","ven-plu","mer-sat","cuarto"],
+      "houses":["Sol en casa solar 1 · dirección personal","Marte en casa solar 11 · amistades y proyectos","Mercurio en casa solar 2 · recursos propios","Saturno en casa solar 8 · recursos compartidos","Venus en casa solar 3 · comunicación"]
+    },
+    {
+      "slug":"libra","name":"Libra","symbol":"♎","element":"aire",
+      "headline":"Tu voz merece un lugar en el acuerdo",
+      "summary":"Mercurio en tu signo enlaza primero con Urano y después se opone a Saturno. La secuencia sirve como tema para abrir posibilidades y, más adelante, ponerles condiciones realistas. El Sol en tu sector solar de retiro invita a reservar tiempo para preparar lo que viene.",
+      "love":"La oposición Mercurio–Saturno atraviesa tus sectores de identidad y pareja. Escucha sin borrar tu postura y expresa un límite sin convertirlo en castigo. Si estás conociendo a alguien, atiende tanto a la conversación como a la coherencia de sus acciones.",
+      "work":"El sextil Sol–Marte conecta preparación y vida profesional: termina un borrador, ordena antecedentes o ensaya una presentación. No toda tarea importante necesita exposición inmediata. Revisa el alcance de una colaboración antes de confirmar tu participación.",
+      "money":"Venus en tu sector de recursos, en cuadratura con Plutón en el de disfrute, propone distinguir placer de presión. Define cuánto quieres destinar a ocio o a un proyecto creativo. Evita usar una compra para responder a una comparación o demostrar afecto.",
+      "reflection":"¿Qué cambiaría si dijeras lo que quieres antes de intentar complacer?",
+      "eventIds":["mer-ura","sol-mar","ven-plu","mer-sat"],
+      "houses":["Mercurio en casa solar 1 · voz propia","Saturno en casa solar 7 · compromisos","Venus en casa solar 2 · recursos","Plutón en casa solar 5 · disfrute","Marte en casa solar 10 · proyectos profesionales"]
+    },
+    {
+      "slug":"escorpio","name":"Escorpio","symbol":"♏","element":"agua",
+      "headline":"Cercanía con espacio para ser tú",
+      "summary":"Venus en tu signo forma una cuadratura con Plutón en tu sector solar de hogar. La lectura pone atención en la relación entre tus deseos y las costumbres familiares. El Sol y Marte ofrecen un contrapunto para compartir un aprendizaje o dar forma a un proyecto con otras personas.",
+      "love":"Nombra lo que deseas sin esperar que la otra persona lo adivine. Si aparece una diferencia sobre convivencia o privacidad, separa el tema actual de antiguas discusiones. La intensidad no obliga a apresurar una decisión ni sustituye el consentimiento mutuo.",
+      "work":"Busca una colaboración que amplíe lo que sabes hacer. Puede ser estudiar algo con un grupo o contrastar una idea con otra perspectiva. Mercurio frente a Saturno aconseja revisar tu carga diaria y reservar una parte del tiempo para cerrar pendientes.",
+      "money":"Observa si un gasto doméstico responde a una necesidad actual o a una expectativa heredada. El cuarto creciente en tu sector de recursos invita a comprobar un objetivo con cifras reales. Elige un paso que puedas sostener sin depender de promesas ajenas.",
+      "reflection":"¿Qué deseo es tuyo y cuál estás sosteniendo por una expectativa familiar?",
+      "eventIds":["sol-mar","ven-plu","mer-sat","cuarto"],
+      "houses":["Venus en casa solar 1 · deseos propios","Plutón en casa solar 4 · hogar y raíces","Sol en casa solar 11 · redes","Saturno en casa solar 6 · trabajo cotidiano","Luna creciente en casa solar 2 · recursos"]
+    },
+    {
+      "slug":"sagitario","name":"Sagitario","symbol":"♐","element":"fuego",
+      "headline":"Da dirección a lo que quieres compartir",
+      "summary":"El Sol en tu sector solar de profesión enlaza con Marte en el de recursos compartidos. La semana invita a ordenar las condiciones prácticas de una meta. El cuarto creciente en Sagitario añade una pregunta personal: cómo avanzar sin perder de vista lo que para ti tiene sentido.",
+      "love":"Mercurio frente a Saturno conecta amistades y romance. Aclara qué tipo de vínculo quieres y evita sostener expectativas distintas sin hablarlas. Venus en tu sector de intimidad reservada sugiere cuidar la privacidad, sin confundir silencio con un acuerdo.",
+      "work":"Reúne los datos que faltan para una propuesta y aclara quién aporta qué. El Sol y Marte ayudan a enfocar la lectura en responsabilidad compartida, no en hacerlo todo por tu cuenta. El viernes, ajusta un objetivo a los recursos y tiempos disponibles.",
+      "money":"Distingue fondos propios, gastos conjuntos y compromisos pendientes. Si un proyecto depende de una aportación externa, comprueba las condiciones antes de contar con ella. Una expectativa favorable no equivale a un ingreso confirmado.",
+      "reflection":"¿Qué paso pequeño acercaría tu ambición a tus posibilidades actuales?",
+      "eventIds":["sol-mar","ven-plu","mer-sat","cuarto"],
+      "houses":["Sol en casa solar 10 · profesión","Marte en casa solar 8 · recursos compartidos","Mercurio en casa solar 11 · amistades","Saturno en casa solar 5 · proyectos creativos","Luna creciente en casa solar 1 · dirección personal"]
+    },
+    {
+      "slug":"capricornio","name":"Capricornio","symbol":"♑","element":"tierra",
+      "headline":"Crecer también implica repartir el esfuerzo",
+      "summary":"El Sol en tu sector solar de aprendizaje forma un sextil con Marte en el de acuerdos. La lectura favorece plantearte cómo una colaboración puede ampliar tu perspectiva. Mercurio frente a Saturno recuerda después que los objetivos profesionales necesitan convivir con tu vida privada.",
+      "love":"Una conversación sobre planes compartidos puede ser más útil que intentar resolver cada detalle por separado. Marte en tu sector de pareja pide expresar el desacuerdo sin competir. Con Venus y Plutón en tensión, no uses la aprobación del grupo como medida del vínculo.",
+      "work":"Aclara prioridades con quien dependa de tu entrega. Si consideras una formación o una nueva responsabilidad, revisa el tiempo que exige. La oposición Mercurio–Saturno invita a hablar con precisión sobre horarios y a no prometer a costa de tus compromisos domésticos.",
+      "money":"Venus y Plutón conectan proyectos de grupo con recursos propios. Fija tu aportación antes de sumarte a una actividad colectiva. Un presupuesto compartido necesita números claros, aunque participen amistades o personas de confianza.",
+      "reflection":"¿Qué límite haría más sostenible la meta que quieres alcanzar?",
+      "eventIds":["sol-mar","ven-plu","mer-sat"],
+      "houses":["Sol en casa solar 9 · aprendizaje","Marte en casa solar 7 · acuerdos","Mercurio en casa solar 10 · profesión","Saturno en casa solar 4 · hogar","Plutón en casa solar 2 · recursos propios"]
+    },
+    {
+      "slug":"acuario","name":"Acuario","symbol":"♒","element":"aire",
+      "headline":"Muéstrate sin convertirlo en una exigencia",
+      "summary":"Venus en tu sector solar de vida pública forma una cuadratura con Plutón en tu signo. El tema de la semana es reconocer la diferencia entre tu dirección personal y la imagen que intentas sostener. Mercurio y Urano aportan una vía creativa para explicar lo que estás aprendiendo.",
+      "love":"El deseo de cumplir una expectativa externa no tiene por qué marcar el ritmo de tu relación. Habla de lo que necesitas fuera del trabajo y de las redes. Si estás conociendo a alguien, permite que el interés se construya sin convertirlo en una presentación perfecta.",
+      "work":"Una idea creativa puede ganar claridad al contrastarla con otra persona. Cerca del viernes, revisa instrucciones, entregas y documentos: Mercurio frente a Saturno propone pasar del concepto a un mensaje preciso. No confundas visibilidad con la obligación de aceptar todo.",
+      "money":"El Sol y Marte conectan gastos compartidos y tareas diarias. Revisa suscripciones, servicios o pequeños compromisos que varias personas utilizan. Antes de asumir un coste para mejorar tu imagen profesional, define qué necesidad concreta resuelve.",
+      "reflection":"¿Qué parte de tu imagen pública todavía representa lo que quieres construir?",
+      "eventIds":["mer-ura","sol-mar","ven-plu","mer-sat"],
+      "houses":["Venus en casa solar 10 · vida pública","Plutón en casa solar 1 · identidad","Mercurio en casa solar 9 · estudios e ideas","Saturno en casa solar 3 · comunicación","Sol en casa solar 8 · recursos compartidos"]
+    },
+    {
+      "slug":"piscis","name":"Piscis","symbol":"♓","element":"agua",
+      "headline":"Comparte el entusiasmo y aclara las condiciones",
+      "summary":"El sextil del Sol con Marte conecta tus sectores solares de pareja y creatividad. Es un hilo para construir algo agradable con otra persona sin dejar la organización al azar. Mercurio frente a Saturno pone atención en la relación entre recursos compartidos y presupuesto propio.",
+      "love":"Propón una experiencia que puedan disfrutar sin grandes expectativas. El Sol y Marte invitan a participar de forma activa, mientras Venus en tensión con Plutón sugiere revisar una suposición antes de convertirla en verdad sobre la otra persona. Preguntar puede abrir más espacio que imaginar.",
+      "work":"Aclara funciones en una colaboración y muestra una idea con un ejemplo concreto. El cuarto creciente en tu sector profesional sirve para valorar qué avanzó y qué necesita ajuste. Conserva una meta posible en lugar de medir el trabajo solo por su visibilidad.",
+      "money":"Mercurio y Saturno atraviesan los sectores de dinero compartido y recursos propios. Revisa pagos, repartos y compromisos con datos claros. Antes de asumir una aportación por afecto o entusiasmo, comprueba que cabe en tu presupuesto y que entiendes sus condiciones.",
+      "reflection":"¿Qué conversación práctica permitiría disfrutar con más tranquilidad?",
+      "eventIds":["sol-mar","ven-plu","mer-sat","cuarto"],
+      "houses":["Sol en casa solar 7 · relaciones","Marte en casa solar 5 · creatividad y disfrute","Mercurio en casa solar 8 · recursos compartidos","Saturno en casa solar 2 · presupuesto propio","Luna creciente en casa solar 10 · dirección profesional"]
+    }
+  ]
+}

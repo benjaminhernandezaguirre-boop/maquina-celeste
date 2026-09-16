@@ -20,4 +20,17 @@
   <url><loc>https://astroplanetario.com/herramientas</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://astroplanetario.com/predicciones</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://astroplanetario.com/astrologia-horaria</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://astroplanetario.com/horoscopo-semanal</loc><lastmod>2026-09-16</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://astroplanetario.com/horoscopo-semanal/aries</loc><lastmod>2026-09-16</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://astroplanetario.com/horoscopo-semanal/tauro</loc><lastmod>2026-09-16</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://astroplanetario.com/horoscopo-semanal/geminis</loc><lastmod>2026-09-16</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://astroplanetario.com/horoscopo-semanal/cancer</loc><lastmod>2026-09-16</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://astroplanetario.com/horoscopo-semanal/leo</loc><lastmod>2026-09-16</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://astroplanetario.com/horoscopo-semanal/virgo</loc><lastmod>2026-09-16</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://astroplanetario.com/horoscopo-semanal/libra</loc><lastmod>2026-09-16</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://astroplanetario.com/horoscopo-semanal/escorpio</loc><lastmod>2026-09-16</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://astroplanetario.com/horoscopo-semanal/sagitario</loc><lastmod>2026-09-16</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://astroplanetario.com/horoscopo-semanal/capricornio</loc><lastmod>2026-09-16</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://astroplanetario.com/horoscopo-semanal/acuario</loc><lastmod>2026-09-16</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://astroplanetario.com/horoscopo-semanal/piscis</loc><lastmod>2026-09-16</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
 </urlset>

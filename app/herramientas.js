@@ -23,7 +23,7 @@
     sections.forEach(section=>{section.hidden=!Array.from(section.querySelectorAll('[data-herramienta]')).some(card=>!card.hidden)});
     empty.hidden=count!==0;
     clearTimeout(announceTimer);
-    announceTimer=setTimeout(()=>{status.textContent=count===cards.length?'19 accesos en 6 familias':count+' '+(count===1?'acceso encontrado':'accesos encontrados');},150);
+    announceTimer=setTimeout(()=>{status.textContent=count===cards.length?cards.length+' accesos en '+sections.length+' familias':count+' '+(count===1?'acceso encontrado':'accesos encontrados');},150);
   }
   function reset(){search.value='';family.value='';format.value='';filter()}
   form.hidden=false;

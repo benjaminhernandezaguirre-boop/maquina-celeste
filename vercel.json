@@ -103,6 +103,110 @@
     {
       "source": "/astrologia-horaria/",
       "destination": "/astrologia-horaria.html"
+    },
+    {
+      "source": "/horoscopo-semanal",
+      "destination": "/horoscopo-semanal.html"
+    },
+    {
+      "source": "/horoscopo-semanal/",
+      "destination": "/horoscopo-semanal.html"
+    },
+    {
+      "source": "/horoscopo-semanal/aries",
+      "destination": "/horoscopo-semanal/aries.html"
+    },
+    {
+      "source": "/horoscopo-semanal/aries/",
+      "destination": "/horoscopo-semanal/aries.html"
+    },
+    {
+      "source": "/horoscopo-semanal/tauro",
+      "destination": "/horoscopo-semanal/tauro.html"
+    },
+    {
+      "source": "/horoscopo-semanal/tauro/",
+      "destination": "/horoscopo-semanal/tauro.html"
+    },
+    {
+      "source": "/horoscopo-semanal/geminis",
+      "destination": "/horoscopo-semanal/geminis.html"
+    },
+    {
+      "source": "/horoscopo-semanal/geminis/",
+      "destination": "/horoscopo-semanal/geminis.html"
+    },
+    {
+      "source": "/horoscopo-semanal/cancer",
+      "destination": "/horoscopo-semanal/cancer.html"
+    },
+    {
+      "source": "/horoscopo-semanal/cancer/",
+      "destination": "/horoscopo-semanal/cancer.html"
+    },
+    {
+      "source": "/horoscopo-semanal/leo",
+      "destination": "/horoscopo-semanal/leo.html"
+    },
+    {
+      "source": "/horoscopo-semanal/leo/",
+      "destination": "/horoscopo-semanal/leo.html"
+    },
+    {
+      "source": "/horoscopo-semanal/virgo",
+      "destination": "/horoscopo-semanal/virgo.html"
+    },
+    {
+      "source": "/horoscopo-semanal/virgo/",
+      "destination": "/horoscopo-semanal/virgo.html"
+    },
+    {
+      "source": "/horoscopo-semanal/libra",
+      "destination": "/horoscopo-semanal/libra.html"
+    },
+    {
+      "source": "/horoscopo-semanal/libra/",
+      "destination": "/horoscopo-semanal/libra.html"
+    },
+    {
+      "source": "/horoscopo-semanal/escorpio",
+      "destination": "/horoscopo-semanal/escorpio.html"
+    },
+    {
+      "source": "/horoscopo-semanal/escorpio/",
+      "destination": "/horoscopo-semanal/escorpio.html"
+    },
+    {
+      "source": "/horoscopo-semanal/sagitario",
+      "destination": "/horoscopo-semanal/sagitario.html"
+    },
+    {
+      "source": "/horoscopo-semanal/sagitario/",
+      "destination": "/horoscopo-semanal/sagitario.html"
+    },
+    {
+      "source": "/horoscopo-semanal/capricornio",
+      "destination": "/horoscopo-semanal/capricornio.html"
+    },
+    {
+      "source": "/horoscopo-semanal/capricornio/",
+      "destination": "/horoscopo-semanal/capricornio.html"
+    },
+    {
+      "source": "/horoscopo-semanal/acuario",
+      "destination": "/horoscopo-semanal/acuario.html"
+    },
+    {
+      "source": "/horoscopo-semanal/acuario/",
+      "destination": "/horoscopo-semanal/acuario.html"
+    },
+    {
+      "source": "/horoscopo-semanal/piscis",
+      "destination": "/horoscopo-semanal/piscis.html"
+    },
+    {
+      "source": "/horoscopo-semanal/piscis/",
+      "destination": "/horoscopo-semanal/piscis.html"
     }
   ],
   "headers": [
@@ -409,6 +513,42 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/app/cumpleanos.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/app/cumpleanos.css",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/app/navegacion.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/app/herramientas.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
         }
       ]
     }
