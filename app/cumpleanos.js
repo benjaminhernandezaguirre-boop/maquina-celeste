@@ -33,14 +33,23 @@
     if(!hosts.length)return;
     for(const host of hosts){
       host.classList.add('cumpleanos-banner');
+      let enlace=host.querySelector('.cumpleanos-enlace');
+      if(!enlace){
+        enlace=root.document.createElement('a');
+        enlace.className='cumpleanos-enlace';
+        host.appendChild(enlace);
+      }
+      enlace.href='/horoscopo-semanal/'+signo.slug;
+      enlace.setAttribute('aria-label','¡Feliz cumpleaños, '+signo.nombre+'! Ver el horóscopo semanal de '+signo.nombre+'.');
+      enlace.title='Ver el horóscopo semanal de '+signo.nombre;
       let imagen=host.querySelector('img');
       if(!imagen){
         imagen=root.document.createElement('img');
         imagen.width=840;imagen.height=280;imagen.decoding='async';
         // Una sola imagen vigente. No precargar las otras once temporadas.
         imagen.loading='eager';imagen.fetchPriority='low';
-        host.appendChild(imagen);
       }
+      if(imagen.parentNode!==enlace)enlace.appendChild(imagen);
       if(host.dataset.signo!==signo.slug){
         host.dataset.signo=signo.slug;host.dataset.elemento=signo.elemento;
         imagen.alt='¡Feliz cumpleaños, '+signo.nombre+'!';

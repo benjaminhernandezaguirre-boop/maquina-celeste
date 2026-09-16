@@ -14,6 +14,7 @@
           <a href="/herramientas">Todas las herramientas <span>Ver el directorio</span></a>
           <a href="/carta-natal">Carta natal <span>Tu mapa de nacimiento</span></a>
           <a href="/predicciones">Predicciones <span>Ciclos, técnicas y horaria</span></a>
+          <a href="/horoscopo-semanal">Horóscopo semanal <span>Amor, trabajo y dinero por signo</span></a>
           <a href="/herramientas#relaciones">Relaciones <span>Sinastría y carta compuesta</span></a>
           <a href="/herramientas#astrogeografia">Astrogeografía <span>Tu carta sobre el mundo</span></a>
           <a href="/herramientas#estudio-tradicion">Estudio y tradición <span>Dignidades y lotes</span></a>

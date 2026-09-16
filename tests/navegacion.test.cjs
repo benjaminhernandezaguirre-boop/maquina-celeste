@@ -126,12 +126,32 @@ test('quedarse en Carta Natal elimina returnTo; un destino inválido nunca monta
 });
 
 test('las nuevas rutas limpias y sus variantes con barra apuntan a páginas existentes', () => {
-  for (const route of ['/herramientas', '/predicciones', '/astrologia-horaria']) {
+  const signs = require('../app/cumpleanos.js').signos;
+  const routes = ['/herramientas', '/predicciones', '/astrologia-horaria', '/horoscopo-semanal',
+    ...signs.map(sign => '/horoscopo-semanal/' + sign.slug)];
+  for (const route of routes) {
     for (const suffix of ['', '/']) {
       const rule = rewrites.find(item => item.source === route + suffix);
       assert.ok(rule, route + suffix);
       assert.ok(fs.existsSync(path.join(root, rule.destination.slice(1))), rule.destination);
     }
+  }
+});
+
+test('el horóscopo se descubre desde Predicciones, el menú, el directorio y el sitemap', () => {
+  const hub = read('herramientas.html'), predictions = read('predicciones.html');
+  const schema = JSON.parse(hub.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+  const list = schema['@graph'].find(item => item['@type'] === 'ItemList');
+  const count = [...hub.matchAll(/\bdata-herramienta(?=[\s>])/g)].length;
+  assert.equal(list.numberOfItems, count);
+  assert.equal(list.itemListElement.length, count);
+  assert.equal(list.itemListElement.filter(item => item.url === origin + '/horoscopo-semanal').length, 1);
+  assert.deepEqual(list.itemListElement.map(item => item.position), Array.from({length: count}, (_, i) => i + 1));
+  assert.match(hub, new RegExp('id="resultadoHerramientas"[^>]*>' + count + ' accesos en 6 familias'));
+  for (const page of [hub, predictions, read('app/navegacion.js')]) assert.ok(hrefs(page).includes('/horoscopo-semanal'));
+  const sitemap = read('sitemap.xml');
+  for (const route of ['/horoscopo-semanal', ...require('../app/cumpleanos.js').signos.map(sign => '/horoscopo-semanal/' + sign.slug)]) {
+    assert.equal(sitemap.split('<loc>' + origin + route + '</loc>').length - 1, 1, route);
   }
 });
 

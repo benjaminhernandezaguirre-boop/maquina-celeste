@@ -1,6 +1,9 @@
 /* Saludo compacto: independiente de la rueda, las escuelas y las descargas. */
 .cumpleanos-banner{display:block;flex:0 0 auto;width:270px;max-width:100%;aspect-ratio:3/1;margin:0;overflow:hidden;border-radius:7px;line-height:0;box-shadow:0 2px 8px #2524130b}
 .cumpleanos-banner:empty{visibility:hidden}
+.cumpleanos-banner>.cumpleanos-enlace{display:block;width:100%;height:100%;margin:0;padding:0;border:0;border-radius:inherit;text-decoration:none;line-height:0}
+.cumpleanos-banner>.cumpleanos-enlace:focus-visible{outline:3px solid #9d6814;outline-offset:-3px}
+[data-studio-theme="dark"] .cumpleanos-banner>.cumpleanos-enlace:focus-visible{outline-color:#ffe4a2}
 .cumpleanos-banner img{display:block;width:100%;height:100%;max-width:100%;object-fit:contain;border-radius:inherit;filter:none}
 .cumpleanos-fila{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem}
 .cumpleanos-fila>:not(.cumpleanos-banner){min-width:0}
