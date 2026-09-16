@@ -20,7 +20,7 @@
 .hs-seccion-cabecera p{max-width:470px;color:var(--muted);font-size:.98rem}.hs-seccion-cabecera .ceja{margin-bottom:.6rem}
 .hs-signos{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2rem 1.35rem}
 .hs-signo{display:block;text-decoration:none;min-width:0}.hs-signo-arte{position:relative;overflow:hidden;border-radius:7px;background:var(--soft)}
-.hs-signo img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;transition:transform .3s ease}
+.hs-signo img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;object-position:center top;transition:transform .3s ease}
 .hs-signo:hover img{transform:scale(1.035)}.hs-signo:focus-visible{outline-offset:7px;border-radius:7px}
 .hs-signo h3{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-top:.85rem;font:500 1.3rem var(--display)}
 .hs-signo h3 span{font:400 1.65rem/1 Georgia,serif;color:var(--signo-acento,var(--blue))}
