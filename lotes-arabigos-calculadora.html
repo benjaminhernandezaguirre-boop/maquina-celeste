@@ -41,11 +41,19 @@ html[data-studio-theme="dark"]{color-scheme:dark;--bg:#061525;--panel:#0d2434;--
 </style>
 <link rel="stylesheet" href="/app/estudio-comun.css?v=20260915">
 <link rel="stylesheet" href="/app/navegacion.css?v=20260915">
+<link rel="stylesheet" href="/app/cumpleanos.css?v=20260915">
+<link rel="stylesheet" href="/app/cumpleanos-calculadoras.css?v=20260915">
+<script src="/app/cumpleanos.js?v=20260915" defer></script>
 </head>
 <body data-estudio="lotes">
 <header class="ancho cabecera"><a class="marca" href="/">Astroplanetario</a><nav class="nav"><a href="/lotes-arabigos">Guía de lotes</a><a href="/carta-natal">Carta natal</a><button class="tema" id="themeToggle" type="button"></button></nav></header>
 <main class="ancho">
-<section class="hero"><p class="ceja">Neptuno · Calculadora</p><h1>El mapa secreto de tu carta</h1><p>Explora 63 lotes arábigos organizados por grandes temas. Cada punto aparece sobre tu rueda natal con su signo, casa, regente, fórmula y los aspectos planetarios que recibe.</p></section>
+<section class="hero">
+<div class="cumpleanos-fila">
+<div class="cumpleanos-titulo"><p class="ceja">Neptuno · Calculadora</p><h1>El mapa secreto de tu carta</h1><p>Explora 63 lotes arábigos organizados por grandes temas. Cada punto aparece sobre tu rueda natal con su signo, casa, regente, fórmula y los aspectos planetarios que recibe.</p></div>
+<div data-cumpleanos class="cumpleanos-banner"></div>
+</div>
+</section>
 <section class="panel"><h2>1. Selecciona una carta</h2><div class="fila"><div class="campo"><label for="cartaSelect">Carta natal guardada</label><select id="cartaSelect"></select></div><button class="boton" id="calcular" type="button">Calcular lotes</button></div><p class="estado" id="estado" aria-live="polite"></p></section>
 <section id="salida" hidden>
 <div class="resumen" id="resumen"></div>

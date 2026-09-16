@@ -1,0 +1,9 @@
+/* Place the seasonal greeting beside each calculator's title, outside navigation. */
+body[data-estudio] .cumpleanos-titulo{flex:1 1 24rem;min-width:0}
+body[data-estudio] .cumpleanos-calculadora{margin:0 0 1rem}
+body[data-estudio] .cumpleanos-calculadora .brand h1{overflow-wrap:anywhere}
+body[data-estudio=luna] .cumpleanos-titulo .top-time{margin-top:.65rem}
+@media(max-width:600px){
+  body[data-estudio] .cumpleanos-titulo{flex-basis:100%}
+  body[data-estudio] .cumpleanos-fila>.cumpleanos-banner{margin-left:auto}
+}

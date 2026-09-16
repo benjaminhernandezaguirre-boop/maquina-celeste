@@ -39,6 +39,8 @@
 <script src="/app/carta-natal-rueda.js?v=20260915" defer></script>
 <link rel="stylesheet" href="/app/navegacion.css?v=20260915">
 <script src="/app/navegacion.js?v=20260915" defer></script>
+<link rel="stylesheet" href="/app/cumpleanos.css?v=20260915">
+<script src="/app/cumpleanos.js?v=20260915" defer></script>
 </head>
 <body>
 <a class="saltar" href="#contenido">Saltar al contenido</a>
@@ -190,7 +192,7 @@
     <section class="guia-lenguaje" id="lenguaje" aria-labelledby="lenguaje-titulo"><p class="ceja">Aprender a mirar</p><h2 id="lenguaje-titulo">Cuatro piezas de una misma historia</h2><ol class="lenguaje-lista"><li><span class="numero">01</span><div><h3>Planetas</h3><small>Qué se expresa</small></div><p>Representan distintos temas de la experiencia: comunicación, vínculos, iniciativa, límites… El Sol y la Luna se incluyen como luminarias.</p></li><li><span class="numero">02</span><div><h3>Signos</h3><small>Cómo se expresa</small></div><p>Los doce signos aportan cualidades a cada posición. Ocupan sectores de 30° del zodiaco y se agrupan por elemento y modalidad.</p></li><li><span class="numero">03</span><div><h3>Casas</h3><small>En qué ámbito</small></div><p>Distribuyen el mapa en doce áreas de experiencia, como identidad, hogar, vínculos o vocación. Sus límites dependen de la hora, el lugar y el sistema elegido.</p></li><li><span class="numero">04</span><div><h3>Aspectos</h3><small>Cómo se relaciona</small></div><p>Son separaciones angulares entre planetas: conjunción, sextil, cuadratura, trígono y oposición. El <strong>orbe</strong> indica cuánto falta para el ángulo exacto.</p></li></ol><div class="ejemplo-lectura"><p class="ceja">Una forma de unir las piezas</p><p><strong>Venus + un signo + una casa + sus aspectos.</strong> Observa el tema de los vínculos, su estilo de expresión, el ámbito de experiencia y las relaciones con otros planetas. Después vuelve a mirar el conjunto.</p></div></section>
   </div><aside class="guia-sidebar" aria-label="Temporada zodiacal y datos para empezar">
   <section class="temporada-caja elemento-tierra estacion-verano" id="temporadaCaja" aria-labelledby="temporadaTitulo">
-    <div class="temporada-cabecera"><div><p class="ceja">En el zodiaco ahora</p><h2 id="temporadaTitulo">Feliz cumpleaños, Virgo</h2><p class="temporada-fechas" id="temporadaFechas">23 de agosto–22 de septiembre · fechas aproximadas</p></div><img class="temporada-ilustracion" id="temporadaImagen" src="/assets/zodiaco/virgo-celestial.webp" alt="Ilustración celestial de Virgo como una doncella con trigo y flores" width="740" height="1110" loading="lazy" decoding="async"></div>
+    <div class="temporada-cabecera"><p class="ceja">En el zodiaco ahora</p><h2 id="temporadaTitulo">Temporada de Virgo</h2><div data-cumpleanos class="cumpleanos-banner"></div><p class="temporada-fechas" id="temporadaFechas">23 de agosto–22 de septiembre · fechas aproximadas</p></div>
     <p class="temporada-desc" id="temporadaResumen">Observar, cuidar los detalles y mejorar lo cotidiano.</p>
     <div class="rasgos" aria-label="Datos de la temporada"><div class="rasgo"><small>Elemento</small><b id="temporadaElemento">Tierra</b></div><div class="rasgo"><small>Modalidad</small><b id="temporadaModalidad">Mutable</b></div><div class="rasgo"><small>Regente tradicional</small><b id="temporadaRegente">Mercurio</b></div></div>
     <details><summary>Historia y cielo de hoy</summary><p id="temporadaDesc">Virgo es un signo de tierra mutable asociado con la observación y el cuidado de los detalles.</p>
@@ -243,7 +245,7 @@
   render();
 })();
 (()=>{
-  const hoy=new Date(),md=(hoy.getMonth()+1)*100+hoy.getDate();
+
   const pon=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
   const signos=[
     {nombre:"Capricornio",inicio:1222,fin:120,fechas:"22 de diciembre–19 de enero",elemento:"Tierra",modalidad:"Cardinal",regente:"Saturno",imagen:"capricornio",alt:"Ilustración celestial de Capricornio como una cabra marina",desc:"Capricornio es un signo de tierra cardinal asociado con la constancia, la responsabilidad y la construcción paciente de objetivos duraderos.",historia:"Capricornio en la tradición clásica",relato:"<p>Su figura de <strong>cabra marina</strong> combina tierra y agua. Algunas tradiciones grecorromanas la relacionaron con Pan o Egipán, quien adoptó una forma parcialmente acuática al huir del monstruo Tifón. El relato explica su cuerpo híbrido y su capacidad simbólica para avanzar entre mundos distintos.</p>"},
@@ -259,23 +261,39 @@
     {nombre:"Escorpio",inicio:1023,fin:1122,fechas:"23 de octubre–21 de noviembre",elemento:"Agua",modalidad:"Fija",regente:"Marte",imagen:"escorpio",alt:"Ilustración celestial de Escorpio como un escorpión ornamentado",desc:"Escorpio es un signo de agua fija asociado con la intensidad, la reserva y los procesos de transformación profunda.",historia:"Escorpio en la tradición clásica",relato:"<p>Diversas versiones cuentan que un <strong>escorpión</strong> provocó la muerte del cazador Orión, ya fuera enviado por Gea, Artemisa o Apolo. Ambos quedaron en regiones opuestas del cielo: cuando Escorpio aparece, Orión se retira bajo el horizonte.</p>"},
     {nombre:"Sagitario",inicio:1122,fin:1222,fechas:"22 de noviembre–21 de diciembre",elemento:"Fuego",modalidad:"Mutable",regente:"Júpiter",imagen:"sagitario",alt:"Ilustración celestial de Sagitario como un arquero mítico",desc:"Sagitario es un signo de fuego mutable asociado con la exploración, el sentido y la búsqueda de horizontes más amplios.",historia:"Sagitario en la tradición clásica",relato:"<p>El arquero celeste recibió identidades diferentes. Aunque suele llamarse Quirón, autores antiguos también lo relacionaron con <strong>Croto</strong>, arquero y compañero de las Musas. Su flecha expresa dirección, aprendizaje y una mirada que apunta más allá de lo conocido.</p>"}
   ];
-  const temporada=signos.find(s=>s.inicio<s.fin?md>=s.inicio&&md<s.fin:md>=s.inicio||md<s.fin)||signos[8];
+  function actualizaTemporada(fecha=new Date(),signo){
+  const hoy=fecha instanceof Date?fecha:new Date(fecha);if(!Number.isFinite(hoy.getTime()))return;
+  const md=(hoy.getMonth()+1)*100+hoy.getDate();
+  const compartido=signo||window.AstroCumpleanos?.signoDeFecha(hoy);
+  const datos=signos.find(s=>s.imagen===compartido?.slug)||signos.find(s=>s.inicio<s.fin?md>=s.inicio&&md<s.fin:md>=s.inicio||md<s.fin)||signos[8];
+  const elemento=compartido?.elemento?compartido.elemento.charAt(0).toUpperCase()+compartido.elemento.slice(1).toLowerCase():datos.elemento;
+  const temporada={...datos,nombre:compartido?.nombre||datos.nombre,elemento};
+  let fechas=datos.fechas;
+  if(Number.isInteger(compartido?.inicio)&&Number.isInteger(compartido?.fin)){
+    const formato=new Intl.DateTimeFormat("es-MX",{day:"numeric",month:"long"});
+    const inicio=new Date(2000,Math.floor(compartido.inicio/100)-1,compartido.inicio%100);
+    const fin=new Date(2000,Math.floor(compartido.fin/100)-1,compartido.fin%100-1);
+    fechas=formato.format(inicio)+"–"+formato.format(fin);
+  }
   const estaciones=md>=320&&md<621?{slug:"primavera",nombre:"Primavera"}:md>=621&&md<922?{slug:"verano",nombre:"Verano"}:md>=922&&md<1221?{slug:"otono",nombre:"Otoño"}:{slug:"invierno",nombre:"Invierno"};
   const transicion=md>=306&&md<320?"Invierno · transición a primavera":md>=607&&md<621?"Primavera · transición al verano":md>=908&&md<922?"Verano · transición al otoño":md>=1207&&md<1221?"Otoño · transición al invierno":estaciones.nombre;
   const estilos={Tierra:{slug:"tierra",glifo:"❧"},Agua:{slug:"agua",glifo:"≋"},Fuego:{slug:"fuego",glifo:"✦"},Aire:{slug:"aire",glifo:"〰"}},estilo=estilos[temporada.elemento];
   const caja=document.getElementById("temporadaCaja");
   if(caja){caja.classList.remove("elemento-tierra","elemento-agua","elemento-fuego","elemento-aire","estacion-primavera","estacion-verano","estacion-otono","estacion-invierno");caja.classList.add(`elemento-${estilo.slug}`,`estacion-${estaciones.slug}`)}
   pon("elementoGlifo",estilo.glifo);pon("elementoNombre",temporada.elemento);pon("temporadaEstacion",transicion);
-  const resumenes={Capricornio:"Dar forma a las metas con paciencia y constancia.",Acuario:"Abrir perspectivas y pensar en lo colectivo.",Piscis:"Imaginar, sentir y encontrar conexiones.",Aries:"Tomar la iniciativa y abrir nuevos caminos.",Tauro:"Cuidar lo tangible y disfrutar de los sentidos.",Géminis:"Preguntar, compartir ideas y mirar desde otro ángulo.",Cáncer:"Cultivar la memoria, el cuidado y la pertenencia.",Leo:"Crear, expresar y compartir lo que te inspira.",Virgo:"Observar, cuidar los detalles y mejorar lo cotidiano.",Libra:"Buscar acuerdos, proporción y equilibrio.",Escorpio:"Profundizar, transformar y mirar más allá de lo evidente.",Sagitario:"Explorar, aprender y ampliar el horizonte."};pon("temporadaResumen",resumenes[temporada.nombre]);pon("temporadaTitulo",`Feliz cumpleaños, ${temporada.nombre}`);pon("temporadaFechas",`${temporada.fechas} · fechas aproximadas`);pon("temporadaDesc",temporada.desc);pon("temporadaElemento",temporada.elemento);pon("temporadaModalidad",temporada.modalidad);pon("temporadaRegente",temporada.regente);pon("historiaTitulo",temporada.historia);
-  const imagen=document.getElementById("temporadaImagen"),historia=document.getElementById("historiaTexto");
-  if(imagen){imagen.src=`/assets/zodiaco/${temporada.imagen}-celestial.webp`;imagen.alt=temporada.alt}if(historia)historia.innerHTML=temporada.relato;
+  const resumenes={Capricornio:"Dar forma a las metas con paciencia y constancia.",Acuario:"Abrir perspectivas y pensar en lo colectivo.",Piscis:"Imaginar, sentir y encontrar conexiones.",Aries:"Tomar la iniciativa y abrir nuevos caminos.",Tauro:"Cuidar lo tangible y disfrutar de los sentidos.",Géminis:"Preguntar, compartir ideas y mirar desde otro ángulo.",Cáncer:"Cultivar la memoria, el cuidado y la pertenencia.",Leo:"Crear, expresar y compartir lo que te inspira.",Virgo:"Observar, cuidar los detalles y mejorar lo cotidiano.",Libra:"Buscar acuerdos, proporción y equilibrio.",Escorpio:"Profundizar, transformar y mirar más allá de lo evidente.",Sagitario:"Explorar, aprender y ampliar el horizonte."};pon("temporadaResumen",resumenes[temporada.nombre]);pon("temporadaTitulo",`Temporada de ${temporada.nombre}`);pon("temporadaFechas",`${fechas} · fechas aproximadas`);pon("temporadaDesc",temporada.desc);pon("temporadaElemento",temporada.elemento);pon("temporadaModalidad",temporada.modalidad);pon("temporadaRegente",temporada.regente);pon("historiaTitulo",temporada.historia);
+  const historia=document.getElementById("historiaTexto");
+  if(historia)historia.innerHTML=temporada.relato;
   if(!window.Efem)return;
   const nombres=["Aries","Tauro","Géminis","Cáncer","Leo","Virgo","Libra","Escorpio","Sagitario","Capricornio","Acuario","Piscis"];
-  const ms=Date.now(),luna=Efem.lon("luna",ms),sol=Efem.lon("sol",ms),angulo=Efem.mod360(luna-sol),li=Math.floor(luna/30),ln=nombres[li];
+  const ms=hoy.getTime(),luna=Efem.lon("luna",ms),sol=Efem.lon("sol",ms),angulo=Efem.mod360(luna-sol),li=Math.floor(luna/30),ln=nombres[li];
   const fases=["Luna nueva","Luna creciente","Cuarto creciente","Gibosa creciente","Luna llena","Gibosa menguante","Cuarto menguante","Luna menguante"];
   const fi=Math.floor(Efem.mod360(angulo+22.5)/45)%8,fase=fases[fi];
   const mensajes=["En la lectura astrológica, este inicio de ciclo suele asociarse con sembrar intenciones y abrir un proceso nuevo.","En la lectura astrológica, esta etapa suele asociarse con dar forma a una intención y reunir impulso.","En la lectura astrológica, este momento suele asociarse con actuar, ajustar y atravesar una primera tensión.","En la lectura astrológica, esta etapa suele asociarse con afinar lo que está creciendo antes de su culminación.","En la lectura astrológica, esta fase suele asociarse con claridad, culminación y resultados que se vuelven visibles.","En la lectura astrológica, esta etapa suele asociarse con compartir, comprender y comenzar a depurar lo aprendido.","En la lectura astrológica, este momento suele asociarse con revisar decisiones y soltar lo que ya cumplió su función.","En la lectura astrológica, esta etapa suele asociarse con descanso, síntesis y preparación para un ciclo nuevo."];
   pon("lunaTitulo",`${fase} en ${ln}`);pon("lunaTexto",`${fase} en ${ln}. ${mensajes[fi]}`);pon("lunaFecha",`${new Intl.DateTimeFormat("es-MX",{day:"numeric",month:"long",year:"numeric"}).format(hoy)} · cielo calculado por Astroplanetario`);
+  }
+  window.addEventListener("astro-temporada",evento=>actualizaTemporada(evento.detail?.fecha||new Date(),evento.detail?.signo));
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>actualizaTemporada(),{once:true});else actualizaTemporada();
 })();
 </script>
 </body>
