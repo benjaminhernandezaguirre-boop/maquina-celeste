@@ -13,8 +13,8 @@
       back = document.createElement('button');
       back.type = 'button';
       back.className = 'astro-back';
-      back.setAttribute('aria-label','Volver a Astroplanetario');
-      back.innerHTML = '<span aria-hidden="true">←</span><span>Planetario</span>';
+      back.setAttribute('aria-label','Volver al inicio');
+      back.innerHTML = '<span aria-hidden="true">←</span><span>Inicio</span>';
       back.addEventListener('click', () => { location.href = './'; });
       header.insertBefore(back, header.firstChild || null);
     }

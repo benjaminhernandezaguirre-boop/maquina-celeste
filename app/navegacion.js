@@ -19,7 +19,8 @@
           <a href="/herramientas#astrogeografia">Astrogeografía <span>Tu carta sobre el mundo</span></a>
           <a href="/herramientas#estudio-tradicion">Estudio y tradición <span>Dignidades y lotes</span></a>
           <a href="/herramientas#biblioteca">Biblioteca <span>Cartas célebres y guías</span></a>
-          <a href="/">Volver al planetario <span>Explora los planetas</span></a>
+          <a href="/planetario.html">Planetario interactivo <span>Explora los planetas</span></a>
+          <a href="/">Volver al inicio <span>Todos tus recorridos</span></a>
         </div>
       </details>`;
     document.querySelectorAll('.astro-tools-fallback').forEach(a=>a.remove());
