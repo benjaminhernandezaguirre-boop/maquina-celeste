@@ -138,14 +138,17 @@ test('la interfaz presenta las ocho categorías y navegación accesible', () => 
   assert.match(html,/Noto\+Sans\+Symbols\+2/);
 });
 
-test('Neptuno y las rutas públicas enlazan el nuevo módulo', () => {
+test('la portada, Neptuno y las rutas públicas enlazan el módulo de lotes', () => {
   const home = read('index.html');
+  const lotsEntry = home.match(/<section\b[^>]*data-seccion="lotes-arabigos"[\s\S]*?<\/section>/);
+  assert.ok(lotsEntry, 'la portada ofrece la sección de lotes arábigos');
+  assert.match(lotsEntry[0], /href="\/calculadora-lotes-arabigos"/);
+  assert.match(lotsEntry[0], /href="\/lotes-arabigos"/);
   const vercel = JSON.parse(read('vercel.json'));
   const sitemap = read('sitemap.xml');
-  assert.match(home, /data-name="Neptuno"[^>]+href="\/lotes-arabigos"/);
+  assert.match(read('planetario.html'), /data-name="Neptuno"[^>]+href="\/lotes-arabigos"/);
   assert.ok(vercel.rewrites.some(r => r.source === '/lotes-arabigos'));
   assert.ok(vercel.rewrites.some(r => r.source === '/calculadora-lotes-arabigos'));
   assert.match(sitemap, /https:\/\/astroplanetario\.com\/lotes-arabigos/);
   assert.match(sitemap, /https:\/\/astroplanetario\.com\/calculadora-lotes-arabigos/);
 });
-

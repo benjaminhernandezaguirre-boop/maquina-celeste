@@ -6,10 +6,15 @@ const path = require('node:path');
 const root = path.join(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 
-test('Pluto opens the indexable zodiacal releasing guide', () => {
+test('homepage and Pluto expose zodiacal releasing and its indexable guide', () => {
   const home = read('index.html');
-  assert.match(home, /class="planet pluto nav"[^>]+data-name="Plutón"[^>]+href="\/liberacion-zodiacal"/);
-  assert.match(home, /'Plutón':'pluton'/);
+  const releasingEntry = home.match(/<section\b[^>]*data-seccion="liberacion-zodiacal"[\s\S]*?<\/section>/);
+  assert.ok(releasingEntry, 'the homepage exposes its zodiacal releasing section');
+  assert.match(releasingEntry[0], /href="\/calculadora-liberacion-zodiacal"/);
+  assert.match(releasingEntry[0], /href="\/liberacion-zodiacal"/);
+  const planetarium = read('planetario.html');
+  assert.match(planetarium, /class="planet pluto nav"[^>]+data-name="Plutón"[^>]+href="\/liberacion-zodiacal"/);
+  assert.match(planetarium, /'Plutón':'pluton'/);
 
   const html = read('liberacion-zodiacal.html');
   assert.match(html, /<title>[^<]*Liberación zodiacal[^<]*Astroplanetario<\/title>/i);

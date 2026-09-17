@@ -19,7 +19,12 @@ test('carta natal has one focused, indexable landing page', () => {
 
 test('homepage, clean route and discovery files point to carta natal', () => {
   const home = read('index.html');
-  assert.match(home, /<a class="planet earth nav"[^>]+href="\/carta-natal"/);
+  const natalEntry = home.match(/<section\b[^>]*data-seccion="carta-natal"[\s\S]*?<\/section>/);
+  assert.ok(natalEntry, 'the homepage exposes its natal section');
+  assert.match(natalEntry[0], /href="\/astroplanetario\.html\?view=natal"/);
+  assert.match(natalEntry[0], /href="\/carta-natal"/);
+  assert.match(home, /href="\/planetario\.html"/);
+  assert.match(read('planetario.html'), /<a class="planet earth nav"[^>]+href="\/carta-natal"/);
 
   const vercel = JSON.parse(read('vercel.json'));
   assert.ok(vercel.rewrites.some(r => r.source === '/carta-natal' && r.destination === '/carta-natal.html'));
